@@ -33,11 +33,11 @@
 
 ## 🚀 Repositorios
 
-| Componente       | Enlace                                                              | Tecnologías Principales                 p|
-|------------------|---------------------------------------------------------------------|-----------------------------------------|
-| **Backend**      | [TekoApp-Backend](https://github.com/josepanz/TekoApp-Backend)      | NestJS, MongoDB, PostgreSQL, Docker     |
-| **Frontend App** | [TekoApp-Frontend](https://github.com/josepanz/TekoApp-Frontend-App)| Flutter                                 |
-| **Frontend Web** | [TekoApp-Frontend](https://github.com/josepanz/TekoApp-Frontend-Web)| React.js, Tailwind CSS                  |
+| Componente       | Enlace                                                                 | Tecnologías Principales                 |
+|------------------|------------------------------------------------------------------------|-----------------------------------------|
+| **Backend**      | [TekoApp-Backend](https://github.com/josepanz/TekoApp-Backend)         | NestJS, MongoDB, PostgreSQL, Docker     |
+| **Frontend App** | [TekoApp-Mobile](https://github.com/josepanz/TekoApp-Frontend-Mobile)  | Flutter                                 |
+| **Frontend Web** | [TekoApp-Web](https://github.com/josepanz/TekoApp-Frontend-Web)        | React.js, Tailwind CSS                  |
 
 ## 🛠️ Tecnologías
 
@@ -121,7 +121,7 @@ TekoApp-Frontend/
 #### 📲 Instalación (Flutter)
 ##### 1. Clona el repositorio:
 ````bash
-git clone https://github.com/josepanz/TekoApp-Frontend-App.git
+git clone https://github.com/josepanz/TekoApp-Frontend-Mobile.git
 ````
 
 ##### 2. Instala dependencias:
