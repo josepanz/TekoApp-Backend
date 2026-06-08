@@ -11,7 +11,7 @@ export class WsJwtGuard implements CanActivate {
     try {
       const client: Socket = context.switchToWs().getClient();
       const token = this.extractTokenFromHeader(client);
-      
+
       if (!token) {
         throw new WsException('Token no proporcionado');
       }
@@ -19,7 +19,7 @@ export class WsJwtGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token);
       // Asignar el usuario al socket para uso posterior
       client.data.user = payload;
-      
+
       return true;
     } catch (error) {
       throw new WsException('Token inválido');
@@ -27,8 +27,9 @@ export class WsJwtGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(client: Socket): string | undefined {
-    const token = client.handshake.auth.token || 
-                  client.handshake.headers.authorization?.replace('Bearer ', '');
+    const token =
+      client.handshake.auth.token ||
+      client.handshake.headers.authorization?.replace('Bearer ', '');
     return token;
   }
 }

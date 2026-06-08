@@ -1,28 +1,38 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { MiddlewareConfig } from './config/middleware.config';
-import { SwaggerConfig } from './config/swagger.config';
+import { ConfigService, ConfigType } from '@nestjs/config';
+import { MiddlewareConfig } from './core/config/middleware.config';
+import { SwaggerConfig } from './core/config/swagger.config';
+import { AppConfigType, APP_CONFIG } from '@/core/config/config-loader';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  // Configuración de middleware global
+  // 1. ESTABLECER PREFIJO GLOBAL (Es crítico que sea lo primero para estructurar las rutas base)
+  app.setGlobalPrefix('/tekoapp-backend/api');
+
+  // 2. Configuración de middleware global y seguridad (Helmet, CORS, Redis-Rate-Limit)
   MiddlewareConfig.setup(app, configService);
 
-  // Configuración de Swagger
+  // 3. Inicialización dinámica del ecosistema de documentación de Swagger UI
   SwaggerConfig.setup(app);
 
-  // Prefijo global para la API
-  app.setGlobalPrefix('api/v1');
+  // 4. Lectura de variables validadas mediante el token cargador core
+  const config: ConfigType<AppConfigType> = app.get(APP_CONFIG.KEY);
+  const port = config.apiconfig.port || 3000;
 
-  const port = process.env.PORT || 3000;
   await app.listen(port);
-  
-  console.log(`🚀 TekoApp Backend ejecutándose en el puerto ${port}`);
-  console.log(`📚 Documentación de la API disponible en: http://localhost:${port}/api`);
+
+  console.log(
+    `\n🚀 TekoApp Backend ejecutándose con éxito en el puerto ${port}`,
+  );
+  console.log(
+    `📚 OpenAPI Swagger disponible en: http://localhost:${port}/tekoapp-backend/api/swagger`,
+  );
+  console.log(
+    `📄 Documentación Compodoc disponible en: http://localhost:${port}/tekoapp-backend/api/docs\n`,
+  );
 }
 
-bootstrap();
+void bootstrap();

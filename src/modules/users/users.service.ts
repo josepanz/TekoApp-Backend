@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -28,7 +32,16 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find({
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isVerified', 'isActive', 'createdAt'],
+      select: [
+        'id',
+        'email',
+        'firstName',
+        'lastName',
+        'role',
+        'isVerified',
+        'isActive',
+        'createdAt',
+      ],
     });
   }
 
@@ -55,13 +68,22 @@ export class UsersService {
   async findByRole(role: UserRole): Promise<User[]> {
     return this.userRepository.find({
       where: { role },
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isVerified', 'isActive', 'createdAt'],
+      select: [
+        'id',
+        'email',
+        'firstName',
+        'lastName',
+        'role',
+        'isVerified',
+        'isActive',
+        'createdAt',
+      ],
     });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
-    
+
     Object.assign(user, updateUserDto);
     return this.userRepository.save(user);
   }
@@ -100,7 +122,11 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async getUsersCount(): Promise<{ total: number; clients: number; professionals: number }> {
+  async getUsersCount(): Promise<{
+    total: number;
+    clients: number;
+    professionals: number;
+  }> {
     const [total, clients, professionals] = await Promise.all([
       this.userRepository.count(),
       this.userRepository.count({ where: { role: UserRole.CLIENT } }),

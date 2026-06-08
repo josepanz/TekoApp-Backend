@@ -1,0 +1,718 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Example {
+  id             Int    @id @default(autoincrement())
+  email          String @unique
+  firstName      String @map("first_name")
+  lastName       String @map("last_name")
+  documentNumber String @map("document_number")
+
+  // Audit fields
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@map("example")
+}
+
+model AuditLogs {
+  id            BigInt   @id @default(autoincrement())
+  tableName     String   @map("table_name")
+  recordId      String   @map("record_id")
+  operationType String   @map("operation_type")
+  oldData       Json?    @map("old_data")
+  newData       Json?    @map("new_data")
+  changedAt     DateTime @default(now()) @map("changed_at")
+  changedBy     String   @map("changed_by")
+
+  reason          String? @map("reason")
+  ipAddress       String? @map("ip_address")
+  userAgent       String? @map("user_agent")
+  extraData       String? @map("extra_data")
+  audVersion      Int?    @map("aud_version")
+  changeSignature String? @map("change_signature")
+
+  @@index([changedAt(sort: Desc)], name: "idx_audit_changed_at")
+  @@index([changedBy], name: "idx_audit_changed_by")
+  @@index([tableName, recordId], name: "idx_audit_table_record")
+  @@map("audit_logs")
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+  INACTIVE
+  REFUSED
+  PENDING_VERIFICATION
+}
+
+enum UserProfileStatus {
+  INCOMPLETE
+  COMPLETE
+  DOCUMENT_PENDING
+}
+
+model AccessLevel {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  users Users[]
+
+  @@map("access_level")
+}
+
+model Users {
+  id              Int               @id @default(autoincrement())
+  referenceId     String            @unique @default(uuid())
+  legacyUserId    String?           @map("legacy_user_id")
+  email           String            @unique @map("email")
+  status          UserStatus        @default(ACTIVE) @map("status")
+  profileStatus   UserProfileStatus @default(INCOMPLETE) @map("profile_status")
+  lastLogin       DateTime?         @map("last_login")
+  firstName       String            @map("first_name")
+  lastName        String            @map("last_name")
+  documentTypeId  Int               @map("document_type_id")
+  documentNumber  String?           @map("document_number")
+  phoneNumber     String?           @map("phone_number")
+  isEmployee      Boolean           @default(false) @map("is_employee")
+  isLdap          Boolean           @default(false) @map("ldap")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  createdBy       String            @map("created_by")
+  lastChangedAt   DateTime?         @default(now()) @map("last_changed_at")
+  lastChangedBy   String?           @map("last_changed_by")
+  unverifiedEmail String?           @map("unverified_email")
+  changedReason   String?           @map("changed_reason")
+  acceptedTermsAt DateTime?         @map("accepted_terms_at")
+  accessLevelId   Int?
+
+  access_level Int @map("current_level")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  roles                 UserRoles[]
+  permissions           UserPermissions[]
+  credentials           UserCredentials[]
+  professionals         Professionals?
+  services              Services[]
+  documentTypes         DocumentsType         @relation(fields: [documentTypeId], references: [id])
+  accessLevel           AccessLevel?          @relation(fields: [accessLevelId], references: [id])
+  payments              Payments[]
+  paymentMethodEntities PaymentMethodEntity[]
+
+  @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
+  @@map("users")
+}
+
+model DocumentsType {
+  id   Int    @id @default(autoincrement())
+  name String @map("nombre")
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String?   @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+  users           Users[]
+
+  @@map("documents_type")
+}
+
+model UserRoles {
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  roleId Int @map("role_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String   @map("created_by")
+
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Roles @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model Roles {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @map("name")
+  description String? @map("description")
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String    @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  displayName String? @map("display_name")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  rolePermissions RolePermissions[]
+  userRoles       UserRoles[]
+
+  @@index([isActive])
+  @@map("roles")
+}
+
+model Permissions {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique @map("name")
+  description String? @map("description")
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String    @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  displayName String? @map("display_name")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  rolePermissions RolePermissions[]
+  userPermissions UserPermissions[]
+
+  @@index([name])
+  @@index([isActive])
+  @@map("permissions")
+}
+
+model RolePermissions {
+  id           Int @id @default(autoincrement())
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String   @map("created_by")
+
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  role       Roles       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permissions @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model UserPermissions {
+  id           Int @id @default(autoincrement())
+  userId       Int @map("user_id")
+  permissionId Int @map("permission_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String   @map("created_by")
+
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  user       Users       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission Permissions @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+  @@index([userId])
+  @@index([permissionId])
+  @@map("user_permissions")
+}
+
+model UserCredentials {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  passwordHash String    @map("password_hash")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  expiredAt    DateTime? @map("expired_at")
+  attempts     Int       @default(0) @map("attempts")
+
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_credentials")
+}
+
+model ApiClientCredential {
+  id            Int       @id @default(autoincrement())
+  clientId      String    @unique @map("client_id")
+  clientName    String?   @map("client_name")
+  secretKey     String    @unique @map("secret_key")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastChangedAt DateTime? @map("last_changed_at")
+  createdBy     String?   @map("created_by")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  @@map("api_client_credential")
+}
+
+// =====================================================================================================================
+// MODELOS ESPECÍFICOS DE TEKOAPP (MIGRADOS DESDE EL MODELO RELACIONAL)
+// =====================================================================================================================
+
+enum ProfessionalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+model ServiceType {
+  id   Int    @id @default(autoincrement())
+  name String @unique @map("name")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  services Services[]
+
+  @@map("service_type")
+}
+
+enum ServiceStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Professionals {
+  id                Int                @id @default(autoincrement())
+  userId            Int                @unique @map("user_id") // Relación 1:1 con tu tabla Users
+  categoryId        Int                @map("category_id")
+  description       String             @db.Text
+  hourlyRate        Decimal            @map("hourly_rate") @db.Decimal(10, 2)
+  fixedRate         Decimal?           @map("fixed_rate") @db.Decimal(10, 2)
+  skills            String[]           @default([])
+  certifications    String[]           @default([])
+  yearsOfExperience Int                @default(0) @map("years_of_experience")
+  status            ProfessionalStatus @default(PENDING)
+  isAvailable       Boolean            @default(false) @map("is_available")
+  isOnline          Boolean            @default(false) @map("is_online")
+
+  verificationStatus String @default("unverified") @map("verification_status") @db.VarChar(20) // e.g., verified
+
+  // Última posición conocida (El histórico pesado va a Mongo)
+  currentLatitude    Decimal?  @map("current_latitude") @db.Decimal(10, 7)
+  currentLongitude   Decimal?  @map("current_longitude") @db.Decimal(10, 7)
+  lastLocationUpdate DateTime? @map("last_location_update")
+
+  totalServices Int     @default(0) @map("total_services")
+  averageRating Decimal @default(0) @map("average_rating") @db.Decimal(3, 2)
+  totalRatings  Int     @default(0) @map("total_ratings")
+
+  // Seguridad de datos que manejas en tu starter
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  // Relaciones
+  user            Users             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        Category          @relation(fields: [categoryId], references: [id])
+  services        Services[]
+  serviceRequests ServiceRequests[]
+  payments        Payments[]
+
+  @@index([status])
+  @@index([isAvailable])
+  @@map("professionals")
+}
+
+model Services {
+  id             String        @id @default(uuid()) // Usamos UUID para los códigos de servicio públicos
+  userId         Int           @map("user_id")
+  professionalId Int?          @map("professional_id")
+  categoryId     Int           @map("category_id")
+  title          String        @db.VarChar(255)
+  description    String        @db.Text
+  serviceTypeId  Int           @map("service_type_id")
+  status         ServiceStatus @default(PENDING)
+  estimatedHours Decimal?      @map("estimated_hours") @db.Decimal(10, 2)
+  actualHours    Decimal?      @map("actual_hours") @db.Decimal(10, 2)
+  hourlyRate     Decimal?      @map("hourly_rate") @db.Decimal(10, 2)
+  fixedPrice     Decimal?      @map("fixed_price") @db.Decimal(10, 2)
+  totalAmount    Decimal?      @map("total_amount") @db.Decimal(10, 2) // Monto inicial
+  finalAmount    Decimal?      @map("final_amount") @db.Decimal(10, 2) // Monto final tras horas reales
+
+  // Ubicación del servicio
+  latitude        Decimal  @db.Decimal(10, 7)
+  longitude       Decimal  @db.Decimal(10, 7)
+  address         String   @db.VarChar(255)
+  additionalNotes String?  @db.Text
+  images          String[] @default([])
+  isUrgent        Boolean  @default(false) @map("is_urgent")
+
+  // Tiempos
+  scheduledAt        DateTime? @map("scheduled_at")
+  startedAt          DateTime? @map("started_at")
+  completedAt        DateTime? @map("completed_at")
+  cancelledAt        DateTime? @map("cancelled_at")
+  cancellationReason String?   @map("cancellation_reason") @db.Text
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  // Relaciones
+  professional Professionals? @relation(fields: [professionalId], references: [id])
+  serviceType  ServiceType    @relation(fields: [serviceTypeId], references: [id])
+
+  requests ServiceRequests[]
+  payments Payments[]
+  users    Users?            @relation(fields: [userId], references: [id])
+  category Category          @relation(fields: [categoryId], references: [id])
+
+  @@index([status])
+  @@index([userId])
+  @@index([professionalId])
+  @@map("services")
+}
+
+model ServiceRequests {
+  id             String        @id @default(uuid())
+  serviceId      String        @map("service_id")
+  professionalId Int           @map("professional_id")
+  status         RequestStatus @default(PENDING)
+  proposedPrice  Decimal?      @map("proposed_price") @db.Decimal(10, 2)
+  proposedHours  Decimal?      @map("proposed_hours") @db.Decimal(10, 2)
+  message        String?       @db.Text
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  service      Services      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  professional Professionals @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@map("service_requests")
+}
+
+enum CategoryStatus {
+  ACTIVE   @map("active")
+  INACTIVE @map("inactive")
+  PENDING  @map("pending")
+}
+
+model Category {
+  id                   Int            @id @default(autoincrement())
+  name                 String         @unique @db.VarChar(100)
+  slug                 String         @unique @db.VarChar(150)
+  description          String?        @db.Text
+  icon                 String?        @db.VarChar(255)
+  color                String?        @db.VarChar(7)
+  sortOrder            Int            @default(0) @map("sort_order")
+  status               CategoryStatus @default(ACTIVE)
+  isVisible            Boolean        @default(true) @map("is_visible")
+  requiresVerification Boolean        @default(false) @map("requires_verification")
+  metadata             Json?          @db.JsonB
+  parentCategoryId     Int?           @map("parent_category_id")
+
+  // Relación autorreferencial (Padre -> Subcategorías)
+  parentCategory Category?  @relation("CategoryToSubcategory", fields: [parentCategoryId], references: [id], onDelete: Restrict)
+  subcategories  Category[] @relation("CategoryToSubcategory")
+
+  // Relaciones con dominios externos
+  professionals Professionals[]
+  services      Services[]
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@index([name, status])
+  @@index([slug])
+  @@map("categories")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIAL_REFUNDED
+  CANCELLED
+  PROCESSING
+  COMPLETED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  PREPAID_CARD
+  QR
+  LINK
+  TRANSFER
+  WALLET
+  MOBILE_WALLET
+  CRYPTO
+}
+
+enum PaymentProvider {
+  STRIPE
+  BANCARD
+  INFONET
+  PAYPAL
+  MERCADO_PAGO
+  RAPIPAGO
+  PAGOFACIL
+  CASH
+  DINELCO
+  BEPSA
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+  CHARGEBACK
+  ADJUSTMENT
+  FEE
+  TAX
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+model PaymentMethodEntity {
+  id         String          @id @default(uuid()) @db.Uuid
+  userId     Int             @map("user_id")
+  type       PaymentMethod
+  provider   PaymentProvider
+  name       String          @db.VarChar(255)
+  isDefault  Boolean         @default(false) @map("is_default")
+  isActive   Boolean         @default(true) @map("is_active")
+  details    Json            @db.JsonB
+  externalId String?         @map("external_id") @db.VarChar(255)
+  metadata   Json?           @db.JsonB
+  lastUsedAt DateTime?       @map("last_used_at") @db.Timestamp
+  expiresAt  DateTime?       @map("expires_at") @db.Timestamp
+  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamp
+  updatedAt  DateTime        @updatedAt @map("updated_at") @db.Timestamp
+
+  // Relaciones y Transacciones
+  transactions PaymentTransaction[]
+  users        Users?               @relation(fields: [userId], references: [id])
+
+  @@index([userId, isDefault])
+  @@index([userId, type])
+  @@map("payment_methods")
+}
+
+model Country {
+  id              Int     @id @default(autoincrement())
+  commonName      String  @db.VarChar(100)
+  officialName    String  @db.VarChar(255)
+  iso2            String  @db.VarChar(2)
+  iso3            String  @db.VarChar(3)
+  numericCode     String  @db.VarChar(3)
+  phonePrefixCode String  @db.VarChar(10)
+  observations    String? @db.Text
+  isActive        Boolean @default(true) @map("is_active")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  currencies Currency[] // Relación con monedas
+
+  @@index([isActive])
+  @@map("countries")
+}
+
+model Currency {
+  alphaCode       String    @id @db.VarChar(3) // ISO 4217
+  numberCode      String    @db.VarChar(10)
+  decimalQuantity Int       @default(0) @map("decimal_quantity")
+  name            String    @db.VarChar(100)
+  symbol          String?   @db.VarChar(10)
+  countryId       Int       @map("country_id")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  payments Payments[] // Relación con pagos
+  country  Country    @relation(fields: [countryId], references: [id])
+
+  @@index([isActive])
+  @@map("currencies")
+}
+
+model Payments {
+  id                    String          @id @default(uuid()) @db.Uuid
+  userId                Int             @map("user_id")
+  professionalId        Int             @map("professional_id")
+  serviceRequestId      String          @map("service_request_id") 
+  amount                Decimal         @db.Decimal(10, 2)
+  currencyCode          String          @map("currency_code") @db.VarChar(3)
+  fee                   Decimal         @default(0.00) @db.Decimal(10, 2)
+  tax                   Decimal         @default(0.00) @db.Decimal(10, 2)
+  totalAmount           Decimal         @map("total_amount") @db.Decimal(10, 2)
+  status                PaymentStatus   @default(PENDING)
+  paymentMethod         PaymentMethod   @map("payment_method")
+  paymentProvider       PaymentProvider @map("payment_provider")
+  transactionId         String          @unique @map("transaction_id") @db.VarChar(255)
+  externalTransactionId String?         @map("external_transaction_id") @db.VarChar(255)
+  description           String?         @db.Text
+  paymentDetails        Json?           @map("payment_details") @db.JsonB
+  metadata              Json?           @db.JsonB
+  processedAt           DateTime?       @map("processed_at") @db.Timestamp
+  failedAt              DateTime?       @map("failed_at") @db.Timestamp
+  paidAt                DateTime?       @map("paid_at")
+  failureReason         String?         @map("failure_reason") @db.Text
+  refundDetails         Json?           @map("refund_details") @db.JsonB
+  isRecurring           Boolean         @default(false) @map("is_recurring")
+  recurringInterval     String?         @map("recurring_interval") @db.VarChar(50)
+  nextPaymentDate       DateTime?       @map("next_payment_date") @db.Timestamp
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  transactions  PaymentTransaction[]
+  service       Services             @relation(fields: [serviceRequestId], references: [id])
+  currency      Currency             @relation(fields: [currencyCode], references: [alphaCode])
+  users         Users                @relation(fields: [userId], references: [id])
+  professionals Professionals?       @relation(fields: [professionalId], references: [id])
+
+  @@index([professionalId, status])
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+model PaymentTransaction {
+  id                    String            @id @default(uuid()) @db.Uuid
+  paymentId             String            @map("payment_id") @db.Uuid
+  paymentMethodId       String?           @map("payment_method_id") @db.Uuid
+  type                  TransactionType
+  status                TransactionStatus @default(PENDING)
+  amount                Decimal           @db.Decimal(10, 2)
+  externalTransactionId String            @unique @map("external_transaction_id") @db.VarChar(255)
+  externalReference     String?           @map("external_reference") @db.VarChar(255)
+  description           String?           @db.Text
+  transactionDetails    Json?             @map("transaction_details") @db.JsonB
+  metadata              Json?             @db.JsonB
+  processedAt           DateTime?         @map("processed_at") @db.Timestamp
+  failedAt              DateTime?         @map("failed_at") @db.Timestamp
+  failureReason         String?           @map("failure_reason") @db.Text
+  errorDetails          Json?             @map("error_details") @db.JsonB
+  isRetryable           Boolean           @default(false) @map("is_retryable")
+  retryCount            Int               @default(0) @map("retry_count")
+  nextRetryAt           DateTime?         @map("next_retry_at") @db.Timestamp
+  webhookData           Json?             @map("webhook_data") @db.JsonB
+  createdAt             DateTime          @default(now()) @map("created_at") @db.Timestamp
+  updatedAt             DateTime          @updatedAt @map("updated_at") @db.Timestamp
+
+  payment       Payments             @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethodEntity? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  @@index([paymentId, type])
+  @@index([status, createdAt])
+  @@map("payment_transactions")
+}

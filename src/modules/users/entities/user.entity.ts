@@ -10,9 +10,9 @@ import {
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 
-import { Professional } from '../../professionals/entities/professional.entity';
-import { Service } from '../../services/entities/service.entity';
-import { Rating } from '../../ratings/entities/rating.entity';
+import { Professional } from '../../../api/professionals/entities/professional.entity';
+import { Service } from '../../../api/services/entities/service.entity';
+import { Rating } from '../../../api/ratings/entities/rating.entity';
 
 export enum UserRole {
   CLIENT = 'client',
