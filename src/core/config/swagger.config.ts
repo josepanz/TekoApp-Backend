@@ -105,7 +105,7 @@ export class SwaggerConfig {
     const document = SwaggerModule.createDocument(app, config);
 
     // Al usar 'swagger' NestJS lo monta de forma inteligente sobre el prefijo global establecido.
-    SwaggerModule.setup('swagger', app, document, {
+    SwaggerModule.setup('/tekoapp-backend/api/swagger', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
         docExpansion: 'list',
@@ -127,7 +127,7 @@ export class SwaggerConfig {
     const finalDocsPath = fs.existsSync(docsPath) ? docsPath : fallbackDocsPath;
 
     if (fs.existsSync(finalDocsPath)) {
-      app.use('/docs', express.static(finalDocsPath));
+      app.use('/tekoapp-backend/api/docs', express.static(finalDocsPath));
       this.logger.log(
         `✅ Documentación de Compodoc servida en: /tekoapp-backend/api/docs`,
       );

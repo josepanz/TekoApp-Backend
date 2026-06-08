@@ -1,22 +1,13 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_CONFIG } from '@core/config/config-loader';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { DatabaseModule } from '@core/database/database.module';
-
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { ProfessionalsModule } from './api/professionals/professionals.module';
-import { ServicesModule } from './api/services/services.module';
-import { LocationsModule } from './api/locations/locations.module';
-import { PaymentsModule } from './api/payments/payments.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
-import { PromotionsModule } from './api/promotions/promotions.module';
-import { RatingsModule } from './api/ratings/ratings.module';
-import { CategoriesModule } from './api/categories/categories.module';
-import { UploadsModule } from './api/uploads/uploads.module';
-import { AnalyticsModule } from './api/analytics/analytics.module';
+import { ObservabilityInterceptor } from '@/core/interceptors/observability.interceptor';
+import { TraceIdMiddleware } from '@/core/middlewares/trace-id.middleware';
+import { ObservabilityModule } from '@/modules/observability/observability.module';
+import { ApiModule } from '@/api/api.module';
 
 @Module({
   imports: [
@@ -27,20 +18,14 @@ import { AnalyticsModule } from './api/analytics/analytics.module';
     }),
     ScheduleModule.forRoot(),
     DatabaseModule,
-    AuthModule,
-    UsersModule,
-    ProfessionalsModule,
-    ServicesModule,
-    LocationsModule,
-    PaymentsModule,
-    NotificationsModule,
-    PromotionsModule,
-    RatingsModule,
-    CategoriesModule,
-    UploadsModule,
-    AnalyticsModule,
+    ApiModule,
+    ObservabilityModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [ObservabilityInterceptor],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TraceIdMiddleware).forRoutes('*');
+  }
+}

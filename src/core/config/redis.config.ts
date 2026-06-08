@@ -6,20 +6,20 @@ export const getBullConfig = (
   configService: ConfigService,
 ): BullModuleOptions => {
   const redisConfig = configService.get<{
-    host?: string;
-    port?: number;
+    host: string;
+    port: number;
     password?: string;
     queueDb?: number;
   }>('config.redis');
 
   return {
     redis: {
-      host: redisConfig?.host ?? 'localhost',
-      port: redisConfig?.port ?? 6379,
-      password: redisConfig?.password,
-      db: redisConfig?.queueDb ?? 0, // DB dedicada para colas de Bull
+      host: redisConfig.host,
+      port: redisConfig.port,
+      password: redisConfig.password,
+      db: redisConfig.queueDb,
       maxRetriesPerRequest: null,
-      enableReadyCheck: true,
+      enableReadyCheck: false,
     },
     defaultJobOptions: {
       attempts: 3,
