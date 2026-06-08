@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-tekoapp-backend
+  namespace: default
+spec:
+  minReadySeconds: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: deploy-tekoapp-backend
+  template:
+    metadata:
+      name: deploy-tekoapp-backend
+      labels:
+        app: deploy-tekoapp-backend
+      annotations:
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/auth-path: auth/dev-k3s
+        vault.hashicorp.com/role: tekoapp-backend-role
+        # Sincroniza el UID del contenedor de Vault con el del Dockerfile (nodeuser: 1001)
+        vault.hashicorp.com/agent-run-as-user: '1001'
+        vault.hashicorp.com/agent-inject-secret-tekoapp-backend-configmap: project/data/dev/tekoapp-backend-configmap
+        vault.hashicorp.com/agent-inject-template-tekoapp-backend-configmap: |
+          {{- with secret "project/data/dev/tekoapp-backend-configmap" -}}
+          {{- range $key, $value := .Data.data }}
+            export {{ $key }}="{{ $value }}"
+          {{- end }}
+          {{ end }}
+    spec:
+      serviceAccountName: tekoapp-backend
+      imagePullSecrets:
+        - name: regcred
+      enableServiceLinks: false
+      containers:
+        - image: "" 
+          resources:
+            limits:
+              cpu: '800m'
+              memory: '400Mi'
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          name: deploy-tekoapp-backend
+          imagePullPolicy: Always
+          command:
+            - '/bin/sh'
+            - '-c'
+            - |
+              . /vault/secrets/tekoapp-backend-configmap
+              node dist/main

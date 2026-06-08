@@ -43,9 +43,10 @@
 
 ### Backend
 - **NestJS** - Framework backend modular
+- **Mongoose** - ORM para bases de datos mongo
 - **MongoDB** - Base de datos NoSQL para datos flexibles
 - **PostgreSQL** - Base de datos SQL para transacciones críticas
-- **TypeORM** - ORM para bases de datos
+- **PrismaORM** - ORM para bases de datos postgresql
 - **JWT** - Autenticación segura
 - **Google Maps API** - Integración de mapas
 - **Firebase Cloud Messaging** - Notificaciones push
@@ -55,13 +56,15 @@
 ````bash
 TekoApp-Backend/
 ├── src/
-│   ├── auth/                  # Autenticación (JWT, OAuth)
-│   ├── users/                 # Gestión de usuarios (clientes/profesionales)
-│   ├── professionals/         # Lógica específica de profesionales
-│   ├── services/              # Solicitudes de servicios
-│   ├── ratings/               # Sistema de calificaciones
-│   ├── locations/             # Geolocalización en tiempo real
-│   ├── shared/                # Utilidades comunes (middlewares, guards)
+│   ├── api/                   # todo el api orquestador, es entrada, no ve base de datos si no que llama a los servicios, modulos, db, reutilizables que existe
+│   ├    ├── auth/             # Autenticación (JWT, OAuth)
+│   ├    ├── users/            # Gestión de usuarios (clientes/profesionales)
+│   ├    ├── professionals/    # Lógica específica de profesionales
+│   ├    ├── services/         # Solicitudes de servicios
+│   ├    ├── ratings/          # Sistema de calificaciones
+│   ├    ├── locations/        # Geolocalización en tiempo real
+│   ├── common/                # Utilidades comunes (middlewares, guards)
+│   ├── modules/               # Modulos reutilizables, como email, auth, capa de base de datos con el ORM por si se quiera cambiar de DB u herramientas mas adelante se mantiene agnostico el resto del proyecto, o llamada a servicios externos
 │   └── main.ts                # Punto de entrada
 ├── .env                       # Variables de entorno
 ├── docker-compose.yml         # Configuración para Docker
@@ -76,7 +79,7 @@ git clone https://github.com/josepanz/TekoApp-Backend.git
 
 ##### 2. Instala dependencias:
 ````bash
-npm install
+pnpm install
 ````
 
 ##### 3. Configura las variables de entorno (.env):
@@ -88,7 +91,7 @@ GOOGLE_MAPS_API_KEY=tu_api_key
 ````
 ##### 4. Ejecuta en desarrollo:
 ````bash
-npm run start:dev
+pnpm run start:dev
 ````
 
 ### Frontend
@@ -153,11 +156,11 @@ cd web
 
 ##### 3.Instala dependencias:
 ````bash
-npm install
+pnpm install
 ````
 ##### 4. Ejecuta en desarrollo:
 ````bash
-npm start
+pnpm start
 ````
 #### 📦 Despliegue
 ##### Backend: Usa Docker para empaquetar y desplegar en AWS/GCP:
