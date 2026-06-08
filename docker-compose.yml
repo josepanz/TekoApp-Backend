@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: tekoapp-postgres
+    environment:
+      POSTGRES_DB: tekoapp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - tekoapp-network
+
+  # Base de datos MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: tekoapp-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: tekoapp
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - tekoapp-network
+
+  # Redis para colas de trabajo
+  redis:
+    image: redis:7-alpine
+    container_name: tekoapp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - tekoapp-network
+
+  # Backend de la aplicación
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tekoapp-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=tekoapp
+      - MONGODB_URI=mongodb://mongodb:27017/tekoapp
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+    networks:
+      - tekoapp-network
+    command: npm run start:dev
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+
+networks:
+  tekoapp-network:
+    driver: bridge

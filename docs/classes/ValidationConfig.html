@@ -1,0 +1,546 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tekoapp-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+          <script>
+              // --- Iframe navigation tracking for Template Playground ---
+              function sendCurrentUrlToParent() {
+                  if (window.parent && window.parent !== window) {
+                      window.parent.postMessage({
+                          type: 'compodoc-iframe-navigate',
+                          url: window.location.pathname + window.location.hash
+                      }, '*');
+                  }
+              }
+              window.addEventListener('hashchange', sendCurrentUrlToParent, false);
+              window.addEventListener('popstate', sendCurrentUrlToParent, false);
+              window.addEventListener('DOMContentLoaded', sendCurrentUrlToParent, false);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tekoapp-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content class">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >ValidationConfig</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" 
+                class="nav-link"
+                class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" 
+                class="nav-link"
+                
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info">
+        <p class="comment">
+            <h3>File</h3>
+        </p>
+        <p class="comment">
+            <code>src/core/config/validation.config.ts</code>
+        </p>
+
+
+
+
+
+
+            <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Static</span>
+                                <a href="#getCustomMessages" >getCustomMessages</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Static</span>
+                                <a href="#getValidationOptions" >getValidationOptions</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Static</span>
+                                <a href="#getValidationRules" >getValidationRules</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+
+
+            <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getCustomMessages"></a>
+                    <span class="name">
+                            <span class="modifier">Static</span>
+                        <span ><b>getCustomMessages</b></span>
+                        <a href="#getCustomMessages"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getCustomMessages()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="118"
+                                    class="link-to-prism">src/core/config/validation.config.ts:118</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Record&lt;string, string&gt;</code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getValidationOptions"></a>
+                    <span class="name">
+                            <span class="modifier">Static</span>
+                        <span ><b>getValidationOptions</b></span>
+                        <a href="#getValidationOptions"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getValidationOptions()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="19"
+                                    class="link-to-prism">src/core/config/validation.config.ts:19</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/ValidationPipeOptionsExtended.html" target="_self" >ValidationPipeOptionsExtended</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getValidationRules"></a>
+                    <span class="name">
+                            <span class="modifier">Static</span>
+                        <span ><b>getValidationRules</b></span>
+                        <a href="#getValidationRules"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getValidationRules()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="55"
+                                    class="link-to-prism">src/core/config/validation.config.ts:55</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/ValidationRuleItem.html" target="_self" >Record&lt;string, ValidationRuleItem&gt;</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+
+
+
+
+    </div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ValidationPipeOptions } from &#x27;@nestjs/common&#x27;;
+import { ValidationError } from &#x27;class-validator&#x27;;
+
+export interface ValidationRuleItem {
+  pattern?: RegExp;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  precision?: number;
+  message: string;
+}
+
+interface ValidationPipeOptionsExtended extends ValidationPipeOptions {
+  skipEmptyValues?: boolean;
+}
+
+export class ValidationConfig {
+  static getValidationOptions(): ValidationPipeOptionsExtended {
+    return {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      validateCustomDecorators: true,
+      skipMissingProperties: false,
+      skipNullProperties: false,
+      skipUndefinedProperties: false,
+      skipEmptyValues: false,
+      errorHttpStatusCode: 422,
+      exceptionFactory: (errors: ValidationError[]) &#x3D;&gt; {
+        const formattedErrors &#x3D; errors.map((error) &#x3D;&gt; ({
+          field: error.property,
+          value: error.value as unknown,
+          constraints: error.constraints,
+          children:
+            error.children &amp;&amp; error.children.length &gt; 0
+              ? error.children
+              : undefined,
+        }));
+
+        return {
+          statusCode: 422,
+          message: &#x27;Error de validación&#x27;,
+          errors: formattedErrors,
+          timestamp: new Date().toISOString(),
+        };
+      },
+    };
+  }
+
+  static getValidationRules(): Record&lt;string, ValidationRuleItem&gt; {
+    return {
+      email: {
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        message: &#x27;El formato del email no es válido&#x27;,
+      },
+      password: {
+        minLength: 8,
+        maxLength: 128,
+        pattern:
+          /^(?&#x3D;.*[a-z])(?&#x3D;.*[A-Z])(?&#x3D;.*\d)(?&#x3D;.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]/,
+        message:
+          &#x27;La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial&#x27;,
+      },
+      phone: {
+        pattern: /^\+?[1-9]\d{1,14}$/,
+        message: &#x27;El formato del número de teléfono no es válido&#x27;,
+      },
+      latitude: {
+        min: -90,
+        max: 90,
+        message: &#x27;La latitud debe estar entre -90 y 90&#x27;,
+      },
+      longitude: {
+        min: -180,
+        max: 180,
+        message: &#x27;La longitud debe estar entre -180 y 180&#x27;,
+      },
+      price: {
+        min: 0,
+        precision: 2,
+        message: &#x27;El precio debe ser mayor a 0 y tener máximo 2 decimales&#x27;,
+      },
+      rating: {
+        min: 1,
+        max: 5,
+        message: &#x27;La calificación debe estar entre 1 y 5&#x27;,
+      },
+      name: {
+        minLength: 2,
+        maxLength: 50,
+        pattern: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
+        message:
+          &#x27;El nombre debe tener entre 2 y 50 caracteres y solo puede contener letras y espacios&#x27;,
+      },
+      description: {
+        minLength: 10,
+        maxLength: 1000,
+        message: &#x27;La descripción debe tener entre 10 y 1000 caracteres&#x27;,
+      },
+      url: {
+        pattern:
+          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#&#x3D;]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&amp;//&#x3D;]*)$/,
+        message: &#x27;La URL no tiene un formato válido&#x27;,
+      },
+      uuid: {
+        pattern:
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        message: &#x27;El UUID no tiene un formato válido&#x27;,
+      },
+    };
+  }
+
+  static getCustomMessages(): Record&lt;string, string&gt; {
+    return {
+      isNotEmpty: &#x27;El campo no puede estar vacío&#x27;,
+      isString: &#x27;El campo debe ser una cadena de texto&#x27;,
+      isNumber: &#x27;El campo debe ser un número&#x27;,
+      isBoolean: &#x27;El campo debe ser un valor booleano&#x27;,
+      isDate: &#x27;El campo debe ser una fecha válida&#x27;,
+      isArray: &#x27;El campo debe ser un array&#x27;,
+      isObject: &#x27;El campo debe ser un objeto&#x27;,
+      isEmail: &#x27;El campo debe ser un email válido&#x27;,
+      isUrl: &#x27;El campo debe ser una URL válida&#x27;,
+      isUuid: &#x27;El campo debe ser un UUID válido&#x27;,
+      minLength: &#x27;El campo debe tener al menos $constraint1 caracteres&#x27;,
+      maxLength: &#x27;El campo debe tener máximo $constraint1 caracteres&#x27;,
+      min: &#x27;El valor mínimo permitido es $constraint1&#x27;,
+      max: &#x27;El valor máximo permitido es $constraint1&#x27;,
+      isPositive: &#x27;El valor debe ser positivo&#x27;,
+      isNegative: &#x27;El valor debe ser negativo&#x27;,
+      isInt: &#x27;El valor debe ser un número entero&#x27;,
+      isFloat: &#x27;El valor debe ser un número decimal&#x27;,
+      isDateString: &#x27;El campo debe ser una fecha válida en formato ISO&#x27;,
+      isEnum: &#x27;El valor debe ser uno de los siguientes: $constraint1&#x27;,
+      isArrayNotEmpty: &#x27;El array no puede estar vacío&#x27;,
+      arrayMinSize: &#x27;El array debe tener al menos $constraint1 elementos&#x27;,
+      arrayMaxSize: &#x27;El array debe tener máximo $constraint1 elementos&#x27;,
+    };
+  }
+}
+</code></pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'ValidationConfig.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>
