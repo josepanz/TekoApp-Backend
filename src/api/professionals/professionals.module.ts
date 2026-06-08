@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from '@core/database/database.module';
-
-import { ProfessionalsController } from './professionals.controller';
-import { ProfessionalsService } from './professionals.service';
+import { ProfessionalsDbModule } from '@modules/professionals-db/professionals-db.module';
+import { ProfessionalsController } from './controllers/professionals.controller';
+import { ProfessionalsService } from './services/professionals.service';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [ProfessionalsDbModule],
   controllers: [ProfessionalsController],
   providers: [ProfessionalsService],
   exports: [ProfessionalsService],

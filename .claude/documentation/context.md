@@ -95,7 +95,7 @@ src/
 
 ## Estado actual — actualizar por sesión
 
-**Última actualización: 2026-06-08 — Sesión 2 (ESLint 0 errores 0 warnings)**
+**Última actualización: 2026-06-08 — Sesión 4 (professionals-db module + response DTOs + folder structure)**
 
 ### Build y runtime
 - `pnpm lint` — **0 errores, 0 warnings**
@@ -109,12 +109,25 @@ src/
 - [x] Migración users-db, módulos DI, Sharp opcional, APP_CONFIG, webpack:false (Sesión 1)
 - [x] 322 warnings `no-explicit-any`/`no-unsafe-*` → 0 (Sesión 2)
 - [x] 19 errores TypeScript adicionales → 0 (Sesión 2)
-- [x] Eliminado modelo `Example` del schema.prisma (usuario, Sesión 2)
+- [x] Eliminado modelo `Example` del schema.prisma + `pnpm prisma generate` (usuario, Sesión 2/3)
+- [x] DTOs @Param/@Query: `professionals`, `services`, `categories`, `ratings`, `promotions` (Sesión 3)
+- [x] Refactor payments: JwtAuthGuard, DTOs tipados (PaymentIdParamDTO, PaymentListQueryDTO, etc.), eliminado `mockUserId = 1`, `CreatePaymentMethodRequestDTO` (Sesión 3)
+- [x] Reorganización `api.module.ts` / `app.module.ts` (usuario, Sesión 3)
+- [x] Módulo `professionals-db` creado en `src/modules/professionals-db/` con `ProfessionalsDbService`, interfaces, types (Sesión 4)
+- [x] `professionals.service.ts` migrado a `src/api/professionals/services/` — inyecta `ProfessionalsDbService` (Sesión 4)
+- [x] `professionals.controller.ts` movido a `src/api/professionals/controllers/` (Sesión 4)
+- [x] Response DTOs creados: `ProfessionalDetailResponseDTO`, `ProfessionalsListResponseDTO`, `ProfessionalServicesListResponseDTO`, `ProfessionalReviewsListResponseDTO`, `ProfessionalStatsResponseDTO` (Sesión 4)
+- [x] Query DTOs actualizados para extender `PaginatedRequest` (usa `pageSize`); `PrismaPaginationUtil` en todos los listados (Sesión 4)
+- [x] Reglas de estructura de carpetas añadidas en `rules/typescript.md` (Sesión 4)
+
+### Notas de arquitectura (Sesión 4)
+- `src/api/professionals/` → estructura correcta: `controllers/`, `services/`, `dtos/request/`, `dtos/response/`
+- `src/modules/professionals-db/` → `interfaces/`, `types/`, `services/` con `PrismaDatasource`
+- Regla de estructura ya documentada en `rules/typescript.md` — aplicar a todos los módulos nuevos
+- Query DTOs de listas paginadas extienden `PaginatedRequest<T>` y usan `pageSize` (no `limit`)
 
 ### Pendiente (próximas sesiones)
-- [ ] **`pnpm prisma generate`** (INMEDIATO) — regenerar cliente tras eliminar modelo `Example`
-- [ ] **DTOs `@Param`/`@Query`**: `professionals`, `services`, `ratings` controllers usan `ParseIntPipe` inline — violación de `rules/typescript.md`
-- [ ] **Refactor payments**: sub-controllers, DTOs tipados, fee calculator desde DB, JWT guard real (reemplazar `mockUserId = 1`), Stripe webhook
+- [ ] **fee calculator**: hardcodeado en `payments.service.ts` (STRIPE: 0.029, etc.) — debe leer rates desde DB config
+- [ ] **dtos**: las apis categories, payments, promotions,ratings y service, algunos su carpeta de /dtos se llama /dto, debe ajustarse, también algunos no tienen sus respectivos response.ts en /dtos/response como tampoco estan dentro de sus respectivas carpetas /controllers, /services y no estan cumpliendo con las reglas de que deben tener /docs con su respectivo decorador para documentar.
 - [ ] **Tests**: ningún `.spec.ts` creado/actualizado — regla del proyecto exige tests con cada feature
 - [ ] **Sharp binary**: `pnpm add sharp` o binario win32-x64 para habilitar procesamiento de imágenes
-- [ ] **`.env` de desarrollo**: `DATABASE_URL`, `MONGODB_URI`, `REDIS_HOST`, `JWT_PRIVATE_KEY`, `JWT_PUBLIC_KEY`, `STRIPE_SECRET_KEY`

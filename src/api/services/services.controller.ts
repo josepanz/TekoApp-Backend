@@ -9,25 +9,27 @@ import {
   Query,
   UseGuards,
   Request,
-  ParseUUIDPipe,
-  ParseFloatPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { ServicesService } from './services.service';
-import { ServiceStatus } from '@prisma/client';
 import {
   CreateServiceDto,
   UpdateServiceDto,
   CreateServiceRequestDto,
   RespondServiceRequestDto,
+  ServiceIdParamDTO,
+  ServiceRequestParamsDTO,
+  GetServicesListQueryDTO,
+  GetNearbyServicesQueryDTO,
+  GetMyServicesQueryDTO,
+  CancelServiceRequestDTO,
 } from './dto';
 
 @ApiTags('services')
@@ -51,61 +53,50 @@ export class ServicesController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener lista de servicios con filtros' })
-  @ApiQuery({ name: 'status', enum: ServiceStatus, required: false })
-  @ApiQuery({ name: 'categoryId', required: false, type: Number })
-  @ApiQuery({ name: 'latitude', required: false, type: Number })
-  @ApiQuery({ name: 'longitude', required: false, type: Number })
-  @ApiQuery({ name: 'radius', required: false, type: Number })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Lista de servicios obtenida' })
-  async getServices(
-    @Query('status') status?: ServiceStatus,
-    @Query('categoryId') categoryId?: string,
-    @Query('latitude') latitude?: number,
-    @Query('longitude') longitude?: number,
-    @Query('radius') radius?: number,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ) {
-    return this.servicesService.getServices({
-      status,
-      categoryId: categoryId ? Number(categoryId) : undefined,
-      latitude,
-      longitude,
-      radius,
-      page,
-      limit,
-    });
+  async getServices(@Query() query: GetServicesListQueryDTO) {
+    return this.servicesService.getServices(query);
   }
 
   @Get('nearby')
   @ApiOperation({ summary: 'Obtener servicios cercanos por ubicación' })
-  @ApiQuery({ name: 'latitude', required: true, type: Number })
-  @ApiQuery({ name: 'longitude', required: true, type: Number })
-  @ApiQuery({ name: 'radius', required: false, type: Number })
-  @ApiQuery({ name: 'categoryId', required: false })
   @ApiResponse({ status: 200, description: 'Servicios cercanos obtenidos' })
-  async getNearbyServices(
-    @Query('latitude', ParseFloatPipe) latitude: number,
-    @Query('longitude', ParseFloatPipe) longitude: number,
-    @Query('radius') radius: number = 10,
-    @Query('categoryId') categoryId?: string,
-  ) {
+  async getNearbyServices(@Query() query: GetNearbyServicesQueryDTO) {
     return this.servicesService.getNearbyServices(
-      latitude,
-      longitude,
-      Number(radius),
-      categoryId ? Number(categoryId) : undefined,
+      query.latitude,
+      query.longitude,
+      query.radius,
+      query.categoryId,
     );
+  }
+
+  @Get('my-services')
+  @ApiOperation({ summary: 'Obtener servicios del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Servicios del usuario obtenidos' })
+  async getMyServices(
+    @Request() req: { user: IUserDataOnJwt },
+    @Query() query: GetMyServicesQueryDTO,
+  ) {
+    return this.servicesService.getMyServices(
+      req.user.id,
+      query.status,
+      query.role,
+    );
+  }
+
+  @Get('dashboard/stats')
+  @ApiOperation({ summary: 'Obtener estadísticas del dashboard' })
+  @ApiResponse({ status: 200, description: 'Estadísticas obtenidas' })
+  async getDashboardStats(@Request() req: { user: IUserDataOnJwt }) {
+    return this.servicesService.getDashboardStats(req.user.id);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un servicio por ID' })
   @ApiResponse({ status: 200, description: 'Servicio encontrado' })
   @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
-  async getServiceById(@Param('id', ParseUUIDPipe) id: string) {
-    return this.servicesService.getServiceById(id);
+  async getServiceById(@Param() param: ServiceIdParamDTO) {
+    return this.servicesService.getServiceById(param.id);
   }
 
   @Put(':id')
@@ -117,12 +108,12 @@ export class ServicesController {
     description: 'No autorizado para modificar este servicio',
   })
   async updateService(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Body() updateServiceDto: UpdateServiceDto,
     @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.updateService(
-      id,
+      param.id,
       updateServiceDto,
       req.user.id,
     );
@@ -137,11 +128,15 @@ export class ServicesController {
     description: 'No autorizado para cancelar este servicio',
   })
   async cancelService(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body('reason') reason: string,
+    @Param() param: ServiceIdParamDTO,
+    @Body() dto: CancelServiceRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.servicesService.cancelService(id, reason, req.user.id);
+    return this.servicesService.cancelService(
+      param.id,
+      dto.reason,
+      req.user.id,
+    );
   }
 
   @Post(':id/accept')
@@ -153,10 +148,10 @@ export class ServicesController {
     description: 'No autorizado o no es profesional',
   })
   async acceptService(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.servicesService.acceptService(id, req.user.id);
+    return this.servicesService.acceptService(param.id, req.user.id);
   }
 
   @Post(':id/start')
@@ -168,10 +163,10 @@ export class ServicesController {
     description: 'No autorizado o no es profesional',
   })
   async startService(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.servicesService.startService(id, req.user.id);
+    return this.servicesService.startService(param.id, req.user.id);
   }
 
   @Post(':id/complete')
@@ -183,13 +178,12 @@ export class ServicesController {
     description: 'No autorizado o no es profesional',
   })
   async completeService(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.servicesService.completeService(id, req.user.id);
+    return this.servicesService.completeService(param.id, req.user.id);
   }
 
-  // Endpoints para solicitudes de servicio
   @Post(':id/requests')
   @ApiOperation({
     summary: 'Crear una solicitud para un servicio (solo profesionales)',
@@ -201,12 +195,12 @@ export class ServicesController {
     description: 'No autorizado o no es profesional',
   })
   async createServiceRequest(
-    @Param('id', ParseUUIDPipe) serviceId: string,
+    @Param() param: ServiceIdParamDTO,
     @Body() requestDto: CreateServiceRequestDto,
     @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.createServiceRequest(
-      serviceId,
+      param.id,
       requestDto,
       req.user.id,
     );
@@ -216,8 +210,8 @@ export class ServicesController {
   @ApiOperation({ summary: 'Obtener solicitudes de un servicio' })
   @ApiResponse({ status: 200, description: 'Solicitudes obtenidas' })
   @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
-  async getServiceRequests(@Param('id', ParseUUIDPipe) serviceId: string) {
-    return this.servicesService.getServiceRequests(serviceId);
+  async getServiceRequests(@Param() param: ServiceIdParamDTO) {
+    return this.servicesService.getServiceRequests(param.id);
   }
 
   @Put(':id/requests/:requestId')
@@ -229,36 +223,15 @@ export class ServicesController {
     description: 'No autorizado para responder esta solicitud',
   })
   async respondToServiceRequest(
-    @Param('id', ParseUUIDPipe) serviceId: string,
-    @Param('requestId', ParseUUIDPipe) requestId: string,
+    @Param() params: ServiceRequestParamsDTO,
     @Body() responseDto: RespondServiceRequestDto,
     @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.respondToServiceRequest(
-      serviceId,
-      requestId,
+      params.id,
+      params.requestId,
       responseDto,
       req.user.id,
     );
-  }
-
-  @Get('my-services')
-  @ApiOperation({ summary: 'Obtener servicios del usuario autenticado' })
-  @ApiQuery({ name: 'status', enum: ServiceStatus, required: false })
-  @ApiQuery({ name: 'role', enum: ['client', 'professional'], required: false })
-  @ApiResponse({ status: 200, description: 'Servicios del usuario obtenidos' })
-  async getMyServices(
-    @Request() req: { user: IUserDataOnJwt },
-    @Query('status') status?: ServiceStatus,
-    @Query('role') role?: 'client' | 'professional',
-  ) {
-    return this.servicesService.getMyServices(req.user.id, status, role);
-  }
-
-  @Get('dashboard/stats')
-  @ApiOperation({ summary: 'Obtener estadísticas del dashboard' })
-  @ApiResponse({ status: 200, description: 'Estadísticas obtenidas' })
-  async getDashboardStats(@Request() req: { user: IUserDataOnJwt }) {
-    return this.servicesService.getDashboardStats(req.user.id);
   }
 }

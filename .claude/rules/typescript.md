@@ -1,5 +1,54 @@
 # TypeScript rules
 
+## Estructura de carpetas obligatoria (api/* y modules/*)
+
+Todo módulo en `src/api/<domain>/` y `src/modules/<domain>/` debe seguir esta estructura:
+
+```
+src/api/<domain>/
+├── <domain>.module.ts
+├── controllers/
+│   └── <domain>.controller.ts
+├── services/
+│   └── <domain>.service.ts
+└── dtos/
+    ├── request/
+    │   ├── index.ts
+    │   ├── get-<domain>-list.query.dto.ts
+    │   ├── get-<domain>-detail.param.dto.ts
+    │   ├── create-<domain>.request.dto.ts
+    │   └── update-<domain>.request.dto.ts
+    └── response/
+        ├── index.ts
+        ├── <domain>-detail.response.dto.ts
+        └── <domain>-list.response.dto.ts
+
+src/modules/<domain>-db/
+├── <domain>-db.module.ts
+├── interfaces/
+│   └── <domain>-db.interface.ts
+├── types/
+│   └── <domain>-db.type.ts
+└── services/
+    └── <domain>-db.service.ts
+```
+
+**Reglas:**
+- `controller.ts` siempre en `/controllers/` — nunca en la raíz del módulo
+- `service.ts` siempre en `/services/` — nunca en la raíz del módulo
+- `/dto` → siempre `/dtos` (plural), conteniendo `/request` y `/response`
+- Interfaces, enums, types, helpers → en sus carpetas `/interfaces`, `/enums`, `/types`, `/helpers` — nunca inline en services
+- **Todos los métodos de controllers y services deben tener tipo de retorno explícito** con DTO de respuesta tipado
+
+## Response DTOs — obligatorio
+
+- Todo endpoint que retorna datos debe tener su `*ResponseDTO` explícito declarado como tipo de retorno
+- Los servicios de la capa `api/*` deben declarar el tipo de retorno de cada método con el ResponseDTO correspondiente
+- Para listas paginadas: extender `PaginatedResponse<T>` (de `@common/dtos/response-with-pagination.dto`)
+- Para queries paginadas: extender `PaginatedRequest<T>` (de `@common/dtos/request-with-pagination.dto`) — usar `pageSize` (no `limit`)
+- Usar `PrismaPaginationUtil` para todo endpoint de listado con paginación
+- Swagger: `@ApiResponse({ status: 200, type: ResponseDTO })` o `type: [ResponseDTO]` — siempre con tipo explícito
+
 - Use JOI for input `config-schema.ts` on all secrets.
 - Explicit DTOs in NestJS, API tags, validations `(class-validator)` or `(ValidatorConstraint)` with validate and decorator, and transformations `(class-transformer)` if necessary (if applicable to multiple endpoints, create a validator and its specific decorator), with typed enums if applicable, Swagger documentation `(@nestjs/swagger, ApiProperty, ApiPropertyOptional)` and examples for both requests and responses, also for parameters and queries (use DTO in uppercase at the end), examples: GetUsersListQueryDTO, GetUserDetailParamDTO, CreateUserRequestDTO, CreateUserResponseDTO, UpdateUserRequestDTO, UpdateUserResponseDTO (not generic interfaces).
 - Always generate the queryDTO, requestDTO, paramDTO under the cited rules, do not create for example @Param('id', ParseIntPipe) id: number; alone, always do everything from your dto with validation, transformation and Swagger documentation mentioned.

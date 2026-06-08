@@ -226,12 +226,17 @@ export class CreatePaymentDto {
   recurringInterval?: string;
 
   @ApiProperty({
+    description: 'Código de moneda ISO 4217',
+    example: 'USD',
+  })
+  @IsString()
+  currencyCode!: string;
+
+  @ApiProperty({
     description: 'Metadatos adicionales',
     example: { platform: 'mobile', appVersion: '1.2.0' },
     required: false,
   })
   @IsOptional()
   metadata?: Record<string, unknown>;
-
-  currencyCode: string;
 }

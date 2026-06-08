@@ -19,6 +19,7 @@ import {
   UpdatePaymentDto,
   RefundPaymentDto,
   UpdatePaymentMethodDto,
+  CreatePaymentMethodRequestDTO,
 } from '@/api/payments/dtos/request';
 
 @Injectable()
@@ -64,15 +65,11 @@ export class PaymentApiService {
   }
 
   async getPayments(
-    userId?: number | string,
-    professionalId?: number | string,
+    userId?: number,
+    professionalId?: number,
     status?: PaymentStatus,
   ) {
-    return this.dbService.findAllPayments(
-      userId !== undefined ? Number(userId) : undefined,
-      professionalId !== undefined ? Number(professionalId) : undefined,
-      status,
-    );
+    return this.dbService.findAllPayments(userId, professionalId, status);
   }
 
   async getPaymentById(id: string) {
@@ -91,10 +88,9 @@ export class PaymentApiService {
     return this.dbService.updatePayment(id, dto as unknown);
   }
 
-  async cancelPayment(id: string, userId: number | string) {
-    const numId = Number(userId);
+  async cancelPayment(id: string, userId: number) {
     const payment = await this.getPaymentById(id);
-    if (payment.userId !== numId) {
+    if (payment.userId !== userId) {
       throw new ForbiddenException(
         'No tienes permisos para cancelar este pago',
       );
@@ -149,53 +145,46 @@ export class PaymentApiService {
   // ==================== MÉTODOS DE PAGO ====================
 
   async createPaymentMethod(
-    userId: number | string,
-    dto: CreatePaymentDto,
+    userId: number,
+    dto: CreatePaymentMethodRequestDTO,
   ): Promise<PaymentMethodEntity> {
-    const numId = Number(userId);
     return this.dbService.createPaymentMethod({
-      userId: numId,
-      name:
-        ((dto as unknown as Record<string, unknown>).name as string) ??
-        'default',
-      type: dto.paymentMethod,
-      provider: dto.paymentProvider,
+      userId,
+      name: dto.name,
+      type: dto.type,
+      provider: dto.provider,
+      isDefault: dto.isDefault ?? false,
+      details: dto.details ?? {},
+      externalId: dto.externalId,
     } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
   }
 
   async updatePaymentMethod(
     id: string,
-    userId: number | string,
+    userId: number,
     dto: UpdatePaymentMethodDto,
   ): Promise<PaymentMethodEntity> {
-    const numId = Number(userId);
-    const method = await this.dbService.findPaymentMethodById(id, numId);
+    const method = await this.dbService.findPaymentMethodById(id, userId);
     if (!method) throw new NotFoundException('Método de pago no encontrado');
 
-    if ((dto as unknown as Record<string, unknown>).isDefault) {
-      await this.dbService.clearDefaultPaymentMethods(numId);
+    if (dto.isDefault) {
+      await this.dbService.clearDefaultPaymentMethods(userId);
     }
     return this.dbService.updatePaymentMethod(id, dto as unknown);
   }
 
-  async deletePaymentMethod(
-    id: string,
-    userId: number | string,
-  ): Promise<void> {
-    const numId = Number(userId);
-    const method = await this.dbService.findPaymentMethodById(id, numId);
+  async deletePaymentMethod(id: string, userId: number): Promise<void> {
+    const method = await this.dbService.findPaymentMethodById(id, userId);
     if (!method) throw new NotFoundException('Método de pago no encontrado');
 
-    const total = await this.dbService.countActivePaymentMethods(numId);
+    const total = await this.dbService.countActivePaymentMethods(userId);
     if (total <= 1) {
       throw new BadRequestException(
         'No se puede eliminar el único método de pago',
       );
     }
 
-    await this.dbService.updatePaymentMethod(id, {
-      isActive: false,
-    });
+    await this.dbService.updatePaymentMethod(id, { isActive: false });
   }
 
   // ==================== WEBHOOKS ====================
@@ -263,14 +252,8 @@ export class PaymentApiService {
 
   // ==================== ESTADÍSTICAS Y MATEMÁTICA ====================
 
-  async getMetricsSummary(
-    userId?: number | string,
-    professionalId?: number | string,
-  ) {
-    const raw = await this.dbService.getPaymentSummary(
-      userId !== undefined ? Number(userId) : undefined,
-      professionalId !== undefined ? Number(professionalId) : undefined,
-    );
+  async getMetricsSummary(userId?: number, professionalId?: number) {
+    const raw = await this.dbService.getPaymentSummary(userId, professionalId);
 
     const successRate =
       raw.totalPayments > 0
@@ -286,11 +269,8 @@ export class PaymentApiService {
     };
   }
 
-  async getMetricsTrends(days: number, userId?: number | string) {
-    return this.dbService.getPaymentTrends(
-      days,
-      userId !== undefined ? Number(userId) : undefined,
-    );
+  async getMetricsTrends(days: number, userId?: number) {
+    return this.dbService.getPaymentTrends(days, userId);
   }
 
   private calculateFee(amount: number, provider: PaymentProvider): number {
