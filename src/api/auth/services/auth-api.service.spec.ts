@@ -1,11 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
-import {
-  DocumentsType,
-  UserProfileStatus,
-  UserStatus,
-  Users,
-} from '@prisma/client';
+import { UserProfileStatus, UserStatus, Users } from '@prisma/client';
 
 import { AuthApiService } from './auth-api.service';
 import { AuthMigrationService } from './auth-migration.service';

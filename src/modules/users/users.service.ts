@@ -3,136 +3,140 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-
-import { User, UserRole } from './entities/user.entity';
+import { Prisma, UserStatus, UserProfileStatus } from '@prisma/client';
+import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly prisma: PrismaDatasource) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+  async create(dto: CreateUserDto) {
+    const existing = await this.prisma.extended.users.findUnique({
+      where: { email: dto.email },
     });
-
-    if (existingUser) {
+    if (existing) {
       throw new BadRequestException('Ya existe un usuario con este email');
     }
-
-    const user = this.userRepository.create(createUserDto);
-    return this.userRepository.save(user);
-  }
-
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find({
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'lastName',
-        'role',
-        'isVerified',
-        'isActive',
-        'createdAt',
-      ],
+    return this.prisma.extended.users.create({
+      data: {
+        email: dto.email,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        documentTypeId: dto.documentTypeId,
+        access_level: dto.access_level,
+        createdBy: dto.createdBy,
+        phoneNumber: dto.phoneNumber,
+        documentNumber: dto.documentNumber,
+      },
     });
   }
 
-  async findOne(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['professional'],
+  async findAll() {
+    return this.prisma.extended.users.findMany({
+      select: {
+        id: true,
+        referenceId: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        status: true,
+        profileStatus: true,
+        createdAt: true,
+      },
     });
+  }
 
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
+  async findOne(id: number | string) {
+    const user = await this.prisma.extended.users.findUnique({
+      where: { id: Number(id) },
+      include: { professionals: true },
+    });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({
+  async findByReferenceId(referenceId: string) {
+    const user = await this.prisma.extended.users.findUnique({
+      where: { referenceId },
+      include: { professionals: true },
+    });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return user;
+  }
+
+  async findByEmail(email: string) {
+    return this.prisma.extended.users.findUnique({
       where: { email },
-      relations: ['professional'],
+      include: { professionals: true },
     });
   }
 
-  async findByRole(role: UserRole): Promise<User[]> {
-    return this.userRepository.find({
-      where: { role },
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'lastName',
-        'role',
-        'isVerified',
-        'isActive',
-        'createdAt',
-      ],
+  async update(id: number | string, data: Prisma.UsersUpdateInput) {
+    const numId = Number(id);
+    await this.findOne(numId);
+    return this.prisma.extended.users.update({ where: { id: numId }, data });
+  }
+
+  async remove(id: number | string) {
+    const numId = Number(id);
+    await this.findOne(numId);
+    return this.prisma.extended.users.update({
+      where: { id: numId },
+      data: { status: UserStatus.DELETED },
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-
-    Object.assign(user, updateUserDto);
-    return this.userRepository.save(user);
+  async verifyEmail(id: number | string) {
+    const numId = Number(id);
+    await this.findOne(numId);
+    return this.prisma.extended.users.update({
+      where: { id: numId },
+      data: { profileStatus: UserProfileStatus.COMPLETE },
+    });
   }
 
-  async remove(id: string): Promise<void> {
-    const user = await this.findOne(id);
-    await this.userRepository.remove(user);
+  async updateLastLogin(id: number | string) {
+    await this.prisma.extended.users.update({
+      where: { id: Number(id) },
+      data: { lastLogin: new Date() },
+    });
   }
 
-  async verifyEmail(id: string): Promise<User> {
-    const user = await this.findOne(id);
-    user.isVerified = true;
-    user.emailVerifiedAt = new Date();
-    return this.userRepository.save(user);
+  async verifyPhone(id: number | string) {
+    const numId = Number(id);
+    await this.findOne(numId);
+    return this.prisma.extended.users.update({
+      where: { id: numId },
+      data: { profileStatus: UserProfileStatus.COMPLETE },
+    });
   }
 
-  async verifyPhone(id: string): Promise<User> {
-    const user = await this.findOne(id);
-    user.phoneVerifiedAt = new Date();
-    return this.userRepository.save(user);
+  async deactivate(id: number | string) {
+    const numId = Number(id);
+    await this.findOne(numId);
+    return this.prisma.extended.users.update({
+      where: { id: numId },
+      data: { status: UserStatus.INACTIVE },
+    });
   }
 
-  async updateLastLogin(id: string): Promise<void> {
-    await this.userRepository.update(id, { lastLoginAt: new Date() });
+  async activate(id: number | string) {
+    const numId = Number(id);
+    await this.findOne(numId);
+    return this.prisma.extended.users.update({
+      where: { id: numId },
+      data: { status: UserStatus.ACTIVE },
+    });
   }
 
-  async deactivate(id: string): Promise<User> {
-    const user = await this.findOne(id);
-    user.isActive = false;
-    return this.userRepository.save(user);
-  }
-
-  async activate(id: string): Promise<User> {
-    const user = await this.findOne(id);
-    user.isActive = true;
-    return this.userRepository.save(user);
-  }
-
-  async getUsersCount(): Promise<{
-    total: number;
-    clients: number;
-    professionals: number;
-  }> {
-    const [total, clients, professionals] = await Promise.all([
-      this.userRepository.count(),
-      this.userRepository.count({ where: { role: UserRole.CLIENT } }),
-      this.userRepository.count({ where: { role: UserRole.PROFESSIONAL } }),
+  async getUsersCount() {
+    const [total, professionals] = await Promise.all([
+      this.prisma.extended.users.count(),
+      this.prisma.extended.users.count({
+        where: { professionals: { isNot: null } },
+      }),
     ]);
-
-    return { total, clients, professionals };
+    return { total, clients: total - professionals, professionals };
   }
 }

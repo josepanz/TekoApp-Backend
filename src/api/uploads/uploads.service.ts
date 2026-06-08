@@ -2,7 +2,14 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import * as sharp from 'sharp';
+// sharp is an optional native dependency; loaded lazily to allow startup without native binary
+let sharp: typeof import('sharp') | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  sharp = require('sharp') as typeof import('sharp');
+} catch {
+  // Native binary not available — image processing will be skipped
+}
 
 export interface FileInfo {
   filename: string;
@@ -29,15 +36,15 @@ export class UploadsService {
     try {
       const filePath = join(this.uploadPath, file.filename);
 
-      // Procesar imagen con Sharp para optimización
-      await sharp(filePath)
-        .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 80 })
-        .toFile(filePath + '.processed');
-
-      // Reemplazar archivo original con el procesado
-      await fs.unlink(filePath);
-      await fs.rename(filePath + '.processed', filePath);
+      // Procesar imagen con Sharp para optimización (si está disponible)
+      if (sharp) {
+        await sharp(filePath)
+          .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 80 })
+          .toFile(filePath + '.processed');
+        await fs.unlink(filePath);
+        await fs.rename(filePath + '.processed', filePath);
+      }
 
       const stats = await fs.stat(filePath);
 
@@ -49,8 +56,10 @@ export class UploadsService {
         path: filePath,
         url: this.getFileUrl(file.filename),
       };
-    } catch (error) {
-      this.logger.error(`Error procesando imagen: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error procesando imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+      );
       throw new BadRequestException('Error procesando la imagen');
     }
   }
@@ -68,8 +77,10 @@ export class UploadsService {
         path: filePath,
         url: this.getFileUrl(file.filename),
       };
-    } catch (error) {
-      this.logger.error(`Error procesando documento: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error procesando documento: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+      );
       throw new BadRequestException('Error procesando el documento');
     }
   }
@@ -79,8 +90,10 @@ export class UploadsService {
       const filePath = join(this.uploadPath, filename);
       await fs.unlink(filePath);
       this.logger.log(`Archivo eliminado: ${filename}`);
-    } catch (error) {
-      this.logger.error(`Error eliminando archivo: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error eliminando archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+      );
       throw new BadRequestException('Error eliminando el archivo');
     }
   }
@@ -98,9 +111,9 @@ export class UploadsService {
         path: filePath,
         url: this.getFileUrl(filename),
       };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
-        `Error obteniendo información del archivo: ${error.message}`,
+        `Error obteniendo información del archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
       );
       throw new BadRequestException('Archivo no encontrado');
     }
@@ -116,14 +129,17 @@ export class UploadsService {
       const thumbnailName = `thumb_${filename}`;
       const thumbnailPath = join(this.uploadPath, thumbnailName);
 
+      if (!sharp) return filename;
       await sharp(filePath)
         .resize(width, height, { fit: 'cover' })
         .jpeg({ quality: 70 })
         .toFile(thumbnailPath);
 
       return thumbnailName;
-    } catch (error) {
-      this.logger.error(`Error creando thumbnail: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error creando thumbnail: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+      );
       throw new BadRequestException('Error creando thumbnail');
     }
   }
@@ -152,7 +168,7 @@ export class UploadsService {
     return mimeTypes[ext] || 'application/octet-stream';
   }
 
-  async validateFile(file: Express.Multer.File): Promise<boolean> {
+  validateFile(file: Express.Multer.File): boolean {
     const maxSize = this.configService.get<number>(
       'MAX_FILE_SIZE',
       5 * 1024 * 1024,

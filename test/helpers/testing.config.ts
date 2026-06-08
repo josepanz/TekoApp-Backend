@@ -1,5 +1,11 @@
 // test/helpers/testing-infra.helper.ts
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  DynamicModule,
+  ForwardReference,
+  Provider,
+  Type,
+} from '@nestjs/common';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bull';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -75,9 +81,14 @@ export class TestingConfig {
     }
 
     return Test.createTestingModule({
-      imports: [...testImports, ...imports] as any[],
-      providers: testProviders as any[],
-      controllers: controllers as any[],
+      imports: [...testImports, ...imports] as (
+        | DynamicModule
+        | Type
+        | Promise<DynamicModule>
+        | ForwardReference
+      )[],
+      providers: testProviders as Provider[],
+      controllers: controllers as Type[],
     }).compile();
   }
 }
@@ -98,14 +109,20 @@ export const TestUtils = {
       (propertyName) =>
         !propertyName.startsWith('_') &&
         !propertyName.startsWith('$') &&
-        typeof (prisma as any)[propertyName] === 'object',
+        typeof (prisma as unknown as Record<string, unknown>)[propertyName] ===
+          'object',
     );
 
     // Ejecutamos un truncado en cascada para limpiar las tablas respetando las FK
+    const prismaRecord = prisma as unknown as Record<
+      string,
+      { deleteMany: () => Promise<unknown> }
+    >;
     for (const modelName of modelNames) {
       try {
-        await (prisma as any)[modelName].deleteMany();
+        await prismaRecord[modelName].deleteMany();
       } catch (error) {
+        console.error('test-error: ', error);
         // En caso de fallar por restricciones complejas, se puede recurrir a queryRaw:
         // await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${modelName}" CASCADE;`);
       }

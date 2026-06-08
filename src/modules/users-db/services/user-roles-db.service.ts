@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class UserRolesDBService {
     userId: number,
     roleIds: number[],
     changedBy: string,
-    tx?: any,
+    tx?: Prisma.TransactionClient,
   ): Promise<void> {
     if (roleIds.length === 0) {
       throw new BadRequestException(

@@ -69,7 +69,7 @@ export class LocationsService {
     return this.locationsDb.countOnline({
       isOnline: true,
       isAvailable: true,
-      status: 'approved',
+      status: 'APPROVED',
       verificationStatus: 'verified',
     });
   }
@@ -87,7 +87,7 @@ export class LocationsService {
     });
   }
 
-  async calculateDistance(dto: CalculateDistanceQueryDTO): Promise<number> {
+  calculateDistance(dto: CalculateDistanceQueryDTO): number {
     const R = 6371; // Radio planetario estándar en KM
     const dLat = this.toRadians(dto.lat2 - dto.lat1);
     const dLng = this.toRadians(dto.lng2 - dto.lng1);

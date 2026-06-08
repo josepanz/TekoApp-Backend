@@ -44,7 +44,7 @@ export class CreateNotificationRequestDTO {
   })
   @IsOptional()
   @IsObject()
-  readonly data?: Record<string, any>;
+  readonly data?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description:
@@ -63,5 +63,5 @@ export class CreateNotificationRequestDTO {
   })
   @IsOptional()
   @IsObject()
-  readonly metadata?: Record<string, any>;
+  readonly metadata?: Record<string, unknown>;
 }

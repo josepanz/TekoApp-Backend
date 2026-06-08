@@ -6,7 +6,6 @@ import {
   IsEnum,
   Min,
   IsHexColor,
-  IsUUID,
   MaxLength,
   IsNumber,
 } from 'class-validator';
@@ -105,5 +104,5 @@ export class CreateCategoryDto {
     example: { taxRate: 10, minFee: 50000 },
   })
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

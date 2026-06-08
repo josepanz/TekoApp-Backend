@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaDatasource } from '@/core/database/services/prisma.service';
-import { Professionals } from '@prisma/client';
+import { Prisma, Professionals } from '@prisma/client';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
 
 @Injectable()
@@ -11,11 +11,15 @@ export class LocationsDbService {
     return this.prisma.extended.professionals.findUnique({ where: { id } });
   }
 
-  async countOnline(whereClause: any): Promise<number> {
+  async countOnline(
+    whereClause: Prisma.ProfessionalsWhereInput,
+  ): Promise<number> {
     return this.prisma.extended.professionals.count({ where: whereClause });
   }
 
-  async findMany(args: any): Promise<Professionals[]> {
+  async findMany(
+    args: Prisma.ProfessionalsFindManyArgs,
+  ): Promise<Professionals[]> {
     return this.prisma.extended.professionals.findMany(args);
   }
 

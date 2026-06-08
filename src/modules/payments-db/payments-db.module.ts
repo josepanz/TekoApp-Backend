@@ -1,10 +1,9 @@
-// src/modules/payments/payments-db.module.ts
 import { Module } from '@nestjs/common';
+import { DatabaseModule } from '@core/database/database.module';
 import { PaymentDbService } from './services/payment-db.service';
-import { PrismaDatasource } from '@core/database/services/prisma.service';
 
 @Module({
-  imports: [PrismaDatasource],
+  imports: [DatabaseModule],
   providers: [PaymentDbService],
   exports: [PaymentDbService],
 })

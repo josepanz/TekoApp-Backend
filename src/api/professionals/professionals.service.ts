@@ -4,23 +4,16 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import {
-  Repository,
-  In,
-  Between,
-  MoreThanOrEqual,
-  LessThanOrEqual,
-} from 'typeorm';
-import { Professional } from './entities/professional.entity';
-import { ProfessionalCategory } from './entities/professional-category.entity';
-import { User } from '../../modules/users/entities/user.entity';
-import { Category } from '../../api/categories/entities/category.entity';
-import { Service } from '../services/entities/service.entity';
-import { Rating } from '../ratings/entities/rating.entity';
+  Prisma,
+  ProfessionalStatus,
+  ServiceStatus,
+  RatingType,
+} from '@prisma/client';
+import { PrismaDatasource } from '@core/database/services/prisma.service';
 
 export interface ProfessionalFilters {
-  categoryId?: string;
+  categoryId?: number;
   latitude?: number;
   longitude?: number;
   radius?: number;
@@ -36,153 +29,80 @@ export interface ProfessionalStats {
   completedServices: number;
   totalEarnings: number;
   averageRating: number;
-  totalReviews: number;
-  responseTime: number;
+  totalRatings: number;
 }
 
 @Injectable()
 export class ProfessionalsService {
-  constructor(
-    @InjectRepository(Professional)
-    private readonly professionalRepository: Repository<Professional>,
-    @InjectRepository(ProfessionalCategory)
-    private readonly professionalCategoryRepository: Repository<ProfessionalCategory>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
-    @InjectRepository(Service)
-    private readonly serviceRepository: Repository<Service>,
-    @InjectRepository(Rating)
-    private readonly ratingRepository: Repository<Rating>,
-  ) {}
+  constructor(private readonly prisma: PrismaDatasource) {}
 
   async registerProfessional(
-    registerDto: any,
-    userId: string,
-  ): Promise<Professional> {
-    // Verificar que el usuario existe
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    // Verificar que no es ya un profesional
-    const existingProfessional = await this.professionalRepository.findOne({
+    dto: Prisma.ProfessionalsUncheckedCreateInput,
+    userId: number,
+  ) {
+    const user = await this.prisma.extended.users.findUnique({
       where: { id: userId },
     });
-    if (existingProfessional) {
-      throw new BadRequestException('El usuario ya es un profesional');
-    }
+    if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    // Verificar que las categorías existen
-    if (registerDto.categoryIds && registerDto.categoryIds.length > 0) {
-      const categories = await this.categoryRepository.find({
-        where: { id: In(registerDto.categoryIds) },
-      });
-      if (categories.length !== registerDto.categoryIds.length) {
-        throw new BadRequestException('Una o más categorías no existen');
-      }
-    }
-
-    const professional = this.professionalRepository.create({
-      id: userId,
-      ...registerDto,
-      isVerified: false,
-      isAvailable: true,
-      isActive: true,
+    const existing = await this.prisma.extended.professionals.findUnique({
+      where: { userId },
     });
+    if (existing)
+      throw new BadRequestException('El usuario ya es un profesional');
 
-    const savedProfessional =
-      await this.professionalRepository.save(professional);
+    const category = await this.prisma.extended.category.findUnique({
+      where: { id: dto.categoryId },
+    });
+    if (!category) throw new BadRequestException('La categoría no existe');
 
-    // Crear relaciones con categorías
-    if (registerDto.categoryIds && registerDto.categoryIds.length > 0) {
-      const professionalCategories = registerDto.categoryIds.map(
-        (categoryId) => ({
-          professionalId: userId,
-          categoryId,
-        }),
-      );
-      await this.professionalCategoryRepository.save(professionalCategories);
-    }
-
-    return savedProfessional;
+    return this.prisma.extended.professionals.create({
+      data: {
+        ...dto,
+        userId,
+        status: ProfessionalStatus.PENDING,
+        isAvailable: false,
+        isActive: true,
+      },
+    });
   }
 
-  async getProfessionals(
-    filters: ProfessionalFilters,
-  ): Promise<{ professionals: Professional[]; total: number }> {
-    const queryBuilder = this.professionalRepository
-      .createQueryBuilder('professional')
-      .leftJoinAndSelect('professional.user', 'user')
-      .leftJoinAndSelect('professional.categories', 'categories')
-      .leftJoinAndSelect('categories.category', 'category');
+  async getProfessionals(filters: ProfessionalFilters) {
+    const where: Prisma.ProfessionalsWhereInput = { isActive: true };
 
-    // Aplicar filtros
-    if (filters.categoryId) {
-      queryBuilder.andWhere('categories.categoryId = :categoryId', {
-        categoryId: filters.categoryId,
-      });
-    }
+    if (filters.categoryId) where.categoryId = filters.categoryId;
+    if (filters.isAvailable !== undefined)
+      where.isAvailable = filters.isAvailable;
+    if (filters.minRating) where.averageRating = { gte: filters.minRating };
+    if (filters.maxPrice) where.hourlyRate = { lte: filters.maxPrice };
 
     if (filters.latitude && filters.longitude && filters.radius) {
-      // Filtro por distancia
       const latRange = filters.radius / 111;
       const lngRange =
         filters.radius / (111 * Math.cos((filters.latitude * Math.PI) / 180));
-
-      queryBuilder.andWhere(
-        'professional.latitude BETWEEN :minLat AND :maxLat',
-        {
-          minLat: filters.latitude - latRange,
-          maxLat: filters.latitude + latRange,
-        },
-      );
-      queryBuilder.andWhere(
-        'professional.longitude BETWEEN :minLng AND :maxLng',
-        {
-          minLng: filters.longitude - lngRange,
-          maxLng: filters.longitude + lngRange,
-        },
-      );
+      where.currentLatitude = {
+        gte: filters.latitude - latRange,
+        lte: filters.latitude + latRange,
+      };
+      where.currentLongitude = {
+        gte: filters.longitude - lngRange,
+        lte: filters.longitude + lngRange,
+      };
     }
 
-    if (filters.minRating) {
-      queryBuilder.andWhere('professional.averageRating >= :minRating', {
-        minRating: filters.minRating,
-      });
-    }
+    const page = filters.page ?? 1;
+    const limit = filters.limit ?? 10;
 
-    if (filters.maxPrice) {
-      queryBuilder.andWhere('professional.hourlyRate <= :maxPrice', {
-        maxPrice: filters.maxPrice,
-      });
-    }
-
-    if (filters.isAvailable !== undefined) {
-      queryBuilder.andWhere('professional.isAvailable = :isAvailable', {
-        isAvailable: filters.isAvailable,
-      });
-    }
-
-    // Solo profesionales activos y verificados
-    queryBuilder.andWhere('professional.isActive = :isActive', {
-      isActive: true,
-    });
-
-    // Paginación
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-    const offset = (page - 1) * limit;
-
-    queryBuilder
-      .orderBy('professional.averageRating', 'DESC')
-      .addOrderBy('professional.responseTime', 'ASC')
-      .skip(offset)
-      .take(limit);
-
-    const [professionals, total] = await queryBuilder.getManyAndCount();
+    const [professionals, total] = await Promise.all([
+      this.prisma.extended.professionals.findMany({
+        where,
+        include: { user: true, category: true },
+        orderBy: { averageRating: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.extended.professionals.count({ where }),
+    ]);
 
     return { professionals, total };
   }
@@ -190,356 +110,226 @@ export class ProfessionalsService {
   async getNearbyProfessionals(
     latitude: number,
     longitude: number,
-    radius: number = 10,
-    categoryId?: string,
-  ): Promise<Professional[]> {
-    const queryBuilder = this.professionalRepository
-      .createQueryBuilder('professional')
-      .leftJoinAndSelect('professional.user', 'user')
-      .leftJoinAndSelect('professional.categories', 'categories')
-      .leftJoinAndSelect('categories.category', 'category')
-      .where('professional.isAvailable = :isAvailable', { isAvailable: true })
-      .andWhere('professional.isActive = :isActive', { isActive: true });
-
-    if (categoryId) {
-      queryBuilder.andWhere('categories.categoryId = :categoryId', {
-        categoryId,
-      });
-    }
-
-    // Filtro por distancia
+    radius = 10,
+    categoryId?: number,
+  ) {
     const latRange = radius / 111;
     const lngRange = radius / (111 * Math.cos((latitude * Math.PI) / 180));
 
-    queryBuilder
-      .andWhere('professional.latitude BETWEEN :minLat AND :maxLat', {
-        minLat: latitude - latRange,
-        maxLat: latitude + latRange,
-      })
-      .andWhere('professional.longitude BETWEEN :minLng AND :maxLng', {
-        minLng: longitude - lngRange,
-        maxLng: longitude + lngRange,
-      })
-      .orderBy('professional.averageRating', 'DESC')
-      .addOrderBy('professional.responseTime', 'ASC')
-      .take(50);
+    const where: Prisma.ProfessionalsWhereInput = {
+      isAvailable: true,
+      isActive: true,
+      currentLatitude: { gte: latitude - latRange, lte: latitude + latRange },
+      currentLongitude: {
+        gte: longitude - lngRange,
+        lte: longitude + lngRange,
+      },
+    };
+    if (categoryId) where.categoryId = categoryId;
 
-    return queryBuilder.getMany();
+    return this.prisma.extended.professionals.findMany({
+      where,
+      include: { user: true, category: true },
+      orderBy: { averageRating: 'desc' },
+      take: 50,
+    });
   }
 
-  async getProfessionalById(id: string): Promise<Professional> {
-    const professional = await this.professionalRepository.findOne({
+  async getProfessionalById(id: number) {
+    const professional = await this.prisma.extended.professionals.findUnique({
       where: { id },
-      relations: ['user', 'categories', 'categories.category'],
+      include: { user: true, category: true },
     });
+    if (!professional) throw new NotFoundException('Profesional no encontrado');
+    return professional;
+  }
 
-    if (!professional) {
-      throw new NotFoundException('Profesional no encontrado');
-    }
-
+  async getProfessionalByUserId(userId: number) {
+    const professional = await this.prisma.extended.professionals.findUnique({
+      where: { userId },
+      include: { user: true, category: true },
+    });
+    if (!professional) throw new NotFoundException('Profesional no encontrado');
     return professional;
   }
 
   async updateProfessional(
-    id: string,
-    updateDto: any,
-    userId: string,
-  ): Promise<Professional> {
+    id: number,
+    dto: Prisma.ProfessionalsUpdateInput,
+    userId: number,
+  ) {
     const professional = await this.getProfessionalById(id);
-
-    // Verificar permisos
-    if (professional.id !== userId) {
+    if (professional.userId !== userId) {
       throw new ForbiddenException(
         'No tienes permisos para modificar este profesional',
       );
     }
-
-    Object.assign(professional, updateDto);
-    return this.professionalRepository.save(professional);
+    return this.prisma.extended.professionals.update({
+      where: { id },
+      data: dto,
+    });
   }
 
-  async updateAvailability(
-    id: string,
-    availabilityDto: any,
-    userId: string,
-  ): Promise<Professional> {
+  async updateAvailability(id: number, isAvailable: boolean, userId: number) {
     const professional = await this.getProfessionalById(id);
-
-    if (professional.id !== userId) {
+    if (professional.userId !== userId) {
       throw new ForbiddenException(
         'No tienes permisos para modificar este profesional',
       );
     }
-
-    professional.isAvailable = availabilityDto.isAvailable;
-    if (availabilityDto.availableHours) {
-      professional.availableHours = availabilityDto.availableHours;
-    }
-
-    return this.professionalRepository.save(professional);
+    return this.prisma.extended.professionals.update({
+      where: { id },
+      data: { isAvailable },
+    });
   }
 
   async updateLocation(
-    id: string,
-    locationDto: any,
-    userId: string,
-  ): Promise<Professional> {
+    id: number,
+    dto: { latitude: number; longitude: number },
+    userId: number,
+  ) {
     const professional = await this.getProfessionalById(id);
-
-    if (professional.id !== userId) {
+    if (professional.userId !== userId) {
       throw new ForbiddenException(
         'No tienes permisos para modificar este profesional',
       );
     }
-
-    professional.latitude = locationDto.latitude;
-    professional.longitude = locationDto.longitude;
-    professional.address = locationDto.address;
-    professional.lastLocationUpdate = new Date();
-
-    return this.professionalRepository.save(professional);
-  }
-
-  async addCategories(
-    id: string,
-    categoryIds: string[],
-    userId: string,
-  ): Promise<Professional> {
-    const professional = await this.getProfessionalById(id);
-
-    if (professional.id !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este profesional',
-      );
-    }
-
-    // Verificar que las categorías existen
-    const categories = await this.categoryRepository.find({
-      where: { id: In(categoryIds) },
+    return this.prisma.extended.professionals.update({
+      where: { id },
+      data: {
+        currentLatitude: dto.latitude,
+        currentLongitude: dto.longitude,
+        lastLocationUpdate: new Date(),
+      },
     });
-    if (categories.length !== categoryIds.length) {
-      throw new BadRequestException('Una o más categorías no existen');
-    }
-
-    // Crear nuevas relaciones
-    const professionalCategories = categoryIds.map((categoryId) => ({
-      professionalId: id,
-      categoryId,
-    }));
-
-    await this.professionalCategoryRepository.save(professionalCategories);
-
-    return this.getProfessionalById(id);
-  }
-
-  async removeCategory(
-    id: string,
-    categoryId: string,
-    userId: string,
-  ): Promise<Professional> {
-    const professional = await this.getProfessionalById(id);
-
-    if (professional.id !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este profesional',
-      );
-    }
-
-    await this.professionalCategoryRepository.delete({
-      professionalId: id,
-      categoryId,
-    });
-
-    return this.getProfessionalById(id);
   }
 
   async getProfessionalServices(
-    id: string,
-    status?: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ services: Service[]; total: number }> {
-    const queryBuilder = this.serviceRepository
-      .createQueryBuilder('service')
-      .leftJoinAndSelect('service.client', 'client')
-      .leftJoinAndSelect('service.category', 'category')
-      .where('service.professionalId = :professionalId', {
-        professionalId: id,
-      });
+    id: number,
+    status?: ServiceStatus,
+    page = 1,
+    limit = 10,
+  ) {
+    const where: Prisma.ServicesWhereInput = { professionalId: id };
+    if (status) where.status = status;
 
-    if (status) {
-      queryBuilder.andWhere('service.status = :status', { status });
-    }
-
-    const offset = (page - 1) * limit;
-    queryBuilder.orderBy('service.createdAt', 'DESC').skip(offset).take(limit);
-
-    const [services, total] = await queryBuilder.getManyAndCount();
-
+    const [services, total] = await Promise.all([
+      this.prisma.extended.services.findMany({
+        where,
+        include: { users: true, category: true },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.extended.services.count({ where }),
+    ]);
     return { services, total };
   }
 
-  async getProfessionalReviews(
-    id: string,
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ reviews: Rating[]; total: number }> {
-    const queryBuilder = this.ratingRepository
-      .createQueryBuilder('rating')
-      .leftJoinAndSelect('rating.client', 'client')
-      .leftJoinAndSelect('rating.service', 'service')
-      .where('rating.professionalId = :professionalId', { professionalId: id })
-      .andWhere('rating.rating IS NOT NULL');
-
-    const offset = (page - 1) * limit;
-    queryBuilder.orderBy('rating.createdAt', 'DESC').skip(offset).take(limit);
-
-    const [reviews, total] = await queryBuilder.getManyAndCount();
-
+  async getProfessionalReviews(id: number, page = 1, limit = 10) {
+    const where: Prisma.RatingWhereInput = {
+      professionalId: id,
+      type: RatingType.CLIENT_TO_PROFESSIONAL,
+      isActive: true,
+    };
+    const [reviews, total] = await Promise.all([
+      this.prisma.extended.rating.findMany({
+        where,
+        include: { user: true, service: true },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.extended.rating.count({ where }),
+    ]);
     return { reviews, total };
   }
 
-  async getProfessionalStats(id: string): Promise<ProfessionalStats> {
+  async getProfessionalStats(id: number): Promise<ProfessionalStats> {
     const professional = await this.getProfessionalById(id);
 
-    const [totalServices, completedServices] = await Promise.all([
-      this.serviceRepository.count({
-        where: { professionalId: id },
+    const [completedServices, earningsAgg] = await Promise.all([
+      this.prisma.extended.services.count({
+        where: { professionalId: id, status: ServiceStatus.COMPLETED },
       }),
-      this.serviceRepository.count({
-        where: { professionalId: id, status: 'completed' },
+      this.prisma.extended.services.aggregate({
+        where: { professionalId: id, status: ServiceStatus.COMPLETED },
+        _sum: { finalAmount: true },
       }),
     ]);
 
-    // Calcular ganancias totales
-    const earningsResult = await this.serviceRepository
-      .createQueryBuilder('service')
-      .select('SUM(service.finalAmount)', 'total')
-      .where('service.professionalId = :professionalId', { professionalId: id })
-      .andWhere('service.status = :status', { status: 'completed' })
-      .getRawOne();
-
-    const totalEarnings = parseFloat(earningsResult?.total || '0');
-
-    // Calcular calificación promedio
-    const ratingResult = await this.ratingRepository
-      .createQueryBuilder('rating')
-      .select('AVG(rating.rating)', 'average')
-      .where('rating.professionalId = :professionalId', { professionalId: id })
-      .andWhere('rating.rating IS NOT NULL')
-      .getRawOne();
-
-    const averageRating = parseFloat(ratingResult?.average || '0');
-
-    // Contar reseñas
-    const totalReviews = await this.ratingRepository.count({
-      where: { professionalId: id, rating: Not(null) },
-    });
-
     return {
-      totalServices,
+      totalServices: professional.totalServices,
       completedServices,
-      totalEarnings,
-      averageRating,
-      totalReviews,
-      responseTime: professional.responseTime || 0,
+      totalEarnings: Number(earningsAgg._sum.finalAmount ?? 0),
+      averageRating: Number(professional.averageRating),
+      totalRatings: professional.totalRatings,
     };
   }
 
   async verifyProfessional(
-    id: string,
-    verificationDto: any,
-    adminId: string,
-  ): Promise<Professional> {
-    // Aquí deberías verificar que el usuario es admin
-    const professional = await this.getProfessionalById(id);
-
-    professional.isVerified = verificationDto.isVerified;
-    professional.verifiedAt = new Date();
-    professional.verifiedBy = adminId;
-    professional.verificationNotes = verificationDto.notes;
-
-    return this.professionalRepository.save(professional);
+    id: number,
+    dto: { isVerified: boolean; notes?: string },
+    adminId: number,
+  ) {
+    await this.getProfessionalById(id);
+    return this.prisma.extended.professionals.update({
+      where: { id },
+      data: {
+        verificationStatus: dto.isVerified ? 'verified' : 'rejected',
+        status: dto.isVerified
+          ? ProfessionalStatus.APPROVED
+          : ProfessionalStatus.REJECTED,
+        lastChangedBy: String(adminId),
+        changedReason: dto.notes,
+      },
+    });
   }
 
-  async suspendProfessional(
-    id: string,
-    suspensionDto: any,
-    adminId: string,
-  ): Promise<Professional> {
-    // Aquí deberías verificar que el usuario es admin
-    const professional = await this.getProfessionalById(id);
-
-    professional.isActive = false;
-    professional.suspendedAt = new Date();
-    professional.suspendedBy = adminId;
-    professional.suspensionReason = suspensionDto.reason;
-    professional.suspensionEndDate = suspensionDto.endDate;
-
-    return this.professionalRepository.save(professional);
+  async suspendProfessional(id: number, reason: string, adminId: number) {
+    await this.getProfessionalById(id);
+    return this.prisma.extended.professionals.update({
+      where: { id },
+      data: {
+        status: ProfessionalStatus.SUSPENDED,
+        isActive: false,
+        lastChangedBy: String(adminId),
+        changedReason: reason,
+      },
+    });
   }
 
-  async searchBySkills(
-    skills: string[],
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<{ professionals: Professional[]; total: number }> {
-    const queryBuilder = this.professionalRepository
-      .createQueryBuilder('professional')
-      .leftJoinAndSelect('professional.user', 'user')
-      .leftJoinAndSelect('professional.categories', 'categories')
-      .leftJoinAndSelect('categories.category', 'category')
-      .where('professional.isActive = :isActive', { isActive: true });
+  async searchBySkills(skills: string[], page = 1, limit = 10) {
+    const where: Prisma.ProfessionalsWhereInput = {
+      isActive: true,
+      skills: { hasSome: skills },
+    };
 
-    // Buscar por habilidades (en descripción o categorías)
-    const skillConditions = skills
-      .map(
-        (skill) =>
-          `(professional.description ILIKE :${skill} OR professional.skills ILIKE :${skill})`,
-      )
-      .join(' OR ');
-
-    if (skillConditions) {
-      queryBuilder.andWhere(`(${skillConditions})`);
-      skills.forEach((skill) => {
-        queryBuilder.setParameter(skill, `%${skill}%`);
-      });
-    }
-
-    const offset = (page - 1) * limit;
-    queryBuilder
-      .orderBy('professional.averageRating', 'DESC')
-      .skip(offset)
-      .take(limit);
-
-    const [professionals, total] = await queryBuilder.getManyAndCount();
-
+    const [professionals, total] = await Promise.all([
+      this.prisma.extended.professionals.findMany({
+        where,
+        include: { user: true, category: true },
+        orderBy: { averageRating: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.extended.professionals.count({ where }),
+    ]);
     return { professionals, total };
   }
 
-  async getTopRatedProfessionals(
-    categoryId?: string,
-    limit: number = 10,
-  ): Promise<Professional[]> {
-    const queryBuilder = this.professionalRepository
-      .createQueryBuilder('professional')
-      .leftJoinAndSelect('professional.user', 'user')
-      .leftJoinAndSelect('professional.categories', 'categories')
-      .leftJoinAndSelect('categories.category', 'category')
-      .where('professional.isActive = :isActive', { isActive: true })
-      .andWhere('professional.isVerified = :isVerified', { isVerified: true })
-      .andWhere('professional.averageRating > 0');
+  async getTopRatedProfessionals(categoryId?: number, limit = 10) {
+    const where: Prisma.ProfessionalsWhereInput = {
+      isActive: true,
+      averageRating: { gt: 0 },
+    };
+    if (categoryId) where.categoryId = categoryId;
 
-    if (categoryId) {
-      queryBuilder.andWhere('categories.categoryId = :categoryId', {
-        categoryId,
-      });
-    }
-
-    return queryBuilder
-      .orderBy('professional.averageRating', 'DESC')
-      .addOrderBy('professional.totalServices', 'DESC')
-      .take(limit)
-      .getMany();
+    return this.prisma.extended.professionals.findMany({
+      where,
+      include: { user: true, category: true },
+      orderBy: [{ averageRating: 'desc' }, { totalServices: 'desc' }],
+      take: limit,
+    });
   }
 }

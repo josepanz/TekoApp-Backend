@@ -3,7 +3,11 @@ import { registerAs } from '@nestjs/config';
 import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const pkg = require(path.join(process.cwd(), 'package.json'));
+const pkg = require(path.join(process.cwd(), 'package.json')) as {
+  name?: string;
+  description?: string;
+  version?: string;
+};
 
 export const APP_CONFIG = registerAs('config', () => {
   return {

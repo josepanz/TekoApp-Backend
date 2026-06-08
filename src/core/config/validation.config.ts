@@ -34,7 +34,7 @@ export class ValidationConfig {
       exceptionFactory: (errors: ValidationError[]) => {
         const formattedErrors = errors.map((error) => ({
           field: error.property,
-          value: error.value,
+          value: error.value as unknown,
           constraints: error.constraints,
           children:
             error.children && error.children.length > 0
@@ -104,7 +104,7 @@ export class ValidationConfig {
       },
       url: {
         pattern:
-          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+          /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
         message: 'La URL no tiene un formato válido',
       },
       uuid: {

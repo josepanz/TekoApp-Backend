@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
+import { DatabaseModule } from '@core/database/database.module';
 import { CategoriesDbService } from './services/categories-db.service';
-import { PrismaDatasource } from '@/core/database/services/prisma.service'; // Ajustar alias según tu core
 
 @Module({
-  imports: [PrismaDatasource],
+  imports: [DatabaseModule],
   providers: [CategoriesDbService],
   exports: [CategoriesDbService],
 })

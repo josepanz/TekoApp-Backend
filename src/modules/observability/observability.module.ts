@@ -26,7 +26,7 @@ const sanitizePayload = (payload: any): any => {
   return payload;
 };
 
-export function formatPayload(payload: unknown): any {
+export function formatPayload(payload: unknown): unknown {
   if (!payload) return null;
   try {
     const jsonString = JSON.stringify(payload);

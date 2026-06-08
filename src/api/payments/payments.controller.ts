@@ -67,7 +67,7 @@ export class PaymentController {
   @Post(':id/cancel')
   @HttpCode(HttpStatus.OK)
   async cancel(@Param('id') id: string) {
-    const mockUserId = 'user-uuid-1234';
+    const mockUserId = 1;
     return this.apiService.cancelPayment(id, mockUserId);
   }
 
@@ -82,7 +82,7 @@ export class PaymentController {
   @Post('methods')
   @HttpCode(HttpStatus.CREATED)
   async createMethod(@Body() dto: CreatePaymentDto) {
-    const mockUserId = 'user-uuid-1234';
+    const mockUserId = 1;
     return this.apiService.createPaymentMethod(mockUserId, dto);
   }
 
@@ -91,14 +91,14 @@ export class PaymentController {
     @Param('id') id: string,
     @Body() dto: UpdatePaymentMethodDto,
   ) {
-    const mockUserId = 'user-uuid-1234';
+    const mockUserId = 1;
     return this.apiService.updatePaymentMethod(id, mockUserId, dto);
   }
 
   @Delete('methods/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteMethod(@Param('id') id: string) {
-    const mockUserId = 'user-uuid-1234';
+    const mockUserId = 1;
     return this.apiService.deletePaymentMethod(id, mockUserId);
   }
 

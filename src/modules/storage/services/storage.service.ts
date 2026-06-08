@@ -118,15 +118,15 @@ export class StorageService {
     const now = Date.now();
 
     if (this.urlCache.has(cacheKey)) {
-      const cached = this.urlCache.get(cacheKey)!;
+      const cached = this.urlCache.get(cacheKey);
       if (cached.expires > now + 60000) return cached.url;
     }
 
     return this.manager.enqueue(
       async () => {
         const url = await getSignedUrl(
-          this.s3 as any,
-          new GetObjectCommand({ Bucket: bucket, Key: target.key }) as any,
+          this.s3,
+          new GetObjectCommand({ Bucket: bucket, Key: target.key }),
           { expiresIn },
         );
 

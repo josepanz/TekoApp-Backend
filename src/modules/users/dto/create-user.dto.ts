@@ -1,13 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsString,
-  MinLength,
-  IsOptional,
-  IsEnum,
-} from 'class-validator';
-
-import { UserRole } from '../entities/user.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsString, IsOptional, IsInt } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -15,46 +7,41 @@ export class CreateUserDto {
     example: 'usuario@ejemplo.com',
   })
   @IsEmail({}, { message: 'El email debe ser válido' })
-  email: string;
+  email!: string;
 
-  @ApiProperty({
-    description: 'Contraseña del usuario',
-    example: 'password123',
-    minLength: 6,
-  })
-  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
-  password: string;
+  @ApiProperty({ description: 'Nombre del usuario', example: 'Juan' })
+  @IsString()
+  firstName!: string;
 
-  @ApiProperty({
-    description: 'Nombre del usuario',
-    example: 'Juan',
-  })
-  @IsString({ message: 'El nombre debe ser una cadena de texto' })
-  firstName: string;
+  @ApiProperty({ description: 'Apellido del usuario', example: 'Pérez' })
+  @IsString()
+  lastName!: string;
 
-  @ApiProperty({
-    description: 'Apellido del usuario',
-    example: 'Pérez',
-  })
-  @IsString({ message: 'El apellido debe ser una cadena de texto' })
-  lastName: string;
+  @ApiProperty({ description: 'ID del tipo de documento', example: 1 })
+  @IsInt()
+  documentTypeId!: number;
 
-  @ApiProperty({
-    description: 'Número de teléfono (opcional)',
+  @ApiProperty({ description: 'Nivel de acceso', example: 1 })
+  @IsInt()
+  access_level!: number;
+
+  @ApiProperty({ description: 'Creado por (referencia)', example: 'system' })
+  @IsString()
+  createdBy!: string;
+
+  @ApiPropertyOptional({
+    description: 'Número de teléfono',
     example: '+595991234567',
-    required: false,
   })
   @IsOptional()
-  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
-  phone?: string;
+  @IsString()
+  phoneNumber?: string;
 
-  @ApiProperty({
-    description: 'Rol del usuario',
-    enum: UserRole,
-    example: UserRole.CLIENT,
-    default: UserRole.CLIENT,
+  @ApiPropertyOptional({
+    description: 'Número de documento',
+    example: '12345678',
   })
-  @IsEnum(UserRole, { message: 'El rol debe ser válido' })
-  role: UserRole = UserRole.CLIENT;
+  @IsOptional()
+  @IsString()
+  documentNumber?: string;
 }

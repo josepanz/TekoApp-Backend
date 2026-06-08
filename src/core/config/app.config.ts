@@ -41,7 +41,7 @@ export class AppConfig {
 
   get security() {
     return {
-      helmet: security.getHelmetOptions(this.configService),
+      helmet: security.getHelmetOptions(),
       cors: security.getCorsOptions(this.configService),
       rateLimit: security.getRateLimitOptions(this.configService),
       compression: security.getCompressionOptions(),

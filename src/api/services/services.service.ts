@@ -4,34 +4,13 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import {
-  Repository,
-  In,
-  Between,
-  MoreThanOrEqual,
-  LessThanOrEqual,
-} from 'typeorm';
-import { Service, ServiceStatus, ServiceType } from './entities/service.entity';
-import {
-  ServiceRequest,
-  RequestStatus,
-} from './entities/service-request.entity';
-import { User } from '../../modules/users/entities/user.entity';
-import { Professional } from '../professionals/entities/professional.entity';
-import { Category } from '../../api/categories/entities/category.entity';
-import {
-  CreateServiceDto,
-  UpdateServiceDto,
-  CreateServiceRequestDto,
-  RespondServiceRequestDto,
-  RateServiceDto,
-} from './dto';
+import { Prisma, ServiceStatus, RequestStatus } from '@prisma/client';
+import { PrismaDatasource } from '@core/database/services/prisma.service';
+import { CreateServiceDto } from './dto/create-service.dto';
 
 export interface ServiceFilters {
   status?: ServiceStatus;
-  type?: ServiceType;
-  categoryId?: string;
+  categoryId?: number;
   latitude?: number;
   longitude?: number;
   radius?: number;
@@ -46,512 +25,406 @@ export interface ServiceStats {
   completed: number;
   cancelled: number;
   totalEarnings: number;
-  averageRating: number;
 }
+
+const CANCELLABLE = new Set<ServiceStatus>([
+  ServiceStatus.PENDING,
+  ServiceStatus.ACCEPTED,
+]);
 
 @Injectable()
 export class ServicesService {
-  constructor(
-    @InjectRepository(Service)
-    private readonly serviceRepository: Repository<Service>,
-    @InjectRepository(ServiceRequest)
-    private readonly serviceRequestRepository: Repository<ServiceRequest>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Professional)
-    private readonly professionalRepository: Repository<Professional>,
-    @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>,
-  ) {}
+  constructor(private readonly prisma: PrismaDatasource) {}
 
-  async createService(
-    createServiceDto: CreateServiceDto,
-    clientId: string,
-  ): Promise<Service> {
-    // Verificar que el usuario existe y es un cliente
-    const client = await this.userRepository.findOne({
-      where: { id: clientId },
+  async createService(dto: CreateServiceDto, userId: number) {
+    const category = await this.prisma.extended.category.findUnique({
+      where: { id: dto.categoryId },
     });
-    if (!client) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
+    if (!category) throw new NotFoundException('Categoría no encontrada');
 
-    // Verificar que la categoría existe
-    if (createServiceDto.categoryId) {
-      const category = await this.categoryRepository.findOne({
-        where: { id: createServiceDto.categoryId },
-      });
-      if (!category) {
-        throw new NotFoundException('Categoría no encontrada');
-      }
-    }
-
-    const service = this.serviceRepository.create({
-      ...createServiceDto,
-      clientId,
-      status: ServiceStatus.PENDING,
+    return this.prisma.extended.services.create({
+      data: {
+        userId,
+        title: dto.title,
+        description: dto.description,
+        categoryId: dto.categoryId,
+        serviceTypeId: dto.serviceTypeId,
+        estimatedHours: dto.estimatedHours,
+        hourlyRate: dto.hourlyRate,
+        fixedPrice: dto.fixedPrice,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        address: dto.address,
+        additionalNotes: dto.additionalNotes,
+        images: dto.images ?? [],
+        isUrgent: dto.isUrgent ?? false,
+        scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
+        status: ServiceStatus.PENDING,
+      },
     });
-
-    return this.serviceRepository.save(service);
   }
 
-  async getServices(
-    filters: ServiceFilters,
-  ): Promise<{ services: Service[]; total: number }> {
-    const queryBuilder = this.serviceRepository
-      .createQueryBuilder('service')
-      .leftJoinAndSelect('service.client', 'client')
-      .leftJoinAndSelect('service.professional', 'professional')
-      .leftJoinAndSelect('service.category', 'category');
-
-    // Aplicar filtros
-    if (filters.status) {
-      queryBuilder.andWhere('service.status = :status', {
-        status: filters.status,
-      });
-    }
-
-    if (filters.type) {
-      queryBuilder.andWhere('service.type = :type', { type: filters.type });
-    }
-
-    if (filters.categoryId) {
-      queryBuilder.andWhere('service.categoryId = :categoryId', {
-        categoryId: filters.categoryId,
-      });
-    }
+  async getServices(filters: ServiceFilters) {
+    const where: Prisma.ServicesWhereInput = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.categoryId) where.categoryId = filters.categoryId;
 
     if (filters.latitude && filters.longitude && filters.radius) {
-      // Filtro por distancia (aproximación simple)
-      const latRange = filters.radius / 111; // 1 grado ≈ 111 km
+      const latRange = filters.radius / 111;
       const lngRange =
         filters.radius / (111 * Math.cos((filters.latitude * Math.PI) / 180));
-
-      queryBuilder.andWhere('service.latitude BETWEEN :minLat AND :maxLat', {
-        minLat: filters.latitude - latRange,
-        maxLat: filters.latitude + latRange,
-      });
-      queryBuilder.andWhere('service.longitude BETWEEN :minLng AND :maxLng', {
-        minLng: filters.longitude - lngRange,
-        maxLng: filters.longitude + lngRange,
-      });
+      where.latitude = {
+        gte: filters.latitude - latRange,
+        lte: filters.latitude + latRange,
+      };
+      where.longitude = {
+        gte: filters.longitude - lngRange,
+        lte: filters.longitude + lngRange,
+      };
     }
 
-    // Paginación
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-    const offset = (page - 1) * limit;
+    const page = filters.page ?? 1;
+    const limit = filters.limit ?? 10;
 
-    queryBuilder.orderBy('service.createdAt', 'DESC').skip(offset).take(limit);
-
-    const [services, total] = await queryBuilder.getManyAndCount();
-
+    const [services, total] = await Promise.all([
+      this.prisma.extended.services.findMany({
+        where,
+        include: { users: true, professional: true, category: true },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.extended.services.count({ where }),
+    ]);
     return { services, total };
   }
 
   async getNearbyServices(
     latitude: number,
     longitude: number,
-    radius: number = 10,
-    categoryId?: string,
-  ): Promise<Service[]> {
-    const queryBuilder = this.serviceRepository
-      .createQueryBuilder('service')
-      .leftJoinAndSelect('service.client', 'client')
-      .leftJoinAndSelect('service.category', 'category')
-      .where('service.status = :status', { status: ServiceStatus.PENDING });
-
-    if (categoryId) {
-      queryBuilder.andWhere('service.categoryId = :categoryId', { categoryId });
-    }
-
-    // Filtro por distancia
+    radius = 10,
+    categoryId?: number,
+  ) {
     const latRange = radius / 111;
     const lngRange = radius / (111 * Math.cos((latitude * Math.PI) / 180));
 
-    queryBuilder
-      .andWhere('service.latitude BETWEEN :minLat AND :maxLat', {
-        minLat: latitude - latRange,
-        maxLat: latitude + latRange,
-      })
-      .andWhere('service.longitude BETWEEN :minLng AND :maxLng', {
-        minLng: longitude - lngRange,
-        maxLng: longitude + lngRange,
-      })
-      .orderBy('service.createdAt', 'DESC')
-      .take(50);
+    const where: Prisma.ServicesWhereInput = {
+      status: ServiceStatus.PENDING,
+      latitude: { gte: latitude - latRange, lte: latitude + latRange },
+      longitude: { gte: longitude - lngRange, lte: longitude + lngRange },
+    };
+    if (categoryId) where.categoryId = categoryId;
 
-    return queryBuilder.getMany();
+    return this.prisma.extended.services.findMany({
+      where,
+      include: { users: true, category: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
   }
 
-  async getServiceById(id: string): Promise<Service> {
-    const service = await this.serviceRepository.findOne({
+  async getServiceById(id: string) {
+    const service = await this.prisma.extended.services.findUnique({
       where: { id },
-      relations: ['client', 'professional', 'category', 'requests'],
+      include: {
+        users: true,
+        professional: true,
+        category: true,
+        requests: true,
+      },
     });
-
-    if (!service) {
-      throw new NotFoundException('Servicio no encontrado');
-    }
-
+    if (!service) throw new NotFoundException('Servicio no encontrado');
     return service;
   }
 
   async updateService(
     id: string,
-    updateServiceDto: UpdateServiceDto,
-    userId: string,
-  ): Promise<Service> {
+    dto: Prisma.ServicesUpdateInput,
+    userId: number,
+  ) {
     const service = await this.getServiceById(id);
 
-    // Verificar permisos
-    if (service.clientId !== userId && service.professionalId !== userId) {
+    if (service.userId !== userId && service.professionalId !== null) {
+      const professional = await this.prisma.extended.professionals.findUnique({
+        where: { id: service.professionalId },
+      });
+      if (!professional || professional.userId !== userId) {
+        throw new ForbiddenException(
+          'No tienes permisos para modificar este servicio',
+        );
+      }
+    } else if (service.userId !== userId) {
       throw new ForbiddenException(
         'No tienes permisos para modificar este servicio',
       );
     }
 
-    // Solo permitir actualizaciones en ciertos estados
-    if (!service.canBeCancelled()) {
+    if (!CANCELLABLE.has(service.status)) {
       throw new BadRequestException(
         'No se puede modificar un servicio en este estado',
       );
     }
-
-    Object.assign(service, updateServiceDto);
-    return this.serviceRepository.save(service);
+    return this.prisma.extended.services.update({ where: { id }, data: dto });
   }
 
-  async cancelService(
-    id: string,
-    reason: string,
-    userId: string,
-  ): Promise<Service> {
+  async cancelService(id: string, reason: string, userId: number) {
     const service = await this.getServiceById(id);
 
-    // Verificar permisos
-    if (service.clientId !== userId && service.professionalId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para cancelar este servicio',
-      );
-    }
-
-    if (!service.canBeCancelled()) {
+    if (!CANCELLABLE.has(service.status)) {
       throw new BadRequestException(
         'No se puede cancelar un servicio en este estado',
       );
     }
 
-    service.status = ServiceStatus.CANCELLED;
-    service.cancelledAt = new Date();
-    service.cancellationReason = reason;
+    const isProfessionalOwner = service.professionalId
+      ? await this.prisma.extended.professionals
+          .findUnique({ where: { id: service.professionalId } })
+          .then((p) => p?.userId === userId)
+      : false;
 
-    return this.serviceRepository.save(service);
+    if (service.userId !== userId && !isProfessionalOwner) {
+      throw new ForbiddenException(
+        'No tienes permisos para cancelar este servicio',
+      );
+    }
+
+    return this.prisma.extended.services.update({
+      where: { id },
+      data: {
+        status: ServiceStatus.CANCELLED,
+        cancelledAt: new Date(),
+        cancellationReason: reason,
+      },
+    });
   }
 
-  async acceptService(id: string, professionalId: string): Promise<Service> {
+  async acceptService(id: string, professionalId: number) {
     const service = await this.getServiceById(id);
-
-    if (!service.canBeAccepted()) {
+    if (service.status !== ServiceStatus.PENDING) {
       throw new BadRequestException(
         'El servicio no puede ser aceptado en este estado',
       );
     }
-
-    // Verificar que el usuario es un profesional
-    const professional = await this.professionalRepository.findOne({
+    const professional = await this.prisma.extended.professionals.findUnique({
       where: { id: professionalId },
     });
-
-    if (!professional) {
+    if (!professional)
       throw new ForbiddenException('Usuario no es un profesional');
-    }
 
-    service.status = ServiceStatus.ACCEPTED;
-    service.professionalId = professionalId;
-
-    return this.serviceRepository.save(service);
+    return this.prisma.extended.services.update({
+      where: { id },
+      data: { status: ServiceStatus.ACCEPTED, professionalId },
+    });
   }
 
-  async startService(id: string, professionalId: string): Promise<Service> {
+  async startService(id: string, professionalId: number) {
     const service = await this.getServiceById(id);
-
     if (service.professionalId !== professionalId) {
       throw new ForbiddenException(
         'Solo el profesional asignado puede iniciar el servicio',
       );
     }
-
-    if (!service.canBeStarted()) {
+    if (service.status !== ServiceStatus.ACCEPTED) {
       throw new BadRequestException(
         'El servicio no puede ser iniciado en este estado',
       );
     }
-
-    service.status = ServiceStatus.IN_PROGRESS;
-    service.startedAt = new Date();
-
-    return this.serviceRepository.save(service);
+    return this.prisma.extended.services.update({
+      where: { id },
+      data: { status: ServiceStatus.IN_PROGRESS, startedAt: new Date() },
+    });
   }
 
-  async completeService(id: string, professionalId: string): Promise<Service> {
+  async completeService(id: string, professionalId: number) {
     const service = await this.getServiceById(id);
-
     if (service.professionalId !== professionalId) {
       throw new ForbiddenException(
         'Solo el profesional asignado puede completar el servicio',
       );
     }
-
-    if (!service.canBeCompleted()) {
+    if (service.status !== ServiceStatus.IN_PROGRESS) {
       throw new BadRequestException(
         'El servicio no puede ser completado en este estado',
       );
     }
 
-    service.status = ServiceStatus.COMPLETED;
-    service.completedAt = new Date();
+    const completedAt = new Date();
+    const data: Prisma.ServicesUpdateInput = {
+      status: ServiceStatus.COMPLETED,
+      completedAt,
+    };
 
-    // Calcular horas reales si es por hora
-    if (service.type === ServiceType.HOURLY && service.startedAt) {
-      const duration =
-        service.completedAt.getTime() - service.startedAt.getTime();
-      service.actualHours = duration / (1000 * 60 * 60); // Convertir a horas
-      service.finalAmount = service.actualHours * (service.hourlyRate || 0);
+    if (service.hourlyRate && service.startedAt) {
+      const ms = completedAt.getTime() - service.startedAt.getTime();
+      const actualHours = ms / (1000 * 60 * 60);
+      const finalAmount = actualHours * Number(service.hourlyRate);
+      data.actualHours = actualHours;
+      data.finalAmount = finalAmount;
     }
 
-    return this.serviceRepository.save(service);
-  }
-
-  async rateService(
-    id: string,
-    ratingDto: RateServiceDto,
-    userId: string,
-  ): Promise<Service> {
-    const service = await this.getServiceById(id);
-
-    if (service.status !== ServiceStatus.COMPLETED) {
-      throw new BadRequestException(
-        'Solo se pueden calificar servicios completados',
-      );
-    }
-
-    // Verificar permisos
-    if (service.clientId !== userId && service.professionalId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para calificar este servicio',
-      );
-    }
-
-    // Aplicar calificación según el rol
-    if (service.clientId === userId) {
-      service.clientRating = ratingDto.rating;
-      service.clientReview = ratingDto.review;
-    } else {
-      service.professionalRating = ratingDto.rating;
-      service.professionalReview = ratingDto.review;
-    }
-
-    return this.serviceRepository.save(service);
+    return this.prisma.extended.services.update({ where: { id }, data });
   }
 
   async createServiceRequest(
     serviceId: string,
-    requestDto: CreateServiceRequestDto,
-    professionalId: string,
-  ): Promise<ServiceRequest> {
+    dto: { proposedPrice?: number; proposedHours?: number; message?: string },
+    professionalId: number,
+  ) {
     const service = await this.getServiceById(serviceId);
-
     if (service.status !== ServiceStatus.PENDING) {
       throw new BadRequestException(
         'Solo se pueden crear solicitudes para servicios pendientes',
       );
     }
 
-    // Verificar que no existe ya una solicitud del mismo profesional
-    const existingRequest = await this.serviceRequestRepository.findOne({
+    const existing = await this.prisma.extended.serviceRequests.findFirst({
       where: { serviceId, professionalId },
     });
-
-    if (existingRequest) {
+    if (existing)
       throw new BadRequestException(
         'Ya has enviado una solicitud para este servicio',
       );
-    }
 
-    const serviceRequest = this.serviceRequestRepository.create({
-      ...requestDto,
-      serviceId,
-      professionalId,
-      status: RequestStatus.PENDING,
+    return this.prisma.extended.serviceRequests.create({
+      data: {
+        ...dto,
+        serviceId,
+        professionalId,
+        status: RequestStatus.PENDING,
+      },
     });
-
-    return this.serviceRequestRepository.save(serviceRequest);
   }
 
-  async getServiceRequests(serviceId: string): Promise<ServiceRequest[]> {
-    return this.serviceRequestRepository.find({
+  async getServiceRequests(serviceId: string) {
+    return this.prisma.extended.serviceRequests.findMany({
       where: { serviceId },
-      relations: ['professional'],
-      order: { createdAt: 'DESC' },
+      include: { professional: true },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async respondToServiceRequest(
     serviceId: string,
     requestId: string,
-    responseDto: RespondServiceRequestDto,
-    userId: string,
-  ): Promise<ServiceRequest> {
+    dto: { status: RequestStatus; reason?: string },
+    userId: number,
+  ) {
     const service = await this.getServiceById(serviceId);
-
-    if (service.clientId !== userId) {
+    if (service.userId !== userId) {
       throw new ForbiddenException(
         'Solo el cliente puede responder a las solicitudes',
       );
     }
 
-    const serviceRequest = await this.serviceRequestRepository.findOne({
+    const request = await this.prisma.extended.serviceRequests.findFirst({
       where: { id: requestId, serviceId },
     });
+    if (!request) throw new NotFoundException('Solicitud no encontrada');
 
-    if (!serviceRequest) {
-      throw new NotFoundException('Solicitud no encontrada');
+    if (dto.status === RequestStatus.ACCEPTED) {
+      await this.prisma.extended.$transaction([
+        this.prisma.extended.serviceRequests.update({
+          where: { id: requestId },
+          data: { status: RequestStatus.ACCEPTED },
+        }),
+        this.prisma.extended.services.update({
+          where: { id: serviceId },
+          data: {
+            status: ServiceStatus.ACCEPTED,
+            professionalId: request.professionalId,
+          },
+        }),
+        this.prisma.extended.serviceRequests.updateMany({
+          where: {
+            serviceId,
+            status: RequestStatus.PENDING,
+            id: { not: requestId },
+          },
+          data: { status: RequestStatus.REJECTED },
+        }),
+      ]);
+      return this.prisma.extended.serviceRequests.findUnique({
+        where: { id: requestId },
+      });
     }
 
-    if (responseDto.status === RequestStatus.ACCEPTED) {
-      // Aceptar la solicitud y el servicio
-      serviceRequest.status = RequestStatus.ACCEPTED;
-      service.status = ServiceStatus.ACCEPTED;
-      service.professionalId = serviceRequest.professionalId;
-
-      // Rechazar todas las demás solicitudes
-      await this.serviceRequestRepository.update(
-        { serviceId, status: RequestStatus.PENDING },
-        {
-          status: RequestStatus.REJECTED,
-          rejectionReason: 'Otra solicitud fue aceptada',
-        },
-      );
-
-      await this.serviceRepository.save(service);
-    } else {
-      serviceRequest.status = RequestStatus.REJECTED;
-      serviceRequest.rejectionReason = responseDto.reason;
-    }
-
-    serviceRequest.respondedAt = new Date();
-    return this.serviceRequestRepository.save(serviceRequest);
+    return this.prisma.extended.serviceRequests.update({
+      where: { id: requestId },
+      data: { status: RequestStatus.REJECTED },
+    });
   }
 
   async getMyServices(
-    userId: string,
+    userId: number,
     status?: ServiceStatus,
     role?: 'client' | 'professional',
-  ): Promise<Service[]> {
-    const queryBuilder = this.serviceRepository
-      .createQueryBuilder('service')
-      .leftJoinAndSelect('service.client', 'client')
-      .leftJoinAndSelect('service.professional', 'professional')
-      .leftJoinAndSelect('service.category', 'category');
+  ) {
+    const where: Prisma.ServicesWhereInput = {};
 
     if (role === 'client') {
-      queryBuilder.where('service.clientId = :userId', { userId });
+      where.userId = userId;
     } else if (role === 'professional') {
-      queryBuilder.where('service.professionalId = :userId', { userId });
+      const professional = await this.prisma.extended.professionals.findUnique({
+        where: { userId },
+      });
+      if (professional) where.professionalId = professional.id;
     } else {
-      queryBuilder.where(
-        'service.clientId = :userId OR service.professionalId = :userId',
+      const professional = await this.prisma.extended.professionals.findUnique({
+        where: { userId },
+      });
+      where.OR = [
         { userId },
-      );
+        ...(professional ? [{ professionalId: professional.id }] : []),
+      ];
     }
 
-    if (status) {
-      queryBuilder.andWhere('service.status = :status', { status });
-    }
+    if (status) where.status = status;
 
-    queryBuilder.orderBy('service.createdAt', 'DESC');
-
-    return queryBuilder.getMany();
+    return this.prisma.extended.services.findMany({
+      where,
+      include: { users: true, professional: true, category: true },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  async getDashboardStats(userId: string): Promise<ServiceStats> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const isProfessional = await this.professionalRepository.findOne({
+  async getDashboardStats(userId: number): Promise<ServiceStats> {
+    const user = await this.prisma.extended.users.findUnique({
       where: { id: userId },
     });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    let servicesQuery = this.serviceRepository.createQueryBuilder('service');
+    const professional = await this.prisma.extended.professionals.findUnique({
+      where: { userId },
+    });
+    const baseWhere: Prisma.ServicesWhereInput = professional
+      ? { professionalId: professional.id }
+      : { userId };
 
-    if (isProfessional) {
-      servicesQuery = servicesQuery.where('service.professionalId = :userId', {
-        userId,
-      });
-    } else {
-      servicesQuery = servicesQuery.where('service.clientId = :userId', {
-        userId,
-      });
-    }
-
-    const [total, pending, inProgress, completed, cancelled] =
+    const [total, pending, inProgress, completed, cancelled, earningsAgg] =
       await Promise.all([
-        servicesQuery.getCount(),
-        servicesQuery
-          .andWhere('service.status = :status', {
-            status: ServiceStatus.PENDING,
-          })
-          .getCount(),
-        servicesQuery
-          .andWhere('service.status = :status', {
-            status: ServiceStatus.IN_PROGRESS,
-          })
-          .getCount(),
-        servicesQuery
-          .andWhere('service.status = :status', {
-            status: ServiceStatus.COMPLETED,
-          })
-          .getCount(),
-        servicesQuery
-          .andWhere('service.status = :status', {
-            status: ServiceStatus.CANCELLED,
-          })
-          .getCount(),
+        this.prisma.extended.services.count({ where: baseWhere }),
+        this.prisma.extended.services.count({
+          where: { ...baseWhere, status: ServiceStatus.PENDING },
+        }),
+        this.prisma.extended.services.count({
+          where: { ...baseWhere, status: ServiceStatus.IN_PROGRESS },
+        }),
+        this.prisma.extended.services.count({
+          where: { ...baseWhere, status: ServiceStatus.COMPLETED },
+        }),
+        this.prisma.extended.services.count({
+          where: { ...baseWhere, status: ServiceStatus.CANCELLED },
+        }),
+        professional
+          ? this.prisma.extended.services.aggregate({
+              where: {
+                professionalId: professional.id,
+                status: ServiceStatus.COMPLETED,
+              },
+              _sum: { finalAmount: true },
+            })
+          : Promise.resolve({ _sum: { finalAmount: null } }),
       ]);
-
-    // Calcular ganancias totales (solo para profesionales)
-    let totalEarnings = 0;
-    if (isProfessional) {
-      const earningsResult = await this.serviceRepository
-        .createQueryBuilder('service')
-        .select('SUM(service.finalAmount)', 'total')
-        .where('service.professionalId = :userId', { userId })
-        .andWhere('service.status = :status', {
-          status: ServiceStatus.COMPLETED,
-        })
-        .getRawOne();
-
-      totalEarnings = parseFloat(earningsResult?.total || '0');
-    }
-
-    // Calcular calificación promedio
-    const ratingField = isProfessional ? 'professionalRating' : 'clientRating';
-    const ratingResult = await this.serviceRepository
-      .createQueryBuilder('service')
-      .select(`AVG(service.${ratingField})`, 'average')
-      .where(
-        isProfessional
-          ? 'service.professionalId = :userId'
-          : 'service.clientId = :userId',
-        { userId },
-      )
-      .andWhere(`service.${ratingField} IS NOT NULL`)
-      .getRawOne();
-
-    const averageRating = parseFloat(ratingResult?.average || '0');
 
     return {
       total,
@@ -559,8 +432,7 @@ export class ServicesService {
       inProgress,
       completed,
       cancelled,
-      totalEarnings,
-      averageRating,
+      totalEarnings: Number(earningsAgg._sum.finalAmount ?? 0),
     };
   }
 }

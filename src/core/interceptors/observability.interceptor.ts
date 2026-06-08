@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
   NestInterceptor,
@@ -18,7 +15,7 @@ import { formatPayload } from '@modules/observability/observability.module';
 export class ObservabilityInterceptor implements NestInterceptor {
   constructor(private readonly logger: PinoLogger) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const now = Date.now();
     const ctx = context.switchToHttp();
     const req = ctx.getRequest<Request>();
@@ -30,13 +27,13 @@ export class ObservabilityInterceptor implements NestInterceptor {
     );
 
     return next.handle().pipe(
-      tap((responseBody) => {
+      tap((responseBody: unknown) => {
         const latency = Date.now() - now;
-        const context = ctx.getResponse();
-        const statusCode = context.statusCode;
+        const res = ctx.getResponse<{ statusCode: HttpStatus }>();
+        const statusCode = res.statusCode;
         const statusName =
           Object.entries(HttpStatus).find(
-            ([key, value]) => value === statusCode,
+            ([, value]) => value === statusCode,
           )?.[0] ?? 'UNKNOWN';
         if (statusCode >= HttpStatus.OK && statusCode < HttpStatus.AMBIGUOUS) {
           this.logger.info(
@@ -62,18 +59,18 @@ export class ObservabilityInterceptor implements NestInterceptor {
           );
         }
       }),
-      catchError((error) => {
+      catchError((error: unknown) => {
         const latency = Date.now() - now;
-        const context = ctx.getResponse();
-        const statusCode = context.statusCode;
+        const res = ctx.getResponse<{ statusCode: HttpStatus }>();
+        const statusCode = res.statusCode;
         const statusName =
           Object.entries(HttpStatus).find(
-            ([key, value]) => value === statusCode,
+            ([, value]) => value === statusCode,
           )?.[0] ?? 'UNKNOWN';
         this.logger.error(
           {
-            error: error.message,
-            stack: error.stack,
+            error: error instanceof Error ? error.message : 'Error desconocido',
+            stack: error instanceof Error ? error.stack : undefined,
             latencyMs: latency,
           },
           `Error | ${req.method} ${req.url} - (${statusCode} - ${statusName}) | Trace ID: ${req[TRACE_ID_HEADER]}`,

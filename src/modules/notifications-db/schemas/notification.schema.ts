@@ -1,12 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document, Types, Schema as MongooseSchema } from 'mongoose';
 import { NotificationType } from '../enums/notification-type.enum';
 import { NotificationStatus } from '../enums/notification-status.enum';
 
 @Schema({ timestamps: true, collection: 'notifications' })
 export class NotificationDocument extends Document {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
-  userId!: MongooseSchema.Types.ObjectId;
+  userId!: Types.ObjectId;
 
   @Prop({ required: true, type: String, enum: NotificationType })
   type!: NotificationType;
@@ -18,7 +18,7 @@ export class NotificationDocument extends Document {
   message!: string;
 
   @Prop({ type: Object })
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 
   @Prop({
     type: String,
@@ -37,7 +37,7 @@ export class NotificationDocument extends Document {
   channels!: string[];
 
   @Prop({ type: Object })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export const NotificationSchema =

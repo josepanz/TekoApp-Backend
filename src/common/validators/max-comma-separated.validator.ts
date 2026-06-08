@@ -8,10 +8,10 @@ import {
 export class MaxCommaSeparatedConstraint
   implements ValidatorConstraintInterface
 {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: unknown, args: ValidationArguments) {
     if (typeof value !== 'string') return false;
 
-    const max = args.constraints[0];
+    const max = args.constraints[0] as number;
     const rawValue = value.trim();
 
     if (rawValue.length === 0) return false;
@@ -21,7 +21,7 @@ export class MaxCommaSeparatedConstraint
   }
 
   defaultMessage(args: ValidationArguments) {
-    const max = args.constraints[0];
+    const max = args.constraints[0] as number;
     return `${args.property} no puede tener más de ${max} códigos separados por coma y no puede estar vacío.`;
   }
 }

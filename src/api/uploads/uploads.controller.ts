@@ -8,15 +8,12 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
-  Request,
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
 import { UploadsService, FileInfo } from './uploads.service';
-import { promises as fs } from 'fs';
-import { join } from 'path';
 
 @Controller('uploads')
 @UseGuards(JwtAuthGuard)
@@ -32,7 +29,7 @@ export class UploadsController {
       throw new BadRequestException('No se ha subido ningún archivo');
     }
 
-    await this.uploadsService.validateFile(file);
+    this.uploadsService.validateFile(file);
     return this.uploadsService.processImage(file);
   }
 
@@ -45,7 +42,7 @@ export class UploadsController {
       throw new BadRequestException('No se ha subido ningún archivo');
     }
 
-    await this.uploadsService.validateFile(file);
+    this.uploadsService.validateFile(file);
     return this.uploadsService.processDocument(file);
   }
 
@@ -53,7 +50,6 @@ export class UploadsController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
-    @Request() req,
   ): Promise<FileInfo> {
     if (!file) {
       throw new BadRequestException('No se ha subido ningún archivo');
@@ -64,7 +60,7 @@ export class UploadsController {
       throw new BadRequestException('Solo se permiten imágenes para avatares');
     }
 
-    await this.uploadsService.validateFile(file);
+    this.uploadsService.validateFile(file);
     const fileInfo = await this.uploadsService.processImage(file);
 
     // Crear thumbnail para el avatar
@@ -86,7 +82,7 @@ export class UploadsController {
       );
 
       res.sendFile(filePath);
-    } catch (error) {
+    } catch {
       res.status(404).json({ message: 'Archivo no encontrado' });
     }
   }
@@ -108,7 +104,7 @@ export class UploadsController {
       );
 
       res.sendFile(filePath);
-    } catch (error) {
+    } catch {
       // Si no existe el thumbnail, crearlo y luego enviarlo
       try {
         const thumbnailName =
@@ -123,7 +119,7 @@ export class UploadsController {
         );
 
         res.sendFile(filePath);
-      } catch (thumbnailError) {
+      } catch {
         res.status(404).json({ message: 'No se pudo generar el thumbnail' });
       }
     }
@@ -135,7 +131,7 @@ export class UploadsController {
   }
 
   @Delete(':filename')
-  async deleteFile(@Param('filename') filename: string, @Request() req) {
+  async deleteFile(@Param('filename') filename: string) {
     // Aquí podrías agregar lógica adicional para verificar permisos
     // Por ejemplo, solo permitir que el usuario elimine sus propios archivos
 
@@ -156,7 +152,7 @@ export class UploadsController {
 
     for (const file of files) {
       try {
-        await this.uploadsService.validateFile(file);
+        this.uploadsService.validateFile(file);
 
         let fileInfo: FileInfo;
         if (file.mimetype.startsWith('image/')) {

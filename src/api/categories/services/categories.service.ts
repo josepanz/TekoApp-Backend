@@ -56,7 +56,7 @@ export class CategoriesService {
       status: dto.status,
       isVisible: dto.isVisible,
       requiresVerification: dto.requiresVerification,
-      metadata: dto.metadata ?? undefined,
+      metadata: (dto.metadata as Prisma.InputJsonValue) ?? undefined,
       parentCategory: dto.parentCategoryId
         ? { connect: { id: dto.parentCategoryId } }
         : undefined,
@@ -160,7 +160,7 @@ export class CategoriesService {
     const updateData: Prisma.CategoryUpdateInput = {
       ...dto,
       slug: dto.name ? this.slugify(dto.name) : undefined,
-      metadata: dto.metadata ?? undefined,
+      metadata: (dto.metadata as Prisma.InputJsonValue) ?? undefined,
     };
 
     return this.categoriesDb.update(id, updateData);

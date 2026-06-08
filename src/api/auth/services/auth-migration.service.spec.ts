@@ -58,7 +58,7 @@ describe('AuthMigrationService', () => {
         sub: 'user-1',
         email: 'usuario@test.com',
         tokenType: 'tempToken',
-      } as never);
+      });
 
       expect(() =>
         service.verifyTempToken('valid-token', 'usuario@test.com'),
@@ -70,7 +70,7 @@ describe('AuthMigrationService', () => {
         sub: 'user-1',
         email: 'usuario@test.com',
         tokenType: 'accessToken',
-      } as never);
+      });
 
       expect(() =>
         service.verifyTempToken('invalid-token', 'usuario@test.com'),
@@ -82,7 +82,7 @@ describe('AuthMigrationService', () => {
         sub: 'user-1',
         email: 'otro@test.com',
         tokenType: 'tempToken',
-      } as never);
+      });
 
       expect(() =>
         service.verifyTempToken('token', 'usuario@test.com'),
@@ -109,7 +109,7 @@ describe('AuthMigrationService', () => {
         email: 'usuario@test.com',
         tokenType: 'tempToken',
         action: 'forgotPassword',
-      } as never);
+      });
 
       const email = service.verifyForgotPasswordToken('valid-token');
 
@@ -122,7 +122,7 @@ describe('AuthMigrationService', () => {
         email: 'usuario@test.com',
         tokenType: 'accessToken',
         action: 'forgotPassword',
-      } as never);
+      });
 
       expect(() => service.verifyForgotPasswordToken('token')).toThrow(
         UnauthorizedException,
@@ -135,7 +135,7 @@ describe('AuthMigrationService', () => {
         email: 'usuario@test.com',
         tokenType: 'tempToken',
         action: 'createPassword',
-      } as never);
+      });
 
       expect(() => service.verifyForgotPasswordToken('token')).toThrow(
         UnauthorizedException,

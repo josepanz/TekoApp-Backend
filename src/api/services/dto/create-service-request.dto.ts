@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateServiceRequestDto {
   @ApiPropertyOptional({ description: 'Precio propuesto por el profesional' })

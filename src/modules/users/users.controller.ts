@@ -7,22 +7,18 @@ import {
   Param,
   Delete,
   UseGuards,
-  Query,
-  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
 
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UserRole } from './entities/user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -45,11 +41,7 @@ export class UsersController {
     status: 200,
     description: 'Lista de usuarios obtenida exitosamente',
   })
-  @ApiQuery({ name: 'role', enum: UserRole, required: false })
-  async findAll(@Query('role') role?: UserRole) {
-    if (role) {
-      return this.usersService.findByRole(role);
-    }
+  async findAll() {
     return this.usersService.findAll();
   }
 

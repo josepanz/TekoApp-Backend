@@ -36,20 +36,23 @@ export class LocationsGateway
 
   async handleConnection(client: Socket) {
     try {
-      const token =
-        client.handshake.auth.token || client.handshake.headers.authorization;
+      const token = (client.handshake.auth.token ||
+        client.handshake.headers.authorization) as string | undefined;
       if (!token) {
         client.disconnect();
         return;
       }
 
-      const payload = await this.jwtService.verifyAsync(token);
+      const payload = await this.jwtService.verifyAsync<{
+        sub: string;
+        professionalId?: string;
+      }>(token);
       const professionalId = payload.professionalId || payload.sub;
 
       if (professionalId) {
         this.connectedClients.set(professionalId, client);
         await client.join(`professional:${professionalId}`);
-        client.data.user = payload;
+        (client.data as Record<string, unknown>).user = payload;
       } else {
         client.disconnect();
       }
@@ -97,12 +100,14 @@ export class LocationsGateway
       });
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg =
+        error instanceof Error ? error.message : 'Error desconocido';
       client.emit('locationUpdateError', {
         success: false,
-        error: error.message,
+        error: errMsg,
       });
-      return { success: false, error: error.message };
+      return { success: false, error: errMsg };
     }
   }
 
