@@ -1,18 +1,44 @@
+<div align="center">
+
 # TekoApp テコ - Plataforma de Servicios Profesionales 🛠️
 
-![TekoApp Banner](https://example.com/path/to/your/banner.png) <!-- Reemplaza con tu imagen -->
+![TekoApp Banner](https://example.com/path/to/your/banner.png) 
 
-**Conectamos clientes con profesionales calificados en tiempo real**
+**Conectando talento con necesidad, donde sea, cuando sea.**
+
+[![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+
+</div>
+
+---
 
 ## 🌟 Descripción
 
-**TekoApp** es una plataforma innovadora que conecta a usuarios con profesionales de diversas categorías (electricistas, plomeros, pintores, etc.) de manera rápida y segura. Inspirada en modelos como Uber, Bolt, Pedidos Ya, etc., pero para servicios profesionales, ofrece:
+**TekoApp** es una plataforma innovadora de economía colaborativa diseñada para conectar a usuarios con profesionales de servicios de oficio (electricistas, plomeros, pintores, etc.) de manera rápida, segura y geolocalizada. 
 
-- ✅ Doble Rol: Los usuarios pueden registrarse como clientes o profesionales.
-- 📍 Geolocalización en tiempo real de profesionales disponibles
-- ⭐ Sistema de calificaciones bidireccional (clientes ↔ profesionales)
-- 💰 Precios dinámicos establecidos por cada profesional
-- 📱 Aplicación móvil y versión web integradas
+Inspirada en la eficiencia logística de modelos como Uber o Bolt, pero adaptada al sector de servicios profesionales, TekoApp ofrece:
+
+- 🔄 **Doble Rol:** Una única cuenta permite al usuario operar como Cliente o Profesional.
+- 📍 **Tracking en Tiempo Real:** Geolocalización y telemetría de profesionales disponibles.
+- ⭐ **Reputación Bidireccional:** Sistema de calificaciones mutuas para garantizar confianza.
+- 💰 **Economía Dinámica:** Precios establecidos por cada profesional y pagos integrados.
+- 📱 **Ecosistema Completo:** App móvil nativa y panel de administración web.
+
+---
+
+## ♟️ El poder detrás del nombre "Teko"
+
+El nombre de nuestra plataforma fusiona dos conceptos culturales poderosos que definen nuestra misión:
+
+| Idioma   | Escritura | Significado        | Simbolismo en la Arquitectura de la App                  |
+|----------|-----------|--------------------|----------------------------------------------------------|
+| **Guaraní**  | Teko      | *"Vida / Estilo"*  | Representa nuestra misión de mejorar el día a día y conectar a la comunidad. |
+| **Japonés**  | テコ      | *"Palanca"*        | Simboliza el apalancamiento tecnológico; somos la herramienta que multiplica las oportunidades. |
 
 1. **En guaraní**: El nombre "Teko" proviene del guaraní y significa "vida" o "estilo de vida", representando nuestra misión de mejorar la vida de las personas conectándolas con los mejores profesionales.
    - Significa *"vida" o "estilo de vida"*, representando nuestra misión de mejorar el día a día de las personas.
@@ -24,74 +50,92 @@
      - Palanca (herramienta física que multiplica fuerza).
      - Apalancamiento (en contexto figurado: "ser un puente" o "facilitador").
      - Uso: Es una palabra reconocida en japonés, aunque no es de uso cotidiano (se usa más en contextos técnicos/mecánicos).
-## ♟️ El poder detrás del nombre "Teko"
+---
 
-| Idioma   | Escritura | Significado        | Simbolismo para la app                  |
-|----------|-----------|--------------------|------------------------------------------|
-| Guaraní  | Teko      | "Vida"             | Conectar estilos de vida                 |
-| Japonés  | テコ      | "Palanca"          | Ser el puente que potencia oportunidades |
+## 🏗️ Arquitectura de Software y Tecnologías
 
-## 🚀 Repositorios
+El backend de TekoApp está construido bajo principios estrictos de **Clean Architecture** y **Domain-Driven Design (DDD)**. 
 
-| Componente       | Enlace                                                                 | Tecnologías Principales                 |
+### Estrategia de Base de Datos Híbrida
+Para garantizar un rendimiento masivo sin cuellos de botella, dividimos la persistencia:
+- 🐘 **PostgreSQL (Prisma ORM):** Maneja transacciones financieras ACID, perfiles, roles y facturación.
+- 🍃 **MongoDB (Mongoose):** Absorbe la telemetría pesada, *GeoTracking* (índices `2dsphere`), y logs de auditoría en tiempo real.
+- ⚡ **Redis (BullMQ):** Orquesta trabajos asíncronos en segundo plano (Webhooks de pagos, notificaciones Push/SMS).
+
+### 🚀 Ecosistema de Repositorios
+
+| Componente       | Repositorio                                                         | Stack Tecnológico                 |
 |------------------|------------------------------------------------------------------------|-----------------------------------------|
-| **Backend**      | [TekoApp-Backend](https://github.com/josepanz/TekoApp-Backend)         | NestJS, MongoDB, PostgreSQL, Docker     |
-| **Frontend App** | [TekoApp-Mobile](https://github.com/josepanz/TekoApp-Frontend-Mobile)  | Flutter                                 |
-| **Frontend Web** | [TekoApp-Web](https://github.com/josepanz/TekoApp-Frontend-Web)        | React.js, Tailwind CSS                  |
+| **Backend Core** | [TekoApp-Backend](https://github.com/josepanz/TekoApp-Backend)         | NestJS, Prisma, Mongoose, Redis     |
+| **Mobile App**   | [TekoApp-Mobile](https://github.com/josepanz/TekoApp-Frontend-Mobile)  | Flutter, Provider, Google Maps SDK      |
+| **Web Admin**    | [TekoApp-Web](https://github.com/josepanz/TekoApp-Frontend-Web)        | React.js, Redux, Tailwind CSS           |
 
-## 🛠️ Tecnologías
+---
 
-### Backend
-- **NestJS** - Framework backend modular
-- **MongoDB** - Base de datos NoSQL para datos flexibles
-- **PostgreSQL** - Base de datos SQL para transacciones críticas
-- **TypeORM** - ORM para bases de datos
-- **JWT** - Autenticación segura
-- **Google Maps API** - Integración de mapas
-- **Firebase Cloud Messaging** - Notificaciones push
-- **Docker** - Contenerización y despliegue
+## 📂 Estructura del Backend (Desacoplamiento Estricto)
 
-#### Estructura del Proyecto
-````bash
+Nuestra base de código impone una frontera rígida entre la capa de red y la de persistencia:
+
+```text
 TekoApp-Backend/
 ├── src/
-│   ├── auth/                  # Autenticación (JWT, OAuth)
-│   ├── users/                 # Gestión de usuarios (clientes/profesionales)
-│   ├── professionals/         # Lógica específica de profesionales
-│   ├── services/              # Solicitudes de servicios
-│   ├── ratings/               # Sistema de calificaciones
-│   ├── locations/             # Geolocalización en tiempo real
-│   ├── shared/                # Utilidades comunes (middlewares, guards)
-│   └── main.ts                # Punto de entrada
-├── .env                       # Variables de entorno
-├── docker-compose.yml         # Configuración para Docker
-└── README.md                  # Documentación adicional
-````
+│   ├── api/           # 🌐 Capa de Orquestación (Controladores HTTP, DTOs estrictos, Swagger). No toca la BD.
+│   ├── modules/       # 📦 Capa de Dominio/Persistencia (Servicios agnósticos, Prisma, llamadas a APIs externas).
+│   ├── core/          # ⚙️ Configuraciones centralizadas, Middlewares, Guards, Logging (Pino).
+│   └── main.ts        # 🚀 Entrypoint
+├── prisma/            # 🐘 Esquemas y migraciones relacionales
+└── docker-compose.yml # 🐳 Infraestructura local (Postgres, Mongo, Redis)
+🔧 Instalación y Desarrollo Local (Backend)
+Requisito previo: Necesitas tener instalado pnpm, Docker y Node.js 22+.
+```
 
-#### 🔧 Instalación
-##### 1. Clona el repositorio:
-````bash
+## 🔧 Instalación y Desarrollo Local (Backend)
+#### Requisito previo: Necesitas tener instalado `pnpm`, `Docker` y `Node.js 22`.
+
+### 1. Clonar el repositorio:
+```Bash
 git clone https://github.com/josepanz/TekoApp-Backend.git
-````
+cd TekoApp-Backend
+```
 
-##### 2. Instala dependencias:
-````bash
-npm install
-````
+### 2. Instalar dependencias:
+```Bash
+pnpm install
+```
 
-##### 3. Configura las variables de entorno (.env):
-````env
-DATABASE_URL=mongodb://localhost:27017/tekoapp
-POSTGRES_URL=postgres://user:password@localhost:5432/tekoapp
-JWT_SECRET=tu_clave_secreta
-GOOGLE_MAPS_API_KEY=tu_api_key
-````
-##### 4. Ejecuta en desarrollo:
-````bash
-npm run start:dev
-````
+### 3. Levantar infraestructura local:
+```Bash
+# Levanta Postgres, MongoDB y Redis localmente
+docker-compose up -d
+```
 
-### Frontend
+### 4. Configurar el entorno (`.env`):
+Crea un archivo `.env` en la raíz (usa .env.example como referencia):
+```properties
+PORT=3000
+NODE_ENV=development
+DATABASE_URL="postgresql://postgres:password@localhost:5432/tekoapp?schema=public"
+MONGODB_URI="mongodb://localhost:27017/tekoapp_logs"
+REDIS_HOST="localhost"
+JWT_PRIVATE_KEY="tu_llave_rsa_privada"
+...ETC
+```
+
+### 5. Generar cliente Prisma e iniciar:
+```Bash
+pnpm prisma generate
+pnpm prisma db push
+pnpm run start:dev
+```
+
+## 📦 Despliegue en Producción (Kubernetes / K3s)
+TekoApp está diseñado para ser desplegado en entornos distribuidos mediante Kubernetes (K3s/K8s).
+
+El proyecto cuenta con integración nativa de HashiCorp Vault mediante Agent Injectors para la gestión dinámica de secretos, Autoescalado Horizontal de Pods (HPA), y un pipeline CI/CD preparado para generar imágenes Docker seguras sin privilegios (non-root).
+
+Los manifiestos `.yaml` de infraestructura se encuentran disponibles en la carpeta /ci del proyecto.
+
+## Frontend - CONCEPT
 - **Flutter** - Aplicación móvil multiplataforma
 - **React.js** - Versión web
 - **Tailwind CSS** - Estilos para la web
@@ -118,66 +162,71 @@ TekoApp-Frontend/
 └── README.md                  # Documentación adicional
 ````
 
-#### 📲 Instalación (Flutter)
-##### 1. Clona el repositorio:
+### 📲 Instalación (Flutter)
+#### 1. Clona el repositorio:
 ````bash
 git clone https://github.com/josepanz/TekoApp-Frontend-Mobile.git
 ````
 
-##### 2. Instala dependencias:
+#### 2. Instala dependencias:
 ````bash
 flutter pub get
 ````
 
-##### 3. Configura las variables de entorno (lib/config/env.dart):
+#### 3. Configura las variables de entorno (lib/config/env.dart):
 ````env
 const String API_URL = "http://localhost:3000";
 const String GOOGLE_MAPS_API_KEY = "tu_api_key";
 ````
 
-##### 4. Ejecuta la app:
+#### 4. Ejecuta la app:
 ````bash
 flutter run
 ````
 
-#### 🌐 Instalación (Web - React.js)
-##### 1. Clona el repositorio:
+### 🌐 Instalación (Web - React.js)
+#### 1. Clona el repositorio:
 ````bash
 git clone https://github.com/josepanz/TekoApp-Frontend-Web.git
 ````
 
-##### 2. Entra a la carpeta web:
+#### 2. Entra a la carpeta web:
 ````bash
 cd web
 ````
 
-##### 3.Instala dependencias:
+#### 3.Instala dependencias:
 ````bash
-npm install
+pnpm install
 ````
-##### 4. Ejecuta en desarrollo:
+#### 4. Ejecuta en desarrollo:
 ````bash
-npm start
+pnpm start
 ````
-#### 📦 Despliegue
-##### Backend: Usa Docker para empaquetar y desplegar en AWS/GCP:
+
+## 📦 Despliegue
+### Backend: Usa Docker para empaquetar y desplegar en AWS/GCP:
 ````bash
 docker-compose up --build
 ````
-##### Frontend:
-###### - Flutter: Genera APK/IPA con flutter build.
-###### - React.js: Despliega en Vercel/Netlify.
+### Frontend:
+#### - Flutter: Genera APK/IPA con flutter build.
+#### - React.js: Despliega en Vercel/Netlify.
 
 📢 Nota: Asegúrate de configurar correctamente las claves de API (Google Maps, Firebase) y las variables de entorno antes de desplegar.
 
 ### 🤝 Cómo Contribuir
-1. Haz fork del proyecto
-2. Crea tu rama (git checkout -b feature/nueva-funcionalidad)
-3. Haz commit de tus cambios (git commit -m 'Añade nueva funcionalidad')
-4. Haz push a la rama (git push origin feature/nueva-funcionalidad)
-5. Abre un Pull Request
+¡Las contribuciones hacen que la comunidad de código abierto sea un lugar increíble! Si quieres mejorar TekoApp:
+1. Haz un Fork del proyecto.
+2. Crea tu rama funcional (git checkout -b feature/NuevaIdea).
+3. Realiza tus commits respetando el linter y los tests (git commit -m 'feat: Añade NuevaIdea').
+4. Sube tu rama (git push origin feature/NuevaIdea).
+5. Abre un Pull Request.
 
-## ✉️ Contacto
-José Panza - En X @PanzerPy - josepanza1@gmail.com
+**Nota para devs:** Asegúrate de correr la suite de tests unitarios y e2e (pnpm test) antes de abrir tu PR. Todo el código debe estar fuertemente tipado.
 
-✨ "Conectando talento con necesidad, donde sea, cuando sea."
+## ✉️ Contacto y Arquitectura
+José Panza CEO/CTO & Tech Lead Developer & Architect & Senior Staff Engineer
+
+- 𝕏 (Twitter): @PanzerPy
+- 📧 Email: josepanza1@gmail.com
