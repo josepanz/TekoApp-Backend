@@ -4,10 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bull';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
-import {
-  getMongooseConfig,
-  getBullConfig,
-} from '@/core/database/base/mongo/database.config';
+import { getMongooseConfig } from '@/core/database/base/mongo/database.config';
+import { getBullConfig } from '@/core/config/redis.config';
 
 @Global()
 @Module({

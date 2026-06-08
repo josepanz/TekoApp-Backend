@@ -65,7 +65,7 @@ model AccessLevel {
 
 model Users {
   id              Int               @id @default(autoincrement())
-  referenceId     String            @unique @default(uuid())
+  referenceId     String            @unique @default(uuid()) @map("reference_id")
   legacyUserId    String?           @map("legacy_user_id")
   email           String            @unique @map("email")
   status          UserStatus        @default(ACTIVE) @map("status")
@@ -628,7 +628,7 @@ model Payments {
   id                    String          @id @default(uuid()) @db.Uuid
   userId                Int             @map("user_id")
   professionalId        Int             @map("professional_id")
-  serviceRequestId      String          @map("service_request_id") 
+  serviceRequestId      String          @map("service_request_id")
   amount                Decimal         @db.Decimal(10, 2)
   currencyCode          String          @map("currency_code") @db.VarChar(3)
   fee                   Decimal         @default(0.00) @db.Decimal(10, 2)
@@ -713,17 +713,17 @@ enum RatingType {
 }
 
 model Rating {
-  id              String     @id @default(uuid()) @db.Uuid
-  userId          Int        @map("user_id")
-  professionalId  Int        @map("professional_id")
-  serviceId       String?    @map("service_id")
-  type            RatingType @default(CLIENT_TO_PROFESSIONAL)
-  rating          Decimal    @db.Decimal(3, 2)
-  review          String?    @db.Text
-  criteria        Json?      @db.JsonB
-  isAnonymous     Boolean    @default(false) @map("is_anonymous")
-  isReported      Boolean    @default(false) @map("is_reported")
-  reportReason    String?    @map("report_reason") @db.Text
+  id             String     @id @default(uuid()) @db.Uuid
+  userId         Int        @map("user_id")
+  professionalId Int        @map("professional_id")
+  serviceId      String?    @map("service_id")
+  type           RatingType @default(CLIENT_TO_PROFESSIONAL)
+  rating         Decimal    @db.Decimal(3, 2)
+  review         String?    @db.Text
+  criteria       Json?      @db.JsonB
+  isAnonymous    Boolean    @default(false) @map("is_anonymous")
+  isReported     Boolean    @default(false) @map("is_reported")
+  reportReason   String?    @map("report_reason") @db.Text
 
   createdAt       DateTime  @default(now()) @map("created_at")
   createdBy       String?   @map("created_by")
@@ -797,15 +797,15 @@ model Promotion {
 }
 
 model PromotionUsage {
-  id             String    @id @default(uuid()) @db.Uuid
-  promotionId    String    @map("promotion_id") @db.Uuid
-  userId         Int       @map("user_id")
-  serviceId      String?   @map("service_id")
-  originalAmount Decimal   @map("original_amount") @db.Decimal(10, 2)
-  discountAmount Decimal   @map("discount_amount") @db.Decimal(10, 2)
-  finalAmount    Decimal   @map("final_amount") @db.Decimal(10, 2)
-  metadata       Json?     @db.JsonB
-  usedAt         DateTime  @default(now()) @map("used_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  promotionId    String   @map("promotion_id") @db.Uuid
+  userId         Int      @map("user_id")
+  serviceId      String?  @map("service_id")
+  originalAmount Decimal  @map("original_amount") @db.Decimal(10, 2)
+  discountAmount Decimal  @map("discount_amount") @db.Decimal(10, 2)
+  finalAmount    Decimal  @map("final_amount") @db.Decimal(10, 2)
+  metadata       Json?    @db.JsonB
+  usedAt         DateTime @default(now()) @map("used_at")
 
   promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   user      Users     @relation(fields: [userId], references: [id])
