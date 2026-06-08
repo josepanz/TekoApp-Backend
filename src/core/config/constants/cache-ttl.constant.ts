@@ -18,6 +18,6 @@ export type CacheTypeKey = keyof typeof CACHE_TTL_CONFIG;
 /**
  * Obtiene el TTL por defecto para un tipo de entidad específico
  */
-export function getCacheTTL(type: CacheTypeKey | string): number {
+export function getCacheTTL(type: string): number {
   return CACHE_TTL_CONFIG[type as CacheTypeKey] ?? 300; // 5 minutos default
 }

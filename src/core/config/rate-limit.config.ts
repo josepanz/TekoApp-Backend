@@ -78,8 +78,8 @@ export class RateLimitConfig {
       standardHeaders: true,
       legacyHeaders: false,
       keyGenerator: (req: Request): string => {
-        const user = (req as any).user;
-        return user?.id || req.ip || 'anonymous';
+        const user = (req as Request & { user?: { id: string } }).user;
+        return user?.id ?? req.ip ?? 'anonymous';
       },
     });
 
@@ -95,8 +95,8 @@ export class RateLimitConfig {
       standardHeaders: true,
       legacyHeaders: false,
       keyGenerator: (req: Request): string => {
-        const user = (req as any).user;
-        return user?.id || req.ip || 'anonymous';
+        const user = (req as Request & { user?: { id: string } }).user;
+        return user?.id ?? req.ip ?? 'anonymous';
       },
     });
 
@@ -112,8 +112,8 @@ export class RateLimitConfig {
       standardHeaders: true,
       legacyHeaders: false,
       keyGenerator: (req: Request): string => {
-        const user = (req as any).user;
-        return user?.id || req.ip || 'anonymous';
+        const user = (req as Request & { user?: { id: string } }).user;
+        return user?.id ?? req.ip ?? 'anonymous';
       },
     });
 

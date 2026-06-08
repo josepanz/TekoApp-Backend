@@ -3,10 +3,10 @@ import { ConfigType } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { AppConfigType } from '@core/config/config-loader';
 import { IJwtPayload } from '@api/auth/interfaces/jwt-payload.interface';
-import { Algorithm } from 'jsonwebtoken';
+import { Algorithm, SignOptions } from 'jsonwebtoken';
 
 export class CryptoHelper {
   private static configService: ConfigType<AppConfigType>;
@@ -109,10 +109,7 @@ export class CryptoHelper {
         tokenType: tokenType,
       },
       this.configService.authentication.privateKey,
-      {
-        algorithm: algorithm,
-        expiresIn: expires,
-      },
+      { algorithm, expiresIn: expires } as unknown as SignOptions,
     );
   }
 

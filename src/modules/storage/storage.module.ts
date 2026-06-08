@@ -10,17 +10,17 @@ import { STORAGE_MODULE_OPTIONS } from './interfaces/storage.interface';
       provide: S3Client,
       useFactory: () =>
         new S3Client({
-          region: APP_CONFIG().s3.region!,
+          region: APP_CONFIG().s3.region,
           credentials: {
-            accessKeyId: APP_CONFIG().s3.accessKeyId!,
-            secretAccessKey: APP_CONFIG().s3.secretAccessKey!,
+            accessKeyId: APP_CONFIG().s3.accessKeyId,
+            secretAccessKey: APP_CONFIG().s3.secretAccessKey,
           },
         }),
     },
     {
       provide: STORAGE_MODULE_OPTIONS,
       useFactory: () => ({
-        defaultBucket: APP_CONFIG().s3.bucketName!,
+        defaultBucket: APP_CONFIG().s3.bucketName,
         maxConcurrency: APP_CONFIG().s3.maxConcurrency,
         retryAttempts: APP_CONFIG().s3.retryAttempts,
         retryDelayMs: APP_CONFIG().s3.retryDelayMs,

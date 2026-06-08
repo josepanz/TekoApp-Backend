@@ -1,4 +1,4 @@
-import { AccessLevel, UserProfileStatus, UserStatus } from '@prisma/client';
+import { UserProfileStatus, UserStatus } from '@prisma/client';
 
 export interface IUserDataOnJwt {
   id: number;
@@ -6,7 +6,7 @@ export interface IUserDataOnJwt {
   email: string;
   firstName: string;
   lastName: string;
-  accessLevelId: Number;
+  accessLevelId: number;
   userStatus: UserStatus;
   profileStatus: UserProfileStatus;
   permissions: string[];

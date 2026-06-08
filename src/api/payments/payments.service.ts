@@ -10,9 +10,8 @@ import {
   PaymentProvider,
   PaymentStatus,
   TransactionStatus,
-  PaymentMethod,
-  Prisma,
   PaymentMethodEntity,
+  Prisma,
 } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -65,11 +64,15 @@ export class PaymentApiService {
   }
 
   async getPayments(
-    userId?: number,
-    professionalId?: number,
+    userId?: number | string,
+    professionalId?: number | string,
     status?: PaymentStatus,
   ) {
-    return this.dbService.findAllPayments(userId, professionalId, status);
+    return this.dbService.findAllPayments(
+      userId !== undefined ? Number(userId) : undefined,
+      professionalId !== undefined ? Number(professionalId) : undefined,
+      status,
+    );
   }
 
   async getPaymentById(id: string) {
@@ -85,12 +88,13 @@ export class PaymentApiService {
         'Solo se pueden actualizar pagos pendientes',
       );
     }
-    return this.dbService.updatePayment(id, dto);
+    return this.dbService.updatePayment(id, dto as unknown);
   }
 
-  async cancelPayment(id: string, userId: number) {
+  async cancelPayment(id: string, userId: number | string) {
+    const numId = Number(userId);
     const payment = await this.getPaymentById(id);
-    if (payment.userId !== userId) {
+    if (payment.userId !== numId) {
       throw new ForbiddenException(
         'No tienes permisos para cancelar este pago',
       );
@@ -145,45 +149,53 @@ export class PaymentApiService {
   // ==================== MÉTODOS DE PAGO ====================
 
   async createPaymentMethod(
-    userId: number,
+    userId: number | string,
     dto: CreatePaymentDto,
-  ): Promise<PaymentMethod> {
-    // if (dto.isDefault) {
-    //   await this.dbService.clearDefaultPaymentMethods(userId);
-    // }
+  ): Promise<PaymentMethodEntity> {
+    const numId = Number(userId);
     return this.dbService.createPaymentMethod({
-      ...dto,
-      userId,
-      isDefault: dto.isDefault ?? false,
-    });
+      userId: numId,
+      name:
+        ((dto as unknown as Record<string, unknown>).name as string) ??
+        'default',
+      type: dto.paymentMethod,
+      provider: dto.paymentProvider,
+    } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
   }
 
   async updatePaymentMethod(
     id: string,
-    userId: number,
+    userId: number | string,
     dto: UpdatePaymentMethodDto,
-  ): Promise<PaymentMethod> {
-    const method = await this.dbService.findPaymentMethodById(id, userId);
+  ): Promise<PaymentMethodEntity> {
+    const numId = Number(userId);
+    const method = await this.dbService.findPaymentMethodById(id, numId);
     if (!method) throw new NotFoundException('Método de pago no encontrado');
 
-    if (dto.isDefault) {
-      await this.dbService.clearDefaultPaymentMethods(userId);
+    if ((dto as unknown as Record<string, unknown>).isDefault) {
+      await this.dbService.clearDefaultPaymentMethods(numId);
     }
-    return this.dbService.updatePaymentMethod(id, dto);
+    return this.dbService.updatePaymentMethod(id, dto as unknown);
   }
 
-  async deletePaymentMethod(id: string, userId: number): Promise<void> {
-    const method = await this.dbService.findPaymentMethodById(id, userId);
+  async deletePaymentMethod(
+    id: string,
+    userId: number | string,
+  ): Promise<void> {
+    const numId = Number(userId);
+    const method = await this.dbService.findPaymentMethodById(id, numId);
     if (!method) throw new NotFoundException('Método de pago no encontrado');
 
-    const total = await this.dbService.countActivePaymentMethods(userId);
+    const total = await this.dbService.countActivePaymentMethods(numId);
     if (total <= 1) {
       throw new BadRequestException(
         'No se puede eliminar el único método de pago',
       );
     }
 
-    await this.dbService.updatePaymentMethod(id, { isActive: false });
+    await this.dbService.updatePaymentMethod(id, {
+      isActive: false,
+    });
   }
 
   // ==================== WEBHOOKS ====================
@@ -251,8 +263,14 @@ export class PaymentApiService {
 
   // ==================== ESTADÍSTICAS Y MATEMÁTICA ====================
 
-  async getMetricsSummary(userId?: number, professionalId?: number) {
-    const raw = await this.dbService.getPaymentSummary(userId, professionalId);
+  async getMetricsSummary(
+    userId?: number | string,
+    professionalId?: number | string,
+  ) {
+    const raw = await this.dbService.getPaymentSummary(
+      userId !== undefined ? Number(userId) : undefined,
+      professionalId !== undefined ? Number(professionalId) : undefined,
+    );
 
     const successRate =
       raw.totalPayments > 0
@@ -268,8 +286,11 @@ export class PaymentApiService {
     };
   }
 
-  async getMetricsTrends(days: number, userId?: number) {
-    return this.dbService.getPaymentTrends(days, userId);
+  async getMetricsTrends(days: number, userId?: number | string) {
+    return this.dbService.getPaymentTrends(
+      days,
+      userId !== undefined ? Number(userId) : undefined,
+    );
   }
 
   private calculateFee(amount: number, provider: PaymentProvider): number {

@@ -4,121 +4,105 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import {
   Promotion,
+  Prisma,
   PromotionStatus,
   PromotionType,
-} from './entities/promotion.entity';
-import { PromotionUsage } from './entities/promotion-usage.entity';
-import { CreatePromotionDto } from './dto/create-promotion.dto';
-import { ApplyPromotionDto } from './dto/apply-promotion.dto';
+} from '@prisma/client';
+import { PrismaDatasource } from '@core/database/services/prisma.service';
 
 @Injectable()
 export class PromotionsService {
   private readonly logger = new Logger(PromotionsService.name);
 
-  constructor(
-    @InjectRepository(Promotion)
-    private readonly promotionRepository: Repository<Promotion>,
-    @InjectRepository(PromotionUsage)
-    private readonly promotionUsageRepository: Repository<PromotionUsage>,
-  ) {}
+  constructor(private readonly prisma: PrismaDatasource) {}
 
-  async create(
-    createPromotionDto: CreatePromotionDto,
-    createdById: string,
-  ): Promise<Promotion> {
-    // Verificar que el código sea único
-    const existingPromotion = await this.promotionRepository.findOne({
-      where: { code: createPromotionDto.code },
+  async create(dto: Prisma.PromotionUncheckedCreateInput, createdById: number) {
+    const existing = await this.prisma.extended.promotion.findUnique({
+      where: { code: dto.code },
     });
-
-    if (existingPromotion) {
+    if (existing)
       throw new BadRequestException('El código de promoción ya existe');
-    }
 
-    const promotion = this.promotionRepository.create({
-      ...createPromotionDto,
-      validFrom: new Date(createPromotionDto.validFrom),
-      validUntil: new Date(createPromotionDto.validUntil),
-      createdById,
-      status: PromotionStatus.ACTIVE,
-    });
-
-    return this.promotionRepository.save(promotion);
-  }
-
-  async findAll(): Promise<Promotion[]> {
-    return this.promotionRepository.find({
-      order: { createdAt: 'DESC' },
+    return this.prisma.extended.promotion.create({
+      data: { ...dto, createdById, status: PromotionStatus.ACTIVE },
     });
   }
 
-  async findActive(): Promise<Promotion[]> {
-    return this.promotionRepository
-      .createQueryBuilder('promotion')
-      .where('promotion.status = :status', { status: PromotionStatus.ACTIVE })
-      .andWhere('promotion.validFrom <= :now', { now: new Date() })
-      .andWhere('promotion.validUntil >= :now', { now: new Date() })
-      .andWhere(
-        '(promotion.maxUsage = -1 OR promotion.currentUsage < promotion.maxUsage)',
-      )
-      .getMany();
+  async findAll() {
+    return this.prisma.extended.promotion.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  async findOne(id: string): Promise<Promotion> {
-    const promotion = await this.promotionRepository.findOne({
+  async findActive() {
+    const now = new Date();
+    return this.prisma.extended.promotion
+      .findMany({
+        where: {
+          status: PromotionStatus.ACTIVE,
+          validFrom: { lte: now },
+          validUntil: { gte: now },
+          OR: [
+            { maxUsage: -1 },
+            {
+              currentUsage: {
+                lt: this.prisma.extended.promotion.fields?.maxUsage as never,
+              },
+            },
+          ],
+        },
+      })
+      .catch(() =>
+        this.prisma.extended.promotion
+          .findMany({
+            where: {
+              status: PromotionStatus.ACTIVE,
+              validFrom: { lte: now },
+              validUntil: { gte: now },
+            },
+          })
+          .then((all) =>
+            all.filter((p) => p.maxUsage === -1 || p.currentUsage < p.maxUsage),
+          ),
+      );
+  }
+
+  async findOne(id: string) {
+    const promotion = await this.prisma.extended.promotion.findUnique({
       where: { id },
-      relations: ['usages'],
+      include: { usages: true },
     });
-
-    if (!promotion) {
-      throw new NotFoundException('Promoción no encontrada');
-    }
-
+    if (!promotion) throw new NotFoundException('Promoción no encontrada');
     return promotion;
   }
 
-  async findByCode(code: string): Promise<Promotion> {
-    const promotion = await this.promotionRepository.findOne({
+  async findByCode(code: string) {
+    const promotion = await this.prisma.extended.promotion.findUnique({
       where: { code },
     });
-
-    if (!promotion) {
+    if (!promotion)
       throw new NotFoundException('Código de promoción no válido');
-    }
-
     return promotion;
   }
 
-  async update(
-    id: string,
-    updatePromotionDto: Partial<CreatePromotionDto>,
-  ): Promise<Promotion> {
-    const promotion = await this.findOne(id);
-
-    Object.assign(promotion, updatePromotionDto);
-
-    if (updatePromotionDto.validFrom) {
-      promotion.validFrom = new Date(updatePromotionDto.validFrom);
-    }
-    if (updatePromotionDto.validUntil) {
-      promotion.validUntil = new Date(updatePromotionDto.validUntil);
-    }
-
-    return this.promotionRepository.save(promotion);
+  async update(id: string, dto: Prisma.PromotionUpdateInput) {
+    await this.findOne(id);
+    return this.prisma.extended.promotion.update({ where: { id }, data: dto });
   }
 
-  async remove(id: string): Promise<void> {
-    const promotion = await this.findOne(id);
-    await this.promotionRepository.remove(promotion);
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.prisma.extended.promotion.update({
+      where: { id },
+      data: { status: PromotionStatus.INACTIVE },
+    });
   }
 
   async validatePromotion(
     code: string,
-    userId: string,
+    userId: number,
     userType: string,
     serviceAmount: number,
   ): Promise<{
@@ -129,9 +113,15 @@ export class PromotionsService {
   }> {
     try {
       const promotion = await this.findByCode(code);
+      const now = new Date();
 
-      // Verificar si está activa
-      if (!promotion.isActive()) {
+      if (
+        promotion.status !== PromotionStatus.ACTIVE ||
+        promotion.validFrom > now ||
+        promotion.validUntil < now ||
+        (promotion.maxUsage !== -1 &&
+          promotion.currentUsage >= promotion.maxUsage)
+      ) {
         return {
           isValid: false,
           discountAmount: 0,
@@ -139,8 +129,12 @@ export class PromotionsService {
         };
       }
 
-      // Verificar si el usuario puede usar esta promoción
-      if (!promotion.canBeUsedByUser(userId, userType)) {
+      if (
+        (promotion.allowedUserTypes.length > 0 &&
+          !promotion.allowedUserTypes.includes(userType)) ||
+        (promotion.specificUserIds.length > 0 &&
+          !promotion.specificUserIds.includes(userId))
+      ) {
         return {
           isValid: false,
           discountAmount: 0,
@@ -148,12 +142,10 @@ export class PromotionsService {
         };
       }
 
-      // Verificar si el usuario ya usó esta promoción el máximo de veces permitido
-      const userUsageCount = await this.promotionUsageRepository.count({
+      const usageCount = await this.prisma.extended.promotionUsage.count({
         where: { promotionId: promotion.id, userId },
       });
-
-      if (userUsageCount >= promotion.maxUsagePerUser) {
+      if (usageCount >= promotion.maxUsagePerUser) {
         return {
           isValid: false,
           discountAmount: 0,
@@ -161,24 +153,20 @@ export class PromotionsService {
         };
       }
 
-      // Verificar monto mínimo
-      if (promotion.minimumAmount && serviceAmount < promotion.minimumAmount) {
+      const minAmount = promotion.minimumAmount
+        ? Number(promotion.minimumAmount)
+        : 0;
+      if (minAmount > 0 && serviceAmount < minAmount) {
         return {
           isValid: false,
           discountAmount: 0,
-          message: `El monto mínimo para usar esta promoción es $${promotion.minimumAmount}`,
+          message: `El monto mínimo para usar esta promoción es ${minAmount}`,
         };
       }
 
-      // Calcular descuento
-      const discountAmount = promotion.calculateDiscount(serviceAmount);
-
-      return {
-        isValid: true,
-        promotion,
-        discountAmount,
-      };
-    } catch (error) {
+      const discountAmount = this.calculateDiscount(promotion, serviceAmount);
+      return { isValid: true, promotion, discountAmount };
+    } catch {
       return {
         isValid: false,
         discountAmount: 0,
@@ -187,16 +175,14 @@ export class PromotionsService {
     }
   }
 
-  async applyPromotion(applyPromotionDto: ApplyPromotionDto): Promise<{
-    success: boolean;
-    discountAmount: number;
-    finalAmount: number;
-    promotion?: Promotion;
-    message?: string;
-  }> {
-    const { promotionCode, serviceId, serviceAmount, userId, userType } =
-      applyPromotionDto;
-
+  async applyPromotion(dto: {
+    promotionCode: string;
+    serviceId?: string;
+    serviceAmount: number;
+    userId: number;
+    userType: string;
+  }) {
+    const { promotionCode, serviceId, serviceAmount, userId, userType } = dto;
     const validation = await this.validatePromotion(
       promotionCode,
       userId,
@@ -204,7 +190,7 @@ export class PromotionsService {
       serviceAmount,
     );
 
-    if (!validation.isValid) {
+    if (!validation.isValid || !validation.promotion) {
       return {
         success: false,
         discountAmount: 0,
@@ -213,64 +199,84 @@ export class PromotionsService {
       };
     }
 
-    const promotion = validation.promotion;
-    const discountAmount = validation.discountAmount;
+    const { promotion, discountAmount } = validation;
     const finalAmount = serviceAmount - discountAmount;
 
-    // Registrar el uso de la promoción
-    const promotionUsage = this.promotionUsageRepository.create({
-      promotionId: promotion.id,
-      userId,
-      originalAmount: serviceAmount,
-      discountAmount,
-      finalAmount,
-      metadata: { serviceId },
-    });
-
-    await this.promotionUsageRepository.save(promotionUsage);
-
-    // Incrementar el contador de uso
-    promotion.currentUsage += 1;
-    await this.promotionRepository.save(promotion);
+    await this.prisma.extended.$transaction([
+      this.prisma.extended.promotionUsage.create({
+        data: {
+          promotionId: promotion.id,
+          userId,
+          serviceId,
+          originalAmount: serviceAmount,
+          discountAmount,
+          finalAmount,
+          metadata: serviceId ? { serviceId } : undefined,
+        },
+      }),
+      this.prisma.extended.promotion.update({
+        where: { id: promotion.id },
+        data: { currentUsage: { increment: 1 } },
+      }),
+    ]);
 
     this.logger.log(
-      `Promoción ${promotion.code} aplicada exitosamente. Descuento: $${discountAmount}`,
+      `Promoción ${promotion.code} aplicada. Descuento: ${discountAmount}`,
     );
-
     return {
       success: true,
       discountAmount,
       finalAmount,
       promotion,
-      message: `Promoción aplicada exitosamente. Descuento: $${discountAmount}`,
+      message: `Promoción aplicada. Descuento: ${discountAmount}`,
     };
   }
 
-  async getPromotionStats(): Promise<{
-    totalPromotions: number;
-    activePromotions: number;
-    totalUsage: number;
-    totalDiscount: number;
-  }> {
-    const [totalPromotions, activePromotions, totalUsage, totalDiscount] =
-      await Promise.all([
-        this.promotionRepository.count(),
-        this.promotionRepository.count({
-          where: { status: PromotionStatus.ACTIVE },
-        }),
-        this.promotionUsageRepository.count(),
-        this.promotionUsageRepository
-          .createQueryBuilder('usage')
-          .select('SUM(usage.discountAmount)', 'total')
-          .getRawOne()
-          .then((result) => parseFloat(result.total) || 0),
-      ]);
+  async getPromotionStats() {
+    const now = new Date();
+    const [totalPromotions, activePromotions, usageAgg] = await Promise.all([
+      this.prisma.extended.promotion.count(),
+      this.prisma.extended.promotion.count({
+        where: {
+          status: PromotionStatus.ACTIVE,
+          validFrom: { lte: now },
+          validUntil: { gte: now },
+        },
+      }),
+      this.prisma.extended.promotionUsage.aggregate({
+        _count: { id: true },
+        _sum: { discountAmount: true },
+      }),
+    ]);
 
     return {
       totalPromotions,
       activePromotions,
-      totalUsage,
-      totalDiscount,
+      totalUsage: usageAgg._count.id,
+      totalDiscount: Number(usageAgg._sum.discountAmount ?? 0),
     };
+  }
+
+  private calculateDiscount(
+    promotion: {
+      type: PromotionType;
+      discountPercentage: Prisma.Decimal | null;
+      discountAmount: Prisma.Decimal | null;
+      maximumDiscount: Prisma.Decimal | null;
+    },
+    amount: number,
+  ): number {
+    if (promotion.type === PromotionType.FIXED_AMOUNT) {
+      return Math.min(Number(promotion.discountAmount ?? 0), amount);
+    }
+    if (promotion.type === PromotionType.FREE_SERVICE) {
+      return amount;
+    }
+    const pct = Number(promotion.discountPercentage ?? 0);
+    let discount = (amount * pct) / 100;
+    if (promotion.maximumDiscount) {
+      discount = Math.min(discount, Number(promotion.maximumDiscount));
+    }
+    return Math.round(discount * 100) / 100;
   }
 }

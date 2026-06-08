@@ -1,13 +1,9 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { ConfigService } from '@nestjs/config';
+import type { JwtPayload } from 'jsonwebtoken';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
@@ -25,25 +21,28 @@ export class WsAuthGuard implements CanActivate {
         throw new WsException('Token no proporcionado');
       }
 
-      const payload = await this.jwtService.verifyAsync(token, {
+      const payload = await this.jwtService.verifyAsync<
+        JwtPayload & { sub: string; professionalId?: number }
+      >(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
       // Agregar el usuario al socket para uso posterior
-      client.data.user = payload;
+      (client.data as Record<string, unknown>).user = payload;
 
       // Unir al usuario a su sala personal
-      client.join(`user_${payload.sub}`);
+      void client.join(`user_${payload.sub}`);
 
       return true;
-    } catch (error) {
+    } catch {
       throw new WsException('Token inválido');
     }
   }
 
   private extractTokenFromHeader(client: Socket): string | undefined {
     const auth =
-      client.handshake.auth.token || client.handshake.headers.authorization;
+      (client.handshake.auth as Record<string, unknown>)['token'] ||
+      client.handshake.headers.authorization;
 
     if (!auth) {
       return undefined;
@@ -53,6 +52,6 @@ export class WsAuthGuard implements CanActivate {
       return auth.substring(7);
     }
 
-    return auth;
+    return typeof auth === 'string' ? auth : undefined;
   }
 }

@@ -24,7 +24,12 @@ export const getMongooseConfig = (
 export const getBullConfig = (
   configService: ConfigService,
 ): BullModuleOptions => {
-  const redisConfig = configService.get('config.redis');
+  const redisConfig = configService.get<{
+    host: string;
+    port: number;
+    password?: string;
+    db?: number;
+  }>('config.redis');
 
   return {
     redis: {

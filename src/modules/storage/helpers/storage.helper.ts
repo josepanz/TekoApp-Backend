@@ -101,8 +101,9 @@ export class StorageHelper {
     return expiresIn;
   }
 
-  static isRetryable(error: any): boolean {
-    const status = error?.$metadata?.httpStatusCode;
-    return status === 429 || status >= 500;
+  static isRetryable(error: unknown): boolean {
+    const status = (error as { $metadata?: { httpStatusCode?: number } })
+      ?.$metadata?.httpStatusCode;
+    return status === 429 || (status !== undefined && status >= 500);
   }
 }

@@ -7,26 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Example {
-  id             Int    @id @default(autoincrement())
-  email          String @unique
-  firstName      String @map("first_name")
-  lastName       String @map("last_name")
-  documentNumber String @map("document_number")
-
-  // Audit fields
-  createdAt       DateTime  @default(now()) @map("created_at")
-  createdBy       String?   @map("created_by")
-  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
-  lastChangedBy   String?   @map("last_changed_by")
-  changedReason   String?   @map("changed_reason")
-  isActive        Boolean   @default(true) @map("is_active")
-  checksum        String?   @map("checksum")
-  changeSignature String?   @map("change_signature")
-
-  @@map("example")
-}
-
 model AuditLogs {
   id            BigInt   @id @default(autoincrement())
   tableName     String   @map("table_name")
@@ -121,6 +101,8 @@ model Users {
   accessLevel           AccessLevel?          @relation(fields: [accessLevelId], references: [id])
   payments              Payments[]
   paymentMethodEntities PaymentMethodEntity[]
+  ratings               Rating[]
+  promotionUsages       PromotionUsage[]
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -386,6 +368,7 @@ model Professionals {
   services        Services[]
   serviceRequests ServiceRequests[]
   payments        Payments[]
+  ratings         Rating[]
 
   @@index([status])
   @@index([isAvailable])
@@ -437,6 +420,7 @@ model Services {
 
   requests ServiceRequests[]
   payments Payments[]
+  ratings  Rating[]
   users    Users?            @relation(fields: [userId], references: [id])
   category Category          @relation(fields: [categoryId], references: [id])
 
@@ -663,6 +647,8 @@ model Payments {
   paidAt                DateTime?       @map("paid_at")
   failureReason         String?         @map("failure_reason") @db.Text
   refundDetails         Json?           @map("refund_details") @db.JsonB
+  platformFee           Decimal         @default(0.00) @map("platform_fee") @db.Decimal(10, 2)
+  professionalNetAmount Decimal?        @map("professional_net_amount") @db.Decimal(10, 2)
   isRecurring           Boolean         @default(false) @map("is_recurring")
   recurringInterval     String?         @map("recurring_interval") @db.VarChar(50)
   nextPaymentDate       DateTime?       @map("next_payment_date") @db.Timestamp
@@ -715,4 +701,180 @@ model PaymentTransaction {
   @@index([paymentId, type])
   @@index([status, createdAt])
   @@map("payment_transactions")
+}
+
+// =====================================================================================================================
+// CALIFICACIONES Y REPUTACIÓN
+// =====================================================================================================================
+
+enum RatingType {
+  CLIENT_TO_PROFESSIONAL
+  PROFESSIONAL_TO_CLIENT
+}
+
+model Rating {
+  id              String     @id @default(uuid()) @db.Uuid
+  userId          Int        @map("user_id")
+  professionalId  Int        @map("professional_id")
+  serviceId       String?    @map("service_id")
+  type            RatingType @default(CLIENT_TO_PROFESSIONAL)
+  rating          Decimal    @db.Decimal(3, 2)
+  review          String?    @db.Text
+  criteria        Json?      @db.JsonB
+  isAnonymous     Boolean    @default(false) @map("is_anonymous")
+  isReported      Boolean    @default(false) @map("is_reported")
+  reportReason    String?    @map("report_reason") @db.Text
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  user         Users         @relation(fields: [userId], references: [id])
+  professional Professionals @relation(fields: [professionalId], references: [id])
+  service      Services?     @relation(fields: [serviceId], references: [id])
+
+  @@unique([userId, professionalId, serviceId, type])
+  @@index([userId])
+  @@index([professionalId])
+  @@index([serviceId])
+  @@map("ratings")
+}
+
+// =====================================================================================================================
+// PROMOCIONES Y DESCUENTOS
+// =====================================================================================================================
+
+enum PromotionType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SERVICE
+}
+
+enum PromotionStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  DEPLETED
+}
+
+model Promotion {
+  id                 String          @id @default(uuid()) @db.Uuid
+  code               String          @unique @db.VarChar(50)
+  name               String          @db.VarChar(255)
+  description        String?         @db.Text
+  type               PromotionType   @default(PERCENTAGE)
+  status             PromotionStatus @default(ACTIVE)
+  discountPercentage Decimal?        @map("discount_percentage") @db.Decimal(5, 2)
+  discountAmount     Decimal?        @map("discount_amount") @db.Decimal(10, 2)
+  minimumAmount      Decimal?        @map("minimum_amount") @db.Decimal(10, 2)
+  maximumDiscount    Decimal?        @map("maximum_discount") @db.Decimal(10, 2)
+  maxUsage           Int             @default(-1) @map("max_usage")
+  maxUsagePerUser    Int             @default(1) @map("max_usage_per_user")
+  currentUsage       Int             @default(0) @map("current_usage")
+  validFrom          DateTime        @map("valid_from")
+  validUntil         DateTime        @map("valid_until")
+  allowedUserTypes   String[]        @default([]) @map("allowed_user_types")
+  specificUserIds    Int[]           @default([]) @map("specific_user_ids")
+  createdById        Int?            @map("created_by_id")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  usages PromotionUsage[]
+
+  @@index([code])
+  @@index([status, validFrom, validUntil])
+  @@map("promotions")
+}
+
+model PromotionUsage {
+  id             String    @id @default(uuid()) @db.Uuid
+  promotionId    String    @map("promotion_id") @db.Uuid
+  userId         Int       @map("user_id")
+  serviceId      String?   @map("service_id")
+  originalAmount Decimal   @map("original_amount") @db.Decimal(10, 2)
+  discountAmount Decimal   @map("discount_amount") @db.Decimal(10, 2)
+  finalAmount    Decimal   @map("final_amount") @db.Decimal(10, 2)
+  metadata       Json?     @db.JsonB
+  usedAt         DateTime  @default(now()) @map("used_at")
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  user      Users     @relation(fields: [userId], references: [id])
+
+  @@index([promotionId])
+  @@index([userId])
+  @@map("promotion_usages")
+}
+
+// =====================================================================================================================
+// CONFIGURACIÓN DE FEES Y COMISIONES
+// =====================================================================================================================
+
+enum PaymentChannelType {
+  QR
+  LINK
+  CHECKOUT
+  DIRECT
+  WALLET
+}
+
+model PaymentProviderConfig {
+  id            Int                @id @default(autoincrement())
+  provider      PaymentProvider    @unique
+  displayName   String             @map("display_name") @db.VarChar(100)
+  feePercentage Decimal            @default(0.0000) @map("fee_percentage") @db.Decimal(6, 4)
+  feeFixed      Decimal            @default(0.00) @map("fee_fixed") @db.Decimal(10, 2)
+  channelType   PaymentChannelType @default(DIRECT) @map("channel_type")
+  isActive      Boolean            @default(true) @map("is_active")
+  metadata      Json?              @db.JsonB
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@map("payment_provider_config")
+}
+
+enum CommissionTarget {
+  ALL
+  CATEGORY
+  PROFESSIONAL
+}
+
+model PlatformCommissionConfig {
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar(100)
+  description String?          @db.Text
+  percentage  Decimal          @default(0.0000) @db.Decimal(6, 4)
+  fixedAmount Decimal          @default(0.00) @map("fixed_amount") @db.Decimal(10, 2)
+  minimumFee  Decimal?         @map("minimum_fee") @db.Decimal(10, 2)
+  maximumFee  Decimal?         @map("maximum_fee") @db.Decimal(10, 2)
+  target      CommissionTarget @default(ALL)
+  targetId    String?          @map("target_id") @db.VarChar(50)
+  isDefault   Boolean          @default(false) @map("is_default")
+  isActive    Boolean          @default(true) @map("is_active")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@index([isDefault, isActive])
+  @@map("platform_commission_config")
 }

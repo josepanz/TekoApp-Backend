@@ -26,7 +26,7 @@ export class AuthApiService {
       email: dto.email,
       encryptedPassword: dto.encryptedPassword,
       userAgent,
-      rembemberMe: dto.rememberMe!,
+      rembemberMe: dto.rememberMe,
     });
 
     if (loginResult.success) {

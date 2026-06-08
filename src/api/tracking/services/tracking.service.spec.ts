@@ -4,26 +4,25 @@ import { ConfigService } from '@nestjs/config';
 import { TrackingApiService } from './tracking.service';
 import { TrackingDbService } from '@modules/tracking-db/services/tacking-db.service';
 
+const mockSaveLocationPing = jest.fn();
+const mockFindInRadius = jest.fn();
+const mockConfigGet = jest.fn();
+
 describe('TrackingApiService', () => {
   let service: TrackingApiService;
-  let trackingDbServiceMock: jest.Mocked<TrackingDbService>;
-  let configServiceMock: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
-    trackingDbServiceMock = {
-      saveLocationPing: jest.fn(),
-      findInRadius: jest.fn(),
-    } as unknown as jest.Mocked<TrackingDbService>;
-
-    configServiceMock = {
-      get: jest.fn(),
-    } as unknown as jest.Mocked<ConfigService>;
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TrackingApiService,
-        { provide: TrackingDbService, useValue: trackingDbServiceMock },
-        { provide: ConfigService, useValue: configServiceMock },
+        {
+          provide: TrackingDbService,
+          useValue: {
+            saveLocationPing: mockSaveLocationPing,
+            findInRadius: mockFindInRadius,
+          },
+        },
+        { provide: ConfigService, useValue: { get: mockConfigGet } },
       ],
     }).compile();
 
@@ -42,7 +41,7 @@ describe('TrackingApiService', () => {
       latitude: -25.321,
       longitude: -57.552,
     };
-    trackingDbServiceMock.saveLocationPing.mockResolvedValue(undefined);
+    mockSaveLocationPing.mockResolvedValue(undefined);
 
     // Act
     const result = await service.processLocationPing(mockDto);
@@ -50,8 +49,6 @@ describe('TrackingApiService', () => {
     // Assert
     expect(result.success).toBe(true);
     expect(result.message).toBe('Ubicación procesada con éxito');
-    expect(trackingDbServiceMock.saveLocationPing).toHaveBeenCalledWith(
-      mockDto,
-    );
+    expect(mockSaveLocationPing).toHaveBeenCalledWith(mockDto);
   });
 });

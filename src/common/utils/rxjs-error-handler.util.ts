@@ -44,12 +44,13 @@ export function handleHttpErrors(contextMessage: string) {
         apiMessage = responseData.trim();
       } else if (typeof responseData === 'object' && responseData !== null) {
         // Caso B: El servidor devolvió un objeto JSON
-        const rawMessage =
-          (responseData as any).message ?? (responseData as any).error;
+        const responseObj = responseData as Record<string, unknown>;
+        const rawMessage = responseObj['message'] ?? responseObj['error'];
 
         if (Array.isArray(rawMessage)) {
           // Si NestJS/Class-Validator devuelve un array de errores, tomamos el primero o los unimos
-          apiMessage = rawMessage[0] || 'Empty error array';
+          const first: unknown = rawMessage[0];
+          apiMessage = typeof first === 'string' ? first : 'Empty error array';
         } else if (typeof rawMessage === 'string') {
           // Si es un string directo de toda la vida
           apiMessage = rawMessage;

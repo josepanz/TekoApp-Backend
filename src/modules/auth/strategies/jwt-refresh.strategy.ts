@@ -21,8 +21,9 @@ export class JwtRefreshStrategy extends PassportStrategy(
   ) {
     super({
       jwtFromRequest: (req: Request): string | null => {
-        const token = req.cookies?.['refreshToken'];
-        return typeof token === 'string' ? token : null;
+        const cookies = req.cookies as Record<string, string> | undefined;
+        const token: string | undefined = cookies?.['refreshToken'];
+        return token ?? null;
       },
       passReqToCallback: false,
       ignoreExpiration: false,

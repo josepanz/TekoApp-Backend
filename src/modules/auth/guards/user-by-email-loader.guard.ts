@@ -5,6 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { Users } from '@prisma/client';
 
@@ -13,9 +14,11 @@ export class UserByEmailLoaderGuard implements CanActivate {
   constructor(private readonly usersService: UsersDBService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
-    const body = request.body;
-    const query = request.query;
+    const request = context
+      .switchToHttp()
+      .getRequest<ExpressRequest & { user?: unknown }>();
+    const body = request.body as Record<string, unknown> | undefined;
+    const query = request.query as Record<string, unknown> | undefined;
 
     if (!body?.email && !query?.email) {
       throw new BadRequestException(
@@ -23,7 +26,7 @@ export class UserByEmailLoaderGuard implements CanActivate {
       );
     }
 
-    const email: string = body?.email ?? query?.email;
+    const email: string = (body?.email ?? query?.email) as string;
 
     const fullUser: Users | null =
       await this.usersService.findActiveUserByEmail(email);

@@ -61,7 +61,7 @@ export class PrismaPaginationUtil {
 
         if (words.length > 0) {
           finalWhere.AND = words.map((word) => ({
-            OR: options.searchFields!.map((field) => ({
+            OR: options.searchFields.map((field) => ({
               [field]: { contains: word, mode: 'insensitive' },
             })),
           }));

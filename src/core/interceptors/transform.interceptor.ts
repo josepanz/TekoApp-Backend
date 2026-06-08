@@ -24,11 +24,11 @@ export class TransformInterceptor<T>
     next: CallHandler,
   ): Observable<Response<T>> {
     const ctx = context.switchToHttp();
-    const request = ctx.getRequest();
-    const response = ctx.getResponse();
+    const request = ctx.getRequest<{ url: string }>();
+    const response = ctx.getResponse<{ statusCode: number }>();
 
     return next.handle().pipe(
-      map((data) => ({
+      map((data: T) => ({
         success: response.statusCode >= 200 && response.statusCode < 300,
         data,
         message: 'Operación exitosa',

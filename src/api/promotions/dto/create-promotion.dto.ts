@@ -7,9 +7,8 @@ import {
   IsArray,
   IsBoolean,
   Min,
-  Max,
 } from 'class-validator';
-import { PromotionType } from '../entities/promotion.entity';
+import { PromotionType } from '@prisma/client';
 
 export class CreatePromotionDto {
   @IsString()

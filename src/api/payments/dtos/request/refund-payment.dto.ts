@@ -1,11 +1,4 @@
-import {
-  IsNumber,
-  IsString,
-  IsOptional,
-  IsEnum,
-  Min,
-  Max,
-} from 'class-validator';
+import { IsNumber, IsString, IsOptional, IsEnum, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum RefundReason {
@@ -56,5 +49,5 @@ export class RefundPaymentDto {
     required: false,
   })
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

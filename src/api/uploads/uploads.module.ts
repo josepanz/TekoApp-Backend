@@ -10,7 +10,7 @@ import { extname } from 'path';
   imports: [
     MulterModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         storage: diskStorage({
           destination: configService.get<string>('UPLOAD_PATH', './uploads'),
           filename: (req, file, cb) => {

@@ -47,7 +47,7 @@ When asked to review a `.spec.ts` file:
 2. Verify assertions validate behavior, not internal implementation details
 3. Verify `jest.clearAllMocks()` is present in `afterEach`
 4. Flag missing coverage for untested branches or error paths
-5. Run `npm run test -- <file>.spec.ts` to confirm tests compile and pass
+5. Run `pnpm run test -- <file>.spec.ts` to confirm tests compile and pass
 
 ## What I don't do
 
@@ -60,3 +60,7 @@ When asked to review a `.spec.ts` file:
 
 Always output the complete `.spec.ts` file, ready to run — never partial snippets.
 Place the file alongside the file under test, following the project convention.
+
+## Reglas del proyecto
+- @./rules/test.md
+- @./rules/typescript.md

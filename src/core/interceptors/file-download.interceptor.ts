@@ -32,7 +32,7 @@ export class FileDownloadInterceptor implements NestInterceptor {
 
   constructor(private readonly reflector: Reflector) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const isDownload = this.reflector.get<boolean>(
       DOWNLOAD_FILE_KEY,
       context.getHandler(),

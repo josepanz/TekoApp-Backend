@@ -27,7 +27,7 @@ export class NotificationsProcessor {
       );
 
       for (const channel of channels) {
-        await this.sendNotificationByChannel(channel, job.data);
+        this.sendNotificationByChannel(channel, job.data);
       }
 
       await this.dbService.updateStatusByIdDirectly(notificationId, {
@@ -52,10 +52,10 @@ export class NotificationsProcessor {
     }
   }
 
-  private async sendNotificationByChannel(
+  private sendNotificationByChannel(
     channel: string,
     data: NotificationJobPayload,
-  ): Promise<void> {
+  ): void {
     switch (channel) {
       case 'email':
         this.logger.log(

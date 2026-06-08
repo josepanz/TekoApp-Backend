@@ -11,10 +11,10 @@ export interface IExcelColumn {
 export interface IReportDataMetadata {
   excelColumns?: IExcelColumn[]; // Estructura dinámica de columnas para planillas
   title?: string; // Nombre de la pestaña de Excel
-  [key: string]: any; // Variables libres (ej: idLote, totalRegistros, etc.)
+  [key: string]: unknown; // Variables libres (ej: idLote, totalRegistros, etc.)
 }
 
-export interface IReportPayload<T = any> {
+export interface IReportPayload<T = unknown> {
   metadata: IReportDataMetadata;
   items: T[]; // Datos crudos mapeados (filas)
 }

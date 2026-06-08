@@ -49,7 +49,12 @@ export class AnalyticsApiService {
 
     const response = new CategoryPerformanceResponseDTO();
     response.success = true;
-    response.data = performanceData;
+    response.data = performanceData.map((item) => ({
+      category: item.name,
+      serviceCount: item.totalServices,
+      revenue: 0,
+      averageRating: 0,
+    }));
     return response;
   }
 

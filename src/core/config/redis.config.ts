@@ -5,7 +5,12 @@ import { BullModuleOptions } from '@nestjs/bull';
 export const getBullConfig = (
   configService: ConfigService,
 ): BullModuleOptions => {
-  const redisConfig = configService.get('config.redis');
+  const redisConfig = configService.get<{
+    host?: string;
+    port?: number;
+    password?: string;
+    queueDb?: number;
+  }>('config.redis');
 
   return {
     redis: {

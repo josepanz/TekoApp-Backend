@@ -23,7 +23,7 @@ export class SwaggerConfig {
         ) as PackageJson;
         version = packageJson.version;
       }
-    } catch (error) {
+    } catch {
       this.logger.warn(
         'No se pudo cargar la versión desde package.json, usando 1.0.0 por defecto.',
       );

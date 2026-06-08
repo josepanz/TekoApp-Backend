@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { RatingType } from '../entities/rating.entity';
+import { RatingType } from '@prisma/client';
 
 class RatingCriteriaDto {
   @ApiProperty({
@@ -149,5 +149,5 @@ export class CreateRatingDto {
     required: false,
   })
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

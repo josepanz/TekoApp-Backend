@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { NotificationsService } from '../services/notifications.service';
 import { CreateNotificationRequestDTO } from '../dtos/request/create-notification-request.dto';
 import { FindAllNotificationsQueryDTO } from '../dtos/request/find-all-notifications-query.dto';
@@ -37,8 +38,11 @@ export class NotificationsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir y encolar una nueva notificación' })
   @ApiResponse({ status: 201, type: NotificationResponseDTO })
-  async create(@Body() dto: CreateNotificationRequestDTO, @Request() req: any) {
-    return this.notificationsService.create(dto, req.user.id);
+  async create(
+    @Body() dto: CreateNotificationRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    return this.notificationsService.create(dto, String(req.user.id));
   }
 
   @Get()
@@ -47,11 +51,11 @@ export class NotificationsController {
   })
   @ApiResponse({ status: 200, type: [NotificationResponseDTO] })
   async findAll(
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
     @Query() query: FindAllNotificationsQueryDTO,
   ) {
     return this.notificationsService.findAll(
-      req.user.id,
+      String(req.user.id),
       query.limit,
       query.offset,
     );
@@ -60,15 +64,19 @@ export class NotificationsController {
   @Get('unread')
   @ApiOperation({ summary: 'Listar las notificaciones no leídas' })
   @ApiResponse({ status: 200, type: [NotificationResponseDTO] })
-  async findUnread(@Request() req: any) {
-    return this.notificationsService.findUnread(req.user.id);
+  async findUnread(@Request() req: { user: IUserDataOnJwt }) {
+    return this.notificationsService.findUnread(String(req.user.id));
   }
 
   @Get('unread/count')
   @ApiOperation({ summary: 'Obtener contador de elementos no leídos' })
   @ApiResponse({ status: 200, type: UnreadCountResponseDTO })
-  async getUnreadCount(@Request() req: any): Promise<UnreadCountResponseDTO> {
-    const count = await this.notificationsService.getUnreadCount(req.user.id);
+  async getUnreadCount(
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise<UnreadCountResponseDTO> {
+    const count = await this.notificationsService.getUnreadCount(
+      String(req.user.id),
+    );
     return { count };
   }
 
@@ -77,9 +85,9 @@ export class NotificationsController {
   @ApiResponse({ status: 200, type: NotificationResponseDTO })
   async markAsRead(
     @Param() param: NotificationIdParamDTO,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.notificationsService.markAsRead(param.id, req.user.id);
+    return this.notificationsService.markAsRead(param.id, String(req.user.id));
   }
 
   @Put('read-all')
@@ -88,15 +96,18 @@ export class NotificationsController {
     summary: 'Marcar todas las notificaciones del usuario como leídas',
   })
   @ApiResponse({ status: 204 })
-  async markAllAsRead(@Request() req: any) {
-    await this.notificationsService.markAllAsRead(req.user.id);
+  async markAllAsRead(@Request() req: { user: IUserDataOnJwt }) {
+    await this.notificationsService.markAllAsRead(String(req.user.id));
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remover una notificación del historial' })
   @ApiResponse({ status: 204 })
-  async remove(@Param() param: NotificationIdParamDTO, @Request() req: any) {
-    await this.notificationsService.delete(param.id, req.user.id);
+  async remove(
+    @Param() param: NotificationIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    await this.notificationsService.delete(param.id, String(req.user.id));
   }
 }

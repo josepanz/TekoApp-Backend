@@ -106,7 +106,7 @@ export class PaginationQueryDTO {
     message: 'El código de sucursal debe ser una cadena de texto',
   })
   @Transform(({ value }: TransformFnParams): unknown =>
-    value ? value.trim() : value,
+    typeof value === 'string' ? value.trim() : value,
   )
   @IsOptional()
   @IsNotEmpty({ message: 'El código de sucursal no puede venir vacio.' })

@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { LocationsService } from '../services/locations.service';
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location-request.dto';
 import { FindNearbyQueryDTO } from '../dtos/request/find-nearby-query.dto'; // Mapeo de query unificada
@@ -43,7 +44,7 @@ export class LocationsController {
   })
   @ApiResponse({ status: 200, description: 'Ubicación actualizada con éxito.' })
   async updateLocation(
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt & { professionalId?: number } },
     @Body() updateLocationDto: UpdateLocationRequestDTO,
   ) {
     const professionalId = req.user.professionalId;
@@ -99,10 +100,10 @@ export class LocationsController {
       'Calcular distancia geodésica escalar entre dos puntos coordenados autónomos',
   })
   @ApiResponse({ status: 200, type: DistanceResponseDTO })
-  async calculateDistance(
+  calculateDistance(
     @Query() query: CalculateDistanceQueryDTO,
-  ): Promise<DistanceResponseDTO> {
-    const distance = await this.locationsService.calculateDistance(query);
+  ): DistanceResponseDTO {
+    const distance = this.locationsService.calculateDistance(query);
     return { distance: Math.round(distance * 100) / 100, unit: 'km' };
   }
 }

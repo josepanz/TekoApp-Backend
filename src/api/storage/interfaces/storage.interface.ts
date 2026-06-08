@@ -11,6 +11,6 @@ export interface IUploadFileParams {
   userId: string;
   referenceId: string;
   applicationId?: number;
-  documentType?: Number;
+  documentType?: number;
   documentNumber?: string;
 }

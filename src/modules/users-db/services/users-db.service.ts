@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   AccessLevel,
-  DocumentType,
+  DocumentsType,
   Prisma,
   UserProfileStatus,
   Users,
@@ -38,7 +38,7 @@ export class UsersDBService {
 
   // ─── Create ──────────────────────────────────────────────────────────────
 
-  async create(data: Prisma.UsersCreateInput): Promise<Users> {
+  async create(data: Prisma.UsersUncheckedCreateInput): Promise<Users> {
     return await this.prisma.extended.users.create({ data });
   }
 
@@ -47,13 +47,15 @@ export class UsersDBService {
     firstName: string;
     lastName: string;
     documentNumber?: string;
+    documentTypeId?: number;
+    access_level?: number;
     isEmployee: boolean;
     isLdap: boolean;
     status?: UserStatus;
     legacyUserId?: string;
     lastLogin?: Date;
     createdBy: string;
-    accessLevelId?: AccessLevel;
+    accessLevelId?: AccessLevel | number;
     acceptedTermsAt?: Date;
   }): Promise<Users> {
     const existing = await this.findByEmailAndDocument(
@@ -67,7 +69,17 @@ export class UsersDBService {
       );
     }
 
-    const created = await this.create(data);
+    const accessLevelIdNum =
+      typeof data.accessLevelId === 'object'
+        ? data.accessLevelId.id
+        : data.accessLevelId;
+
+    const created = await this.create({
+      ...data,
+      documentTypeId: data.documentTypeId ?? 1,
+      access_level: data.access_level ?? accessLevelIdNum ?? 0,
+      accessLevelId: accessLevelIdNum,
+    });
 
     try {
       await this.emailService.sendEmailByType(
@@ -87,13 +99,15 @@ export class UsersDBService {
     firstName: string;
     lastName: string;
     documentNumber?: string;
-    documentType?: DocumentType;
+    documentTypeId?: number;
+    documentType?: DocumentsType;
     phoneNumber?: string;
     isEmployee: boolean;
     isLdap: boolean;
     status: UserStatus;
     createdBy: string;
-    accessLevelId?: AccessLevel;
+    accessLevelId?: AccessLevel | number;
+    access_level?: number;
     roleIds?: number[];
     merchantCtx?: {
       ruc: string;
@@ -114,6 +128,11 @@ export class UsersDBService {
       );
     }
 
+    const accessLevelIdNum =
+      typeof data.accessLevelId === 'object'
+        ? data.accessLevelId.id
+        : data.accessLevelId;
+
     const created = await this.prisma.extended.$transaction(async (tx) => {
       const user = await tx.users.create({
         data: {
@@ -121,13 +140,18 @@ export class UsersDBService {
           firstName: data.firstName,
           lastName: data.lastName,
           documentNumber: data.documentNumber ?? null,
-          documentType: data.documentType ?? DocumentType.CIP,
+          documentTypeId:
+            data.documentTypeId ??
+            (data.documentType as unknown as DocumentsType & { id: number })
+              ?.id ??
+            1,
           phoneNumber: data.phoneNumber ?? null,
           isEmployee: data.isEmployee,
           isLdap: data.isLdap,
           status: data.status,
           createdBy: data.createdBy,
-          accessLevelId: data.accessLevelId,
+          accessLevelId: accessLevelIdNum,
+          access_level: data.access_level ?? accessLevelIdNum ?? 0,
           profileStatus: UserProfileStatus.COMPLETE,
         },
       });
@@ -137,7 +161,7 @@ export class UsersDBService {
           user.id,
           data.roleIds,
           data.createdBy,
-          tx,
+          tx as unknown as Prisma.TransactionClient,
         );
       }
 
@@ -380,13 +404,13 @@ export class UsersDBService {
   async findActiveUserByEmailWithPermissions(
     email: string,
   ): Promise<UserWithSecuritiesExtended | null> {
-    return (await this.prisma.extended.users.findFirst({
+    return await this.prisma.extended.users.findFirst({
       where: {
         email,
         status: { in: [UserStatus.ACTIVE, UserStatus.PENDING_VERIFICATION] },
       },
       include: userWithSecuritiesExtended.include,
-    })) as UserWithSecuritiesExtended;
+    });
   }
 
   // ─── Update ──────────────────────────────────────────────────────────────
@@ -556,7 +580,7 @@ export class UsersDBService {
           user.id,
           dto.roleIds,
           operatorUserEmail,
-          tx,
+          tx as unknown as Prisma.TransactionClient,
         );
       }
     });

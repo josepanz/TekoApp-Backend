@@ -14,7 +14,7 @@ export class CacheKeyHelper {
   ): string {
     const filterString = Object.entries(filters)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]) => `${key}=${value as string | number | boolean}`)
       .join('&');
 
     return `${type}:list:${filterString}`;
@@ -26,7 +26,7 @@ export class CacheKeyHelper {
   ): string {
     const filterString = Object.entries(filters)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]) => `${key}=${value as string | number | boolean}`)
       .join('&');
 
     return `search:${query}:${filterString}`;
@@ -52,7 +52,7 @@ export class CacheKeyHelper {
   ): string {
     const filterString = Object.entries(filters)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
+      .map(([key, value]) => `${key}=${value as string | number | boolean}`)
       .join('&');
 
     return `stats:${type}:${period}:${filterString}`;

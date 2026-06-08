@@ -10,9 +10,7 @@ import {
   UseGuards,
   Request,
   ParseUUIDPipe,
-  ParseEnumPipe,
   ParseFloatPipe,
-  ParseBoolPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,15 +20,14 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { ServicesService } from './services.service';
-import { ServiceStatus, ServiceType } from './entities/service.entity';
-import { RequestStatus } from './entities/service-request.entity';
+import { ServiceStatus } from '@prisma/client';
 import {
   CreateServiceDto,
   UpdateServiceDto,
   CreateServiceRequestDto,
   RespondServiceRequestDto,
-  RateServiceDto,
 } from './dto';
 
 @ApiTags('services')
@@ -47,7 +44,7 @@ export class ServicesController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   async createService(
     @Body() createServiceDto: CreateServiceDto,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.createService(createServiceDto, req.user.id);
   }
@@ -55,8 +52,7 @@ export class ServicesController {
   @Get()
   @ApiOperation({ summary: 'Obtener lista de servicios con filtros' })
   @ApiQuery({ name: 'status', enum: ServiceStatus, required: false })
-  @ApiQuery({ name: 'type', enum: ServiceType, required: false })
-  @ApiQuery({ name: 'categoryId', required: false })
+  @ApiQuery({ name: 'categoryId', required: false, type: Number })
   @ApiQuery({ name: 'latitude', required: false, type: Number })
   @ApiQuery({ name: 'longitude', required: false, type: Number })
   @ApiQuery({ name: 'radius', required: false, type: Number })
@@ -65,7 +61,6 @@ export class ServicesController {
   @ApiResponse({ status: 200, description: 'Lista de servicios obtenida' })
   async getServices(
     @Query('status') status?: ServiceStatus,
-    @Query('type') type?: ServiceType,
     @Query('categoryId') categoryId?: string,
     @Query('latitude') latitude?: number,
     @Query('longitude') longitude?: number,
@@ -75,8 +70,7 @@ export class ServicesController {
   ) {
     return this.servicesService.getServices({
       status,
-      type,
-      categoryId,
+      categoryId: categoryId ? Number(categoryId) : undefined,
       latitude,
       longitude,
       radius,
@@ -101,8 +95,8 @@ export class ServicesController {
     return this.servicesService.getNearbyServices(
       latitude,
       longitude,
-      radius,
-      categoryId,
+      Number(radius),
+      categoryId ? Number(categoryId) : undefined,
     );
   }
 
@@ -125,7 +119,7 @@ export class ServicesController {
   async updateService(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateServiceDto: UpdateServiceDto,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.updateService(
       id,
@@ -145,7 +139,7 @@ export class ServicesController {
   async cancelService(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('reason') reason: string,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.cancelService(id, reason, req.user.id);
   }
@@ -160,7 +154,7 @@ export class ServicesController {
   })
   async acceptService(
     @Param('id', ParseUUIDPipe) id: string,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.acceptService(id, req.user.id);
   }
@@ -175,7 +169,7 @@ export class ServicesController {
   })
   async startService(
     @Param('id', ParseUUIDPipe) id: string,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.startService(id, req.user.id);
   }
@@ -190,25 +184,9 @@ export class ServicesController {
   })
   async completeService(
     @Param('id', ParseUUIDPipe) id: string,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.completeService(id, req.user.id);
-  }
-
-  @Post(':id/rate')
-  @ApiOperation({ summary: 'Calificar un servicio completado' })
-  @ApiResponse({ status: 200, description: 'Servicio calificado' })
-  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
-  @ApiResponse({
-    status: 403,
-    description: 'No autorizado para calificar este servicio',
-  })
-  async rateService(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() ratingDto: RateServiceDto,
-    @Request() req: any,
-  ) {
-    return this.servicesService.rateService(id, ratingDto, req.user.id);
   }
 
   // Endpoints para solicitudes de servicio
@@ -225,7 +203,7 @@ export class ServicesController {
   async createServiceRequest(
     @Param('id', ParseUUIDPipe) serviceId: string,
     @Body() requestDto: CreateServiceRequestDto,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.createServiceRequest(
       serviceId,
@@ -254,7 +232,7 @@ export class ServicesController {
     @Param('id', ParseUUIDPipe) serviceId: string,
     @Param('requestId', ParseUUIDPipe) requestId: string,
     @Body() responseDto: RespondServiceRequestDto,
-    @Request() req: any,
+    @Request() req: { user: IUserDataOnJwt },
   ) {
     return this.servicesService.respondToServiceRequest(
       serviceId,
@@ -270,9 +248,9 @@ export class ServicesController {
   @ApiQuery({ name: 'role', enum: ['client', 'professional'], required: false })
   @ApiResponse({ status: 200, description: 'Servicios del usuario obtenidos' })
   async getMyServices(
+    @Request() req: { user: IUserDataOnJwt },
     @Query('status') status?: ServiceStatus,
     @Query('role') role?: 'client' | 'professional',
-    @Request() req: any,
   ) {
     return this.servicesService.getMyServices(req.user.id, status, role);
   }
@@ -280,7 +258,7 @@ export class ServicesController {
   @Get('dashboard/stats')
   @ApiOperation({ summary: 'Obtener estadísticas del dashboard' })
   @ApiResponse({ status: 200, description: 'Estadísticas obtenidas' })
-  async getDashboardStats(@Request() req: any) {
+  async getDashboardStats(@Request() req: { user: IUserDataOnJwt }) {
     return this.servicesService.getDashboardStats(req.user.id);
   }
 }

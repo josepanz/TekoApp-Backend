@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
 const PERMISSIONS_KEY = 'permissions';
 
@@ -22,7 +23,9 @@ export class PermissionsGuard implements CanActivate {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = context
+      .switchToHttp()
+      .getRequest<{ user: IUserDataOnJwt }>();
 
     if (!user || !user.permissions || !Array.isArray(user.permissions)) {
       throw new ForbiddenException(`Usuario sin permisos asignados.`);

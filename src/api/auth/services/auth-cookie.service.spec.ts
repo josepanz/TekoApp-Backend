@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Response } from 'express';
 
 import { AuthCookieService } from './auth-cookie.service';
 import { APP_CONFIG } from '@core/config/config-loader';
@@ -32,7 +33,7 @@ describe('AuthCookieService', () => {
 
   describe('setAccessToken', () => {
     it('debe establecer la cookie accessToken con opciones seguras y maxAge calculado desde config', () => {
-      service.setAccessToken(res as any, 'access-token-abc');
+      service.setAccessToken(res as unknown as Response, 'access-token-abc');
 
       expect(res.cookie).toHaveBeenCalledWith(
         'accessToken',
@@ -48,7 +49,7 @@ describe('AuthCookieService', () => {
     });
 
     it('debe llamar a res.cookie exactamente una vez', () => {
-      service.setAccessToken(res as any, 'tok');
+      service.setAccessToken(res as unknown as Response, 'tok');
 
       expect(res.cookie).toHaveBeenCalledTimes(1);
     });
@@ -56,7 +57,11 @@ describe('AuthCookieService', () => {
 
   describe('setRefreshToken', () => {
     it('debe usar refreshTokenExpires cuando rememberMe es true', () => {
-      service.setRefreshToken(res as any, 'refresh-token-abc', true);
+      service.setRefreshToken(
+        res as unknown as Response,
+        'refresh-token-abc',
+        true,
+      );
 
       expect(res.cookie).toHaveBeenCalledWith(
         'refreshToken',
@@ -72,7 +77,11 @@ describe('AuthCookieService', () => {
     });
 
     it('debe usar shortRefreshTokenExpires cuando rememberMe es false', () => {
-      service.setRefreshToken(res as any, 'refresh-token-abc', false);
+      service.setRefreshToken(
+        res as unknown as Response,
+        'refresh-token-abc',
+        false,
+      );
 
       expect(res.cookie).toHaveBeenCalledWith(
         'refreshToken',
@@ -88,21 +97,33 @@ describe('AuthCookieService', () => {
     });
 
     it('el maxAge con rememberMe=true debe ser mayor que con rememberMe=false', () => {
-      service.setRefreshToken(res as any, 'tok-a', true);
-      const [, , optsTrue] = res.cookie.mock.calls[0];
+      service.setRefreshToken(res as unknown as Response, 'tok-a', true);
+      const [, , optsTrue] = res.cookie.mock.calls[0] as [
+        unknown,
+        unknown,
+        { maxAge: number },
+      ];
 
       res.cookie.mockClear();
 
-      service.setRefreshToken(res as any, 'tok-b', false);
-      const [, , optsFalse] = res.cookie.mock.calls[0];
+      service.setRefreshToken(res as unknown as Response, 'tok-b', false);
+      const [, , optsFalse] = res.cookie.mock.calls[0] as [
+        unknown,
+        unknown,
+        { maxAge: number },
+      ];
 
       expect(optsTrue.maxAge).toBeGreaterThan(optsFalse.maxAge);
     });
 
     it('debe usar httpOnly, secure y sameSite=strict en ambos modos', () => {
-      service.setRefreshToken(res as any, 'tok', true);
+      service.setRefreshToken(res as unknown as Response, 'tok', true);
 
-      const [, , opts] = res.cookie.mock.calls[0];
+      const [, , opts] = res.cookie.mock.calls[0] as [
+        unknown,
+        unknown,
+        Record<string, unknown>,
+      ];
       expect(opts).toMatchObject({
         httpOnly: true,
         secure: true,

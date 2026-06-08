@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { RatingsService } from './ratings.service';
-import { Rating, RatingType } from './entities/rating.entity';
+import { RatingType } from '@prisma/client';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import {
@@ -13,7 +11,6 @@ import {
 
 describe('RatingsService', () => {
   let service: RatingsService;
-  let repository: Repository<Rating>;
 
   const mockRatingRepository = {
     create: jest.fn(),
@@ -36,17 +33,10 @@ describe('RatingsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RatingsService,
-        {
-          provide: getRepositoryToken(Rating),
-          useValue: mockRatingRepository,
-        },
-      ],
+      providers: [RatingsService],
     }).compile();
 
     service = module.get<RatingsService>(RatingsService);
-    repository = module.get<Repository<Rating>>(getRepositoryToken(Rating));
   });
 
   it('should be defined', () => {

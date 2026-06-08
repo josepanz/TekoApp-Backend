@@ -40,7 +40,7 @@ export class NotificationResponseDTO {
   readonly channels!: string[];
 
   @ApiPropertyOptional({ description: 'Payload con datos extras' })
-  readonly data?: Record<string, any>;
+  readonly data?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Fecha de lectura',

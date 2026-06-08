@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { ApiClientCredential } from '@prisma/client';
 
@@ -16,7 +17,11 @@ export class BasicAuthGuard implements CanActivate {
   constructor(private readonly prisma: PrismaDatasource) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<
+        ExpressRequest & { apiClient?: { id: string; name: string } }
+      >();
     const authHeader = request.headers['authorization'];
 
     if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -49,13 +54,13 @@ export class BasicAuthGuard implements CanActivate {
     let apiClientCredential: ApiClientCredential;
     try {
       apiClientCredential =
-        (await this.prisma.extended.apiClientCredential.findUnique({
+        await this.prisma.extended.apiClientCredential.findUnique({
           where: { clientId: clientId },
-        })) as unknown as ApiClientCredential;
+        });
     } catch (error) {
       this.logger.error(
         'Error de base de datos al buscar credenciales:',
-        error.stack,
+        error instanceof Error ? error.stack : String(error),
       );
       throw new ForbiddenException(
         'Error de servicio al validar credenciales.',

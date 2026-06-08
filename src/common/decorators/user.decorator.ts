@@ -12,8 +12,8 @@ import { Users } from '@prisma/client';
  */
 export const User = createParamDecorator(
   (data: string | undefined, ctx: ExecutionContext): unknown => {
-    const request = ctx.switchToHttp().getRequest();
-    const user = request.user as Users;
+    const request = ctx.switchToHttp().getRequest<{ user?: Users }>();
+    const user = request.user;
 
     // Si se especifica una propiedad (ej. 'email'), se retorna esa propiedad.
     if (user && data) {

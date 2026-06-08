@@ -17,7 +17,7 @@ export class CustomHttpResponseHelper {
   private static logger = new Logger(CustomHttpResponseHelper.name);
 
   static handleResponse(response: AxiosResponse): never {
-    const status = response.status as HttpStatus;
+    const status: HttpStatus = response.status;
     const statusText = response.statusText;
 
     switch (status) {

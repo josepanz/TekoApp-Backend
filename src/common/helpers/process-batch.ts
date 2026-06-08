@@ -35,8 +35,11 @@ export class ProcessBatchManager {
 
   private shouldRetry(error: unknown): boolean {
     const errorName =
-      error && typeof error === 'object' && 'name' in error
-        ? String(error.name)
+      error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      typeof error.name === 'string'
+        ? (error as { name: string }).name
         : '';
     const statusCode =
       error && typeof error === 'object' && '$metadata' in error

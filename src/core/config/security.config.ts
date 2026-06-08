@@ -2,7 +2,7 @@
 import { ConfigService } from '@nestjs/config';
 import * as compression from 'compression';
 
-export const getHelmetOptions = (configService: ConfigService) => ({
+export const getHelmetOptions = () => ({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
@@ -88,14 +88,22 @@ export const getRateLimitOptions = (configService: ConfigService) => ({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req: any) => req.user?.id || req.ip,
-  skip: (req: any) => req.path === '/health' || req.path === '/api/v1/health',
+  keyGenerator: (req: { user?: { id: string }; ip?: string }): string =>
+    req.user?.id ?? req.ip ?? 'anonymous',
+  skip: (req: { path: string }) =>
+    req.path === '/health' || req.path === '/api/v1/health',
 });
 
 export const getCompressionOptions = () => ({
-  filter: (req: any, res: any) => {
+  filter: (
+    req: { headers: Record<string, string | string[] | undefined> },
+    res: Parameters<typeof compression.filter>[1],
+  ) => {
     if (req.headers['x-no-compression']) return false;
-    return compression.filter(req, res);
+    return compression.filter(
+      req as Parameters<typeof compression.filter>[0],
+      res,
+    );
   },
   threshold: 1024, // Solo comprimir respuestas mayores a 1KB
   level: 6,

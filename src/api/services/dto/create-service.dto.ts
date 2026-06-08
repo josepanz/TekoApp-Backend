@@ -4,35 +4,32 @@ import {
   IsOptional,
   IsNumber,
   IsBoolean,
-  IsEnum,
   IsArray,
-  IsUUID,
+  IsInt,
   Min,
   Max,
   IsDateString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ServiceType } from '../entities/service.entity';
 
 export class CreateServiceDto {
   @ApiProperty({ description: 'Título del servicio' })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @ApiProperty({ description: 'Descripción detallada del servicio' })
   @IsString()
   @IsNotEmpty()
-  description: string;
+  description!: string;
 
-  @ApiProperty({ description: 'ID de la categoría del servicio' })
-  @IsUUID()
-  @IsNotEmpty()
-  categoryId: string;
+  @ApiProperty({ description: 'ID de la categoría del servicio (Int)' })
+  @IsInt()
+  categoryId!: number;
 
-  @ApiProperty({ enum: ServiceType, description: 'Tipo de servicio' })
-  @IsEnum(ServiceType)
-  type: ServiceType;
+  @ApiProperty({ description: 'ID del tipo de servicio (Int)' })
+  @IsInt()
+  serviceTypeId!: number;
 
   @ApiPropertyOptional({
     description: 'Horas estimadas (para servicios por hora)',
@@ -43,17 +40,13 @@ export class CreateServiceDto {
   @Max(24)
   estimatedHours?: number;
 
-  @ApiPropertyOptional({
-    description: 'Tarifa por hora (para servicios por hora)',
-  })
+  @ApiPropertyOptional({ description: 'Tarifa por hora' })
   @IsOptional()
   @IsNumber()
   @Min(0)
   hourlyRate?: number;
 
-  @ApiPropertyOptional({
-    description: 'Precio fijo (para servicios con precio fijo)',
-  })
+  @ApiPropertyOptional({ description: 'Precio fijo' })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -63,18 +56,18 @@ export class CreateServiceDto {
   @IsNumber()
   @Min(-90)
   @Max(90)
-  latitude: number;
+  latitude!: number;
 
   @ApiProperty({ description: 'Longitud de la ubicación del servicio' })
   @IsNumber()
   @Min(-180)
   @Max(180)
-  longitude: number;
+  longitude!: number;
 
   @ApiProperty({ description: 'Dirección del servicio' })
   @IsString()
   @IsNotEmpty()
-  address: string;
+  address!: string;
 
   @ApiPropertyOptional({ description: 'Notas adicionales' })
   @IsOptional()

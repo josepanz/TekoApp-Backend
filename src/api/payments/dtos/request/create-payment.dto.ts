@@ -231,7 +231,7 @@ export class CreatePaymentDto {
     required: false,
   })
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   currencyCode: string;
 }

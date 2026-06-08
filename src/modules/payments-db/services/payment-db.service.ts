@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaDatasource } from '@core/database/services/prisma.service'; // Ajusta la ruta a tu PrismaService
 import {
   Payments,
-  PaymentMethod,
   PaymentTransaction,
   PaymentStatus,
   TransactionStatus,

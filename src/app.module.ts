@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { MongooseModule } from '@nestjs/mongoose';
-import { BullModule } from '@nestjs/bull';
+import { ConfigModule } from '@nestjs/config';
+import { APP_CONFIG } from '@core/config/config-loader';
 import { ScheduleModule } from '@nestjs/schedule';
 
-// Módulos de la aplicación
+import { DatabaseModule } from '@core/database/database.module';
+
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProfessionalsModule } from './api/professionals/professionals.module';
@@ -19,49 +18,15 @@ import { CategoriesModule } from './api/categories/categories.module';
 import { UploadsModule } from './api/uploads/uploads.module';
 import { AnalyticsModule } from './api/analytics/analytics.module';
 
-// Configuración de la base de datos
-import { DatabaseConfig } from './core/database/base/mongo/database.config';
-import { RedisConfig } from './core/config/redis.config';
-
 @Module({
   imports: [
-    // Configuración de variables de entorno
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
+      load: [APP_CONFIG],
     }),
-
-    // Configuración de PostgreSQL (TypeORM)
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) =>
-        DatabaseConfig.getTypeOrmConfig(configService),
-      inject: [ConfigService],
-    }),
-
-    // Configuración de MongoDB (Mongoose)
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }),
-      inject: [ConfigService],
-    }),
-
-    // Configuración de Redis para colas de trabajo
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) =>
-        RedisConfig.getBullConfig(configService),
-      inject: [ConfigService],
-    }),
-
-    // Módulo de programación de tareas
     ScheduleModule.forRoot(),
-
-    // Módulos de la aplicación
+    DatabaseModule,
     AuthModule,
     UsersModule,
     ProfessionalsModule,

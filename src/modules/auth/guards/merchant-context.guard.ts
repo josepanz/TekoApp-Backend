@@ -7,13 +7,21 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
 @Injectable()
 export class MerchantContextGuard implements CanActivate {
   constructor(private prisma: PrismaDatasource) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<
+      ExpressRequest & {
+        user: IUserDataOnJwt;
+        merchantContext?: IMerchantContext;
+        cookies: Record<string, string>;
+      }
+    >();
     const user = request.user;
 
     const userExists = await this.prisma.extended.users.findUnique({
@@ -25,7 +33,9 @@ export class MerchantContextGuard implements CanActivate {
       throw new ForbiddenException('El usuario no existe.');
     }
 
-    const cookieData = request.cookies['merchant-ctx'];
+    const cookieData = (request.cookies as Record<string, string | undefined>)[
+      'merchant-ctx'
+    ];
 
     if (!cookieData) {
       throw new BadRequestException(
@@ -35,7 +45,9 @@ export class MerchantContextGuard implements CanActivate {
 
     try {
       const decodedString = Buffer.from(cookieData, 'base64').toString('utf-8');
-      const merchantContext: IMerchantContext = JSON.parse(decodedString);
+      const merchantContext = JSON.parse(
+        decodedString,
+      ) as unknown as IMerchantContext;
 
       request.merchantContext = merchantContext;
 

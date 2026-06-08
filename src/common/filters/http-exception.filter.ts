@@ -3,7 +3,6 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
-  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
@@ -20,13 +19,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let error = 'Internal Server Error';
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-      if ('message' in exceptionResponse) {
-        message = Array.isArray(exceptionResponse.message)
-          ? exceptionResponse.message[0]
-          : exceptionResponse.message;
+      const resp = exceptionResponse as Record<string, unknown>;
+      if ('message' in resp) {
+        const raw = resp['message'];
+        message = Array.isArray(raw)
+          ? typeof raw[0] === 'string'
+            ? raw[0]
+            : message
+          : typeof raw === 'string'
+            ? raw
+            : message;
       }
-      if ('error' in exceptionResponse) {
-        error = exceptionResponse.error as string;
+      if ('error' in resp) {
+        const raw = resp['error'];
+        error = typeof raw === 'string' ? raw : error;
       }
     }
 

@@ -1,6 +1,6 @@
 // src/infra/database/mongo/schemas/geo-tracking-log.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document } from 'mongoose';
 import { MongoCollections } from '../constants/constants';
 
 @Schema({

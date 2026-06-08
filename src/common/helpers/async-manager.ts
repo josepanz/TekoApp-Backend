@@ -23,7 +23,9 @@ export class AsyncManager {
           } else {
             // Si por alguna razón lo que se lanzó no es un Error (ej: throw "string"),
             // lo envolvemos en uno para que el linter esté feliz y tengamos stack trace.
-            reject(new Error(String(error)));
+            const msg =
+              typeof error === 'string' ? error : (JSON.stringify(error) ?? '');
+            reject(new Error(msg));
           }
         }
       };
@@ -62,7 +64,7 @@ export class AsyncManager {
       const task = this.queue.shift();
       if (task) {
         this.running++;
-        task().finally(() => {
+        void task().finally(() => {
           this.running--;
           this.next();
         });

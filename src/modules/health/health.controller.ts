@@ -77,8 +77,10 @@ export class HealthController {
         try {
           const pong = await this.redisClient.ping();
           return { redis: { status: pong === 'PONG' ? 'up' : 'down' } };
-        } catch (error: any) {
-          return { redis: { status: 'down', message: error.message } };
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : 'Error desconocido';
+          return { redis: { status: 'down', message } };
         }
       },
 

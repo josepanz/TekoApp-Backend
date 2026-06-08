@@ -14,7 +14,14 @@ export class AuditInterceptor implements NestInterceptor {
   constructor(private readonly reflector: Reflector) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<{
+      user?: { email?: string };
+      body?: Record<string, unknown>;
+      query?: Record<string, unknown>;
+      params?: Record<string, unknown>;
+      ip?: string;
+      headers: Record<string, string | string[] | undefined>;
+    }>();
 
     const applicationName =
       this.reflector.getAllAndOverride<string>(APPLICATION_NAME_KEY, [
@@ -22,17 +29,23 @@ export class AuditInterceptor implements NestInterceptor {
         context.getClass(),
       ]) ?? 'tekoapp-backend';
 
-    const store = {
-      userId:
-        request?.user?.email ??
-        request?.body?.userEmail ??
-        request?.query?.userEmail ??
-        request?.params?.userEmail ??
-        'system',
-      ip: request.ip || request.headers['x-forwarded-for'] || 'unknown',
-      userAgent: request.headers['user-agent'] || 'unknown',
-      applicationName,
-    };
+    const userIdRaw =
+      request?.user?.email ??
+      request?.body?.userEmail ??
+      request?.query?.userEmail ??
+      request?.params?.userEmail ??
+      'system';
+    const userId = typeof userIdRaw === 'string' ? userIdRaw : 'system';
+
+    const ipRaw = request.ip ?? request.headers['x-forwarded-for'] ?? 'unknown';
+    const ip = Array.isArray(ipRaw) ? (ipRaw[0] ?? 'unknown') : ipRaw;
+
+    const userAgentRaw = request.headers['user-agent'] ?? 'unknown';
+    const userAgent = Array.isArray(userAgentRaw)
+      ? (userAgentRaw[0] ?? 'unknown')
+      : userAgentRaw;
+
+    const store = { userId, ip, userAgent, applicationName };
 
     return auditStorage.run(store, () => next.handle());
   }

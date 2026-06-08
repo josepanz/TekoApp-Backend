@@ -24,7 +24,6 @@ import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import { ReportRatingDto } from './dto/report-rating.dto';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
-import { Rating } from './entities/rating.entity';
 import {
   ProfessionalRatingStatsDto,
   UserRatingStatsDto,
@@ -39,94 +38,48 @@ export class RatingsController {
   constructor(private readonly ratingsService: RatingsService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Crear una nueva calificación',
-    description: 'Permite a un usuario calificar un servicio o profesional',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Calificación creada exitosamente',
-    type: Rating,
-  })
+  @ApiOperation({ summary: 'Crear una nueva calificación' })
+  @ApiResponse({ status: 201, description: 'Calificación creada exitosamente' })
   @ApiResponse({
     status: 400,
     description: 'Datos inválidos o calificación duplicada',
   })
   async create(
-    @Request() req,
+    @Request() req: { user: { id: number } },
     @Body() createRatingDto: CreateRatingDto,
-  ): Promise<Rating> {
+  ) {
     return this.ratingsService.create(req.user.id, createRatingDto);
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Obtener todas las calificaciones',
-    description:
-      'Retorna una lista paginada de todas las calificaciones del sistema',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    description: 'Número de página',
-    type: Number,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Límite de elementos por página',
-    type: Number,
-  })
+  @ApiOperation({ summary: 'Obtener todas las calificaciones' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({
     status: 200,
     description: 'Lista de calificaciones obtenida exitosamente',
-    type: [Rating],
   })
-  async findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
-  ): Promise<Rating[]> {
+  async findAll() {
     return this.ratingsService.findAll();
   }
 
   @Get('recent')
-  @ApiOperation({
-    summary: 'Obtener calificaciones recientes',
-    description: 'Retorna las calificaciones más recientes del sistema',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Número máximo de calificaciones a retornar',
-    type: Number,
-  })
+  @ApiOperation({ summary: 'Obtener calificaciones recientes' })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({
     status: 200,
     description: 'Calificaciones recientes obtenidas exitosamente',
-    type: [Rating],
   })
-  async getRecentRatings(
-    @Query('limit') limit: number = 20,
-  ): Promise<Rating[]> {
+  async getRecentRatings(@Query('limit') limit: number = 20) {
     return this.ratingsService.getRecentRatings(limit);
   }
 
   @Get('top-professionals')
-  @ApiOperation({
-    summary: 'Obtener profesionales mejor calificados',
-    description:
-      'Retorna una lista de profesionales ordenados por calificación promedio',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: 'Número máximo de profesionales a retornar',
-    type: Number,
-  })
+  @ApiOperation({ summary: 'Obtener profesionales mejor calificados' })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({
     status: 200,
-    description:
-      'Lista de profesionales mejor calificados obtenida exitosamente',
+    description: 'Lista de profesionales mejor calificados',
     type: [TopRatedProfessionalDto],
   })
   async getTopRatedProfessionals(
@@ -136,94 +89,64 @@ export class RatingsController {
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Obtener una calificación específica',
-    description: 'Retorna los detalles de una calificación por su ID',
-  })
+  @ApiOperation({ summary: 'Obtener una calificación específica' })
   @ApiResponse({
     status: 200,
     description: 'Calificación encontrada exitosamente',
-    type: Rating,
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Calificación no encontrada',
-  })
-  async findOne(@Param('id') id: string): Promise<Rating> {
+  @ApiResponse({ status: 404, description: 'Calificación no encontrada' })
+  async findOne(@Param('id') id: string) {
     return this.ratingsService.findOne(id);
   }
 
   @Get('user/:userId')
-  @ApiOperation({
-    summary: 'Obtener calificaciones de un usuario',
-    description:
-      'Retorna todas las calificaciones realizadas por un usuario específico',
-  })
+  @ApiOperation({ summary: 'Obtener calificaciones de un usuario' })
   @ApiResponse({
     status: 200,
     description: 'Calificaciones del usuario obtenidas exitosamente',
-    type: [Rating],
   })
-  async findByUser(@Param('userId') userId: string): Promise<Rating[]> {
-    return this.ratingsService.findByUser(userId);
+  async findByUser(@Param('userId') userId: string) {
+    return this.ratingsService.findByUser(Number(userId));
   }
 
   @Get('professional/:professionalId')
-  @ApiOperation({
-    summary: 'Obtener calificaciones de un profesional',
-    description:
-      'Retorna todas las calificaciones recibidas por un profesional',
-  })
+  @ApiOperation({ summary: 'Obtener calificaciones de un profesional' })
   @ApiResponse({
     status: 200,
     description: 'Calificaciones del profesional obtenidas exitosamente',
-    type: [Rating],
   })
-  async findByProfessional(
-    @Param('professionalId') professionalId: string,
-  ): Promise<Rating[]> {
-    return this.ratingsService.findByProfessional(professionalId);
+  async findByProfessional(@Param('professionalId') professionalId: string) {
+    return this.ratingsService.findByProfessional(Number(professionalId));
   }
 
   @Get('professional/:professionalId/client-ratings')
   @ApiOperation({
     summary: 'Obtener calificaciones de clientes a un profesional',
-    description:
-      'Retorna solo las calificaciones que los clientes han hecho a un profesional',
   })
   @ApiResponse({
     status: 200,
     description: 'Calificaciones de clientes obtenidas exitosamente',
-    type: [Rating],
   })
-  async getClientRatings(
-    @Param('professionalId') professionalId: string,
-  ): Promise<Rating[]> {
-    return this.ratingsService.findClientRatings(professionalId);
+  async getClientRatings(@Param('professionalId') professionalId: string) {
+    return this.ratingsService.findClientRatings(Number(professionalId));
   }
 
   @Get('professional/:professionalId/average')
-  @ApiOperation({
-    summary: 'Obtener calificación promedio de un profesional',
-    description:
-      'Retorna estadísticas detalladas de calificaciones de un profesional',
-  })
+  @ApiOperation({ summary: 'Obtener calificación promedio de un profesional' })
   @ApiResponse({
     status: 200,
-    description: 'Estadísticas de calificaciones obtenidas exitosamente',
+    description: 'Estadísticas de calificaciones obtenidas',
     type: ProfessionalRatingStatsDto,
   })
   async getAverageRating(
     @Param('professionalId') professionalId: string,
   ): Promise<ProfessionalRatingStatsDto> {
-    return this.ratingsService.getAverageRating(professionalId);
+    return this.ratingsService.getAverageRating(Number(professionalId));
   }
 
   @Get('user/:userId/stats')
   @ApiOperation({
     summary: 'Obtener estadísticas de calificaciones de un usuario',
-    description:
-      'Retorna estadísticas de calificaciones dadas y recibidas por un usuario',
   })
   @ApiResponse({
     status: 200,
@@ -239,30 +162,22 @@ export class RatingsController {
   @Get('service/:serviceRequestId')
   @ApiOperation({
     summary: 'Obtener calificaciones de una solicitud de servicio',
-    description:
-      'Retorna todas las calificaciones relacionadas con una solicitud de servicio específica',
   })
   @ApiResponse({
     status: 200,
     description: 'Calificaciones de la solicitud obtenidas exitosamente',
-    type: [Rating],
   })
   async findByServiceRequest(
     @Param('serviceRequestId') serviceRequestId: string,
-  ): Promise<Rating[]> {
+  ) {
     return this.ratingsService.findByServiceRequest(serviceRequestId);
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Actualizar una calificación',
-    description:
-      'Permite a un usuario editar su calificación dentro de las primeras 24 horas',
-  })
+  @ApiOperation({ summary: 'Actualizar una calificación' })
   @ApiResponse({
     status: 200,
     description: 'Calificación actualizada exitosamente',
-    type: Rating,
   })
   @ApiResponse({
     status: 400,
@@ -274,44 +189,35 @@ export class RatingsController {
   })
   async update(
     @Param('id') id: string,
-    @Request() req,
+    @Request() req: { user: { id: number } },
     @Body() updateRatingDto: UpdateRatingDto,
-  ): Promise<Rating> {
+  ) {
     return this.ratingsService.update(id, req.user.id, updateRatingDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({
-    summary: 'Eliminar una calificación',
-    description:
-      'Permite a un usuario eliminar su calificación si cumple las condiciones',
-  })
+  @ApiOperation({ summary: 'Eliminar una calificación' })
   @ApiResponse({
     status: 204,
     description: 'Calificación eliminada exitosamente',
   })
   @ApiResponse({
-    status: 400,
-    description: 'No se puede eliminar esta calificación',
-  })
-  @ApiResponse({
     status: 403,
     description: 'No tienes permisos para eliminar esta calificación',
   })
-  async remove(@Param('id') id: string, @Request() req): Promise<void> {
-    return this.ratingsService.remove(id, req.user.id);
+  async remove(
+    @Param('id') id: string,
+    @Request() req: { user: { id: number } },
+  ): Promise<void> {
+    await this.ratingsService.remove(id, req.user.id);
   }
 
   @Post(':id/report')
-  @ApiOperation({
-    summary: 'Reportar una calificación',
-    description: 'Permite reportar una calificación inapropiada o falsa',
-  })
+  @ApiOperation({ summary: 'Reportar una calificación' })
   @ApiResponse({
     status: 200,
     description: 'Calificación reportada exitosamente',
-    type: Rating,
   })
   @ApiResponse({
     status: 400,
@@ -319,9 +225,9 @@ export class RatingsController {
   })
   async reportRating(
     @Param('id') id: string,
-    @Request() req,
+    @Request() req: { user: { id: number } },
     @Body() reportRatingDto: ReportRatingDto,
-  ): Promise<Rating> {
+  ) {
     return this.ratingsService.reportRating(
       id,
       req.user.id,

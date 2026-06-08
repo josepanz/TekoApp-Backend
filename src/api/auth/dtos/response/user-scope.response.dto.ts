@@ -43,7 +43,7 @@ export class UserScopeResponseDTO {
     status: string;
     profileStatus: string;
     isEmployee: boolean;
-    accessLevelId: Number;
+    accessLevelId: number;
   };
 
   @ApiProperty({ type: [RoleScopeDTO] })

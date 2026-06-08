@@ -8,9 +8,9 @@ import {
   Put,
   UseGuards,
   Request,
-  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PromotionsService } from './promotions.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { ApplyPromotionDto } from './dto/apply-promotion.dto';
@@ -21,7 +21,10 @@ export class PromotionsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createPromotionDto: CreatePromotionDto, @Request() req) {
+  create(
+    @Body() createPromotionDto: CreatePromotionDto,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
     return this.promotionsService.create(createPromotionDto, req.user.id);
   }
 
@@ -69,7 +72,7 @@ export class PromotionsController {
       code: string;
       serviceAmount: number;
     },
-    @Request() req,
+    @Request() req: { user: IUserDataOnJwt & { role?: string } },
   ) {
     return this.promotionsService.validatePromotion(
       validationData.code,
@@ -81,7 +84,10 @@ export class PromotionsController {
 
   @Post('apply')
   @UseGuards(JwtAuthGuard)
-  applyPromotion(@Body() applyPromotionDto: ApplyPromotionDto, @Request() req) {
+  applyPromotion(
+    @Body() applyPromotionDto: ApplyPromotionDto,
+    @Request() req: { user: IUserDataOnJwt & { role?: string } },
+  ) {
     return this.promotionsService.applyPromotion({
       ...applyPromotionDto,
       userId: req.user.id,
