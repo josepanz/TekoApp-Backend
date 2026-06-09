@@ -95,39 +95,38 @@ src/
 
 ## Estado actual — actualizar por sesión
 
-**Última actualización: 2026-06-08 — Sesión 4 (professionals-db module + response DTOs + folder structure)**
+**Última actualización: 2026-06-08 — Sesión 5 (DTO restructure 5 APIs + fee calculator + tests)**
 
 ### Build y runtime
 - `pnpm lint` — **0 errores, 0 warnings**
-- `pnpm build` — OK, cero errores TypeScript
+- `pnpm build` (tsc --noEmit) — **0 errores TypeScript**
+- `pnpm test` — **4 suites, 68 tests, todos PASS**
 - `node dist/main` — Arranca, todos los módulos DI inicializan correctamente
 - Errores en runtime (esperados, sin .env): MongoDB/PostgreSQL/Redis retry por `.env` ausente
 
 ### Tareas completadas
-- [x] Eliminados 8 archivos entity TypeORM (no instalado)
+- [x] Eliminados 8 archivos entity TypeORM (no instalado) (Sesión 1)
 - [x] Corregidos ~38 errores de compilación TypeScript (Sesión 1)
 - [x] Migración users-db, módulos DI, Sharp opcional, APP_CONFIG, webpack:false (Sesión 1)
 - [x] 322 warnings `no-explicit-any`/`no-unsafe-*` → 0 (Sesión 2)
 - [x] 19 errores TypeScript adicionales → 0 (Sesión 2)
 - [x] Eliminado modelo `Example` del schema.prisma + `pnpm prisma generate` (usuario, Sesión 2/3)
 - [x] DTOs @Param/@Query: `professionals`, `services`, `categories`, `ratings`, `promotions` (Sesión 3)
-- [x] Refactor payments: JwtAuthGuard, DTOs tipados (PaymentIdParamDTO, PaymentListQueryDTO, etc.), eliminado `mockUserId = 1`, `CreatePaymentMethodRequestDTO` (Sesión 3)
+- [x] Refactor payments: JwtAuthGuard, DTOs tipados, eliminado `mockUserId = 1` (Sesión 3)
 - [x] Reorganización `api.module.ts` / `app.module.ts` (usuario, Sesión 3)
-- [x] Módulo `professionals-db` creado en `src/modules/professionals-db/` con `ProfessionalsDbService`, interfaces, types (Sesión 4)
-- [x] `professionals.service.ts` migrado a `src/api/professionals/services/` — inyecta `ProfessionalsDbService` (Sesión 4)
-- [x] `professionals.controller.ts` movido a `src/api/professionals/controllers/` (Sesión 4)
-- [x] Response DTOs creados: `ProfessionalDetailResponseDTO`, `ProfessionalsListResponseDTO`, `ProfessionalServicesListResponseDTO`, `ProfessionalReviewsListResponseDTO`, `ProfessionalStatsResponseDTO` (Sesión 4)
-- [x] Query DTOs actualizados para extender `PaginatedRequest` (usa `pageSize`); `PrismaPaginationUtil` en todos los listados (Sesión 4)
-- [x] Reglas de estructura de carpetas añadidas en `rules/typescript.md` (Sesión 4)
+- [x] Módulo `professionals-db` + `ProfessionalsDbService` + response DTOs + folder structure (Sesión 4)
+- [x] **DTO restructure completa** (Sesión 5): categories, payments, promotions, ratings, services → `/dtos/request/`, `/dtos/response/`, `/controllers/`, `/services/`, `/docs/`
+- [x] **Fee calculator** (Sesión 5): `FeeCalculatorService` en `payments-db`, lee rates desde DB, TTL cache 5 min
+- [x] **Tests** (Sesión 5): 4 suites — fee-calculator (7), payments (~26), promotions (12), categories (23)
+- [x] **Jest alias `@/`** (Sesión 5): `jest.config.ts` agrega `'^@/(.*)$': '<rootDir>/$1'`
 
-### Notas de arquitectura (Sesión 4)
-- `src/api/professionals/` → estructura correcta: `controllers/`, `services/`, `dtos/request/`, `dtos/response/`
-- `src/modules/professionals-db/` → `interfaces/`, `types/`, `services/` con `PrismaDatasource`
-- Regla de estructura ya documentada en `rules/typescript.md` — aplicar a todos los módulos nuevos
-- Query DTOs de listas paginadas extienden `PaginatedRequest<T>` y usan `pageSize` (no `limit`)
+### Notas de arquitectura (Sesión 5)
+- Cast pattern: `return service.method() as unknown as Promise<ResponseDTO>` — evita remapping Prisma→DTO
+- `FeeCalculatorService`: TTL cache en Map (no Redis) — suficiente para config que cambia raramente
+- Jest aliases disponibles: `@core/`, `@modules/`, `@api/`, `@common/`, `@auth/`, `@email/`, `@/`
+- `expect.objectContaining()` retorna `any` — cast con `as unknown` para suprimir `no-unsafe-assignment`
 
 ### Pendiente (próximas sesiones)
-- [ ] **fee calculator**: hardcodeado en `payments.service.ts` (STRIPE: 0.029, etc.) — debe leer rates desde DB config
-- [ ] **dtos**: las apis categories, payments, promotions,ratings y service, algunos su carpeta de /dtos se llama /dto, debe ajustarse, también algunos no tienen sus respectivos response.ts en /dtos/response como tampoco estan dentro de sus respectivas carpetas /controllers, /services y no estan cumpliendo con las reglas de que deben tener /docs con su respectivo decorador para documentar.
-- [ ] **Tests**: ningún `.spec.ts` creado/actualizado — regla del proyecto exige tests con cada feature
 - [ ] **Sharp binary**: `pnpm add sharp` o binario win32-x64 para habilitar procesamiento de imágenes
+- [ ] **Tests restantes**: `professionals-db.service.spec.ts`, `professionals.service.spec.ts`, controllers specs
+- [ ] **`--forceExit`** (opcional): TTL cache de `FeeCalculatorService` produce warning cosmético "worker process failed to exit gracefully"

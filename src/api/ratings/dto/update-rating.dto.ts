@@ -1,10 +1,2 @@
-import { PartialType, OmitType } from '@nestjs/swagger';
-import { CreateRatingDto } from './create-rating.dto';
-
-export class UpdateRatingDto extends PartialType(
-  OmitType(CreateRatingDto, [
-    'professionalId',
-    'serviceRequestId',
-    'type',
-  ] as const),
-) {}
+// Re-export para compatibilidad con specs existentes.
+export { UpdateRatingRequestDTO as UpdateRatingDto } from '../dtos/request/update-rating.request.dto';

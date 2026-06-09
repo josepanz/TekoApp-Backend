@@ -80,5 +80,6 @@
 ## Próximos pasos
 
 - [ ] **fee calculator**: mover rates hardcodeados de `payments.service.ts` a tabla de config en DB
+- [ ] **dtos**: las apis categories, payments, promotions,ratings y service, algunos su carpeta de /dtos se llama /dto, debe ajustarse, también algunos no tienen sus respectivos response.ts en /dtos/response como tampoco estan dentro de sus respectivas carpetas /controllers, /services y no estan cumpliendo con las reglas de que deben tener /docs con su respectivo decorador para documentar.
 - [ ] **Tests**: `professionals-db.service.spec.ts`, `professionals.service.spec.ts`, `professionals.controller.spec.ts`
 - [ ] **Sharp binary**: `pnpm add sharp` o instalar binario win32-x64

@@ -11,13 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dtos/request/create-category.dto';
@@ -28,6 +22,25 @@ import {
   SearchCategoriesQueryDTO,
   ChangeCategoryStatusQueryDTO,
 } from '../dtos/request';
+import {
+  CategoryDetailResponseDTO,
+  CategoryStatsResponseDTO,
+} from '../dtos/response';
+import {
+  ApiCreateCategory,
+  ApiGetAllCategories,
+  ApiGetAllCategoriesWithRelations,
+  ApiGetMainCategories,
+  ApiGetSubcategories,
+  ApiSearchCategories,
+  ApiGetCategoryById,
+  ApiGetCategoryBySlug,
+  ApiGetCategoryStats,
+  ApiUpdateCategory,
+  ApiChangeCategoryStatus,
+  ApiToggleCategoryVisibility,
+  ApiDeleteCategory,
+} from '../docs/categories.docs';
 
 @ApiTags('Categorías')
 @Controller('categories')
@@ -36,138 +49,129 @@ export class CategoriesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Crear nueva categoría',
-    description: 'Crea una nueva categoría de servicios profesionales.',
-  })
-  @ApiResponse({ status: 201, description: 'Categoría creada exitosamente.' })
-  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos.' })
-  @ApiResponse({
-    status: 409,
-    description: 'Ya existe una categoría con este nombre.',
-  })
-  async create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  @ApiCreateCategory()
+  async create(
+    @Body() createCategoryDto: CreateCategoryDto,
+  ): Promise<CategoryDetailResponseDTO> {
+    return this.categoriesService.create(
+      createCategoryDto,
+    ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Obtener todas las categorías',
-    description: 'Retorna todas las categorías activas y visibles.',
-  })
-  @ApiResponse({ status: 200, description: 'Lista de categorías activas.' })
-  async findAll() {
-    return this.categoriesService.findAll();
+  @ApiGetAllCategories()
+  async findAll(): Promise<CategoryDetailResponseDTO[]> {
+    return this.categoriesService.findAll() as unknown as Promise<
+      CategoryDetailResponseDTO[]
+    >;
   }
 
   @Get('all')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Obtener todas las categorías (incluyendo inactivas)',
-    description:
-      'Retorna todo el árbol de categorías para panel de administración.',
-  })
-  async findAllWithRelations() {
-    return this.categoriesService.findAllWithRelations();
+  @ApiGetAllCategoriesWithRelations()
+  async findAllWithRelations(): Promise<CategoryDetailResponseDTO[]> {
+    return this.categoriesService.findAllWithRelations() as unknown as Promise<
+      CategoryDetailResponseDTO[]
+    >;
   }
 
   @Get('main')
-  @ApiOperation({
-    summary: 'Obtener categorías principales',
-    description: 'Retorna raíz de categorías (Filtra las subcategorías).',
-  })
-  async findMainCategories() {
-    return this.categoriesService.findMainCategories();
+  @ApiGetMainCategories()
+  async findMainCategories(): Promise<CategoryDetailResponseDTO[]> {
+    return this.categoriesService.findMainCategories() as unknown as Promise<
+      CategoryDetailResponseDTO[]
+    >;
   }
 
   @Get('subcategories/:parentId')
-  @ApiParam({
-    name: 'parentId',
-    description: 'ID de la categoría padre',
-    type: Number,
-  })
-  @ApiOperation({
-    summary: 'Obtener subcategorías',
-    description: 'Retorna las subcategorías hijas de una categoría raíz.',
-  })
-  async findSubcategories(@Param() param: GetSubcategoriesParamDTO) {
-    return this.categoriesService.findSubcategories(param.parentId);
+  @ApiGetSubcategories()
+  async findSubcategories(
+    @Param() param: GetSubcategoriesParamDTO,
+  ): Promise<CategoryDetailResponseDTO[]> {
+    return this.categoriesService.findSubcategories(
+      param.parentId,
+    ) as unknown as Promise<CategoryDetailResponseDTO[]>;
   }
 
   @Get('search')
-  @ApiOperation({
-    summary: 'Buscar categorías',
-    description: 'Busca coincidencias por nombre o descripciones indexadas.',
-  })
-  async searchCategories(@Query() query: SearchCategoriesQueryDTO) {
-    return this.categoriesService.searchCategories(query.q);
+  @ApiSearchCategories()
+  async searchCategories(
+    @Query() query: SearchCategoriesQueryDTO,
+  ): Promise<CategoryDetailResponseDTO[]> {
+    return this.categoriesService.searchCategories(
+      query.q,
+    ) as unknown as Promise<CategoryDetailResponseDTO[]>;
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', description: 'ID de la categoría', type: Number })
-  @ApiOperation({
-    summary: 'Obtener categoría por ID',
-    description: 'Busca de forma exacta un registro por ID.',
-  })
-  async findOne(@Param() param: CategoryIdParamDTO) {
-    return this.categoriesService.findOne(param.id);
+  @ApiGetCategoryById()
+  async findOne(
+    @Param() param: CategoryIdParamDTO,
+  ): Promise<CategoryDetailResponseDTO> {
+    return this.categoriesService.findOne(
+      param.id,
+    ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
   @Get('slug/:slug')
-  @ApiParam({ name: 'slug', description: 'Slug único estructurado url-ready' })
-  @ApiOperation({ summary: 'Obtener categoría por slug' })
-  async findBySlug(@Param('slug') slug: string) {
-    return this.categoriesService.findBySlug(slug);
+  @ApiGetCategoryBySlug()
+  async findBySlug(
+    @Param('slug') slug: string,
+  ): Promise<CategoryDetailResponseDTO> {
+    return this.categoriesService.findBySlug(
+      slug,
+    ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
   @Get(':id/stats')
-  @ApiParam({ name: 'id', description: 'ID de la categoría', type: Number })
-  @ApiOperation({ summary: 'Obtener métricas y contadores de la categoría' })
-  async getCategoryStats(@Param() param: CategoryIdParamDTO) {
+  @ApiGetCategoryStats()
+  async getCategoryStats(
+    @Param() param: CategoryIdParamDTO,
+  ): Promise<CategoryStatsResponseDTO> {
     return this.categoriesService.getCategoryStats(param.id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiParam({ name: 'id', description: 'ID de la categoría', type: Number })
-  @ApiOperation({ summary: 'Actualizar categoría de forma parcial' })
+  @ApiUpdateCategory()
   async update(
     @Param() param: CategoryIdParamDTO,
     @Body() updateCategoryDto: UpdateCategoryDto,
-  ) {
-    return this.categoriesService.update(param.id, updateCategoryDto);
+  ): Promise<CategoryDetailResponseDTO> {
+    return this.categoriesService.update(
+      param.id,
+      updateCategoryDto,
+    ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiParam({ name: 'id', description: 'ID de la categoría', type: Number })
-  @ApiOperation({ summary: 'Mutar estado transaccional de una categoría' })
+  @ApiChangeCategoryStatus()
   async changeStatus(
     @Param() param: CategoryIdParamDTO,
     @Query() query: ChangeCategoryStatusQueryDTO,
-  ) {
-    return this.categoriesService.changeStatus(param.id, query.status);
+  ): Promise<CategoryDetailResponseDTO> {
+    return this.categoriesService.changeStatus(
+      param.id,
+      query.status,
+    ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
   @Patch(':id/toggle-visibility')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiParam({ name: 'id', description: 'ID de la categoría', type: Number })
-  @ApiOperation({ summary: 'Invertir bandera de visibilidad pública' })
-  async toggleVisibility(@Param() param: CategoryIdParamDTO) {
-    return this.categoriesService.toggleVisibility(param.id);
+  @ApiToggleCategoryVisibility()
+  async toggleVisibility(
+    @Param() param: CategoryIdParamDTO,
+  ): Promise<CategoryDetailResponseDTO> {
+    return this.categoriesService.toggleVisibility(
+      param.id,
+    ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiParam({ name: 'id', description: 'ID de la categoría', type: Number })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Eliminar físicamente una categoría' })
+  @ApiDeleteCategory()
   async remove(@Param() param: CategoryIdParamDTO): Promise<void> {
     return this.categoriesService.remove(param.id);
   }

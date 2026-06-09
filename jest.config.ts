@@ -9,8 +9,6 @@ const config: Config = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   moduleNameMapper: {
-    '^@modules/ai-assistant/tools$':
-      '<rootDir>/modules/ai-assistant/tools/__mocks__/index.ts',
     '^@core/(.*)$': '<rootDir>/core/$1',
     '^@modules/(.*)$': '<rootDir>/modules/$1',
     '^@api/(.*)$': '<rootDir>/api/$1',
@@ -19,6 +17,7 @@ const config: Config = {
     '^@helpers/(.*)$': '<rootDir>/helpers/$1',
     '^@auth/(.*)$': '<rootDir>/modules/auth/$1',
     '^@email/(.*)$': '<rootDir>/modules/email/$1',
+    '^@/(.*)$': '<rootDir>/$1',
   },
   collectCoverageFrom: [
     '**/*.(t|j)s',

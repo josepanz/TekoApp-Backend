@@ -1,0 +1,4 @@
+
+> tekoapp-backend@1.0.0-develop.1 build C:\workspace\equipo-web\backend\TekoApp-Backend
+> nest build
+
