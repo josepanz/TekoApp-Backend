@@ -10,7 +10,7 @@ import {
   PromotionStatus,
   PromotionType,
 } from '@prisma/client';
-import { PrismaDatasource } from '@core/database/services/prisma.service';
+import { PromotionsDbService } from '@modules/promotions-db/services/promotions-db.service';
 import { CreatePromotionRequestDTO } from '../dtos/request/create-promotion.request.dto';
 import { PromotionDetailResponseDTO } from '../dtos/response/promotion-detail.response.dto';
 import { PromotionValidateResponseDTO } from '../dtos/response/promotion-validate.response.dto';
@@ -21,75 +21,43 @@ import { PromotionStatsResponseDTO } from '../dtos/response/promotion-stats.resp
 export class PromotionsService {
   private readonly logger = new Logger(PromotionsService.name);
 
-  constructor(private readonly prisma: PrismaDatasource) {}
+  constructor(private readonly db: PromotionsDbService) {}
 
   async create(
     dto: Prisma.PromotionUncheckedCreateInput,
     createdById: number,
   ): Promise<PromotionDetailResponseDTO> {
-    const existing = await this.prisma.extended.promotion.findUnique({
-      where: { code: dto.code },
-    });
+    const existing = await this.db.findByCode(dto.code);
     if (existing)
       throw new BadRequestException('El código de promoción ya existe');
 
-    return this.prisma.extended.promotion.create({
-      data: { ...dto, createdById, status: PromotionStatus.ACTIVE },
+    return this.db.create({
+      ...dto,
+      createdById,
+      status: PromotionStatus.ACTIVE,
     }) as unknown as Promise<PromotionDetailResponseDTO>;
   }
 
   async findAll(): Promise<PromotionDetailResponseDTO[]> {
-    return this.prisma.extended.promotion.findMany({
-      orderBy: { createdAt: 'desc' },
-    }) as unknown as Promise<PromotionDetailResponseDTO[]>;
+    return this.db.findAll() as unknown as Promise<
+      PromotionDetailResponseDTO[]
+    >;
   }
 
   async findActive(): Promise<PromotionDetailResponseDTO[]> {
-    const now = new Date();
-    return this.prisma.extended.promotion
-      .findMany({
-        where: {
-          status: PromotionStatus.ACTIVE,
-          validFrom: { lte: now },
-          validUntil: { gte: now },
-          OR: [
-            { maxUsage: -1 },
-            {
-              currentUsage: {
-                lt: this.prisma.extended.promotion.fields?.maxUsage as never,
-              },
-            },
-          ],
-        },
-      })
-      .catch(() =>
-        this.prisma.extended.promotion
-          .findMany({
-            where: {
-              status: PromotionStatus.ACTIVE,
-              validFrom: { lte: now },
-              validUntil: { gte: now },
-            },
-          })
-          .then((all) =>
-            all.filter((p) => p.maxUsage === -1 || p.currentUsage < p.maxUsage),
-          ),
-      ) as Promise<PromotionDetailResponseDTO[]>;
+    return this.db.findActive() as unknown as Promise<
+      PromotionDetailResponseDTO[]
+    >;
   }
 
   async findOne(id: string): Promise<PromotionDetailResponseDTO> {
-    const promotion = await this.prisma.extended.promotion.findUnique({
-      where: { id },
-      include: { usages: true },
-    });
+    const promotion = await this.db.findById(id);
     if (!promotion) throw new NotFoundException('Promoción no encontrada');
     return promotion as unknown as PromotionDetailResponseDTO;
   }
 
   async findByCode(code: string): Promise<Promotion> {
-    const promotion = await this.prisma.extended.promotion.findUnique({
-      where: { code },
-    });
+    const promotion = await this.db.findByCode(code);
     if (!promotion)
       throw new NotFoundException('Código de promoción no válido');
     return promotion;
@@ -100,18 +68,12 @@ export class PromotionsService {
     dto: Prisma.PromotionUpdateInput,
   ): Promise<PromotionDetailResponseDTO> {
     await this.findOne(id);
-    return this.prisma.extended.promotion.update({
-      where: { id },
-      data: dto,
-    }) as unknown as PromotionDetailResponseDTO;
+    return this.db.update(id, dto) as unknown as PromotionDetailResponseDTO;
   }
 
   async remove(id: string): Promise<PromotionDetailResponseDTO> {
     await this.findOne(id);
-    return this.prisma.extended.promotion.update({
-      where: { id },
-      data: { status: PromotionStatus.INACTIVE },
-    }) as unknown as PromotionDetailResponseDTO;
+    return this.db.deactivate(id) as unknown as PromotionDetailResponseDTO;
   }
 
   async validatePromotion(
@@ -151,9 +113,7 @@ export class PromotionsService {
         };
       }
 
-      const usageCount = await this.prisma.extended.promotionUsage.count({
-        where: { promotionId: promotion.id, userId },
-      });
+      const usageCount = await this.db.countUsageByUser(promotion.id, userId);
       if (usageCount >= promotion.maxUsagePerUser) {
         return {
           isValid: false,
@@ -215,23 +175,15 @@ export class PromotionsService {
     const { promotion, discountAmount } = validation;
     const finalAmount = serviceAmount - discountAmount;
 
-    await this.prisma.extended.$transaction([
-      this.prisma.extended.promotionUsage.create({
-        data: {
-          promotionId: promotion.id,
-          userId,
-          serviceId,
-          originalAmount: serviceAmount,
-          discountAmount,
-          finalAmount,
-          metadata: serviceId ? { serviceId } : undefined,
-        },
-      }),
-      this.prisma.extended.promotion.update({
-        where: { id: promotion.id },
-        data: { currentUsage: { increment: 1 } },
-      }),
-    ]);
+    await this.db.applyTransaction({
+      promotionId: promotion.id,
+      userId,
+      serviceId,
+      originalAmount: serviceAmount,
+      discountAmount,
+      finalAmount,
+      metadata: serviceId ? { serviceId } : undefined,
+    });
 
     this.logger.log(
       `Promoción ${promotion.code} aplicada. Descuento: ${discountAmount}`,
@@ -248,18 +200,13 @@ export class PromotionsService {
   async getPromotionStats(): Promise<PromotionStatsResponseDTO> {
     const now = new Date();
     const [totalPromotions, activePromotions, usageAgg] = await Promise.all([
-      this.prisma.extended.promotion.count(),
-      this.prisma.extended.promotion.count({
-        where: {
-          status: PromotionStatus.ACTIVE,
-          validFrom: { lte: now },
-          validUntil: { gte: now },
-        },
+      this.db.countPromotions(),
+      this.db.countPromotions({
+        status: PromotionStatus.ACTIVE,
+        validFrom: { lte: now },
+        validUntil: { gte: now },
       }),
-      this.prisma.extended.promotionUsage.aggregate({
-        _count: { id: true },
-        _sum: { discountAmount: true },
-      }),
+      this.db.aggregateUsage(),
     ]);
 
     return {
@@ -294,5 +241,4 @@ export class PromotionsService {
   }
 }
 
-// Re-export type alias used by service consumers
 export type { CreatePromotionRequestDTO };

@@ -7,7 +7,7 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { OnboardingUserResponseDTO } from '../dto/response';
+import { OnboardingUserResponseDTO } from '../dtos/response';
 import { UnauthorizedException } from '@nestjs/common';
 
 export const OnboardingApiDocs = {

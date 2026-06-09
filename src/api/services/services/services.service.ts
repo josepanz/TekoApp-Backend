@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Prisma, ServiceStatus, RequestStatus } from '@prisma/client';
-import { PrismaDatasource } from '@core/database/services/prisma.service';
+import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { CreateServiceRequestDTO } from '../dtos/request/create-service.request.dto';
 import { UpdateServiceRequestDTO } from '../dtos/request/update-service.request.dto';
 import { CreateServiceRequestRequestDTO } from '../dtos/request/create-service-request.request.dto';
@@ -26,36 +26,32 @@ const CANCELLABLE = new Set<ServiceStatus>([
 
 @Injectable()
 export class ServicesService {
-  constructor(private readonly prisma: PrismaDatasource) {}
+  constructor(private readonly db: ServicesDbService) {}
 
   async createService(
     dto: CreateServiceRequestDTO,
     userId: number,
   ): Promise<ServiceDetailResponseDTO> {
-    const category = await this.prisma.extended.category.findUnique({
-      where: { id: dto.categoryId },
-    });
+    const category = await this.db.findCategoryById(dto.categoryId);
     if (!category) throw new NotFoundException('Categoría no encontrada');
 
-    return this.prisma.extended.services.create({
-      data: {
-        userId,
-        title: dto.title,
-        description: dto.description,
-        categoryId: dto.categoryId,
-        serviceTypeId: dto.serviceTypeId,
-        estimatedHours: dto.estimatedHours,
-        hourlyRate: dto.hourlyRate,
-        fixedPrice: dto.fixedPrice,
-        latitude: dto.latitude,
-        longitude: dto.longitude,
-        address: dto.address,
-        additionalNotes: dto.additionalNotes,
-        images: dto.images ?? [],
-        isUrgent: dto.isUrgent ?? false,
-        scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
-        status: ServiceStatus.PENDING,
-      },
+    return this.db.createService({
+      userId,
+      title: dto.title,
+      description: dto.description,
+      categoryId: dto.categoryId,
+      serviceTypeId: dto.serviceTypeId,
+      estimatedHours: dto.estimatedHours,
+      hourlyRate: dto.hourlyRate,
+      fixedPrice: dto.fixedPrice,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      address: dto.address,
+      additionalNotes: dto.additionalNotes,
+      images: dto.images ?? [],
+      isUrgent: dto.isUrgent ?? false,
+      scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
+      status: ServiceStatus.PENDING,
     }) as unknown as Promise<ServiceDetailResponseDTO>;
   }
 
@@ -83,16 +79,11 @@ export class ServicesService {
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 10;
 
-    const [services, total] = await Promise.all([
-      this.prisma.extended.services.findMany({
-        where,
-        include: { users: true, professional: true, category: true },
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      this.prisma.extended.services.count({ where }),
-    ]);
+    const [services, total] = await this.db.findManyWithCount(
+      where,
+      page,
+      pageSize,
+    );
 
     return {
       data: services as unknown as ServiceDetailResponseDTO[],
@@ -121,24 +112,13 @@ export class ServicesService {
     };
     if (categoryId) where.categoryId = categoryId;
 
-    return this.prisma.extended.services.findMany({
-      where,
-      include: { users: true, category: true },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    }) as unknown as Promise<ServiceDetailResponseDTO[]>;
+    return this.db.findNearby(where) as unknown as Promise<
+      ServiceDetailResponseDTO[]
+    >;
   }
 
   async getServiceById(id: string): Promise<ServiceDetailResponseDTO> {
-    const service = await this.prisma.extended.services.findUnique({
-      where: { id },
-      include: {
-        users: true,
-        professional: true,
-        category: true,
-        requests: true,
-      },
-    });
+    const service = await this.db.findServiceById(id);
     if (!service) throw new NotFoundException('Servicio no encontrado');
     return service as unknown as ServiceDetailResponseDTO;
   }
@@ -151,9 +131,10 @@ export class ServicesService {
     const service = await this.getServiceById(id);
 
     if (service.userId !== userId && service.professionalId !== null) {
-      const professional = await this.prisma.extended.professionals.findUnique({
-        where: { id: service.professionalId ?? undefined },
-      });
+      const professional =
+        service.professionalId != null
+          ? await this.db.findProfessionalById(service.professionalId)
+          : null;
       if (!professional || professional.userId !== userId) {
         throw new ForbiddenException(
           'No tienes permisos para modificar este servicio',
@@ -171,10 +152,10 @@ export class ServicesService {
       );
     }
 
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: dto,
-    }) as unknown as Promise<ServiceDetailResponseDTO>;
+    return this.db.updateService(
+      id,
+      dto,
+    ) as unknown as Promise<ServiceDetailResponseDTO>;
   }
 
   async cancelService(
@@ -191,8 +172,8 @@ export class ServicesService {
     }
 
     const isProfessionalOwner = service.professionalId
-      ? await this.prisma.extended.professionals
-          .findUnique({ where: { id: service.professionalId } })
+      ? await this.db
+          .findProfessionalById(service.professionalId)
           .then((p) => p?.userId === userId)
       : false;
 
@@ -202,13 +183,10 @@ export class ServicesService {
       );
     }
 
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: {
-        status: ServiceStatus.CANCELLED,
-        cancelledAt: new Date(),
-        cancellationReason: reason,
-      },
+    return this.db.updateService(id, {
+      status: ServiceStatus.CANCELLED,
+      cancelledAt: new Date(),
+      cancellationReason: reason,
     }) as unknown as Promise<ServiceDetailResponseDTO>;
   }
 
@@ -222,15 +200,13 @@ export class ServicesService {
         'El servicio no puede ser aceptado en este estado',
       );
     }
-    const professional = await this.prisma.extended.professionals.findUnique({
-      where: { id: professionalId },
-    });
+    const professional = await this.db.findProfessionalById(professionalId);
     if (!professional)
       throw new ForbiddenException('Usuario no es un profesional');
 
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: { status: ServiceStatus.ACCEPTED, professionalId },
+    return this.db.updateService(id, {
+      status: ServiceStatus.ACCEPTED,
+      professionalId,
     }) as unknown as Promise<ServiceDetailResponseDTO>;
   }
 
@@ -249,9 +225,9 @@ export class ServicesService {
         'El servicio no puede ser iniciado en este estado',
       );
     }
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: { status: ServiceStatus.IN_PROGRESS, startedAt: new Date() },
+    return this.db.updateService(id, {
+      status: ServiceStatus.IN_PROGRESS,
+      startedAt: new Date(),
     }) as unknown as Promise<ServiceDetailResponseDTO>;
   }
 
@@ -272,7 +248,7 @@ export class ServicesService {
     }
 
     const completedAt = new Date();
-    const data: Prisma.ServicesUpdateInput = {
+    const data: Prisma.ServicesUncheckedUpdateInput = {
       status: ServiceStatus.COMPLETED,
       completedAt,
     };
@@ -285,10 +261,10 @@ export class ServicesService {
       data.finalAmount = finalAmount;
     }
 
-    return this.prisma.extended.services.update({
-      where: { id },
+    return this.db.updateService(
+      id,
       data,
-    }) as unknown as Promise<ServiceDetailResponseDTO>;
+    ) as unknown as Promise<ServiceDetailResponseDTO>;
   }
 
   async createServiceRequest(
@@ -303,32 +279,27 @@ export class ServicesService {
       );
     }
 
-    const existing = await this.prisma.extended.serviceRequests.findFirst({
-      where: { serviceId, professionalId },
-    });
+    const existing = await this.db.findDuplicateRequest(
+      serviceId,
+      professionalId,
+    );
     if (existing)
       throw new BadRequestException(
         'Ya has enviado una solicitud para este servicio',
       );
 
-    return this.prisma.extended.serviceRequests.create({
-      data: {
-        ...dto,
-        serviceId,
-        professionalId,
-        status: RequestStatus.PENDING,
-      },
+    return this.db.createServiceRequest({
+      ...dto,
+      serviceId,
+      professionalId,
+      status: RequestStatus.PENDING,
     }) as unknown as Promise<ServiceRequestDetailResponseDTO>;
   }
 
   async getServiceRequests(
     serviceId: string,
   ): Promise<ServiceRequestsListResponseDTO> {
-    const data = await this.prisma.extended.serviceRequests.findMany({
-      where: { serviceId },
-      include: { professional: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    const data = await this.db.findServiceRequests(serviceId);
     return { data: data as unknown as ServiceRequestDetailResponseDTO[] };
   }
 
@@ -345,41 +316,22 @@ export class ServicesService {
       );
     }
 
-    const request = await this.prisma.extended.serviceRequests.findFirst({
-      where: { id: requestId, serviceId },
-    });
+    const request = await this.db.findServiceRequest(requestId, serviceId);
     if (!request) throw new NotFoundException('Solicitud no encontrada');
 
     if (dto.status === RequestStatus.ACCEPTED) {
-      await this.prisma.extended.$transaction([
-        this.prisma.extended.serviceRequests.update({
-          where: { id: requestId },
-          data: { status: RequestStatus.ACCEPTED },
-        }),
-        this.prisma.extended.services.update({
-          where: { id: serviceId },
-          data: {
-            status: ServiceStatus.ACCEPTED,
-            professionalId: request.professionalId,
-          },
-        }),
-        this.prisma.extended.serviceRequests.updateMany({
-          where: {
-            serviceId,
-            status: RequestStatus.PENDING,
-            id: { not: requestId },
-          },
-          data: { status: RequestStatus.REJECTED },
-        }),
-      ]);
-      return this.prisma.extended.serviceRequests.findUnique({
-        where: { id: requestId },
-      }) as unknown as Promise<ServiceRequestDetailResponseDTO>;
+      await this.db.acceptRequestTransaction(
+        requestId,
+        serviceId,
+        request.professionalId,
+      );
+      return this.db.findServiceRequestById(
+        requestId,
+      ) as unknown as Promise<ServiceRequestDetailResponseDTO>;
     }
 
-    return this.prisma.extended.serviceRequests.update({
-      where: { id: requestId },
-      data: { status: RequestStatus.REJECTED },
+    return this.db.updateServiceRequest(requestId, {
+      status: RequestStatus.REJECTED,
     }) as unknown as Promise<ServiceRequestDetailResponseDTO>;
   }
 
@@ -393,14 +345,10 @@ export class ServicesService {
     if (role === 'client') {
       where.userId = userId;
     } else if (role === 'professional') {
-      const professional = await this.prisma.extended.professionals.findUnique({
-        where: { userId },
-      });
+      const professional = await this.db.findProfessionalByUserId(userId);
       if (professional) where.professionalId = professional.id;
     } else {
-      const professional = await this.prisma.extended.professionals.findUnique({
-        where: { userId },
-      });
+      const professional = await this.db.findProfessionalByUserId(userId);
       where.OR = [
         { userId },
         ...(professional ? [{ professionalId: professional.id }] : []),
@@ -409,49 +357,38 @@ export class ServicesService {
 
     if (status) where.status = status;
 
-    return this.prisma.extended.services.findMany({
-      where,
-      include: { users: true, professional: true, category: true },
-      orderBy: { createdAt: 'desc' },
-    }) as unknown as Promise<ServiceDetailResponseDTO[]>;
+    return this.db.findMyServices(where) as unknown as Promise<
+      ServiceDetailResponseDTO[]
+    >;
   }
 
   async getDashboardStats(userId: number): Promise<ServiceStatsResponseDTO> {
-    const user = await this.prisma.extended.users.findUnique({
-      where: { id: userId },
-    });
+    const user = await this.db.findUserById(userId);
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const professional = await this.prisma.extended.professionals.findUnique({
-      where: { userId },
-    });
+    const professional = await this.db.findProfessionalByUserId(userId);
     const baseWhere: Prisma.ServicesWhereInput = professional
       ? { professionalId: professional.id }
       : { userId };
 
     const [total, pending, inProgress, completed, cancelled, earningsAgg] =
       await Promise.all([
-        this.prisma.extended.services.count({ where: baseWhere }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.PENDING },
+        this.db.countServices(baseWhere),
+        this.db.countServices({ ...baseWhere, status: ServiceStatus.PENDING }),
+        this.db.countServices({
+          ...baseWhere,
+          status: ServiceStatus.IN_PROGRESS,
         }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.IN_PROGRESS },
+        this.db.countServices({
+          ...baseWhere,
+          status: ServiceStatus.COMPLETED,
         }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.COMPLETED },
-        }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.CANCELLED },
+        this.db.countServices({
+          ...baseWhere,
+          status: ServiceStatus.CANCELLED,
         }),
         professional
-          ? this.prisma.extended.services.aggregate({
-              where: {
-                professionalId: professional.id,
-                status: ServiceStatus.COMPLETED,
-              },
-              _sum: { finalAmount: true },
-            })
+          ? this.db.aggregateEarnings(professional.id)
           : Promise.resolve({ _sum: { finalAmount: null } }),
       ]);
 

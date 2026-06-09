@@ -24,6 +24,8 @@ Crear o actualizar `memory/sessions/session_N_accion.md` donde:
 - `N` = número de sesión (incrementar del último existente)
 - `accion` = slug 2-3 palabras de lo hecho (ej: `auth_jwt`, `fix_payments`, `refactor_users`)
 
+Si no lo dice y cierra la sesión/chat tanto en claude code desktop como la extension vscode, se proactivo y ejecuta el guardado tu. 
+
 ```markdown
 # Sesión N — [Fecha] — [Descripción breve]
 

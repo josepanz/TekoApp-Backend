@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { CryptoHelper } from '@common/helpers/crypto-helpers';
 
-import * as DTO from '@api/onboarding/dto';
+import * as DTO from '@/api/onboarding/dtos';
 import { OnboardingService } from '@modules/onboarding/services/onboarding.service';
 
 /**
