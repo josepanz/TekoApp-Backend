@@ -4,9 +4,10 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { CategoriesDbService } from '@/modules/categories-db/services/categories-db.service';
+import { CategoriesDbService } from '@modules/categories-db/services/categories-db.service';
 import { CreateCategoryDto } from '../dtos/request/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/request/update-category.dto';
+import { CategoryStatsResponseDTO } from '../dtos/response';
 import { Category, CategoryStatus, Prisma } from '@prisma/client';
 
 @Injectable()
@@ -210,7 +211,7 @@ export class CategoriesService {
     return this.categoriesDb.update(id, { isVisible: !category.isVisible });
   }
 
-  async getCategoryStats(id: number) {
+  async getCategoryStats(id: number): Promise<CategoryStatsResponseDTO> {
     const category = await this.findOne(id);
     const relations = category as unknown as {
       professionals: { averageRating: number }[];

@@ -1,10 +1,3 @@
-export * from './create-rating.dto';
-export * from './update-rating.dto';
-export * from './report-rating.dto';
-export * from './rating-stats.dto';
-export * from './rating-id.param.dto';
-export * from './user-id.param.dto';
-export * from './professional-id-rating.param.dto';
-export * from './service-request-id.param.dto';
-export * from './get-recent-ratings.query.dto';
-export * from './get-top-rated-professionals.query.dto';
+// Re-exports de compatibilidad. Usar dtos/request y dtos/response para código nuevo.
+export * from '../dtos/request';
+export * from '../dtos/response';

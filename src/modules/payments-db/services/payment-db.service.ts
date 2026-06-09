@@ -216,25 +216,30 @@ export class PaymentDbService {
       ...(professionalId && { professionalId }),
     };
 
-    const [totalStats, completedStats, failedStats] = await Promise.all([
-      this.prisma.extended.payments.aggregate({
-        where: whereClause,
-        _count: { id: true },
-        _sum: { totalAmount: true },
-      }),
-      this.prisma.extended.payments.count({
-        where: { ...whereClause, status: PaymentStatus.COMPLETED },
-      }),
-      this.prisma.extended.payments.count({
-        where: { ...whereClause, status: PaymentStatus.FAILED },
-      }),
-    ]);
+    const [totalStats, completedStats, failedStats, pendingStats] =
+      await Promise.all([
+        this.prisma.extended.payments.aggregate({
+          where: whereClause,
+          _count: { id: true },
+          _sum: { totalAmount: true },
+        }),
+        this.prisma.extended.payments.count({
+          where: { ...whereClause, status: PaymentStatus.COMPLETED },
+        }),
+        this.prisma.extended.payments.count({
+          where: { ...whereClause, status: PaymentStatus.FAILED },
+        }),
+        this.prisma.extended.payments.count({
+          where: { ...whereClause, status: PaymentStatus.PENDING },
+        }),
+      ]);
 
     return {
       totalPayments: totalStats._count.id,
       totalAmount: Number(totalStats._sum.totalAmount || 0),
       successfulPayments: completedStats,
       failedPayments: failedStats,
+      pendingPayments: pendingStats,
     };
   }
 
