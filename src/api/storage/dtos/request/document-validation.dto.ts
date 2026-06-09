@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { DocumentTypeEnum } from '../const/storage-api.enum';
+import { DocumentTypeEnum } from '../../const/storage-api.enum';
 
 export class DocumentValidationDTO {
   @ApiProperty({

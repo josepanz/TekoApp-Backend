@@ -1,11 +1,11 @@
 import { Body, Controller, Post, UseGuards, Version } from '@nestjs/common';
-import { StorageApiService } from './storage-api.service';
+import { StorageApiService } from '../services/storage-api.service';
 import { JwtAuthGuard } from '@modules/auth/guards';
-import { DocumentValidationDTO } from './dto/document-validation.dto';
+import { DocumentValidationDTO } from '../dtos/request/document-validation.dto';
 import {
   ALLOWED_MIME_TYPES,
   MERCHANT_DOC_FIELDS,
-} from './const/storage-api.enum';
+} from '../const/storage-api.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { User } from '@common/decorators/user.decorator';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';

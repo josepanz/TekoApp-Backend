@@ -1,43 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { PromotionStatus, PromotionType } from '@prisma/client';
-import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { PromotionsService } from './promotions.service';
+import { PromotionsDbService } from '@modules/promotions-db/services/promotions-db.service';
 
-// ──────────────────────────────────────────────
-// Mocks de Prisma a nivel de módulo
-// ──────────────────────────────────────────────
-const mockPromotionFindUnique = jest.fn();
-const mockPromotionFindMany = jest.fn();
-const mockPromotionCreate = jest.fn();
-const mockPromotionUpdate = jest.fn();
-const mockPromotionCount = jest.fn();
-const mockPromotionUsageCount = jest.fn();
-const mockPromotionUsageCreate = jest.fn();
-const mockPromotionUsageAggregate = jest.fn();
-const mockTransaction = jest.fn();
+const mockFindByCode = jest.fn();
+const mockCreate = jest.fn();
+const mockFindAll = jest.fn();
+const mockFindActive = jest.fn();
+const mockFindById = jest.fn();
+const mockUpdate = jest.fn();
+const mockDeactivate = jest.fn();
+const mockCountUsageByUser = jest.fn();
+const mockApplyTransaction = jest.fn();
+const mockCountPromotions = jest.fn();
+const mockAggregateUsage = jest.fn();
 
-const mockPrisma = {
-  extended: {
-    promotion: {
-      findUnique: mockPromotionFindUnique,
-      findMany: mockPromotionFindMany,
-      create: mockPromotionCreate,
-      update: mockPromotionUpdate,
-      count: mockPromotionCount,
-    },
-    promotionUsage: {
-      count: mockPromotionUsageCount,
-      create: mockPromotionUsageCreate,
-      aggregate: mockPromotionUsageAggregate,
-    },
-    $transaction: mockTransaction,
-  },
-};
-
-// ──────────────────────────────────────────────
-// Fixtures reutilizables
-// ──────────────────────────────────────────────
 const ahora = new Date();
 const ayer = new Date(ahora.getTime() - 24 * 60 * 60 * 1000);
 const manana = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
@@ -72,35 +50,79 @@ describe('PromotionsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PromotionsService,
-        { provide: PrismaDatasource, useValue: mockPrisma },
+        {
+          provide: PromotionsDbService,
+          useValue: {
+            findByCode: mockFindByCode,
+            create: mockCreate,
+            findAll: mockFindAll,
+            findActive: mockFindActive,
+            findById: mockFindById,
+            update: mockUpdate,
+            deactivate: mockDeactivate,
+            countUsageByUser: mockCountUsageByUser,
+            applyTransaction: mockApplyTransaction,
+            countPromotions: mockCountPromotions,
+            aggregateUsage: mockAggregateUsage,
+          },
+        },
       ],
     }).compile();
 
     service = module.get<PromotionsService>(PromotionsService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  afterEach(() => jest.clearAllMocks());
 
-  // ────────────────────────────────────────────
-  // findOne
-  // ────────────────────────────────────────────
-  describe('findOne', () => {
-    it('debe lanzar NotFoundException si la promoción no existe', async () => {
+  describe('create', () => {
+    it('debe crear la promoción cuando el código no existe', async () => {
       // Arrange
-      mockPromotionFindUnique.mockResolvedValue(null);
+      const dto = {
+        code: 'NUEVO2025',
+        type: PromotionType.PERCENTAGE,
+      } as never;
+      mockFindByCode.mockResolvedValue(null);
+      mockCreate.mockResolvedValue({ ...promocionActiva, code: 'NUEVO2025' });
 
-      // Act & Assert
-      await expect(service.findOne('id-inexistente')).rejects.toThrow(
-        NotFoundException,
-      );
+      // Act
+      const result = await service.create(dto, 1);
+
+      // Assert
+      expect(mockFindByCode).toHaveBeenCalledWith('NUEVO2025');
+      expect(mockCreate).toHaveBeenCalled();
+      expect(result).toBeDefined();
     });
 
+    it('debe lanzar BadRequestException cuando el código ya existe', async () => {
+      // Arrange
+      const dto = { code: 'VERANO2025' } as never;
+      mockFindByCode.mockResolvedValue(promocionActiva);
+
+      // Act & Assert
+      await expect(service.create(dto, 1)).rejects.toThrow(BadRequestException);
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findAll', () => {
+    it('debe retornar todas las promociones ordenadas por fecha de creación', async () => {
+      // Arrange
+      mockFindAll.mockResolvedValue([promocionActiva]);
+
+      // Act
+      const result = await service.findAll();
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(mockFindAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
     it('debe retornar la promoción cuando existe', async () => {
       // Arrange
       const promConUsages = { ...promocionActiva, usages: [] };
-      mockPromotionFindUnique.mockResolvedValue(promConUsages);
+      mockFindById.mockResolvedValue(promConUsages);
 
       // Act
       const resultado = await service.findOne(promocionActiva.id);
@@ -110,20 +132,43 @@ describe('PromotionsService', () => {
         id: promocionActiva.id,
         code: 'VERANO2025',
       });
-      expect(mockPromotionFindUnique).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: promocionActiva.id } }),
+      expect(mockFindById).toHaveBeenCalledWith(promocionActiva.id);
+    });
+
+    it('debe lanzar NotFoundException si la promoción no existe', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.findOne('id-inexistente')).rejects.toThrow(
+        NotFoundException,
       );
     });
   });
 
-  // ────────────────────────────────────────────
-  // validatePromotion
-  // ────────────────────────────────────────────
+  describe('remove', () => {
+    it('debe desactivar la promoción cuando existe', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue({ ...promocionActiva, usages: [] });
+      mockDeactivate.mockResolvedValue({
+        ...promocionActiva,
+        status: PromotionStatus.INACTIVE,
+      });
+
+      // Act
+      const result = await service.remove(promocionActiva.id);
+
+      // Assert
+      expect(mockDeactivate).toHaveBeenCalledWith(promocionActiva.id);
+      expect(result).toBeDefined();
+    });
+  });
+
   describe('validatePromotion', () => {
     it('debe retornar isValid:true y discountAmount calculado para una promoción válida', async () => {
       // Arrange
-      mockPromotionFindUnique.mockResolvedValue(promocionActiva);
-      mockPromotionUsageCount.mockResolvedValue(0);
+      mockFindByCode.mockResolvedValue(promocionActiva);
+      mockCountUsageByUser.mockResolvedValue(0);
 
       // Act
       const resultado = await service.validatePromotion(
@@ -135,17 +180,16 @@ describe('PromotionsService', () => {
 
       // Assert
       expect(resultado.isValid).toBe(true);
-      // 20 % de 100 000 = 20 000; cap maximumDiscount=30 000 → 20 000
+      // 20% de 100 000 = 20 000; cap maximumDiscount=30 000 → 20 000
       expect(resultado.discountAmount).toBe(20000);
     });
 
     it('debe retornar isValid:false si la promoción está INACTIVE', async () => {
       // Arrange
-      const promInactiva = {
+      mockFindByCode.mockResolvedValue({
         ...promocionActiva,
         status: PromotionStatus.INACTIVE,
-      };
-      mockPromotionFindUnique.mockResolvedValue(promInactiva);
+      });
 
       // Act
       const resultado = await service.validatePromotion(
@@ -162,15 +206,15 @@ describe('PromotionsService', () => {
 
     it('debe retornar isValid:false si el monto es menor al mínimo requerido', async () => {
       // Arrange
-      mockPromotionFindUnique.mockResolvedValue(promocionActiva); // minimumAmount = 50 000
-      mockPromotionUsageCount.mockResolvedValue(0);
+      mockFindByCode.mockResolvedValue(promocionActiva); // minimumAmount = 50 000
+      mockCountUsageByUser.mockResolvedValue(0);
 
       // Act
       const resultado = await service.validatePromotion(
         'VERANO2025',
         42,
         'cliente',
-        10000, // monto menor al mínimo
+        10000,
       );
 
       // Assert
@@ -181,8 +225,8 @@ describe('PromotionsService', () => {
 
     it('debe retornar isValid:false si el usuario ya usó la promoción el máximo de veces', async () => {
       // Arrange
-      mockPromotionFindUnique.mockResolvedValue(promocionActiva); // maxUsagePerUser = 1
-      mockPromotionUsageCount.mockResolvedValue(1); // ya usó 1 vez
+      mockFindByCode.mockResolvedValue(promocionActiva); // maxUsagePerUser = 1
+      mockCountUsageByUser.mockResolvedValue(1);
 
       // Act
       const resultado = await service.validatePromotion(
@@ -199,9 +243,6 @@ describe('PromotionsService', () => {
     });
   });
 
-  // ────────────────────────────────────────────
-  // applyPromotion
-  // ────────────────────────────────────────────
   describe('applyPromotion', () => {
     const dtoBase = {
       promotionCode: 'VERANO2025',
@@ -211,11 +252,11 @@ describe('PromotionsService', () => {
       userType: 'cliente',
     };
 
-    it('debe retornar success:true y crear el PromotionUsage cuando la promoción es válida', async () => {
+    it('debe retornar success:true y aplicar el descuento cuando la promoción es válida', async () => {
       // Arrange
-      mockPromotionFindUnique.mockResolvedValue(promocionActiva);
-      mockPromotionUsageCount.mockResolvedValue(0);
-      mockTransaction.mockResolvedValue([{}, {}]);
+      mockFindByCode.mockResolvedValue(promocionActiva);
+      mockCountUsageByUser.mockResolvedValue(0);
+      mockApplyTransaction.mockResolvedValue(undefined);
 
       // Act
       const resultado = await service.applyPromotion(dtoBase);
@@ -224,12 +265,12 @@ describe('PromotionsService', () => {
       expect(resultado.success).toBe(true);
       expect(resultado.discountAmount).toBe(20000);
       expect(resultado.finalAmount).toBe(80000);
-      expect(mockTransaction).toHaveBeenCalledTimes(1);
+      expect(mockApplyTransaction).toHaveBeenCalledTimes(1);
     });
 
     it('debe retornar success:false cuando la validación de la promoción falla', async () => {
       // Arrange — código inexistente dispara NotFoundException → catch → isValid:false
-      mockPromotionFindUnique.mockResolvedValue(null);
+      mockFindByCode.mockResolvedValue(null);
 
       // Act
       const resultado = await service.applyPromotion(dtoBase);
@@ -238,20 +279,15 @@ describe('PromotionsService', () => {
       expect(resultado.success).toBe(false);
       expect(resultado.discountAmount).toBe(0);
       expect(resultado.finalAmount).toBe(dtoBase.serviceAmount);
-      expect(mockTransaction).not.toHaveBeenCalled();
+      expect(mockApplyTransaction).not.toHaveBeenCalled();
     });
   });
 
-  // ────────────────────────────────────────────
-  // getPromotionStats
-  // ────────────────────────────────────────────
   describe('getPromotionStats', () => {
     it('debe retornar totalPromotions, activePromotions, totalUsage y totalDiscount correctamente', async () => {
       // Arrange
-      mockPromotionCount
-        .mockResolvedValueOnce(25) // totalPromotions
-        .mockResolvedValueOnce(8); // activePromotions
-      mockPromotionUsageAggregate.mockResolvedValue({
+      mockCountPromotions.mockResolvedValueOnce(25).mockResolvedValueOnce(8);
+      mockAggregateUsage.mockResolvedValue({
         _count: { id: 342 },
         _sum: { discountAmount: 5750000 },
       });
@@ -270,8 +306,8 @@ describe('PromotionsService', () => {
 
     it('debe retornar totalDiscount:0 cuando no hay usos registrados', async () => {
       // Arrange
-      mockPromotionCount.mockResolvedValueOnce(5).mockResolvedValueOnce(2);
-      mockPromotionUsageAggregate.mockResolvedValue({
+      mockCountPromotions.mockResolvedValueOnce(5).mockResolvedValueOnce(2);
+      mockAggregateUsage.mockResolvedValue({
         _count: { id: 0 },
         _sum: { discountAmount: null },
       });

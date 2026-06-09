@@ -497,6 +497,22 @@ export class UsersDBService {
     await this.inactivate(id, deletedBy);
   }
 
+  // ─── Aggregate ───────────────────────────────────────────────────────────
+
+  async getUsersCount(): Promise<{
+    total: number;
+    clients: number;
+    professionals: number;
+  }> {
+    const [total, professionals] = await Promise.all([
+      this.prisma.extended.users.count(),
+      this.prisma.extended.users.count({
+        where: { professionals: { isNot: null } },
+      }),
+    ]);
+    return { total, clients: total - professionals, professionals };
+  }
+
   // ─── Roles y permisos ────────────────────────────────────────────────────
 
   async getUserRoles(userId: number): Promise<RoleDTO[]> {

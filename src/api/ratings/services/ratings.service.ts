@@ -4,8 +4,8 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Prisma, RatingType } from '@prisma/client';
-import { PrismaDatasource } from '@core/database/services/prisma.service';
+import { Prisma } from '@prisma/client';
+import { RatingsDbService } from '@modules/ratings-db/services/ratings-db.service';
 import { CreateRatingRequestDTO } from '../dtos/request/create-rating.request.dto';
 import { UpdateRatingRequestDTO } from '../dtos/request/update-rating.request.dto';
 import {
@@ -18,16 +18,13 @@ const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class RatingsService {
-  constructor(private readonly prisma: PrismaDatasource) {}
+  constructor(private readonly db: RatingsDbService) {}
 
   async create(userId: number, dto: CreateRatingRequestDTO) {
     const professionalId =
       typeof dto.professionalId === 'string'
-        ? ((
-            await this.prisma.extended.professionals.findFirst({
-              where: { user: { referenceId: dto.professionalId } },
-            })
-          )?.id ?? 0)
+        ? ((await this.db.findProfessionalByUserRef(dto.professionalId))?.id ??
+          0)
         : Number(dto.professionalId);
 
     const serviceId =
@@ -38,111 +35,67 @@ export class RatingsService {
         | string
         | undefined);
 
-    const existing = await this.prisma.extended.rating.findFirst({
-      where: { userId, professionalId, serviceId, type: dto.type },
-    });
+    const existing = await this.db.findDuplicate(
+      userId,
+      professionalId,
+      serviceId,
+      dto.type,
+    );
     if (existing)
       throw new BadRequestException('Ya has calificado este servicio');
 
-    return this.prisma.extended.rating.create({
-      data: {
-        userId,
-        professionalId,
-        serviceId,
-        type: dto.type,
-        rating: dto.rating,
-        review:
-          ((dto as unknown as Record<string, unknown>).comment as string) ??
-          ((dto as unknown as Record<string, unknown>).review as string),
-        criteria: dto.criteria ? dto.criteria : undefined,
-        isAnonymous: dto.isAnonymous ?? false,
-        createdBy: String(userId),
-      },
+    return this.db.create({
+      userId,
+      professionalId,
+      serviceId,
+      type: dto.type,
+      rating: dto.rating,
+      review:
+        ((dto as unknown as Record<string, unknown>).comment as string) ??
+        ((dto as unknown as Record<string, unknown>).review as string),
+      criteria: dto.criteria
+        ? (dto.criteria as unknown as import('@prisma/client').Prisma.InputJsonValue)
+        : undefined,
+      isAnonymous: dto.isAnonymous ?? false,
+      createdBy: String(userId),
     });
   }
 
   async findAll() {
-    return this.prisma.extended.rating.findMany({
-      include: { user: true, professional: true, service: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.db.findAll();
   }
 
   async findOne(id: string) {
-    const rating = await this.prisma.extended.rating.findUnique({
-      where: { id },
-      include: { user: true, professional: true, service: true },
-    });
+    const rating = await this.db.findById(id);
     if (!rating) throw new NotFoundException('Calificación no encontrada');
     return rating;
   }
 
   async findByUser(userId: number) {
-    return this.prisma.extended.rating.findMany({
-      where: { userId },
-      include: { professional: true, service: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.db.findByUser(userId);
   }
 
   async findByProfessional(professionalId: number) {
-    return this.prisma.extended.rating.findMany({
-      where: { professionalId, isActive: true },
-      include: { user: true, service: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.db.findByProfessional(professionalId);
   }
 
   async findClientRatings(professionalId: number) {
-    return this.prisma.extended.rating.findMany({
-      where: {
-        professionalId,
-        type: RatingType.CLIENT_TO_PROFESSIONAL,
-        isAnonymous: false,
-        isActive: true,
-      },
-      include: { user: true, service: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.db.findClientRatings(professionalId);
   }
 
   async findProfessionalRatings(userId: number) {
-    return this.prisma.extended.rating.findMany({
-      where: {
-        userId,
-        type: RatingType.PROFESSIONAL_TO_CLIENT,
-        isAnonymous: false,
-        isActive: true,
-      },
-      include: { professional: true, service: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.db.findProfessionalRatings(userId);
   }
 
   async findByServiceRequest(serviceRequestId: string) {
-    return this.prisma.extended.rating.findMany({
-      where: { serviceId: serviceRequestId, isActive: true },
-      include: { user: true, professional: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.db.findByServiceId(serviceRequestId);
   }
 
   async getUserRatingStats(
     userId: number | string,
   ): Promise<UserRatingStatsResponseDTO> {
     const id = typeof userId === 'string' ? Number(userId) : userId;
-    const [given, received] = await Promise.all([
-      this.prisma.extended.rating.aggregate({
-        where: { userId: id },
-        _count: { id: true },
-        _avg: { rating: true },
-      }),
-      this.prisma.extended.rating.aggregate({
-        where: { professionalId: id },
-        _count: { id: true },
-        _avg: { rating: true },
-      }),
-    ]);
+    const [given, received] = await this.db.aggregateUserStats(id);
     return {
       givenRatings: given._count.id,
       receivedRatings: received._count.id,
@@ -168,7 +121,7 @@ export class RatingsService {
         'No se puede editar la calificación después de 24 horas',
       );
     }
-    return this.prisma.extended.rating.update({ where: { id }, data: dto });
+    return this.db.update(id, dto as Prisma.RatingUpdateInput);
   }
 
   async remove(id: string, userId: number): Promise<void> {
@@ -180,10 +133,7 @@ export class RatingsService {
     if (age > EDIT_WINDOW_MS) {
       throw new BadRequestException('No se puede eliminar esta calificación');
     }
-    await this.prisma.extended.rating.update({
-      where: { id },
-      data: { isActive: false },
-    });
+    await this.db.deactivate(id);
   }
 
   async reportRating(id: string, userId: number, reason: string) {
@@ -193,34 +143,14 @@ export class RatingsService {
         'No puedes reportar tu propia calificación',
       );
     }
-    return this.prisma.extended.rating.update({
-      where: { id },
-      data: { isReported: true, reportReason: reason },
-    });
+    return this.db.report(id, reason);
   }
 
   async getAverageRating(
     professionalId: number,
   ): Promise<ProfessionalRatingStatsResponseDTO> {
-    const [aggregate, ratings] = await Promise.all([
-      this.prisma.extended.rating.aggregate({
-        where: {
-          professionalId,
-          type: RatingType.CLIENT_TO_PROFESSIONAL,
-          isActive: true,
-        },
-        _avg: { rating: true },
-        _count: { id: true },
-      }),
-      this.prisma.extended.rating.findMany({
-        where: {
-          professionalId,
-          type: RatingType.CLIENT_TO_PROFESSIONAL,
-          isActive: true,
-        },
-        select: { rating: true, criteria: true },
-      }),
-    ]);
+    const [aggregate, ratings] =
+      await this.db.getAggregateAndRatings(professionalId);
 
     if (aggregate._count.id === 0) {
       return {
@@ -279,15 +209,7 @@ export class RatingsService {
   async getTopRatedProfessionals(
     limit = 10,
   ): Promise<TopRatedProfessionalResponseDTO[]> {
-    const grouped = await this.prisma.extended.rating.groupBy({
-      by: ['professionalId'],
-      where: { type: RatingType.CLIENT_TO_PROFESSIONAL, isActive: true },
-      _avg: { rating: true },
-      _count: { id: true },
-      having: { rating: { _count: { gte: 3 } } },
-      orderBy: { _avg: { rating: 'desc' } },
-      take: limit,
-    });
+    const grouped = await this.db.groupTopRated(limit);
 
     return grouped.map((g) => ({
       professionalId: String(g.professionalId),
@@ -297,10 +219,6 @@ export class RatingsService {
   }
 
   async getRecentRatings(limit = 20) {
-    return this.prisma.extended.rating.findMany({
-      include: { user: true, professional: true, service: true },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    });
+    return this.db.findRecent(limit);
   }
 }

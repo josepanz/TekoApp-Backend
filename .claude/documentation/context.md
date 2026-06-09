@@ -95,14 +95,27 @@ src/
 
 ## Estado actual — actualizar por sesión
 
-**Última actualización: 2026-06-08 — Sesión 5 (DTO restructure 5 APIs + fee calculator + tests)**
+**Última actualización: 2026-06-09 — Sesión 8 (Migración a -db modules: ratings, services, promotions + tests de controllers)**
 
 ### Build y runtime
 - `pnpm lint` — **0 errores, 0 warnings**
 - `pnpm build` (tsc --noEmit) — **0 errores TypeScript**
-- `pnpm test` — **4 suites, 68 tests, todos PASS**
+- `pnpm test` — **22 suites, 315 tests, todos PASS** (Sesión 8)
 - `node dist/main` — Arranca, todos los módulos DI inicializan correctamente
 - Errores en runtime (esperados, sin .env): MongoDB/PostgreSQL/Redis retry por `.env` ausente
+
+### Módulos -db activos (arquitectura limpia)
+| Módulo db | Importado por |
+|-----------|---------------|
+| `users-db` | `api/users` |
+| `payments-db` | `api/payments` |
+| `categories-db` | `api/categories` |
+| `locations-db` | `api/locations` |
+| `analytics-db` | `api/analytics` |
+| `professionals-db` | `api/professionals` |
+| `ratings-db` | `api/ratings` ✅ (Sesión 8) |
+| `services-db` | `api/services` ✅ (Sesión 8) |
+| `promotions-db` | `api/promotions` ✅ (Sesión 8) |
 
 ### Tareas completadas
 - [x] Eliminados 8 archivos entity TypeORM (no instalado) (Sesión 1)
@@ -115,18 +128,78 @@ src/
 - [x] Refactor payments: JwtAuthGuard, DTOs tipados, eliminado `mockUserId = 1` (Sesión 3)
 - [x] Reorganización `api.module.ts` / `app.module.ts` (usuario, Sesión 3)
 - [x] Módulo `professionals-db` + `ProfessionalsDbService` + response DTOs + folder structure (Sesión 4)
-- [x] **DTO restructure completa** (Sesión 5): categories, payments, promotions, ratings, services → `/dtos/request/`, `/dtos/response/`, `/controllers/`, `/services/`, `/docs/`
-- [x] **Fee calculator** (Sesión 5): `FeeCalculatorService` en `payments-db`, lee rates desde DB, TTL cache 5 min
+- [x] **DTO restructure completa** (Sesión 5): categories, payments, promotions, ratings, services
+- [x] **Fee calculator** (Sesión 5): `FeeCalculatorService` en `payments-db`, TTL cache 5 min
 - [x] **Tests** (Sesión 5): 4 suites — fee-calculator (7), payments (~26), promotions (12), categories (23)
-- [x] **Jest alias `@/`** (Sesión 5): `jest.config.ts` agrega `'^@/(.*)$': '<rootDir>/$1'`
+- [x] **Jest alias `@/`** (Sesión 5)
+- [x] **`--forceExit`** en Jest (Sesión 6)
+- [x] **6 nuevos specs de services** (Sesión 6): analytics, locations, professionals, ratings/services, services/services, users-api
+- [x] **`getUsersCount()`** migrado a `users-db.service.ts` (Sesión 6)
+- [x] **Tests de controllers** (Sesión 7): analytics (4), locations (8), professionals (15), ratings (16), services (16), users (10)
+- [x] **`ratings-db` module + service** (Sesión 8): 17 métodos semánticos
+- [x] **`services-db` module + service** (Sesión 8): 19 métodos, incluyendo `acceptRequestTransaction`
+- [x] **`promotions-db` module + service** (Sesión 8): 11 métodos, `applyTransaction` con `$transaction`
+- [x] **Migración `ratings.service.ts`** (Sesión 8): PrismaDatasource → RatingsDbService, spec reescrito
+- [x] **Migración `services.service.ts`** (Sesión 8): PrismaDatasource → ServicesDbService, spec reescrito
+- [x] **Migración `promotions.service.ts`** (Sesión 8): PrismaDatasource → PromotionsDbService, spec reescrito
+- [x] **Módulos api actualizados** (Sesión 8): ratings/services/promotions importan módulo `-db` en lugar de DatabaseModule
 
-### Notas de arquitectura (Sesión 5)
+### Notas de arquitectura
 - Cast pattern: `return service.method() as unknown as Promise<ResponseDTO>` — evita remapping Prisma→DTO
-- `FeeCalculatorService`: TTL cache en Map (no Redis) — suficiente para config que cambia raramente
+- Cast en specs: declarar `const dto = { prop: val }` sin cast, luego `service.method(dto as never)` en el call site
+- `ServicesDbService.updateService` acepta `Prisma.ServicesUncheckedUpdateInput` para soportar FK escalares (`professionalId`)
+- `UserHelper` tiene métodos estáticos — mockear con `jest.spyOn(UserHelper, 'method').mockReturnValue(...)`
+- `IMerchantContext` requiere campo `ruc: string` — incluirlo en mocks de tests que usen MerchantContext
 - Jest aliases disponibles: `@core/`, `@modules/`, `@api/`, `@common/`, `@auth/`, `@email/`, `@/`
-- `expect.objectContaining()` retorna `any` — cast con `as unknown` para suprimir `no-unsafe-assignment`
+- **Regla de oro activa en todos los módulos**: `api/*` nunca accede a PrismaDatasource directo
 
 ### Pendiente (próximas sesiones)
+- [ ] **Faltan test specs:**
+    - En /src/api: 
+        - [ ] Categories controller
+        - [ ] Notifications controller
+        - [ ] Notifications service
+        - [ ] Notification processor
+        - [ ] Onboarding controller
+        - [ ] Onboarding api service
+        - [ ] Payments controller
+        - [ ] Promotions controller
+        - [ ] Roles-permission controller
+        - [ ] roles permission api service
+        - [ ] storage controller
+        - [ ] services controller
+        - [ ] Tracking controller
+
+        En /src/module:
+        - [ ] analytrics-db service
+        - [ ] auth-password.service
+        - [ ] auth-token.service
+        - [ ] auth.service
+        - [ ] categories-db.service
+        - [ ] email.service
+        - [ ] health.controller
+        - [ ] locations-db.service
+        - [ ] notifications-db.service
+        - [ ] onboarding.service
+        - [ ] payment-db.service
+        - [ ] professionals-db.service
+        - [ ] promotions-db.service
+        - [ ] ratings-db.service
+        - [ ] permissions-db.service.ts
+        - [ ] role-permissions-db.service.ts
+        - [ ] roles-db.service.ts
+        - [ ] user-permissions-db.service.ts
+        - [ ] user-roles-db.service.ts
+        - [ ] services-db.service
+        - [ ] tacking-db.service
+        - [ ] user-roles-db.service
+        - [ ] users-db.service
+
+    - Y si es facil, no consume recurso y se puede testear sin muchos pasos:
+        - [ ] report.service
+
+- [ ] **Ajustes criticos de diseño:**
+    - [ ] Validar /src/api/uploads si en verdad es necesario o se puede unificar y consolidar todo en storage para exponer las funciones correctas segun las reglas, specs, lint, rules definidas y specs:
+        - [ ] Si si es necesario, ajustar completo el uploads de /src/api, falta organización de carpetas controllers, services, dtos, dtos/request, dtos/response, faltan propiamente los DTOs request.dto.ts, response.dto.ts, query.dto.ts, param.dto.ts según las reglas, faltan specs de controller y service, sino borrar.
+    - [ ] Validar /src/api/storage y /src/modules/storage que cumpla con todas las reglas
 - [ ] **Sharp binary**: `pnpm add sharp` o binario win32-x64 para habilitar procesamiento de imágenes
-- [ ] **Tests restantes**: `professionals-db.service.spec.ts`, `professionals.service.spec.ts`, controllers specs
-- [ ] **`--forceExit`** (opcional): TTL cache de `FeeCalculatorService` produce warning cosmético "worker process failed to exit gracefully"

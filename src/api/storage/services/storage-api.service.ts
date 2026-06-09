@@ -9,7 +9,7 @@ import {
 import {
   IUploadFileParams,
   IUploadedFileUrls,
-} from './interfaces/storage.interface';
+} from '../interfaces/storage.interface';
 
 @Injectable()
 export class StorageApiService {
