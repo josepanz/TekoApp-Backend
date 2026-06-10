@@ -127,6 +127,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        run: pnpm prisma generate
+
       # Semantic Release: determina versión, actualiza CHANGELOG, package.json,
       # ejecuta replace-version.sh (deployment.yml), commitea y crea git tag.
       - name: Semantic Release
@@ -136,6 +139,7 @@ jobs:
           GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          HUSKY: 0
         run: npx semantic-release
 
       # Captura el tag recién creado para pasar a los pasos siguientes
