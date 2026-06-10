@@ -1,27 +1,22 @@
 #!/bin/sh
+set -e
 
-set -e  # Detener la ejecución si algún comando falla
+echo "prepare: actualizando imagen en deployment.yml"
 
-echo "prepare update argo image version"
-
-# Set Variables
 VERSION=$1
 BRANCH=$2
+FILE=$3
 
-SCRIPT_DIR=$(dirname "$0")  # Directorio donde se encuentra el script
-BASE_DIR=$(realpath "$SCRIPT_DIR")  # Ruta absoluta del directorio
-FILE_PATH=$(realpath "$BASE_DIR/../ci/$BRANCH/$3") 
+SCRIPT_DIR=$(dirname "$0")
+FILE_PATH=$(realpath "$SCRIPT_DIR/../ci/$BRANCH/$FILE")
 
-TAG=${VERSION}
+echo "  branch : $BRANCH"
+echo "  version: $VERSION"
+echo "  file   : $FILE_PATH"
 
-echo "Updating version of tekoapp-backend in $BRANCH environment path: $FILE_PATH"
-sed -i.bak -E "s|(registry-local\.dominio\.com\.py:port/ruta/tekoapp-backend):[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9.]+)?|\1:$TAG|" "$FILE_PATH"
+# Reemplaza la etiqueta de versión en cualquier imagen que contenga 'tekoapp-backend:X.Y.Z'
+# Funciona independientemente del dominio del registry configurado.
+# GNU sed (Linux/GitHub Actions): -i sin extension no crea archivos .bak
+sed -i -E "s|(image:.*tekoapp-backend):([0-9a-zA-Z._-]+)|\1:${VERSION}|" "$FILE_PATH"
 
-
-# Confirmar el cambio
-if [ $? -eq 0 ]; then
-  echo "Image 'ruta/tekoapp-backend' version updated to $TAG in $BRANCH"
-else
-  echo "Error updating image version."
-  exit 1
-fi
+echo "  imagen tekoapp-backend actualizada a :${VERSION} en $BRANCH"
