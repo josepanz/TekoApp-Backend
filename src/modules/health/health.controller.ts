@@ -1,5 +1,5 @@
 // api/health/health.controller.ts
-import { Controller, Get, Version } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import {
   HealthCheck,
@@ -52,7 +52,6 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  @Version('1')
   @ApiOperation({
     summary:
       'Verifica el estado de salud global de la infraestructura de TekoApp',
