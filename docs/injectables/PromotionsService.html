@@ -133,7 +133,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/promotions/promotions.service.ts</code>
+            <code>src/api/promotions/services/promotions.service.ts</code>
         </p>
 
 
@@ -231,12 +231,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(prisma: <a href="../injectables/PrismaDatasource.html" target="_self">PrismaDatasource</a>)</code>
+<code>constructor(db: <a href="../injectables/PromotionsDbService.html" target="_self">PromotionsDbService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/api/promotions/promotions.service.ts:17</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/api/promotions/services/promotions.service.ts:22</a></div>
                             </td>
                         </tr>
 
@@ -254,10 +254,10 @@
                                         </thead>
                                         <tbody>
                                                 <tr>
-                                                        <td>prisma</td>
+                                                        <td>db</td>
                                                   
                                                         <td>
-                                                                        <code><a href="../injectables/PrismaDatasource.html" target="_self" >PrismaDatasource</a></code>
+                                                                        <code><a href="../injectables/PromotionsDbService.html" target="_self" >PromotionsDbService</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -301,8 +301,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="178"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:178</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="151"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:151</a></div>
                         </td>
                     </tr>
 
@@ -338,7 +338,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionApplyResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -370,8 +370,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="260"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:260</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="220"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:220</a></div>
                         </td>
                     </tr>
 
@@ -451,8 +451,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="21"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:21</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="26"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:26</a></div>
                         </td>
                     </tr>
 
@@ -500,7 +500,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -532,8 +532,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="39"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:39</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="47"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:47</a></div>
                         </td>
                     </tr>
 
@@ -542,7 +542,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -571,8 +571,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="33"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:33</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:41</a></div>
                         </td>
                     </tr>
 
@@ -581,7 +581,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -610,8 +610,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="81"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:81</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="59"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:59</a></div>
                         </td>
                     </tr>
 
@@ -647,7 +647,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>    <code>Promise&lt;Promotion&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -679,8 +679,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="72"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:72</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -716,7 +716,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -748,8 +748,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="235"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:235</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="200"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:200</a></div>
                         </td>
                     </tr>
 
@@ -758,7 +758,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionStatsResponseDTO&gt;</a></code>
 
                         </div>
                 </td>
@@ -787,8 +787,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="95"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:95</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:74</a></div>
                         </td>
                     </tr>
 
@@ -824,7 +824,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -856,8 +856,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="90"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:90</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="66"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:66</a></div>
                         </td>
                     </tr>
 
@@ -905,7 +905,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -937,8 +937,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="103"
-                                    class="link-to-prism">src/api/promotions/promotions.service.ts:103</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="79"
+                                    class="link-to-prism">src/api/promotions/services/promotions.service.ts:79</a></div>
                         </td>
                     </tr>
 
@@ -1010,7 +1010,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionValidateResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1052,7 +1052,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/api/promotions/promotions.service.ts:17</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/api/promotions/services/promotions.service.ts:22</a></div>
                         </td>
                     </tr>
 
@@ -1077,94 +1077,70 @@ import {
   PromotionStatus,
   PromotionType,
 } from &#x27;@prisma/client&#x27;;
-import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;;
+import { PromotionsDbService } from &#x27;@modules/promotions-db/services/promotions-db.service&#x27;;
+import { CreatePromotionRequestDTO } from &#x27;../dtos/request/create-promotion.request.dto&#x27;;
+import { PromotionDetailResponseDTO } from &#x27;../dtos/response/promotion-detail.response.dto&#x27;;
+import { PromotionValidateResponseDTO } from &#x27;../dtos/response/promotion-validate.response.dto&#x27;;
+import { PromotionApplyResponseDTO } from &#x27;../dtos/response/promotion-apply.response.dto&#x27;;
+import { PromotionStatsResponseDTO } from &#x27;../dtos/response/promotion-stats.response.dto&#x27;;
 
 @Injectable()
 export class PromotionsService {
   private readonly logger &#x3D; new Logger(PromotionsService.name);
 
-  constructor(private readonly prisma: PrismaDatasource) {}
+  constructor(private readonly db: PromotionsDbService) {}
 
-  async create(dto: Prisma.PromotionUncheckedCreateInput, createdById: number) {
-    const existing &#x3D; await this.prisma.extended.promotion.findUnique({
-      where: { code: dto.code },
-    });
+  async create(
+    dto: Prisma.PromotionUncheckedCreateInput,
+    createdById: number,
+  ): Promise&lt;PromotionDetailResponseDTO&gt; {
+    const existing &#x3D; await this.db.findByCode(dto.code);
     if (existing)
       throw new BadRequestException(&#x27;El código de promoción ya existe&#x27;);
 
-    return this.prisma.extended.promotion.create({
-      data: { ...dto, createdById, status: PromotionStatus.ACTIVE },
-    });
+    return this.db.create({
+      ...dto,
+      createdById,
+      status: PromotionStatus.ACTIVE,
+    }) as unknown as Promise&lt;PromotionDetailResponseDTO&gt;;
   }
 
-  async findAll() {
-    return this.prisma.extended.promotion.findMany({
-      orderBy: { createdAt: &#x27;desc&#x27; },
-    });
+  async findAll(): Promise&lt;PromotionDetailResponseDTO[]&gt; {
+    return this.db.findAll() as unknown as Promise&lt;
+      PromotionDetailResponseDTO[]
+    &gt;;
   }
 
-  async findActive() {
-    const now &#x3D; new Date();
-    return this.prisma.extended.promotion
-      .findMany({
-        where: {
-          status: PromotionStatus.ACTIVE,
-          validFrom: { lte: now },
-          validUntil: { gte: now },
-          OR: [
-            { maxUsage: -1 },
-            {
-              currentUsage: {
-                lt: this.prisma.extended.promotion.fields?.maxUsage as never,
-              },
-            },
-          ],
-        },
-      })
-      .catch(() &#x3D;&gt;
-        this.prisma.extended.promotion
-          .findMany({
-            where: {
-              status: PromotionStatus.ACTIVE,
-              validFrom: { lte: now },
-              validUntil: { gte: now },
-            },
-          })
-          .then((all) &#x3D;&gt;
-            all.filter((p) &#x3D;&gt; p.maxUsage &#x3D;&#x3D;&#x3D; -1 || p.currentUsage &lt; p.maxUsage),
-          ),
-      );
+  async findActive(): Promise&lt;PromotionDetailResponseDTO[]&gt; {
+    return this.db.findActive() as unknown as Promise&lt;
+      PromotionDetailResponseDTO[]
+    &gt;;
   }
 
-  async findOne(id: string) {
-    const promotion &#x3D; await this.prisma.extended.promotion.findUnique({
-      where: { id },
-      include: { usages: true },
-    });
+  async findOne(id: string): Promise&lt;PromotionDetailResponseDTO&gt; {
+    const promotion &#x3D; await this.db.findById(id);
     if (!promotion) throw new NotFoundException(&#x27;Promoción no encontrada&#x27;);
-    return promotion;
+    return promotion as unknown as PromotionDetailResponseDTO;
   }
 
-  async findByCode(code: string) {
-    const promotion &#x3D; await this.prisma.extended.promotion.findUnique({
-      where: { code },
-    });
+  async findByCode(code: string): Promise&lt;Promotion&gt; {
+    const promotion &#x3D; await this.db.findByCode(code);
     if (!promotion)
       throw new NotFoundException(&#x27;Código de promoción no válido&#x27;);
     return promotion;
   }
 
-  async update(id: string, dto: Prisma.PromotionUpdateInput) {
+  async update(
+    id: string,
+    dto: Prisma.PromotionUpdateInput,
+  ): Promise&lt;PromotionDetailResponseDTO&gt; {
     await this.findOne(id);
-    return this.prisma.extended.promotion.update({ where: { id }, data: dto });
+    return this.db.update(id, dto) as unknown as PromotionDetailResponseDTO;
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise&lt;PromotionDetailResponseDTO&gt; {
     await this.findOne(id);
-    return this.prisma.extended.promotion.update({
-      where: { id },
-      data: { status: PromotionStatus.INACTIVE },
-    });
+    return this.db.deactivate(id) as unknown as PromotionDetailResponseDTO;
   }
 
   async validatePromotion(
@@ -1172,12 +1148,7 @@ export class PromotionsService {
     userId: number,
     userType: string,
     serviceAmount: number,
-  ): Promise&lt;{
-    isValid: boolean;
-    promotion?: Promotion;
-    discountAmount: number;
-    message?: string;
-  }&gt; {
+  ): Promise&lt;PromotionValidateResponseDTO&gt; {
     try {
       const promotion &#x3D; await this.findByCode(code);
       const now &#x3D; new Date();
@@ -1209,9 +1180,7 @@ export class PromotionsService {
         };
       }
 
-      const usageCount &#x3D; await this.prisma.extended.promotionUsage.count({
-        where: { promotionId: promotion.id, userId },
-      });
+      const usageCount &#x3D; await this.db.countUsageByUser(promotion.id, userId);
       if (usageCount &gt;&#x3D; promotion.maxUsagePerUser) {
         return {
           isValid: false,
@@ -1232,7 +1201,11 @@ export class PromotionsService {
       }
 
       const discountAmount &#x3D; this.calculateDiscount(promotion, serviceAmount);
-      return { isValid: true, promotion, discountAmount };
+      return {
+        isValid: true,
+        promotion: promotion as unknown as PromotionDetailResponseDTO,
+        discountAmount,
+      };
     } catch {
       return {
         isValid: false,
@@ -1248,7 +1221,7 @@ export class PromotionsService {
     serviceAmount: number;
     userId: number;
     userType: string;
-  }) {
+  }): Promise&lt;PromotionApplyResponseDTO&gt; {
     const { promotionCode, serviceId, serviceAmount, userId, userType } &#x3D; dto;
     const validation &#x3D; await this.validatePromotion(
       promotionCode,
@@ -1269,23 +1242,15 @@ export class PromotionsService {
     const { promotion, discountAmount } &#x3D; validation;
     const finalAmount &#x3D; serviceAmount - discountAmount;
 
-    await this.prisma.extended.$transaction([
-      this.prisma.extended.promotionUsage.create({
-        data: {
-          promotionId: promotion.id,
-          userId,
-          serviceId,
-          originalAmount: serviceAmount,
-          discountAmount,
-          finalAmount,
-          metadata: serviceId ? { serviceId } : undefined,
-        },
-      }),
-      this.prisma.extended.promotion.update({
-        where: { id: promotion.id },
-        data: { currentUsage: { increment: 1 } },
-      }),
-    ]);
+    await this.db.applyTransaction({
+      promotionId: promotion.id,
+      userId,
+      serviceId,
+      originalAmount: serviceAmount,
+      discountAmount,
+      finalAmount,
+      metadata: serviceId ? { serviceId } : undefined,
+    });
 
     this.logger.log(
       &#x60;Promoción ${promotion.code} aplicada. Descuento: ${discountAmount}&#x60;,
@@ -1299,21 +1264,16 @@ export class PromotionsService {
     };
   }
 
-  async getPromotionStats() {
+  async getPromotionStats(): Promise&lt;PromotionStatsResponseDTO&gt; {
     const now &#x3D; new Date();
     const [totalPromotions, activePromotions, usageAgg] &#x3D; await Promise.all([
-      this.prisma.extended.promotion.count(),
-      this.prisma.extended.promotion.count({
-        where: {
-          status: PromotionStatus.ACTIVE,
-          validFrom: { lte: now },
-          validUntil: { gte: now },
-        },
+      this.db.countPromotions(),
+      this.db.countPromotions({
+        status: PromotionStatus.ACTIVE,
+        validFrom: { lte: now },
+        validUntil: { gte: now },
       }),
-      this.prisma.extended.promotionUsage.aggregate({
-        _count: { id: true },
-        _sum: { discountAmount: true },
-      }),
+      this.db.aggregateUsage(),
     ]);
 
     return {
@@ -1347,6 +1307,8 @@ export class PromotionsService {
     return Math.round(discount * 100) / 100;
   }
 }
+
+export type { CreatePromotionRequestDTO };
 </code></pre>
     </div>
 

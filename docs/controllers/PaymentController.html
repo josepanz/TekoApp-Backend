@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/payments/payments.controller.ts</code>
+            <code>src/api/payments/controllers/payments.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -160,10 +160,12 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#cancel" >cancel</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -172,10 +174,12 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#createMethod" >createMethod</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -183,25 +187,30 @@
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findAll" >findAll</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findOne" >findOne</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getSummary" >getSummary</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getTrends" >getTrends</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -210,15 +219,18 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#refund" >refund</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#update" >update</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#updateMethod" >updateMethod</a>
@@ -248,6 +260,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>cancel</b></span>
                         <a href="#cancel"><span class="icon ion-ios-link"></span></a>
@@ -257,7 +270,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>cancel(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>cancel(param: <a href="../classes/PaymentIdParamDTO.html" target="_self">PaymentIdParamDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -265,14 +278,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/cancel&#x27;)<br />@HttpCode(HttpStatus.OK)<br /></code>
+                    <code>@Post(&#x27;:id/cancel&#x27;)<br />@HttpCode(HttpStatus.OK)<br />@ApiCancelPayment()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="69"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:69</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="128"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:128</a></div>
                         </td>
                     </tr>
 
@@ -293,9 +306,21 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentIdParamDTO.html" target="_self" >PaymentIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>literal type</code>
                                             </td>
 
                                             <td>
@@ -308,7 +333,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -326,6 +351,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>create</b></span>
                         <a href="#create"><span class="icon ion-ios-link"></span></a>
@@ -335,7 +361,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>create(dto: <a href="../classes/CreatePaymentDto.html" target="_self">CreatePaymentDto</a>)</code>
+                    <code>create(dto: <a href="../classes/CreatePaymentDto.html" target="_self">CreatePaymentDto</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -343,14 +369,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@HttpCode(HttpStatus.CREATED)<br /></code>
+                    <code>@Post()<br />@HttpCode(HttpStatus.CREATED)<br />@ApiCreatePayment()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="30"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:30</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="62"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:62</a></div>
                         </td>
                     </tr>
 
@@ -382,11 +408,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -404,6 +442,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>createMethod</b></span>
                         <a href="#createMethod"><span class="icon ion-ios-link"></span></a>
@@ -413,7 +452,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createMethod(dto: <a href="../classes/CreatePaymentDto.html" target="_self">CreatePaymentDto</a>)</code>
+                    <code>createMethod(dto: <a href="../classes/CreatePaymentMethodRequestDTO.html" target="_self">CreatePaymentMethodRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -421,14 +460,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;methods&#x27;)<br />@HttpCode(HttpStatus.CREATED)<br /></code>
+                    <code>@Post(&#x27;methods&#x27;)<br />@HttpCode(HttpStatus.CREATED)<br />@ApiCreatePaymentMethod()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="84"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:84</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="156"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:156</a></div>
                         </td>
                     </tr>
 
@@ -451,7 +490,19 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/CreatePaymentDto.html" target="_self" >CreatePaymentDto</a></code>
+                                                            <code><a href="../classes/CreatePaymentMethodRequestDTO.html" target="_self" >CreatePaymentMethodRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>literal type</code>
                                             </td>
 
                                             <td>
@@ -464,7 +515,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentMethodDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -482,6 +533,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>deleteMethod</b></span>
                         <a href="#deleteMethod"><span class="icon ion-ios-link"></span></a>
@@ -491,7 +543,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deleteMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>deleteMethod(param: <a href="../classes/PaymentMethodIdParamDTO.html" target="_self">PaymentMethodIdParamDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -499,14 +551,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;methods/:id&#x27;)<br />@HttpCode(HttpStatus.NO_CONTENT)<br /></code>
+                    <code>@Delete(&#x27;methods/:id&#x27;)<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@ApiDeletePaymentMethod()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="100"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:100</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="183"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:183</a></div>
                         </td>
                     </tr>
 
@@ -527,9 +579,21 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentMethodIdParamDTO.html" target="_self" >PaymentMethodIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>literal type</code>
                                             </td>
 
                                             <td>
@@ -542,7 +606,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -559,6 +623,7 @@
                     <a name="findAll"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findAll</b></span>
                         <a href="#findAll"><span class="icon ion-ios-link"></span></a>
@@ -568,7 +633,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findAll(query: <a href="../classes/PaymentQueryDto.html" target="_self">PaymentQueryDto</a>)</code>
+                    <code>findAll(query: <a href="../classes/PaymentListQueryDTO.html" target="_self">PaymentListQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -576,14 +641,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br /></code>
+                    <code>@Get()<br />@ApiGetPayments()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="36"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:36</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:74</a></div>
                         </td>
                     </tr>
 
@@ -606,7 +671,7 @@
                                         <tr>
                                                 <td>query</td>
                                             <td>
-                                                            <code><a href="../classes/PaymentQueryDto.html" target="_self" >PaymentQueryDto</a></code>
+                                                            <code><a href="../classes/PaymentListQueryDTO.html" target="_self" >PaymentListQueryDTO</a></code>
                                             </td>
 
                                             <td>
@@ -619,7 +684,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -636,6 +701,7 @@
                     <a name="findOne"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findOne</b></span>
                         <a href="#findOne"><span class="icon ion-ios-link"></span></a>
@@ -645,7 +711,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOne(param: <a href="../classes/PaymentIdParamDTO.html" target="_self">PaymentIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -653,14 +719,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@ApiGetPaymentById()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="58"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:58</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:105</a></div>
                         </td>
                     </tr>
 
@@ -681,9 +747,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentIdParamDTO.html" target="_self" >PaymentIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -696,7 +762,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -713,6 +779,7 @@
                     <a name="getSummary"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getSummary</b></span>
                         <a href="#getSummary"><span class="icon ion-ios-link"></span></a>
@@ -722,7 +789,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getSummary(userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, professionalId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getSummary(query: <a href="../classes/PaymentSummaryQueryDTO.html" target="_self">PaymentSummaryQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -730,14 +797,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;summary&#x27;)<br /></code>
+                    <code>@Get(&#x27;summary&#x27;)<br />@ApiGetPaymentSummary()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="45"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:45</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="86"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:86</a></div>
                         </td>
                     </tr>
 
@@ -758,25 +825,13 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>userId</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentSummaryQueryDTO.html" target="_self" >PaymentSummaryQueryDTO</a></code>
                                             </td>
 
                                             <td>
-                                                    Yes
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>professionalId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
+                                                    No
                                             </td>
 
 
@@ -785,7 +840,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentSummaryResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -802,6 +857,7 @@
                     <a name="getTrends"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getTrends</b></span>
                         <a href="#getTrends"><span class="icon ion-ios-link"></span></a>
@@ -811,7 +867,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getTrends(days: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getTrends(query: <a href="../classes/PaymentTrendsQueryDTO.html" target="_self">PaymentTrendsQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -819,14 +875,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;trends&#x27;)<br /></code>
+                    <code>@Get(&#x27;trends&#x27;)<br />@ApiGetPaymentTrends()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="53"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:53</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="97"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:97</a></div>
                         </td>
                     </tr>
 
@@ -843,44 +899,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>days</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/PaymentTrendsQueryDTO.html" target="_self" >PaymentTrendsQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>30</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>userId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentTrendsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -898,6 +936,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>handleWebhooks</b></span>
                         <a href="#handleWebhooks"><span class="icon ion-ios-link"></span></a>
@@ -907,7 +946,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>handleWebhooks(provider: PaymentProvider, payload: Record<string | unknown>)</code>
+                    <code>handleWebhooks(param: <a href="../classes/PaymentWebhookParamDTO.html" target="_self">PaymentWebhookParamDTO</a>, payload: Record<string | unknown>)</code>
                 </td>
             </tr>
 
@@ -915,14 +954,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;webhooks/:provider&#x27;)<br />@HttpCode(HttpStatus.OK)<br /></code>
+                    <code>@Post(&#x27;webhooks/:provider&#x27;)<br />@HttpCode(HttpStatus.OK)<br />@ApiHandleWebhook()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="109"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:109</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="195"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:195</a></div>
                         </td>
                     </tr>
 
@@ -943,9 +982,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>provider</td>
+                                                <td>param</td>
                                             <td>
-                                                        <code>PaymentProvider</code>
+                                                            <code><a href="../classes/PaymentWebhookParamDTO.html" target="_self" >PaymentWebhookParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -970,7 +1009,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -988,6 +1027,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>refund</b></span>
                         <a href="#refund"><span class="icon ion-ios-link"></span></a>
@@ -997,7 +1037,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>refund(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/RefundPaymentDto.html" target="_self">RefundPaymentDto</a>)</code>
+                    <code>refund(param: <a href="../classes/PaymentIdParamDTO.html" target="_self">PaymentIdParamDTO</a>, dto: <a href="../classes/RefundPaymentDto.html" target="_self">RefundPaymentDto</a>)</code>
                 </td>
             </tr>
 
@@ -1005,14 +1045,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/refund&#x27;)<br />@HttpCode(HttpStatus.OK)<br /></code>
+                    <code>@Post(&#x27;:id/refund&#x27;)<br />@HttpCode(HttpStatus.OK)<br />@ApiRefundPayment()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="76"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:76</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="141"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:141</a></div>
                         </td>
                     </tr>
 
@@ -1033,9 +1073,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentIdParamDTO.html" target="_self" >PaymentIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1060,7 +1100,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1077,6 +1117,7 @@
                     <a name="update"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>update</b></span>
                         <a href="#update"><span class="icon ion-ios-link"></span></a>
@@ -1086,7 +1127,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdatePaymentDto.html" target="_self">UpdatePaymentDto</a>)</code>
+                    <code>update(param: <a href="../classes/PaymentIdParamDTO.html" target="_self">PaymentIdParamDTO</a>, dto: <a href="../classes/UpdatePaymentDto.html" target="_self">UpdatePaymentDto</a>)</code>
                 </td>
             </tr>
 
@@ -1094,14 +1135,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Put(&#x27;:id&#x27;)<br /></code>
+                    <code>@Put(&#x27;:id&#x27;)<br />@ApiUpdatePayment()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="63"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:63</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="115"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:115</a></div>
                         </td>
                     </tr>
 
@@ -1122,9 +1163,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentIdParamDTO.html" target="_self" >PaymentIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1149,7 +1190,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1166,6 +1207,7 @@
                     <a name="updateMethod"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>updateMethod</b></span>
                         <a href="#updateMethod"><span class="icon ion-ios-link"></span></a>
@@ -1175,7 +1217,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdatePaymentMethodDto.html" target="_self">UpdatePaymentMethodDto</a>)</code>
+                    <code>updateMethod(param: <a href="../classes/PaymentMethodIdParamDTO.html" target="_self">PaymentMethodIdParamDTO</a>, dto: <a href="../classes/UpdatePaymentMethodDto.html" target="_self">UpdatePaymentMethodDto</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1183,14 +1225,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Put(&#x27;methods/:id&#x27;)<br /></code>
+                    <code>@Put(&#x27;methods/:id&#x27;)<br />@ApiUpdatePaymentMethod()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="90"
-                                    class="link-to-prism">src/api/payments/payments.controller.ts:90</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="168"
+                                    class="link-to-prism">src/api/payments/controllers/payments.controller.ts:168</a></div>
                         </td>
                     </tr>
 
@@ -1211,9 +1253,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PaymentMethodIdParamDTO.html" target="_self" >PaymentMethodIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1234,11 +1276,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                        <code>literal type</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentMethodDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1252,8 +1306,7 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">// src/api/payments/controllers/payment.controller.ts
-import {
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
   Controller,
   Post,
   Get,
@@ -1264,107 +1317,194 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
+  Request,
 } from &#x27;@nestjs/common&#x27;;
-import { PaymentApiService } from &#x27;./payments.service&#x27;;
-import { PaymentProvider } from &#x27;@prisma/client&#x27;;
+import { ApiTags } from &#x27;@nestjs/swagger&#x27;;
+import { JwtAuthGuard } from &#x27;@auth/guards/jwt-auth.guard&#x27;;
+import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
+import { PaymentApiService } from &#x27;../services/payments.service&#x27;;
 import {
   CreatePaymentDto,
   UpdatePaymentDto,
   RefundPaymentDto,
   UpdatePaymentMethodDto,
-} from &#x27;@/api/payments/dtos/request&#x27;;
-import { PaymentQueryDto } from &#x27;@/api/payments/dtos/request/payment-query.dto&#x27;;
+  PaymentIdParamDTO,
+  PaymentMethodIdParamDTO,
+  PaymentWebhookParamDTO,
+  PaymentListQueryDTO,
+  PaymentSummaryQueryDTO,
+  PaymentTrendsQueryDTO,
+  CreatePaymentMethodRequestDTO,
+} from &#x27;../dtos/request&#x27;;
+import {
+  PaymentDetailResponseDTO,
+  PaymentMethodDetailResponseDTO,
+  PaymentSummaryResponseDTO,
+  PaymentTrendsResponseDTO,
+} from &#x27;../dtos/response&#x27;;
+import {
+  ApiCreatePayment,
+  ApiGetPayments,
+  ApiGetPaymentSummary,
+  ApiGetPaymentTrends,
+  ApiGetPaymentById,
+  ApiUpdatePayment,
+  ApiCancelPayment,
+  ApiRefundPayment,
+  ApiCreatePaymentMethod,
+  ApiUpdatePaymentMethod,
+  ApiDeletePaymentMethod,
+  ApiHandleWebhook,
+} from &#x27;../docs/payments.docs&#x27;;
 
+@ApiTags(&#x27;Pagos&#x27;)
 @Controller(&#x27;payments&#x27;)
+@UseGuards(JwtAuthGuard)
 export class PaymentController {
   constructor(private readonly apiService: PaymentApiService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() dto: CreatePaymentDto) {
-    // Usualmente se saca del JWT con @GetUser(&#x27;id&#x27;) userId: string
-    return this.apiService.createPayment(1, dto);
+  @ApiCreatePayment()
+  async create(
+    @Body() dto: CreatePaymentDto,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;PaymentDetailResponseDTO&gt; {
+    return this.apiService.createPayment(
+      req.user.id,
+      dto,
+    ) as unknown as Promise&lt;PaymentDetailResponseDTO&gt;;
   }
 
   @Get()
-  async findAll(@Query() query: PaymentQueryDto) {
+  @ApiGetPayments()
+  async findAll(
+    @Query() query: PaymentListQueryDTO,
+  ): Promise&lt;PaymentDetailResponseDTO[]&gt; {
     return this.apiService.getPayments(
       query.userId,
       query.professionalId,
       query.status,
-    );
+    ) as unknown as Promise&lt;PaymentDetailResponseDTO[]&gt;;
   }
 
   @Get(&#x27;summary&#x27;)
+  @ApiGetPaymentSummary()
   async getSummary(
-    @Query(&#x27;userId&#x27;) userId?: string,
-    @Query(&#x27;professionalId&#x27;) professionalId?: string,
-  ) {
-    return this.apiService.getMetricsSummary(userId, professionalId);
+    @Query() query: PaymentSummaryQueryDTO,
+  ): Promise&lt;PaymentSummaryResponseDTO&gt; {
+    return this.apiService.getMetricsSummary(
+      query.userId,
+      query.professionalId,
+    );
   }
 
   @Get(&#x27;trends&#x27;)
-  async getTrends(@Query(&#x27;days&#x27;) days &#x3D; 30, @Query(&#x27;userId&#x27;) userId?: string) {
-    return this.apiService.getMetricsTrends(Number(days), userId);
+  @ApiGetPaymentTrends()
+  async getTrends(
+    @Query() query: PaymentTrendsQueryDTO,
+  ): Promise&lt;PaymentTrendsResponseDTO&gt; {
+    return this.apiService.getMetricsTrends(query.days, query.userId);
   }
 
   @Get(&#x27;:id&#x27;)
-  async findOne(@Param(&#x27;id&#x27;) id: string) {
-    return this.apiService.getPaymentById(id);
+  @ApiGetPaymentById()
+  async findOne(
+    @Param() param: PaymentIdParamDTO,
+  ): Promise&lt;PaymentDetailResponseDTO&gt; {
+    return this.apiService.getPaymentById(
+      param.id,
+    ) as unknown as Promise&lt;PaymentDetailResponseDTO&gt;;
   }
 
   @Put(&#x27;:id&#x27;)
-  async update(@Param(&#x27;id&#x27;) id: string, @Body() dto: UpdatePaymentDto) {
-    return this.apiService.updatePayment(id, dto);
+  @ApiUpdatePayment()
+  async update(
+    @Param() param: PaymentIdParamDTO,
+    @Body() dto: UpdatePaymentDto,
+  ): Promise&lt;PaymentDetailResponseDTO&gt; {
+    return this.apiService.updatePayment(
+      param.id,
+      dto,
+    ) as unknown as Promise&lt;PaymentDetailResponseDTO&gt;;
   }
 
   @Post(&#x27;:id/cancel&#x27;)
   @HttpCode(HttpStatus.OK)
-  async cancel(@Param(&#x27;id&#x27;) id: string) {
-    const mockUserId &#x3D; 1;
-    return this.apiService.cancelPayment(id, mockUserId);
+  @ApiCancelPayment()
+  async cancel(
+    @Param() param: PaymentIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;PaymentDetailResponseDTO&gt; {
+    return this.apiService.cancelPayment(
+      param.id,
+      req.user.id,
+    ) as unknown as Promise&lt;PaymentDetailResponseDTO&gt;;
   }
 
   @Post(&#x27;:id/refund&#x27;)
   @HttpCode(HttpStatus.OK)
-  async refund(@Param(&#x27;id&#x27;) id: string, @Body() dto: RefundPaymentDto) {
-    return this.apiService.refundPayment(id, dto);
+  @ApiRefundPayment()
+  async refund(
+    @Param() param: PaymentIdParamDTO,
+    @Body() dto: RefundPaymentDto,
+  ): Promise&lt;PaymentDetailResponseDTO&gt; {
+    return this.apiService.refundPayment(
+      param.id,
+      dto,
+    ) as unknown as Promise&lt;PaymentDetailResponseDTO&gt;;
   }
 
   // --- MÉTODOS DE PAGO ---
 
   @Post(&#x27;methods&#x27;)
   @HttpCode(HttpStatus.CREATED)
-  async createMethod(@Body() dto: CreatePaymentDto) {
-    const mockUserId &#x3D; 1;
-    return this.apiService.createPaymentMethod(mockUserId, dto);
+  @ApiCreatePaymentMethod()
+  async createMethod(
+    @Body() dto: CreatePaymentMethodRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;PaymentMethodDetailResponseDTO&gt; {
+    return this.apiService.createPaymentMethod(
+      req.user.id,
+      dto,
+    ) as unknown as Promise&lt;PaymentMethodDetailResponseDTO&gt;;
   }
 
   @Put(&#x27;methods/:id&#x27;)
+  @ApiUpdatePaymentMethod()
   async updateMethod(
-    @Param(&#x27;id&#x27;) id: string,
+    @Param() param: PaymentMethodIdParamDTO,
     @Body() dto: UpdatePaymentMethodDto,
-  ) {
-    const mockUserId &#x3D; 1;
-    return this.apiService.updatePaymentMethod(id, mockUserId, dto);
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;PaymentMethodDetailResponseDTO&gt; {
+    return this.apiService.updatePaymentMethod(
+      param.id,
+      req.user.id,
+      dto,
+    ) as unknown as Promise&lt;PaymentMethodDetailResponseDTO&gt;;
   }
 
   @Delete(&#x27;methods/:id&#x27;)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteMethod(@Param(&#x27;id&#x27;) id: string) {
-    const mockUserId &#x3D; 1;
-    return this.apiService.deletePaymentMethod(id, mockUserId);
+  @ApiDeletePaymentMethod()
+  async deleteMethod(
+    @Param() param: PaymentMethodIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;void&gt; {
+    return this.apiService.deletePaymentMethod(param.id, req.user.id);
   }
 
   // --- WEBHOOKS ---
 
   @Post(&#x27;webhooks/:provider&#x27;)
   @HttpCode(HttpStatus.OK)
+  @ApiHandleWebhook()
   async handleWebhooks(
-    @Param(&#x27;provider&#x27;) provider: PaymentProvider,
+    @Param() param: PaymentWebhookParamDTO,
     @Body() payload: Record&lt;string, unknown&gt;,
-  ) {
-    return this.apiService.processWebhook(provider, payload);
+  ): Promise&lt;void&gt; {
+    return this.apiService.processWebhook(param.provider, payload);
   }
 }
 </code></pre>

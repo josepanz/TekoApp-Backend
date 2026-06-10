@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/professionals/professionals.controller.ts</code>
+            <code>src/api/professionals/controllers/professionals.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -161,10 +161,6 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getNearbyProfessionals" >getNearbyProfessionals</a>
                             </li>
@@ -180,8 +176,6 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getProfessionalReviews" >getProfessionalReviews</a>
                             </li>
@@ -189,22 +183,10 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getProfessionals" >getProfessionals</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -222,8 +204,6 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getTopRatedProfessionals" >getTopRatedProfessionals</a>
                             </li>
@@ -235,9 +215,6 @@
                                 <a href="#registerProfessional" >registerProfessional</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -305,10 +282,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getNearbyProfessionals</b></span>
                         <a href="#getNearbyProfessionals"><span class="icon ion-ios-link"></span></a>
@@ -318,7 +291,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getNearbyProfessionals(latitude: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, longitude: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, radius: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, categoryId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getNearbyProfessionals(query: <a href="../classes/GetNearbyProfessionalsQueryDTO.html" target="_self">GetNearbyProfessionalsQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -326,14 +299,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;nearby&#x27;)<br />@ApiOperation({summary: &#x27;Obtener profesionales cercanos por ubicación&#x27;})<br />@ApiQuery({name: &#x27;latitude&#x27;, required: true, type: Number})<br />@ApiQuery({name: &#x27;longitude&#x27;, required: true, type: Number})<br />@ApiQuery({name: &#x27;radius&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;categoryId&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Profesionales cercanos obtenidos&#x27;})<br /></code>
+                    <code>@Get(&#x27;nearby&#x27;)<br />@ApiOperation({summary: &#x27;Obtener profesionales cercanos por ubicación&#x27;})<br />@ApiResponse({status: 200, type: undefined})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="91"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:91</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="73"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:73</a></div>
                         </td>
                     </tr>
 
@@ -350,72 +323,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>latitude</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetNearbyProfessionalsQueryDTO.html" target="_self" >GetNearbyProfessionalsQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>longitude</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>radius</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>categoryId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -444,7 +371,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getProfessionalById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getProfessionalById(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -452,14 +379,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Obtener un profesional por ID&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Profesional encontrado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Profesional no encontrado&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Obtener un profesional por ID&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br />@ApiResponse({status: 404, description: &#x27;Profesional no encontrado&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="152"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:152</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="101"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:101</a></div>
                         </td>
                     </tr>
 
@@ -480,9 +407,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -495,7 +422,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -514,8 +441,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getProfessionalReviews</b></span>
                         <a href="#getProfessionalReviews"><span class="icon ion-ios-link"></span></a>
@@ -525,7 +450,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getProfessionalReviews(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getProfessionalReviews(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, query: <a href="../classes/GetProfessionalReviewsQueryDTO.html" target="_self">GetProfessionalReviewsQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -533,14 +458,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id/reviews&#x27;)<br />@ApiOperation({summary: &#x27;Obtener reseñas del profesional&#x27;})<br />@ApiQuery({name: &#x27;page&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Reseñas del profesional obtenidas&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id/reviews&#x27;)<br />@ApiOperation({summary: &#x27;Obtener reseñas del profesional&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalReviewsListResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="232"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:232</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="161"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:161</a></div>
                         </td>
                     </tr>
 
@@ -557,59 +482,38 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                            </td>
 
                                         </tr>
                                         <tr>
-                                                <td>page</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetProfessionalReviewsQueryDTO.html" target="_self" >GetProfessionalReviewsQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>1</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>limit</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalReviewsListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -628,15 +532,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getProfessionals</b></span>
                         <a href="#getProfessionals"><span class="icon ion-ios-link"></span></a>
@@ -646,7 +541,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getProfessionals(categoryId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, latitude?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, longitude?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, radius?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, minRating?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, maxPrice?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, isAvailable?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getProfessionals(query: <a href="../classes/GetProfessionalsListQueryDTO.html" target="_self">GetProfessionalsListQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -654,14 +549,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Obtener lista de profesionales con filtros&#x27;})<br />@ApiQuery({name: &#x27;categoryId&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;latitude&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;longitude&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;radius&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;minRating&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;maxPrice&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;isAvailable&#x27;, required: false, type: Boolean})<br />@ApiQuery({name: &#x27;page&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Lista de profesionales obtenida&#x27;})<br /></code>
+                    <code>@Get()<br />@ApiOperation({summary: &#x27;Obtener lista de profesionales con filtros&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalsListResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="60"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:60</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="64"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:64</a></div>
                         </td>
                     </tr>
 
@@ -678,143 +573,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>categoryId</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>latitude</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>longitude</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>radius</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>minRating</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>maxPrice</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>isAvailable</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>page</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetProfessionalsListQueryDTO.html" target="_self" >GetProfessionalsListQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>1</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>limit</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalsListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -833,9 +611,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getProfessionalServices</b></span>
                         <a href="#getProfessionalServices"><span class="icon ion-ios-link"></span></a>
@@ -845,7 +620,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getProfessionalServices(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, status?: ServiceStatus, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getProfessionalServices(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, query: <a href="../classes/GetProfessionalServicesQueryDTO.html" target="_self">GetProfessionalServicesQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -853,14 +628,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id/services&#x27;)<br />@ApiOperation({summary: &#x27;Obtener servicios del profesional&#x27;})<br />@ApiQuery({name: &#x27;status&#x27;, enum: ServiceStatus, required: false})<br />@ApiQuery({name: &#x27;page&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Servicios del profesional obtenidos&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id/services&#x27;)<br />@ApiOperation({summary: &#x27;Obtener servicios del profesional&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalServicesListResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="210"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:210</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="151"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:151</a></div>
                         </td>
                     </tr>
 
@@ -877,73 +652,38 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                            </td>
 
                                         </tr>
                                         <tr>
-                                                <td>status</td>
+                                                <td>query</td>
                                             <td>
-                                                        <code>ServiceStatus</code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>page</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetProfessionalServicesQueryDTO.html" target="_self" >GetProfessionalServicesQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>1</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>limit</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalServicesListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -971,7 +711,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getProfessionalStats(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getProfessionalStats(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -979,14 +719,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id/stats&#x27;)<br />@ApiOperation({summary: &#x27;Obtener estadísticas del profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Estadísticas obtenidas&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id/stats&#x27;)<br />@ApiOperation({summary: &#x27;Obtener estadísticas del profesional&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalStatsResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="247"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:247</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="171"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:171</a></div>
                         </td>
                     </tr>
 
@@ -1007,9 +747,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1022,7 +762,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../classes/ProfessionalStatsResponseDTO.html" target="_self" >Promise&lt;ProfessionalStatsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1041,8 +781,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getTopRatedProfessionals</b></span>
                         <a href="#getTopRatedProfessionals"><span class="icon ion-ios-link"></span></a>
@@ -1052,7 +790,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getTopRatedProfessionals(categoryId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getTopRatedProfessionals(query: <a href="../classes/GetTopRatedQueryDTO.html" target="_self">GetTopRatedQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1060,14 +798,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;top-rated&#x27;)<br />@ApiOperation({summary: &#x27;Obtener profesionales mejor calificados&#x27;})<br />@ApiQuery({name: &#x27;categoryId&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Profesionales mejor calificados obtenidos&#x27;})<br /></code>
+                    <code>@Get(&#x27;top-rated&#x27;)<br />@ApiOperation({summary: &#x27;Obtener profesionales mejor calificados&#x27;})<br />@ApiResponse({status: 200, type: undefined})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="138"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:138</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="91"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:91</a></div>
                         </td>
                     </tr>
 
@@ -1084,44 +822,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>categoryId</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>limit</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetTopRatedQueryDTO.html" target="_self" >GetTopRatedQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1149,7 +869,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>registerProfessional(registerDto: unknown, req: literal type)</code>
+                    <code>registerProfessional(dto: <a href="../classes/CreateProfessionalRequestDTO.html" target="_self">CreateProfessionalRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1157,14 +877,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@ApiOperation({summary: &#x27;Registrar un nuevo profesional&#x27;})<br />@ApiResponse({status: 201, description: &#x27;Profesional registrado exitosamente&#x27;})<br /></code>
+                    <code>@Post()<br />@ApiOperation({summary: &#x27;Registrar un nuevo profesional&#x27;})<br />@ApiResponse({status: 201, type: ProfessionalDetailResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="38"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:38</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="54"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:54</a></div>
                         </td>
                     </tr>
 
@@ -1185,9 +905,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>registerDto</td>
+                                                <td>dto</td>
                                             <td>
-                                                        <code>unknown</code>
+                                                            <code><a href="../classes/CreateProfessionalRequestDTO.html" target="_self" >CreateProfessionalRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1212,7 +932,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1231,9 +951,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>searchBySkills</b></span>
                         <a href="#searchBySkills"><span class="icon ion-ios-link"></span></a>
@@ -1243,7 +960,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>searchBySkills(skills: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>searchBySkills(query: <a href="../classes/SearchBySkillsQueryDTO.html" target="_self">SearchBySkillsQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1251,14 +968,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;search/skills&#x27;)<br />@ApiOperation({summary: &#x27;Buscar profesionales por habilidades&#x27;})<br />@ApiQuery({name: &#x27;skills&#x27;, required: true, description: &#x27;Habilidades separadas por comas&#x27;})<br />@ApiQuery({name: &#x27;page&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Profesionales encontrados por habilidades&#x27;})<br /></code>
+                    <code>@Get(&#x27;search/skills&#x27;)<br />@ApiOperation({summary: &#x27;Buscar profesionales por habilidades&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalsListResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="118"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:118</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="82"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:82</a></div>
                         </td>
                     </tr>
 
@@ -1275,59 +992,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>skills</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/SearchBySkillsQueryDTO.html" target="_self" >SearchBySkillsQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>page</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>1</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>limit</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalsListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1355,7 +1039,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>suspendProfessional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: literal type, req: literal type)</code>
+                    <code>suspendProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/SuspendProfessionalRequestDTO.html" target="_self">SuspendProfessionalRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1363,14 +1047,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/suspend&#x27;)<br />@ApiOperation({summary: &#x27;Suspender profesional (solo admin)&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Profesional suspendido&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/suspend&#x27;)<br />@ApiOperation({summary: &#x27;Suspender profesional (solo admin)&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="269"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:269</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="195"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:195</a></div>
                         </td>
                     </tr>
 
@@ -1391,9 +1075,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1405,7 +1089,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/SuspendProfessionalRequestDTO.html" target="_self" >SuspendProfessionalRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1430,7 +1114,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1458,7 +1142,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateAvailability(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: literal type, req: literal type)</code>
+                    <code>updateAvailability(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateAvailabilityRequestDTO.html" target="_self">UpdateAvailabilityRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1466,14 +1150,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/availability&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar disponibilidad del profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Disponibilidad actualizada&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/availability&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar disponibilidad del profesional&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="174"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:174</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="125"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:125</a></div>
                         </td>
                     </tr>
 
@@ -1494,9 +1178,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1508,7 +1192,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/UpdateAvailabilityRequestDTO.html" target="_self" >UpdateAvailabilityRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1533,7 +1217,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1561,7 +1245,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateLocation(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: literal type, req: literal type)</code>
+                    <code>updateLocation(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalLocationRequestDTO.html" target="_self">UpdateProfessionalLocationRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1569,14 +1253,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/location&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar ubicación del profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Ubicación actualizada&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/location&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar ubicación del profesional&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="189"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:189</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="140"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:140</a></div>
                         </td>
                     </tr>
 
@@ -1597,9 +1281,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1611,7 +1295,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/UpdateProfessionalLocationRequestDTO.html" target="_self" >UpdateProfessionalLocationRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1636,7 +1320,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1664,7 +1348,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateProfessional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, updateDto: unknown, req: literal type)</code>
+                    <code>updateProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalRequestDTO.html" target="_self">UpdateProfessionalRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1672,14 +1356,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Put(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar perfil de profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Profesional actualizado&#x27;})<br /></code>
+                    <code>@Put(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar perfil de profesional&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="159"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:159</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="110"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:110</a></div>
                         </td>
                     </tr>
 
@@ -1700,9 +1384,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1712,9 +1396,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>updateDto</td>
+                                                <td>dto</td>
                                             <td>
-                                                        <code>unknown</code>
+                                                            <code><a href="../classes/UpdateProfessionalRequestDTO.html" target="_self" >UpdateProfessionalRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1739,7 +1423,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1767,7 +1451,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>verifyProfessional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: literal type, req: literal type)</code>
+                    <code>verifyProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/VerifyProfessionalRequestDTO.html" target="_self">VerifyProfessionalRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1775,14 +1459,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/verify&#x27;)<br />@ApiOperation({summary: &#x27;Verificar identidad del profesional (solo admin)&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Profesional verificado&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/verify&#x27;)<br />@ApiOperation({summary: &#x27;Verificar identidad del profesional (solo admin)&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="254"
-                                    class="link-to-prism">src/api/professionals/professionals.controller.ts:254</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="180"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:180</a></div>
                         </td>
                     </tr>
 
@@ -1803,9 +1487,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1817,7 +1501,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/VerifyProfessionalRequestDTO.html" target="_self" >VerifyProfessionalRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1842,7 +1526,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1866,21 +1550,40 @@
   Query,
   UseGuards,
   Request,
-  ParseFloatPipe,
-  ParseIntPipe,
 } from &#x27;@nestjs/common&#x27;;
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from &#x27;@nestjs/swagger&#x27;;
-import { ServiceStatus } from &#x27;@prisma/client&#x27;;
-import { JwtAuthGuard } from &#x27;../../modules/auth/guards/jwt-auth.guard&#x27;;
-import { ProfessionalsService } from &#x27;./professionals.service&#x27;;
+import { JwtAuthGuard } from &#x27;@auth/guards/jwt-auth.guard&#x27;;
+import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
+import { ProfessionalsService } from &#x27;../services/professionals.service&#x27;;
+import {
+  ProfessionalIdParamDTO,
+  GetProfessionalsListQueryDTO,
+  GetNearbyProfessionalsQueryDTO,
+  SearchBySkillsQueryDTO,
+  GetTopRatedQueryDTO,
+  GetProfessionalServicesQueryDTO,
+  GetProfessionalReviewsQueryDTO,
+  CreateProfessionalRequestDTO,
+  UpdateProfessionalRequestDTO,
+  UpdateAvailabilityRequestDTO,
+  UpdateProfessionalLocationRequestDTO,
+  VerifyProfessionalRequestDTO,
+  SuspendProfessionalRequestDTO,
+} from &#x27;../dtos/request&#x27;;
+import {
+  ProfessionalDetailResponseDTO,
+  ProfessionalsListResponseDTO,
+  ProfessionalServicesListResponseDTO,
+  ProfessionalReviewsListResponseDTO,
+  ProfessionalStatsResponseDTO,
+} from &#x27;../dtos/response&#x27;;
 
-@ApiTags(&#x27;professionals&#x27;)
+@ApiTags(&#x27;Professionals&#x27;)
 @Controller(&#x27;professionals&#x27;)
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
@@ -1889,250 +1592,157 @@ export class ProfessionalsController {
 
   @Post()
   @ApiOperation({ summary: &#x27;Registrar un nuevo profesional&#x27; })
-  @ApiResponse({
-    status: 201,
-    description: &#x27;Profesional registrado exitosamente&#x27;,
-  })
+  @ApiResponse({ status: 201, type: ProfessionalDetailResponseDTO })
   async registerProfessional(
-    @Body() registerDto: unknown,
-    @Request() req: { user: { id: number } },
-  ) {
-    return this.professionalsService.registerProfessional(
-      registerDto as never,
-      Number(req.user.id),
-    );
+    @Body() dto: CreateProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    return this.professionalsService.registerProfessional(dto, req.user.id);
   }
 
   @Get()
   @ApiOperation({ summary: &#x27;Obtener lista de profesionales con filtros&#x27; })
-  @ApiQuery({ name: &#x27;categoryId&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;latitude&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;longitude&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;radius&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;minRating&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;maxPrice&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;isAvailable&#x27;, required: false, type: Boolean })
-  @ApiQuery({ name: &#x27;page&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({ status: 200, description: &#x27;Lista de profesionales obtenida&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalsListResponseDTO })
   async getProfessionals(
-    @Query(&#x27;categoryId&#x27;) categoryId?: string,
-    @Query(&#x27;latitude&#x27;) latitude?: number,
-    @Query(&#x27;longitude&#x27;) longitude?: number,
-    @Query(&#x27;radius&#x27;) radius?: number,
-    @Query(&#x27;minRating&#x27;) minRating?: number,
-    @Query(&#x27;maxPrice&#x27;) maxPrice?: number,
-    @Query(&#x27;isAvailable&#x27;) isAvailable?: boolean,
-    @Query(&#x27;page&#x27;) page &#x3D; 1,
-    @Query(&#x27;limit&#x27;) limit &#x3D; 10,
-  ) {
-    return this.professionalsService.getProfessionals({
-      categoryId: categoryId ? Number(categoryId) : undefined,
-      latitude: latitude ? Number(latitude) : undefined,
-      longitude: longitude ? Number(longitude) : undefined,
-      radius: radius ? Number(radius) : undefined,
-      minRating: minRating ? Number(minRating) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
-      isAvailable,
-      page: Number(page),
-      limit: Number(limit),
-    });
+    @Query() query: GetProfessionalsListQueryDTO,
+  ): Promise&lt;ProfessionalsListResponseDTO&gt; {
+    return this.professionalsService.getProfessionals(query);
   }
 
   @Get(&#x27;nearby&#x27;)
   @ApiOperation({ summary: &#x27;Obtener profesionales cercanos por ubicación&#x27; })
-  @ApiQuery({ name: &#x27;latitude&#x27;, required: true, type: Number })
-  @ApiQuery({ name: &#x27;longitude&#x27;, required: true, type: Number })
-  @ApiQuery({ name: &#x27;radius&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;categoryId&#x27;, required: false, type: Number })
-  @ApiResponse({ status: 200, description: &#x27;Profesionales cercanos obtenidos&#x27; })
+  @ApiResponse({ status: 200, type: [ProfessionalDetailResponseDTO] })
   async getNearbyProfessionals(
-    @Query(&#x27;latitude&#x27;, ParseFloatPipe) latitude: number,
-    @Query(&#x27;longitude&#x27;, ParseFloatPipe) longitude: number,
-    @Query(&#x27;radius&#x27;) radius &#x3D; 10,
-    @Query(&#x27;categoryId&#x27;) categoryId?: string,
-  ) {
-    return this.professionalsService.getNearbyProfessionals(
-      latitude,
-      longitude,
-      Number(radius),
-      categoryId ? Number(categoryId) : undefined,
-    );
+    @Query() query: GetNearbyProfessionalsQueryDTO,
+  ): Promise&lt;ProfessionalDetailResponseDTO[]&gt; {
+    return this.professionalsService.getNearbyProfessionals(query);
   }
 
   @Get(&#x27;search/skills&#x27;)
   @ApiOperation({ summary: &#x27;Buscar profesionales por habilidades&#x27; })
-  @ApiQuery({
-    name: &#x27;skills&#x27;,
-    required: true,
-    description: &#x27;Habilidades separadas por comas&#x27;,
-  })
-  @ApiQuery({ name: &#x27;page&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Profesionales encontrados por habilidades&#x27;,
-  })
+  @ApiResponse({ status: 200, type: ProfessionalsListResponseDTO })
   async searchBySkills(
-    @Query(&#x27;skills&#x27;) skills: string,
-    @Query(&#x27;page&#x27;) page &#x3D; 1,
-    @Query(&#x27;limit&#x27;) limit &#x3D; 10,
-  ) {
-    return this.professionalsService.searchBySkills(
-      skills.split(&#x27;,&#x27;).map((s) &#x3D;&gt; s.trim()),
-      Number(page),
-      Number(limit),
-    );
+    @Query() query: SearchBySkillsQueryDTO,
+  ): Promise&lt;ProfessionalsListResponseDTO&gt; {
+    return this.professionalsService.searchBySkills(query);
   }
 
   @Get(&#x27;top-rated&#x27;)
   @ApiOperation({ summary: &#x27;Obtener profesionales mejor calificados&#x27; })
-  @ApiQuery({ name: &#x27;categoryId&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Profesionales mejor calificados obtenidos&#x27;,
-  })
+  @ApiResponse({ status: 200, type: [ProfessionalDetailResponseDTO] })
   async getTopRatedProfessionals(
-    @Query(&#x27;categoryId&#x27;) categoryId?: string,
-    @Query(&#x27;limit&#x27;) limit &#x3D; 10,
-  ) {
-    return this.professionalsService.getTopRatedProfessionals(
-      categoryId ? Number(categoryId) : undefined,
-      Number(limit),
-    );
+    @Query() query: GetTopRatedQueryDTO,
+  ): Promise&lt;ProfessionalDetailResponseDTO[]&gt; {
+    return this.professionalsService.getTopRatedProfessionals(query);
   }
 
   @Get(&#x27;:id&#x27;)
   @ApiOperation({ summary: &#x27;Obtener un profesional por ID&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Profesional encontrado&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   @ApiResponse({ status: 404, description: &#x27;Profesional no encontrado&#x27; })
-  async getProfessionalById(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
-    return this.professionalsService.getProfessionalById(id);
+  async getProfessionalById(
+    @Param() param: ProfessionalIdParamDTO,
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    return this.professionalsService.getProfessionalById(param.id);
   }
 
   @Put(&#x27;:id&#x27;)
   @ApiOperation({ summary: &#x27;Actualizar perfil de profesional&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Profesional actualizado&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async updateProfessional(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Body() updateDto: unknown,
-    @Request() req: { user: { id: number } },
-  ) {
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: UpdateProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     return this.professionalsService.updateProfessional(
-      id,
-      updateDto,
-      Number(req.user.id),
+      param.id,
+      dto,
+      req.user.id,
     );
   }
 
   @Post(&#x27;:id/availability&#x27;)
   @ApiOperation({ summary: &#x27;Actualizar disponibilidad del profesional&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Disponibilidad actualizada&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async updateAvailability(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Body() dto: { isAvailable: boolean },
-    @Request() req: { user: { id: number } },
-  ) {
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: UpdateAvailabilityRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     return this.professionalsService.updateAvailability(
-      id,
+      param.id,
       dto.isAvailable,
-      Number(req.user.id),
+      req.user.id,
     );
   }
 
   @Post(&#x27;:id/location&#x27;)
   @ApiOperation({ summary: &#x27;Actualizar ubicación del profesional&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Ubicación actualizada&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async updateLocation(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Body() dto: { latitude: number; longitude: number },
-    @Request() req: { user: { id: number } },
-  ) {
-    return this.professionalsService.updateLocation(
-      id,
-      dto,
-      Number(req.user.id),
-    );
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: UpdateProfessionalLocationRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    return this.professionalsService.updateLocation(param.id, dto, req.user.id);
   }
 
   @Get(&#x27;:id/services&#x27;)
   @ApiOperation({ summary: &#x27;Obtener servicios del profesional&#x27; })
-  @ApiQuery({ name: &#x27;status&#x27;, enum: ServiceStatus, required: false })
-  @ApiQuery({ name: &#x27;page&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Servicios del profesional obtenidos&#x27;,
-  })
+  @ApiResponse({ status: 200, type: ProfessionalServicesListResponseDTO })
   async getProfessionalServices(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Query(&#x27;status&#x27;) status?: ServiceStatus,
-    @Query(&#x27;page&#x27;) page &#x3D; 1,
-    @Query(&#x27;limit&#x27;) limit &#x3D; 10,
-  ) {
-    return this.professionalsService.getProfessionalServices(
-      id,
-      status,
-      Number(page),
-      Number(limit),
-    );
+    @Param() param: ProfessionalIdParamDTO,
+    @Query() query: GetProfessionalServicesQueryDTO,
+  ): Promise&lt;ProfessionalServicesListResponseDTO&gt; {
+    return this.professionalsService.getProfessionalServices(param.id, query);
   }
 
   @Get(&#x27;:id/reviews&#x27;)
   @ApiOperation({ summary: &#x27;Obtener reseñas del profesional&#x27; })
-  @ApiQuery({ name: &#x27;page&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Reseñas del profesional obtenidas&#x27;,
-  })
+  @ApiResponse({ status: 200, type: ProfessionalReviewsListResponseDTO })
   async getProfessionalReviews(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Query(&#x27;page&#x27;) page &#x3D; 1,
-    @Query(&#x27;limit&#x27;) limit &#x3D; 10,
-  ) {
-    return this.professionalsService.getProfessionalReviews(
-      id,
-      Number(page),
-      Number(limit),
-    );
+    @Param() param: ProfessionalIdParamDTO,
+    @Query() query: GetProfessionalReviewsQueryDTO,
+  ): Promise&lt;ProfessionalReviewsListResponseDTO&gt; {
+    return this.professionalsService.getProfessionalReviews(param.id, query);
   }
 
   @Get(&#x27;:id/stats&#x27;)
   @ApiOperation({ summary: &#x27;Obtener estadísticas del profesional&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Estadísticas obtenidas&#x27; })
-  async getProfessionalStats(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
-    return this.professionalsService.getProfessionalStats(id);
+  @ApiResponse({ status: 200, type: ProfessionalStatsResponseDTO })
+  async getProfessionalStats(
+    @Param() param: ProfessionalIdParamDTO,
+  ): Promise&lt;ProfessionalStatsResponseDTO&gt; {
+    return this.professionalsService.getProfessionalStats(param.id);
   }
 
   @Post(&#x27;:id/verify&#x27;)
   @ApiOperation({ summary: &#x27;Verificar identidad del profesional (solo admin)&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Profesional verificado&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async verifyProfessional(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Body() dto: { isVerified: boolean; notes?: string },
-    @Request() req: { user: { id: number } },
-  ) {
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: VerifyProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     return this.professionalsService.verifyProfessional(
-      id,
+      param.id,
       dto,
-      Number(req.user.id),
+      req.user.id,
     );
   }
 
   @Post(&#x27;:id/suspend&#x27;)
   @ApiOperation({ summary: &#x27;Suspender profesional (solo admin)&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Profesional suspendido&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async suspendProfessional(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Body() dto: { reason: string },
-    @Request() req: { user: { id: number } },
-  ) {
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: SuspendProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     return this.professionalsService.suspendProfessional(
-      id,
+      param.id,
       dto.reason,
-      Number(req.user.id),
+      req.user.id,
     );
   }
 }

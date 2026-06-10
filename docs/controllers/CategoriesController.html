@@ -161,17 +161,10 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#changeStatus" >changeStatus</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -181,7 +174,6 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findAll" >findAll</a>
                             </li>
@@ -189,12 +181,10 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findAllWithRelations" >findAllWithRelations</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -209,19 +199,16 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findOne" >findOne</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findSubcategories" >findSubcategories</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -232,13 +219,10 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#remove" >remove</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -248,14 +232,10 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#toggleVisibility" >toggleVisibility</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -288,9 +268,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>changeStatus</b></span>
                         <a href="#changeStatus"><span class="icon ion-ios-link"></span></a>
@@ -300,7 +277,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>changeStatus(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, status: CategoryStatus)</code>
+                    <code>changeStatus(param: <a href="../classes/CategoryIdParamDTO.html" target="_self">CategoryIdParamDTO</a>, query: <a href="../classes/ChangeCategoryStatusQueryDTO.html" target="_self">ChangeCategoryStatusQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -308,14 +285,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Patch(&#x27;:id/status&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth(&#x27;JWT-auth&#x27;)<br />@ApiParam({name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27;})<br />@ApiQuery({name: &#x27;status&#x27;, enum: undefined})<br />@ApiOperation({summary: &#x27;Mutar estado transaccional de una categoría&#x27;})<br /></code>
+                    <code>@Patch(&#x27;:id/status&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiChangeCategoryStatus()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="148"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:148</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="150"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:150</a></div>
                         </td>
                     </tr>
 
@@ -336,9 +313,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/CategoryIdParamDTO.html" target="_self" >CategoryIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -348,9 +325,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>status</td>
+                                                <td>query</td>
                                             <td>
-                                                        <code>CategoryStatus</code>
+                                                            <code><a href="../classes/ChangeCategoryStatusQueryDTO.html" target="_self" >ChangeCategoryStatusQueryDTO</a></code>
                                             </td>
 
                                             <td>
@@ -363,7 +340,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -379,10 +356,6 @@
                 <td class="col-md-4">
                     <a name="create"></a>
                     <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
@@ -403,14 +376,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth(&#x27;JWT-auth&#x27;)<br />@ApiOperation({summary: &#x27;Crear nueva categoría&#x27;, description: &#x27;Crea una nueva categoría de servicios profesionales.&#x27;})<br />@ApiResponse({status: 201, description: &#x27;Categoría creada exitosamente.&#x27;})<br />@ApiResponse({status: 400, description: &#x27;Datos de entrada inválidos.&#x27;})<br />@ApiResponse({status: 409, description: &#x27;Ya existe una categoría con este nombre.&#x27;})<br /></code>
+                    <code>@Post()<br />@UseGuards(JwtAuthGuard)<br />@ApiCreateCategory()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="47"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:47</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -446,7 +419,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -462,7 +435,6 @@
                 <td class="col-md-4">
                     <a name="findAll"></a>
                     <span class="name">
-                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -482,14 +454,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Obtener todas las categorías&#x27;, description: &#x27;Retorna todas las categorías activas y visibles.&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Lista de categorías activas.&#x27;})<br /></code>
+                    <code>@Get()<br />@ApiGetAllCategories()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="57"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:57</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="63"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:63</a></div>
                         </td>
                     </tr>
 
@@ -498,7 +470,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -511,7 +483,6 @@
                 <td class="col-md-4">
                     <a name="findAllWithRelations"></a>
                     <span class="name">
-                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
@@ -532,14 +503,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;all&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth(&#x27;JWT-auth&#x27;)<br />@ApiOperation({summary: &#x27;Obtener todas las categorías (incluyendo inactivas)&#x27;, description: &#x27;Retorna todo el árbol de categorías para panel de administración.&#x27;})<br /></code>
+                    <code>@Get(&#x27;all&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiGetAllCategoriesWithRelations()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="69"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:69</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="72"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:72</a></div>
                         </td>
                     </tr>
 
@@ -548,7 +519,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -561,7 +532,6 @@
                 <td class="col-md-4">
                     <a name="findBySlug"></a>
                     <span class="name">
-                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -581,14 +551,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;slug/:slug&#x27;)<br />@ApiParam({name: &#x27;slug&#x27;, description: &#x27;Slug único estructurado url-ready&#x27;})<br />@ApiOperation({summary: &#x27;Obtener categoría por slug&#x27;})<br /></code>
+                    <code>@Get(&#x27;slug/:slug&#x27;)<br />@ApiGetCategoryBySlug()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="119"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:119</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="118"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:118</a></div>
                         </td>
                     </tr>
 
@@ -624,7 +594,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -659,14 +629,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;main&#x27;)<br />@ApiOperation({summary: &#x27;Obtener categorías principales&#x27;, description: &#x27;Retorna raíz de categorías (Filtra las subcategorías).&#x27;})<br /></code>
+                    <code>@Get(&#x27;main&#x27;)<br />@ApiGetMainCategories()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="80"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:80</a></div>
                         </td>
                     </tr>
 
@@ -675,7 +645,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -690,7 +660,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findOne</b></span>
                         <a href="#findOne"><span class="icon ion-ios-link"></span></a>
@@ -700,7 +669,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>findOne(param: <a href="../classes/CategoryIdParamDTO.html" target="_self">CategoryIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -708,14 +677,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br />@ApiParam({name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27;})<br />@ApiOperation({summary: &#x27;Obtener categoría por ID&#x27;, description: &#x27;Busca de forma exacta un registro por ID.&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@ApiGetCategoryById()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="112"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:112</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="108"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:108</a></div>
                         </td>
                     </tr>
 
@@ -736,9 +705,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/CategoryIdParamDTO.html" target="_self" >CategoryIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -751,7 +720,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -769,7 +738,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findSubcategories</b></span>
                         <a href="#findSubcategories"><span class="icon ion-ios-link"></span></a>
@@ -779,7 +747,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findSubcategories(parentId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>findSubcategories(param: <a href="../classes/GetSubcategoriesParamDTO.html" target="_self">GetSubcategoriesParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -787,14 +755,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;subcategories/:parentId&#x27;)<br />@ApiParam({name: &#x27;parentId&#x27;, description: &#x27;ID UUID de la categoría padre&#x27;, type: String})<br />@ApiOperation({summary: &#x27;Obtener subcategorías&#x27;, description: &#x27;Retorna las subcategorías hijas de una categoría raíz.&#x27;})<br /></code>
+                    <code>@Get(&#x27;subcategories/:parentId&#x27;)<br />@ApiGetSubcategories()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="92"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:92</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="88"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:88</a></div>
                         </td>
                     </tr>
 
@@ -815,9 +783,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>parentId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetSubcategoriesParamDTO.html" target="_self" >GetSubcategoriesParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -830,7 +798,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -848,7 +816,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getCategoryStats</b></span>
                         <a href="#getCategoryStats"><span class="icon ion-ios-link"></span></a>
@@ -858,7 +825,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getCategoryStats(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getCategoryStats(param: <a href="../classes/CategoryIdParamDTO.html" target="_self">CategoryIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -866,14 +833,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id/stats&#x27;)<br />@ApiParam({name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27;})<br />@ApiOperation({summary: &#x27;Obtener métricas y contadores de la categoría&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id/stats&#x27;)<br />@ApiGetCategoryStats()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="126"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:126</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="128"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:128</a></div>
                         </td>
                     </tr>
 
@@ -894,9 +861,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/CategoryIdParamDTO.html" target="_self" >CategoryIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -909,7 +876,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryStatsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -929,8 +896,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>remove</b></span>
                         <a href="#remove"><span class="icon ion-ios-link"></span></a>
@@ -940,7 +905,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>remove(param: <a href="../classes/CategoryIdParamDTO.html" target="_self">CategoryIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -948,14 +913,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth(&#x27;JWT-auth&#x27;)<br />@ApiParam({name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27;})<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@ApiOperation({summary: &#x27;Eliminar físicamente una categoría&#x27;})<br /></code>
+                    <code>@Delete(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@ApiDeleteCategory()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="170"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:170</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="175"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:175</a></div>
                         </td>
                     </tr>
 
@@ -976,9 +941,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/CategoryIdParamDTO.html" target="_self" >CategoryIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1009,7 +974,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>searchCategories</b></span>
                         <a href="#searchCategories"><span class="icon ion-ios-link"></span></a>
@@ -1019,7 +983,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>searchCategories(query: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>searchCategories(query: <a href="../classes/SearchCategoriesQueryDTO.html" target="_self">SearchCategoriesQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1027,14 +991,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;search&#x27;)<br />@ApiQuery({name: &#x27;q&#x27;, description: &#x27;Término o palabra clave de búsqueda&#x27;})<br />@ApiOperation({summary: &#x27;Buscar categorías&#x27;, description: &#x27;Busca coincidencias por nombre o descripciones indexadas.&#x27;})<br /></code>
+                    <code>@Get(&#x27;search&#x27;)<br />@ApiSearchCategories()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="102"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:102</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="98"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:98</a></div>
                         </td>
                     </tr>
 
@@ -1057,7 +1021,7 @@
                                         <tr>
                                                 <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/SearchCategoriesQueryDTO.html" target="_self" >SearchCategoriesQueryDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1070,7 +1034,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1089,8 +1053,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>toggleVisibility</b></span>
                         <a href="#toggleVisibility"><span class="icon ion-ios-link"></span></a>
@@ -1100,7 +1062,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>toggleVisibility(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>toggleVisibility(param: <a href="../classes/CategoryIdParamDTO.html" target="_self">CategoryIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1108,14 +1070,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Patch(&#x27;:id/toggle-visibility&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth(&#x27;JWT-auth&#x27;)<br />@ApiParam({name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27;})<br />@ApiOperation({summary: &#x27;Invertir bandera de visibilidad pública&#x27;})<br /></code>
+                    <code>@Patch(&#x27;:id/toggle-visibility&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiToggleCategoryVisibility()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="160"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:160</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="163"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:163</a></div>
                         </td>
                     </tr>
 
@@ -1136,9 +1098,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/CategoryIdParamDTO.html" target="_self" >CategoryIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1151,7 +1113,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1170,8 +1132,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>update</b></span>
                         <a href="#update"><span class="icon ion-ios-link"></span></a>
@@ -1181,7 +1141,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, updateCategoryDto: <a href="../classes/UpdateCategoryDto.html" target="_self">UpdateCategoryDto</a>)</code>
+                    <code>update(param: <a href="../classes/CategoryIdParamDTO.html" target="_self">CategoryIdParamDTO</a>, updateCategoryDto: <a href="../classes/UpdateCategoryDto.html" target="_self">UpdateCategoryDto</a>)</code>
                 </td>
             </tr>
 
@@ -1189,14 +1149,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Patch(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth(&#x27;JWT-auth&#x27;)<br />@ApiParam({name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27;})<br />@ApiOperation({summary: &#x27;Actualizar categoría de forma parcial&#x27;})<br /></code>
+                    <code>@Patch(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiUpdateCategory()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="135"
-                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:135</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="137"
+                                    class="link-to-prism">src/api/categories/controllers/categories.controller.ts:137</a></div>
                         </td>
                     </tr>
 
@@ -1217,9 +1177,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/CategoryIdParamDTO.html" target="_self" >CategoryIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1244,7 +1204,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;CategoryDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1270,21 +1230,37 @@
   UseGuards,
   HttpCode,
   HttpStatus,
-  ParseIntPipe,
 } from &#x27;@nestjs/common&#x27;;
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiParam,
-  ApiQuery,
-} from &#x27;@nestjs/swagger&#x27;;
+import { ApiTags } from &#x27;@nestjs/swagger&#x27;;
 import { JwtAuthGuard } from &#x27;@auth/guards/jwt-auth.guard&#x27;;
 import { CategoriesService } from &#x27;../services/categories.service&#x27;;
 import { CreateCategoryDto } from &#x27;../dtos/request/create-category.dto&#x27;;
 import { UpdateCategoryDto } from &#x27;../dtos/request/update-category.dto&#x27;;
-import { CategoryStatus } from &#x27;@prisma/client&#x27;;
+import {
+  CategoryIdParamDTO,
+  GetSubcategoriesParamDTO,
+  SearchCategoriesQueryDTO,
+  ChangeCategoryStatusQueryDTO,
+} from &#x27;../dtos/request&#x27;;
+import {
+  CategoryDetailResponseDTO,
+  CategoryStatsResponseDTO,
+} from &#x27;../dtos/response&#x27;;
+import {
+  ApiCreateCategory,
+  ApiGetAllCategories,
+  ApiGetAllCategoriesWithRelations,
+  ApiGetMainCategories,
+  ApiGetSubcategories,
+  ApiSearchCategories,
+  ApiGetCategoryById,
+  ApiGetCategoryBySlug,
+  ApiGetCategoryStats,
+  ApiUpdateCategory,
+  ApiChangeCategoryStatus,
+  ApiToggleCategoryVisibility,
+  ApiDeleteCategory,
+} from &#x27;../docs/categories.docs&#x27;;
 
 @ApiTags(&#x27;Categorías&#x27;)
 @Controller(&#x27;categories&#x27;)
@@ -1293,142 +1269,131 @@ export class CategoriesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth(&#x27;JWT-auth&#x27;)
-  @ApiOperation({
-    summary: &#x27;Crear nueva categoría&#x27;,
-    description: &#x27;Crea una nueva categoría de servicios profesionales.&#x27;,
-  })
-  @ApiResponse({ status: 201, description: &#x27;Categoría creada exitosamente.&#x27; })
-  @ApiResponse({ status: 400, description: &#x27;Datos de entrada inválidos.&#x27; })
-  @ApiResponse({
-    status: 409,
-    description: &#x27;Ya existe una categoría con este nombre.&#x27;,
-  })
-  async create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  @ApiCreateCategory()
+  async create(
+    @Body() createCategoryDto: CreateCategoryDto,
+  ): Promise&lt;CategoryDetailResponseDTO&gt; {
+    return this.categoriesService.create(
+      createCategoryDto,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO&gt;;
   }
 
   @Get()
-  @ApiOperation({
-    summary: &#x27;Obtener todas las categorías&#x27;,
-    description: &#x27;Retorna todas las categorías activas y visibles.&#x27;,
-  })
-  @ApiResponse({ status: 200, description: &#x27;Lista de categorías activas.&#x27; })
-  async findAll() {
-    return this.categoriesService.findAll();
+  @ApiGetAllCategories()
+  async findAll(): Promise&lt;CategoryDetailResponseDTO[]&gt; {
+    return this.categoriesService.findAll() as unknown as Promise&lt;
+      CategoryDetailResponseDTO[]
+    &gt;;
   }
 
   @Get(&#x27;all&#x27;)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth(&#x27;JWT-auth&#x27;)
-  @ApiOperation({
-    summary: &#x27;Obtener todas las categorías (incluyendo inactivas)&#x27;,
-    description:
-      &#x27;Retorna todo el árbol de categorías para panel de administración.&#x27;,
-  })
-  async findAllWithRelations() {
-    return this.categoriesService.findAllWithRelations();
+  @ApiGetAllCategoriesWithRelations()
+  async findAllWithRelations(): Promise&lt;CategoryDetailResponseDTO[]&gt; {
+    return this.categoriesService.findAllWithRelations() as unknown as Promise&lt;
+      CategoryDetailResponseDTO[]
+    &gt;;
   }
 
   @Get(&#x27;main&#x27;)
-  @ApiOperation({
-    summary: &#x27;Obtener categorías principales&#x27;,
-    description: &#x27;Retorna raíz de categorías (Filtra las subcategorías).&#x27;,
-  })
-  async findMainCategories() {
-    return this.categoriesService.findMainCategories();
+  @ApiGetMainCategories()
+  async findMainCategories(): Promise&lt;CategoryDetailResponseDTO[]&gt; {
+    return this.categoriesService.findMainCategories() as unknown as Promise&lt;
+      CategoryDetailResponseDTO[]
+    &gt;;
   }
 
   @Get(&#x27;subcategories/:parentId&#x27;)
-  @ApiParam({
-    name: &#x27;parentId&#x27;,
-    description: &#x27;ID UUID de la categoría padre&#x27;,
-    type: String,
-  })
-  @ApiOperation({
-    summary: &#x27;Obtener subcategorías&#x27;,
-    description: &#x27;Retorna las subcategorías hijas de una categoría raíz.&#x27;,
-  })
-  async findSubcategories(@Param(&#x27;parentId&#x27;, ParseIntPipe) parentId: number) {
-    return this.categoriesService.findSubcategories(parentId);
+  @ApiGetSubcategories()
+  async findSubcategories(
+    @Param() param: GetSubcategoriesParamDTO,
+  ): Promise&lt;CategoryDetailResponseDTO[]&gt; {
+    return this.categoriesService.findSubcategories(
+      param.parentId,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO[]&gt;;
   }
 
   @Get(&#x27;search&#x27;)
-  @ApiQuery({ name: &#x27;q&#x27;, description: &#x27;Término o palabra clave de búsqueda&#x27; })
-  @ApiOperation({
-    summary: &#x27;Buscar categorías&#x27;,
-    description: &#x27;Busca coincidencias por nombre o descripciones indexadas.&#x27;,
-  })
-  async searchCategories(@Query(&#x27;q&#x27;) query: string) {
-    return this.categoriesService.searchCategories(query);
+  @ApiSearchCategories()
+  async searchCategories(
+    @Query() query: SearchCategoriesQueryDTO,
+  ): Promise&lt;CategoryDetailResponseDTO[]&gt; {
+    return this.categoriesService.searchCategories(
+      query.q,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO[]&gt;;
   }
 
   @Get(&#x27;:id&#x27;)
-  @ApiParam({ name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27; })
-  @ApiOperation({
-    summary: &#x27;Obtener categoría por ID&#x27;,
-    description: &#x27;Busca de forma exacta un registro por ID.&#x27;,
-  })
-  async findOne(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
-    return this.categoriesService.findOne(id);
+  @ApiGetCategoryById()
+  async findOne(
+    @Param() param: CategoryIdParamDTO,
+  ): Promise&lt;CategoryDetailResponseDTO&gt; {
+    return this.categoriesService.findOne(
+      param.id,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO&gt;;
   }
 
   @Get(&#x27;slug/:slug&#x27;)
-  @ApiParam({ name: &#x27;slug&#x27;, description: &#x27;Slug único estructurado url-ready&#x27; })
-  @ApiOperation({ summary: &#x27;Obtener categoría por slug&#x27; })
-  async findBySlug(@Param(&#x27;slug&#x27;) slug: string) {
-    return this.categoriesService.findBySlug(slug);
+  @ApiGetCategoryBySlug()
+  async findBySlug(
+    @Param(&#x27;slug&#x27;) slug: string,
+  ): Promise&lt;CategoryDetailResponseDTO&gt; {
+    return this.categoriesService.findBySlug(
+      slug,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO&gt;;
   }
 
   @Get(&#x27;:id/stats&#x27;)
-  @ApiParam({ name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27; })
-  @ApiOperation({ summary: &#x27;Obtener métricas y contadores de la categoría&#x27; })
-  async getCategoryStats(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
-    return this.categoriesService.getCategoryStats(id);
+  @ApiGetCategoryStats()
+  async getCategoryStats(
+    @Param() param: CategoryIdParamDTO,
+  ): Promise&lt;CategoryStatsResponseDTO&gt; {
+    return this.categoriesService.getCategoryStats(param.id);
   }
 
   @Patch(&#x27;:id&#x27;)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth(&#x27;JWT-auth&#x27;)
-  @ApiParam({ name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27; })
-  @ApiOperation({ summary: &#x27;Actualizar categoría de forma parcial&#x27; })
+  @ApiUpdateCategory()
   async update(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
+    @Param() param: CategoryIdParamDTO,
     @Body() updateCategoryDto: UpdateCategoryDto,
-  ) {
-    return this.categoriesService.update(id, updateCategoryDto);
+  ): Promise&lt;CategoryDetailResponseDTO&gt; {
+    return this.categoriesService.update(
+      param.id,
+      updateCategoryDto,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO&gt;;
   }
 
   @Patch(&#x27;:id/status&#x27;)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth(&#x27;JWT-auth&#x27;)
-  @ApiParam({ name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27; })
-  @ApiQuery({ name: &#x27;status&#x27;, enum: [&#x27;active&#x27;, &#x27;inactive&#x27;, &#x27;pending&#x27;] })
-  @ApiOperation({ summary: &#x27;Mutar estado transaccional de una categoría&#x27; })
+  @ApiChangeCategoryStatus()
   async changeStatus(
-    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
-    @Query(&#x27;status&#x27;) status: CategoryStatus,
-  ) {
-    return this.categoriesService.changeStatus(id, status);
+    @Param() param: CategoryIdParamDTO,
+    @Query() query: ChangeCategoryStatusQueryDTO,
+  ): Promise&lt;CategoryDetailResponseDTO&gt; {
+    return this.categoriesService.changeStatus(
+      param.id,
+      query.status,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO&gt;;
   }
 
   @Patch(&#x27;:id/toggle-visibility&#x27;)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth(&#x27;JWT-auth&#x27;)
-  @ApiParam({ name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27; })
-  @ApiOperation({ summary: &#x27;Invertir bandera de visibilidad pública&#x27; })
-  async toggleVisibility(@Param(&#x27;id&#x27;, ParseIntPipe) id: number) {
-    return this.categoriesService.toggleVisibility(id);
+  @ApiToggleCategoryVisibility()
+  async toggleVisibility(
+    @Param() param: CategoryIdParamDTO,
+  ): Promise&lt;CategoryDetailResponseDTO&gt; {
+    return this.categoriesService.toggleVisibility(
+      param.id,
+    ) as unknown as Promise&lt;CategoryDetailResponseDTO&gt;;
   }
 
   @Delete(&#x27;:id&#x27;)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth(&#x27;JWT-auth&#x27;)
-  @ApiParam({ name: &#x27;id&#x27;, description: &#x27;ID UUID de la categoría&#x27; })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: &#x27;Eliminar físicamente una categoría&#x27; })
-  async remove(@Param(&#x27;id&#x27;, ParseIntPipe) id: number): Promise&lt;void&gt; {
-    return this.categoriesService.remove(id);
+  @ApiDeleteCategory()
+  async remove(@Param() param: CategoryIdParamDTO): Promise&lt;void&gt; {
+    return this.categoriesService.remove(param.id);
   }
 }
 </code></pre>

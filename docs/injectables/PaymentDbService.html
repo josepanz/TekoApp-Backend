@@ -1253,8 +1253,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="241"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:241</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="246"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:246</a></div>
                         </td>
                     </tr>
 
@@ -1814,25 +1814,30 @@ export class PaymentDbService {
       ...(professionalId &amp;&amp; { professionalId }),
     };
 
-    const [totalStats, completedStats, failedStats] &#x3D; await Promise.all([
-      this.prisma.extended.payments.aggregate({
-        where: whereClause,
-        _count: { id: true },
-        _sum: { totalAmount: true },
-      }),
-      this.prisma.extended.payments.count({
-        where: { ...whereClause, status: PaymentStatus.COMPLETED },
-      }),
-      this.prisma.extended.payments.count({
-        where: { ...whereClause, status: PaymentStatus.FAILED },
-      }),
-    ]);
+    const [totalStats, completedStats, failedStats, pendingStats] &#x3D;
+      await Promise.all([
+        this.prisma.extended.payments.aggregate({
+          where: whereClause,
+          _count: { id: true },
+          _sum: { totalAmount: true },
+        }),
+        this.prisma.extended.payments.count({
+          where: { ...whereClause, status: PaymentStatus.COMPLETED },
+        }),
+        this.prisma.extended.payments.count({
+          where: { ...whereClause, status: PaymentStatus.FAILED },
+        }),
+        this.prisma.extended.payments.count({
+          where: { ...whereClause, status: PaymentStatus.PENDING },
+        }),
+      ]);
 
     return {
       totalPayments: totalStats._count.id,
       totalAmount: Number(totalStats._sum.totalAmount || 0),
       successfulPayments: completedStats,
       failedPayments: failedStats,
+      pendingPayments: pendingStats,
     };
   }
 

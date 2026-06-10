@@ -133,7 +133,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/services/services.service.ts</code>
+            <code>src/api/services/services/services.service.ts</code>
         </p>
 
 
@@ -227,12 +227,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(prisma: <a href="../injectables/PrismaDatasource.html" target="_self">PrismaDatasource</a>)</code>
+<code>constructor(db: <a href="../injectables/ServicesDbService.html" target="_self">ServicesDbService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="36" class="link-to-prism">src/api/services/services.service.ts:36</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="28" class="link-to-prism">src/api/services/services/services.service.ts:28</a></div>
                             </td>
                         </tr>
 
@@ -250,10 +250,10 @@
                                         </thead>
                                         <tbody>
                                                 <tr>
-                                                        <td>prisma</td>
+                                                        <td>db</td>
                                                   
                                                         <td>
-                                                                        <code><a href="../injectables/PrismaDatasource.html" target="_self" >PrismaDatasource</a></code>
+                                                                        <code><a href="../injectables/ServicesDbService.html" target="_self" >ServicesDbService</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -297,8 +297,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="201"
-                                    class="link-to-prism">src/api/services/services.service.ts:201</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="193"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:193</a></div>
                         </td>
                     </tr>
 
@@ -346,7 +346,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -378,8 +378,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="170"
-                                    class="link-to-prism">src/api/services/services.service.ts:170</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="161"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:161</a></div>
                         </td>
                     </tr>
 
@@ -439,7 +439,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -471,8 +471,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="238"
-                                    class="link-to-prism">src/api/services/services.service.ts:238</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="234"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:234</a></div>
                         </td>
                     </tr>
 
@@ -520,7 +520,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -545,15 +545,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createService(dto: <a href="../classes/CreateServiceDto.html" target="_self">CreateServiceDto</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>createService(dto: <a href="../classes/CreateServiceRequestDTO.html" target="_self">CreateServiceRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="39"
-                                    class="link-to-prism">src/api/services/services.service.ts:39</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="31"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:31</a></div>
                         </td>
                     </tr>
 
@@ -576,7 +576,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/CreateServiceDto.html" target="_self" >CreateServiceDto</a></code>
+                                                            <code><a href="../classes/CreateServiceRequestDTO.html" target="_self" >CreateServiceRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -601,7 +601,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -626,15 +626,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createServiceRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: literal type, professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>createServiceRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/CreateServiceRequestRequestDTO.html" target="_self">CreateServiceRequestRequestDTO</a>, professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="268"
-                                    class="link-to-prism">src/api/services/services.service.ts:268</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="270"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:270</a></div>
                         </td>
                     </tr>
 
@@ -669,7 +669,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/CreateServiceRequestRequestDTO.html" target="_self" >CreateServiceRequestRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -694,7 +694,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceRequestDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -726,8 +726,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="390"
-                                    class="link-to-prism">src/api/services/services.service.ts:390</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="365"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:365</a></div>
                         </td>
                     </tr>
 
@@ -763,7 +763,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/ServiceStats.html" target="_self" >Promise&lt;ServiceStats&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceStatsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -795,8 +795,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="357"
-                                    class="link-to-prism">src/api/services/services.service.ts:357</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="338"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:338</a></div>
                         </td>
                     </tr>
 
@@ -856,7 +856,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -888,8 +888,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="102"
-                                    class="link-to-prism">src/api/services/services.service.ts:102</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="99"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:99</a></div>
                         </td>
                     </tr>
 
@@ -971,7 +971,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1003,8 +1003,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="126"
-                                    class="link-to-prism">src/api/services/services.service.ts:126</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="120"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:120</a></div>
                         </td>
                     </tr>
 
@@ -1040,7 +1040,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1072,8 +1072,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="298"
-                                    class="link-to-prism">src/api/services/services.service.ts:298</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="299"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:299</a></div>
                         </td>
                     </tr>
 
@@ -1109,7 +1109,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceRequestsListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1134,15 +1134,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getServices(filters: <a href="../interfaces/ServiceFilters.html" target="_self">ServiceFilters</a>)</code>
+                    <code>getServices(filters: <a href="../classes/GetServicesListQueryDTO.html" target="_self">GetServicesListQueryDTO</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="67"
-                                    class="link-to-prism">src/api/services/services.service.ts:67</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="58"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:58</a></div>
                         </td>
                     </tr>
 
@@ -1165,7 +1165,7 @@
                                         <tr>
                                                 <td>filters</td>
                                             <td>
-                                                            <code><a href="../interfaces/ServiceFilters.html" target="_self" >ServiceFilters</a></code>
+                                                            <code><a href="../classes/GetServicesListQueryDTO.html" target="_self" >GetServicesListQueryDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1178,7 +1178,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServicesListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1203,7 +1203,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>respondToServiceRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, requestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: literal type, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>respondToServiceRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, requestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/RespondServiceRequestRequestDTO.html" target="_self">RespondServiceRequestRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -1211,7 +1211,7 @@
                     <tr>
                         <td class="col-md-4">
                             <div class="io-line">Defined in <a href="" data-line="306"
-                                    class="link-to-prism">src/api/services/services.service.ts:306</a></div>
+                                    class="link-to-prism">src/api/services/services/services.service.ts:306</a></div>
                         </td>
                     </tr>
 
@@ -1258,7 +1258,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/RespondServiceRequestRequestDTO.html" target="_self" >RespondServiceRequestRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1283,7 +1283,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceRequestDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1315,8 +1315,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="220"
-                                    class="link-to-prism">src/api/services/services.service.ts:220</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="213"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:213</a></div>
                         </td>
                     </tr>
 
@@ -1364,7 +1364,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1389,15 +1389,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: Prisma.ServicesUpdateInput, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>updateService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdateServiceRequestDTO.html" target="_self">UpdateServiceRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="140"
-                                    class="link-to-prism">src/api/services/services.service.ts:140</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="126"
+                                    class="link-to-prism">src/api/services/services/services.service.ts:126</a></div>
                         </td>
                     </tr>
 
@@ -1432,7 +1432,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                        <code>Prisma.ServicesUpdateInput</code>
+                                                            <code><a href="../classes/UpdateServiceRequestDTO.html" target="_self" >UpdateServiceRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1457,7 +1457,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1480,27 +1480,19 @@
   BadRequestException,
 } from &#x27;@nestjs/common&#x27;;
 import { Prisma, ServiceStatus, RequestStatus } from &#x27;@prisma/client&#x27;;
-import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;;
-import { CreateServiceDto } from &#x27;./dto/create-service.dto&#x27;;
-
-export interface ServiceFilters {
-  status?: ServiceStatus;
-  categoryId?: number;
-  latitude?: number;
-  longitude?: number;
-  radius?: number;
-  page?: number;
-  limit?: number;
-}
-
-export interface ServiceStats {
-  total: number;
-  pending: number;
-  inProgress: number;
-  completed: number;
-  cancelled: number;
-  totalEarnings: number;
-}
+import { ServicesDbService } from &#x27;@modules/services-db/services/services-db.service&#x27;;
+import { CreateServiceRequestDTO } from &#x27;../dtos/request/create-service.request.dto&#x27;;
+import { UpdateServiceRequestDTO } from &#x27;../dtos/request/update-service.request.dto&#x27;;
+import { CreateServiceRequestRequestDTO } from &#x27;../dtos/request/create-service-request.request.dto&#x27;;
+import { RespondServiceRequestRequestDTO } from &#x27;../dtos/request/respond-service-request.request.dto&#x27;;
+import { GetServicesListQueryDTO } from &#x27;../dtos/request/get-services-list.query.dto&#x27;;
+import {
+  ServiceDetailResponseDTO,
+  ServicesListResponseDTO,
+  ServiceRequestDetailResponseDTO,
+  ServiceRequestsListResponseDTO,
+  ServiceStatsResponseDTO,
+} from &#x27;../dtos/response&#x27;;
 
 const CANCELLABLE &#x3D; new Set&lt;ServiceStatus&gt;([
   ServiceStatus.PENDING,
@@ -1509,37 +1501,38 @@ const CANCELLABLE &#x3D; new Set&lt;ServiceStatus&gt;([
 
 @Injectable()
 export class ServicesService {
-  constructor(private readonly prisma: PrismaDatasource) {}
+  constructor(private readonly db: ServicesDbService) {}
 
-  async createService(dto: CreateServiceDto, userId: number) {
-    const category &#x3D; await this.prisma.extended.category.findUnique({
-      where: { id: dto.categoryId },
-    });
+  async createService(
+    dto: CreateServiceRequestDTO,
+    userId: number,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    const category &#x3D; await this.db.findCategoryById(dto.categoryId);
     if (!category) throw new NotFoundException(&#x27;Categoría no encontrada&#x27;);
 
-    return this.prisma.extended.services.create({
-      data: {
-        userId,
-        title: dto.title,
-        description: dto.description,
-        categoryId: dto.categoryId,
-        serviceTypeId: dto.serviceTypeId,
-        estimatedHours: dto.estimatedHours,
-        hourlyRate: dto.hourlyRate,
-        fixedPrice: dto.fixedPrice,
-        latitude: dto.latitude,
-        longitude: dto.longitude,
-        address: dto.address,
-        additionalNotes: dto.additionalNotes,
-        images: dto.images ?? [],
-        isUrgent: dto.isUrgent ?? false,
-        scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
-        status: ServiceStatus.PENDING,
-      },
-    });
+    return this.db.createService({
+      userId,
+      title: dto.title,
+      description: dto.description,
+      categoryId: dto.categoryId,
+      serviceTypeId: dto.serviceTypeId,
+      estimatedHours: dto.estimatedHours,
+      hourlyRate: dto.hourlyRate,
+      fixedPrice: dto.fixedPrice,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      address: dto.address,
+      additionalNotes: dto.additionalNotes,
+      images: dto.images ?? [],
+      isUrgent: dto.isUrgent ?? false,
+      scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
+      status: ServiceStatus.PENDING,
+    }) as unknown as Promise&lt;ServiceDetailResponseDTO&gt;;
   }
 
-  async getServices(filters: ServiceFilters) {
+  async getServices(
+    filters: GetServicesListQueryDTO,
+  ): Promise&lt;ServicesListResponseDTO&gt; {
     const where: Prisma.ServicesWhereInput &#x3D; {};
     if (filters.status) where.status &#x3D; filters.status;
     if (filters.categoryId) where.categoryId &#x3D; filters.categoryId;
@@ -1559,19 +1552,23 @@ export class ServicesService {
     }
 
     const page &#x3D; filters.page ?? 1;
-    const limit &#x3D; filters.limit ?? 10;
+    const pageSize &#x3D; filters.pageSize ?? 10;
 
-    const [services, total] &#x3D; await Promise.all([
-      this.prisma.extended.services.findMany({
-        where,
-        include: { users: true, professional: true, category: true },
-        orderBy: { createdAt: &#x27;desc&#x27; },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.extended.services.count({ where }),
-    ]);
-    return { services, total };
+    const [services, total] &#x3D; await this.db.findManyWithCount(
+      where,
+      page,
+      pageSize,
+    );
+
+    return {
+      data: services as unknown as ServiceDetailResponseDTO[],
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   }
 
   async getNearbyServices(
@@ -1579,7 +1576,7 @@ export class ServicesService {
     longitude: number,
     radius &#x3D; 10,
     categoryId?: number,
-  ) {
+  ): Promise&lt;ServiceDetailResponseDTO[]&gt; {
     const latRange &#x3D; radius / 111;
     const lngRange &#x3D; radius / (111 * Math.cos((latitude * Math.PI) / 180));
 
@@ -1590,39 +1587,29 @@ export class ServicesService {
     };
     if (categoryId) where.categoryId &#x3D; categoryId;
 
-    return this.prisma.extended.services.findMany({
-      where,
-      include: { users: true, category: true },
-      orderBy: { createdAt: &#x27;desc&#x27; },
-      take: 50,
-    });
+    return this.db.findNearby(where) as unknown as Promise&lt;
+      ServiceDetailResponseDTO[]
+    &gt;;
   }
 
-  async getServiceById(id: string) {
-    const service &#x3D; await this.prisma.extended.services.findUnique({
-      where: { id },
-      include: {
-        users: true,
-        professional: true,
-        category: true,
-        requests: true,
-      },
-    });
+  async getServiceById(id: string): Promise&lt;ServiceDetailResponseDTO&gt; {
+    const service &#x3D; await this.db.findServiceById(id);
     if (!service) throw new NotFoundException(&#x27;Servicio no encontrado&#x27;);
-    return service;
+    return service as unknown as ServiceDetailResponseDTO;
   }
 
   async updateService(
     id: string,
-    dto: Prisma.ServicesUpdateInput,
+    dto: UpdateServiceRequestDTO,
     userId: number,
-  ) {
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(id);
 
     if (service.userId !&#x3D;&#x3D; userId &amp;&amp; service.professionalId !&#x3D;&#x3D; null) {
-      const professional &#x3D; await this.prisma.extended.professionals.findUnique({
-        where: { id: service.professionalId },
-      });
+      const professional &#x3D;
+        service.professionalId !&#x3D; null
+          ? await this.db.findProfessionalById(service.professionalId)
+          : null;
       if (!professional || professional.userId !&#x3D;&#x3D; userId) {
         throw new ForbiddenException(
           &#x27;No tienes permisos para modificar este servicio&#x27;,
@@ -1639,10 +1626,18 @@ export class ServicesService {
         &#x27;No se puede modificar un servicio en este estado&#x27;,
       );
     }
-    return this.prisma.extended.services.update({ where: { id }, data: dto });
+
+    return this.db.updateService(
+      id,
+      dto,
+    ) as unknown as Promise&lt;ServiceDetailResponseDTO&gt;;
   }
 
-  async cancelService(id: string, reason: string, userId: number) {
+  async cancelService(
+    id: string,
+    reason: string,
+    userId: number,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(id);
 
     if (!CANCELLABLE.has(service.status)) {
@@ -1652,8 +1647,8 @@ export class ServicesService {
     }
 
     const isProfessionalOwner &#x3D; service.professionalId
-      ? await this.prisma.extended.professionals
-          .findUnique({ where: { id: service.professionalId } })
+      ? await this.db
+          .findProfessionalById(service.professionalId)
           .then((p) &#x3D;&gt; p?.userId &#x3D;&#x3D;&#x3D; userId)
       : false;
 
@@ -1663,36 +1658,37 @@ export class ServicesService {
       );
     }
 
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: {
-        status: ServiceStatus.CANCELLED,
-        cancelledAt: new Date(),
-        cancellationReason: reason,
-      },
-    });
+    return this.db.updateService(id, {
+      status: ServiceStatus.CANCELLED,
+      cancelledAt: new Date(),
+      cancellationReason: reason,
+    }) as unknown as Promise&lt;ServiceDetailResponseDTO&gt;;
   }
 
-  async acceptService(id: string, professionalId: number) {
+  async acceptService(
+    id: string,
+    professionalId: number,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(id);
     if (service.status !&#x3D;&#x3D; ServiceStatus.PENDING) {
       throw new BadRequestException(
         &#x27;El servicio no puede ser aceptado en este estado&#x27;,
       );
     }
-    const professional &#x3D; await this.prisma.extended.professionals.findUnique({
-      where: { id: professionalId },
-    });
+    const professional &#x3D; await this.db.findProfessionalById(professionalId);
     if (!professional)
       throw new ForbiddenException(&#x27;Usuario no es un profesional&#x27;);
 
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: { status: ServiceStatus.ACCEPTED, professionalId },
-    });
+    return this.db.updateService(id, {
+      status: ServiceStatus.ACCEPTED,
+      professionalId,
+    }) as unknown as Promise&lt;ServiceDetailResponseDTO&gt;;
   }
 
-  async startService(id: string, professionalId: number) {
+  async startService(
+    id: string,
+    professionalId: number,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(id);
     if (service.professionalId !&#x3D;&#x3D; professionalId) {
       throw new ForbiddenException(
@@ -1704,13 +1700,16 @@ export class ServicesService {
         &#x27;El servicio no puede ser iniciado en este estado&#x27;,
       );
     }
-    return this.prisma.extended.services.update({
-      where: { id },
-      data: { status: ServiceStatus.IN_PROGRESS, startedAt: new Date() },
-    });
+    return this.db.updateService(id, {
+      status: ServiceStatus.IN_PROGRESS,
+      startedAt: new Date(),
+    }) as unknown as Promise&lt;ServiceDetailResponseDTO&gt;;
   }
 
-  async completeService(id: string, professionalId: number) {
+  async completeService(
+    id: string,
+    professionalId: number,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(id);
     if (service.professionalId !&#x3D;&#x3D; professionalId) {
       throw new ForbiddenException(
@@ -1724,27 +1723,30 @@ export class ServicesService {
     }
 
     const completedAt &#x3D; new Date();
-    const data: Prisma.ServicesUpdateInput &#x3D; {
+    const data: Prisma.ServicesUncheckedUpdateInput &#x3D; {
       status: ServiceStatus.COMPLETED,
       completedAt,
     };
 
     if (service.hourlyRate &amp;&amp; service.startedAt) {
-      const ms &#x3D; completedAt.getTime() - service.startedAt.getTime();
+      const ms &#x3D; completedAt.getTime() - new Date(service.startedAt).getTime();
       const actualHours &#x3D; ms / (1000 * 60 * 60);
       const finalAmount &#x3D; actualHours * Number(service.hourlyRate);
       data.actualHours &#x3D; actualHours;
       data.finalAmount &#x3D; finalAmount;
     }
 
-    return this.prisma.extended.services.update({ where: { id }, data });
+    return this.db.updateService(
+      id,
+      data,
+    ) as unknown as Promise&lt;ServiceDetailResponseDTO&gt;;
   }
 
   async createServiceRequest(
     serviceId: string,
-    dto: { proposedPrice?: number; proposedHours?: number; message?: string },
+    dto: CreateServiceRequestRequestDTO,
     professionalId: number,
-  ) {
+  ): Promise&lt;ServiceRequestDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(serviceId);
     if (service.status !&#x3D;&#x3D; ServiceStatus.PENDING) {
       throw new BadRequestException(
@@ -1752,38 +1754,36 @@ export class ServicesService {
       );
     }
 
-    const existing &#x3D; await this.prisma.extended.serviceRequests.findFirst({
-      where: { serviceId, professionalId },
-    });
+    const existing &#x3D; await this.db.findDuplicateRequest(
+      serviceId,
+      professionalId,
+    );
     if (existing)
       throw new BadRequestException(
         &#x27;Ya has enviado una solicitud para este servicio&#x27;,
       );
 
-    return this.prisma.extended.serviceRequests.create({
-      data: {
-        ...dto,
-        serviceId,
-        professionalId,
-        status: RequestStatus.PENDING,
-      },
-    });
+    return this.db.createServiceRequest({
+      ...dto,
+      serviceId,
+      professionalId,
+      status: RequestStatus.PENDING,
+    }) as unknown as Promise&lt;ServiceRequestDetailResponseDTO&gt;;
   }
 
-  async getServiceRequests(serviceId: string) {
-    return this.prisma.extended.serviceRequests.findMany({
-      where: { serviceId },
-      include: { professional: true },
-      orderBy: { createdAt: &#x27;desc&#x27; },
-    });
+  async getServiceRequests(
+    serviceId: string,
+  ): Promise&lt;ServiceRequestsListResponseDTO&gt; {
+    const data &#x3D; await this.db.findServiceRequests(serviceId);
+    return { data: data as unknown as ServiceRequestDetailResponseDTO[] };
   }
 
   async respondToServiceRequest(
     serviceId: string,
     requestId: string,
-    dto: { status: RequestStatus; reason?: string },
+    dto: RespondServiceRequestRequestDTO,
     userId: number,
-  ) {
+  ): Promise&lt;ServiceRequestDetailResponseDTO&gt; {
     const service &#x3D; await this.getServiceById(serviceId);
     if (service.userId !&#x3D;&#x3D; userId) {
       throw new ForbiddenException(
@@ -1791,62 +1791,39 @@ export class ServicesService {
       );
     }
 
-    const request &#x3D; await this.prisma.extended.serviceRequests.findFirst({
-      where: { id: requestId, serviceId },
-    });
+    const request &#x3D; await this.db.findServiceRequest(requestId, serviceId);
     if (!request) throw new NotFoundException(&#x27;Solicitud no encontrada&#x27;);
 
     if (dto.status &#x3D;&#x3D;&#x3D; RequestStatus.ACCEPTED) {
-      await this.prisma.extended.$transaction([
-        this.prisma.extended.serviceRequests.update({
-          where: { id: requestId },
-          data: { status: RequestStatus.ACCEPTED },
-        }),
-        this.prisma.extended.services.update({
-          where: { id: serviceId },
-          data: {
-            status: ServiceStatus.ACCEPTED,
-            professionalId: request.professionalId,
-          },
-        }),
-        this.prisma.extended.serviceRequests.updateMany({
-          where: {
-            serviceId,
-            status: RequestStatus.PENDING,
-            id: { not: requestId },
-          },
-          data: { status: RequestStatus.REJECTED },
-        }),
-      ]);
-      return this.prisma.extended.serviceRequests.findUnique({
-        where: { id: requestId },
-      });
+      await this.db.acceptRequestTransaction(
+        requestId,
+        serviceId,
+        request.professionalId,
+      );
+      return this.db.findServiceRequestById(
+        requestId,
+      ) as unknown as Promise&lt;ServiceRequestDetailResponseDTO&gt;;
     }
 
-    return this.prisma.extended.serviceRequests.update({
-      where: { id: requestId },
-      data: { status: RequestStatus.REJECTED },
-    });
+    return this.db.updateServiceRequest(requestId, {
+      status: RequestStatus.REJECTED,
+    }) as unknown as Promise&lt;ServiceRequestDetailResponseDTO&gt;;
   }
 
   async getMyServices(
     userId: number,
     status?: ServiceStatus,
     role?: &#x27;client&#x27; | &#x27;professional&#x27;,
-  ) {
+  ): Promise&lt;ServiceDetailResponseDTO[]&gt; {
     const where: Prisma.ServicesWhereInput &#x3D; {};
 
     if (role &#x3D;&#x3D;&#x3D; &#x27;client&#x27;) {
       where.userId &#x3D; userId;
     } else if (role &#x3D;&#x3D;&#x3D; &#x27;professional&#x27;) {
-      const professional &#x3D; await this.prisma.extended.professionals.findUnique({
-        where: { userId },
-      });
+      const professional &#x3D; await this.db.findProfessionalByUserId(userId);
       if (professional) where.professionalId &#x3D; professional.id;
     } else {
-      const professional &#x3D; await this.prisma.extended.professionals.findUnique({
-        where: { userId },
-      });
+      const professional &#x3D; await this.db.findProfessionalByUserId(userId);
       where.OR &#x3D; [
         { userId },
         ...(professional ? [{ professionalId: professional.id }] : []),
@@ -1855,49 +1832,38 @@ export class ServicesService {
 
     if (status) where.status &#x3D; status;
 
-    return this.prisma.extended.services.findMany({
-      where,
-      include: { users: true, professional: true, category: true },
-      orderBy: { createdAt: &#x27;desc&#x27; },
-    });
+    return this.db.findMyServices(where) as unknown as Promise&lt;
+      ServiceDetailResponseDTO[]
+    &gt;;
   }
 
-  async getDashboardStats(userId: number): Promise&lt;ServiceStats&gt; {
-    const user &#x3D; await this.prisma.extended.users.findUnique({
-      where: { id: userId },
-    });
+  async getDashboardStats(userId: number): Promise&lt;ServiceStatsResponseDTO&gt; {
+    const user &#x3D; await this.db.findUserById(userId);
     if (!user) throw new NotFoundException(&#x27;Usuario no encontrado&#x27;);
 
-    const professional &#x3D; await this.prisma.extended.professionals.findUnique({
-      where: { userId },
-    });
+    const professional &#x3D; await this.db.findProfessionalByUserId(userId);
     const baseWhere: Prisma.ServicesWhereInput &#x3D; professional
       ? { professionalId: professional.id }
       : { userId };
 
     const [total, pending, inProgress, completed, cancelled, earningsAgg] &#x3D;
       await Promise.all([
-        this.prisma.extended.services.count({ where: baseWhere }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.PENDING },
+        this.db.countServices(baseWhere),
+        this.db.countServices({ ...baseWhere, status: ServiceStatus.PENDING }),
+        this.db.countServices({
+          ...baseWhere,
+          status: ServiceStatus.IN_PROGRESS,
         }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.IN_PROGRESS },
+        this.db.countServices({
+          ...baseWhere,
+          status: ServiceStatus.COMPLETED,
         }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.COMPLETED },
-        }),
-        this.prisma.extended.services.count({
-          where: { ...baseWhere, status: ServiceStatus.CANCELLED },
+        this.db.countServices({
+          ...baseWhere,
+          status: ServiceStatus.CANCELLED,
         }),
         professional
-          ? this.prisma.extended.services.aggregate({
-              where: {
-                professionalId: professional.id,
-                status: ServiceStatus.COMPLETED,
-              },
-              _sum: { finalAmount: true },
-            })
+          ? this.db.aggregateEarnings(professional.id)
           : Promise.resolve({ _sum: { finalAmount: null } }),
       ]);
 

@@ -24,13 +24,13 @@
 <title>cluster_RolesPermissionDBModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="8,-70 8,-268 1387,-268 1387,-70 8,-70"/>
 </g>
-<g id="clust6" class="cluster">
-<title>cluster_RolesPermissionDBModule_providers</title>
-<polygon fill="none" stroke="black" points="279,-78 279,-130 1379,-130 1379,-78 279,-78"/>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_RolesPermissionDBModule_exports</title>
 <polygon fill="none" stroke="black" points="196,-208 196,-260 1035,-260 1035,-208 196,-208"/>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_RolesPermissionDBModule_providers</title>
+<polygon fill="none" stroke="black" points="279,-78 279,-130 1379,-130 1379,-78 279,-78"/>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_RolesPermissionDBModule_imports</title>

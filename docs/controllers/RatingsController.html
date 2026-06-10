@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/ratings/ratings.controller.ts</code>
+            <code>src/api/ratings/controllers/ratings.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -160,15 +160,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#create" >create</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -177,12 +172,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findByProfessional" >findByProfessional</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -191,13 +184,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findByUser" >findByUser</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -206,12 +196,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getAverageRating" >getAverageRating</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -220,21 +208,16 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getRecentRatings" >getRecentRatings</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getTopRatedProfessionals" >getTopRatedProfessionals</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -244,23 +227,16 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#remove" >remove</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#reportRating" >reportRating</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -291,8 +267,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>create</b></span>
                         <a href="#create"><span class="icon ion-ios-link"></span></a>
@@ -302,7 +276,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>create(req: literal type, createRatingDto: <a href="../classes/CreateRatingDto.html" target="_self">CreateRatingDto</a>)</code>
+                    <code>create(req: literal type, createRatingDto: <a href="../classes/CreateRatingRequestDTO.html" target="_self">CreateRatingRequestDTO</a>)</code>
                 </td>
             </tr>
 
@@ -310,14 +284,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@ApiOperation({summary: &#x27;Crear una nueva calificación&#x27;})<br />@ApiResponse({status: 201, description: &#x27;Calificación creada exitosamente&#x27;})<br />@ApiResponse({status: 400, description: &#x27;Datos inválidos o calificación duplicada&#x27;})<br /></code>
+                    <code>@Post()<br />@CreateRatingDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="47"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:47</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="61"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:61</a></div>
                         </td>
                     </tr>
 
@@ -352,7 +326,7 @@
                                         <tr>
                                                 <td>createRatingDto</td>
                                             <td>
-                                                            <code><a href="../classes/CreateRatingDto.html" target="_self" >CreateRatingDto</a></code>
+                                                            <code><a href="../classes/CreateRatingRequestDTO.html" target="_self" >CreateRatingRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -365,7 +339,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -381,9 +355,6 @@
                 <td class="col-md-4">
                     <a name="findAll"></a>
                     <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -403,14 +374,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Obtener todas las calificaciones&#x27;})<br />@ApiQuery({name: &#x27;page&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Lista de calificaciones obtenida exitosamente&#x27;})<br /></code>
+                    <code>@Get()<br />@FindAllRatingsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="62"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:62</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="73"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:73</a></div>
                         </td>
                     </tr>
 
@@ -419,7 +390,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -434,7 +405,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findByProfessional</b></span>
                         <a href="#findByProfessional"><span class="icon ion-ios-link"></span></a>
@@ -444,7 +414,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findByProfessional(professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findByProfessional(param: <a href="../classes/ProfessionalIdRatingParamDTO.html" target="_self">ProfessionalIdRatingParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -452,14 +422,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;professional/:professionalId&#x27;)<br />@ApiOperation({summary: &#x27;Obtener calificaciones de un profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificaciones del profesional obtenidas exitosamente&#x27;})<br /></code>
+                    <code>@Get(&#x27;professional/:professionalId&#x27;)<br />@FindByProfessionalDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="118"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:118</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="117"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:117</a></div>
                         </td>
                     </tr>
 
@@ -480,9 +450,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>professionalId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ProfessionalIdRatingParamDTO.html" target="_self" >ProfessionalIdRatingParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -495,7 +465,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -513,7 +483,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findByServiceRequest</b></span>
                         <a href="#findByServiceRequest"><span class="icon ion-ios-link"></span></a>
@@ -523,7 +492,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findByServiceRequest(serviceRequestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findByServiceRequest(param: <a href="../classes/ServiceRequestIdParamDTO.html" target="_self">ServiceRequestIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -531,14 +500,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;service/:serviceRequestId&#x27;)<br />@ApiOperation({summary: &#x27;Obtener calificaciones de una solicitud de servicio&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificaciones de la solicitud obtenidas exitosamente&#x27;})<br /></code>
+                    <code>@Get(&#x27;service/:serviceRequestId&#x27;)<br />@FindByServiceRequestDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="170"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:170</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="145"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:145</a></div>
                         </td>
                     </tr>
 
@@ -559,9 +528,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>serviceRequestId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceRequestIdParamDTO.html" target="_self" >ServiceRequestIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -574,7 +543,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -592,7 +561,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findByUser</b></span>
                         <a href="#findByUser"><span class="icon ion-ios-link"></span></a>
@@ -602,7 +570,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findByUser(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findByUser(param: <a href="../classes/UserIdParamDTO.html" target="_self">UserIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -610,14 +578,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;user/:userId&#x27;)<br />@ApiOperation({summary: &#x27;Obtener calificaciones de un usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificaciones del usuario obtenidas exitosamente&#x27;})<br /></code>
+                    <code>@Get(&#x27;user/:userId&#x27;)<br />@FindByUserDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="108"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:108</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="99"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:99</a></div>
                         </td>
                     </tr>
 
@@ -638,9 +606,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>userId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/UserIdParamDTO.html" target="_self" >UserIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -653,7 +621,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -671,8 +639,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findOne</b></span>
                         <a href="#findOne"><span class="icon ion-ios-link"></span></a>
@@ -682,7 +648,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOne(param: <a href="../classes/RatingIdParamDTO.html" target="_self">RatingIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -690,14 +656,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Obtener una calificación específica&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificación encontrada exitosamente&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Calificación no encontrada&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@FindOneRatingDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="98"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:98</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="155"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:155</a></div>
                         </td>
                     </tr>
 
@@ -718,9 +684,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/RatingIdParamDTO.html" target="_self" >RatingIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -733,7 +699,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -751,7 +717,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getAverageRating</b></span>
                         <a href="#getAverageRating"><span class="icon ion-ios-link"></span></a>
@@ -761,7 +726,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getAverageRating(professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getAverageRating(param: <a href="../classes/ProfessionalIdRatingParamDTO.html" target="_self">ProfessionalIdRatingParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -769,14 +734,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;professional/:professionalId/average&#x27;)<br />@ApiOperation({summary: &#x27;Obtener calificación promedio de un profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Estadísticas de calificaciones obtenidas&#x27;, type: ProfessionalRatingStatsDto})<br /></code>
+                    <code>@Get(&#x27;professional/:professionalId/average&#x27;)<br />@GetAverageRatingDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="141"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:141</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="137"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:137</a></div>
                         </td>
                     </tr>
 
@@ -797,9 +762,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>professionalId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ProfessionalIdRatingParamDTO.html" target="_self" >ProfessionalIdRatingParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -812,7 +777,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/ProfessionalRatingStatsDto.html" target="_self" >Promise&lt;ProfessionalRatingStatsDto&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalRatingStatsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -830,7 +795,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getClientRatings</b></span>
                         <a href="#getClientRatings"><span class="icon ion-ios-link"></span></a>
@@ -840,7 +804,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getClientRatings(professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getClientRatings(param: <a href="../classes/ProfessionalIdRatingParamDTO.html" target="_self">ProfessionalIdRatingParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -848,14 +812,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;professional/:professionalId/client-ratings&#x27;)<br />@ApiOperation({summary: &#x27;Obtener calificaciones de clientes a un profesional&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificaciones de clientes obtenidas exitosamente&#x27;})<br /></code>
+                    <code>@Get(&#x27;professional/:professionalId/client-ratings&#x27;)<br />@GetClientRatingsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="130"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:130</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="127"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:127</a></div>
                         </td>
                     </tr>
 
@@ -876,9 +840,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>professionalId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ProfessionalIdRatingParamDTO.html" target="_self" >ProfessionalIdRatingParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -891,7 +855,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -909,8 +873,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getRecentRatings</b></span>
                         <a href="#getRecentRatings"><span class="icon ion-ios-link"></span></a>
@@ -920,7 +882,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getRecentRatings(limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getRecentRatings(query: <a href="../classes/GetRecentRatingsQueryDTO.html" target="_self">GetRecentRatingsQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -928,14 +890,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;recent&#x27;)<br />@ApiOperation({summary: &#x27;Obtener calificaciones recientes&#x27;})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Calificaciones recientes obtenidas exitosamente&#x27;})<br /></code>
+                    <code>@Get(&#x27;recent&#x27;)<br />@GetRecentRatingsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="73"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:73</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="81"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:81</a></div>
                         </td>
                     </tr>
 
@@ -952,30 +914,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>limit</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetRecentRatingsQueryDTO.html" target="_self" >GetRecentRatingsQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>20</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -993,8 +951,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getTopRatedProfessionals</b></span>
                         <a href="#getTopRatedProfessionals"><span class="icon ion-ios-link"></span></a>
@@ -1004,7 +960,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getTopRatedProfessionals(limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getTopRatedProfessionals(query: <a href="../classes/GetTopRatedProfessionalsQueryDTO.html" target="_self">GetTopRatedProfessionalsQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1012,14 +968,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;top-professionals&#x27;)<br />@ApiOperation({summary: &#x27;Obtener profesionales mejor calificados&#x27;})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Lista de profesionales mejor calificados&#x27;, type: undefined})<br /></code>
+                    <code>@Get(&#x27;top-professionals&#x27;)<br />@GetTopRatedProfessionalsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="85"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:85</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="91"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:91</a></div>
                         </td>
                     </tr>
 
@@ -1036,30 +992,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>limit</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetTopRatedProfessionalsQueryDTO.html" target="_self" >GetTopRatedProfessionalsQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/TopRatedProfessionalDto.html" target="_self" >Promise&lt;TopRatedProfessionalDto[]&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;TopRatedProfessionalResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1077,7 +1029,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getUserRatingStats</b></span>
                         <a href="#getUserRatingStats"><span class="icon ion-ios-link"></span></a>
@@ -1087,7 +1038,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserRatingStats(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getUserRatingStats(param: <a href="../classes/UserIdParamDTO.html" target="_self">UserIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1095,14 +1046,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;user/:userId/stats&#x27;)<br />@ApiOperation({summary: &#x27;Obtener estadísticas de calificaciones de un usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Estadísticas del usuario obtenidas exitosamente&#x27;, type: UserRatingStatsDto})<br /></code>
+                    <code>@Get(&#x27;user/:userId/stats&#x27;)<br />@GetUserRatingStatsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="156"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:156</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="109"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:109</a></div>
                         </td>
                     </tr>
 
@@ -1123,9 +1074,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>userId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/UserIdParamDTO.html" target="_self" >UserIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1138,7 +1089,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/UserRatingStatsDto.html" target="_self" >Promise&lt;UserRatingStatsDto&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;UserRatingStatsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1157,8 +1108,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>remove</b></span>
                         <a href="#remove"><span class="icon ion-ios-link"></span></a>
@@ -1168,7 +1117,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type)</code>
+                    <code>remove(param: <a href="../classes/RatingIdParamDTO.html" target="_self">RatingIdParamDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1176,14 +1125,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;:id&#x27;)<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@ApiOperation({summary: &#x27;Eliminar una calificación&#x27;})<br />@ApiResponse({status: 204, description: &#x27;Calificación eliminada exitosamente&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No tienes permisos para eliminar esta calificación&#x27;})<br /></code>
+                    <code>@Delete(&#x27;:id&#x27;)<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@RemoveRatingDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="209"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:209</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="180"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:180</a></div>
                         </td>
                     </tr>
 
@@ -1204,9 +1153,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/RatingIdParamDTO.html" target="_self" >RatingIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1249,8 +1198,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>reportRating</b></span>
                         <a href="#reportRating"><span class="icon ion-ios-link"></span></a>
@@ -1260,7 +1207,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>reportRating(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type, reportRatingDto: <a href="../classes/ReportRatingDto.html" target="_self">ReportRatingDto</a>)</code>
+                    <code>reportRating(param: <a href="../classes/RatingIdParamDTO.html" target="_self">RatingIdParamDTO</a>, req: literal type, reportRatingDto: <a href="../classes/ReportRatingRequestDTO.html" target="_self">ReportRatingRequestDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1268,14 +1215,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/report&#x27;)<br />@ApiOperation({summary: &#x27;Reportar una calificación&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificación reportada exitosamente&#x27;})<br />@ApiResponse({status: 400, description: &#x27;No puedes reportar tu propia calificación&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/report&#x27;)<br />@ReportRatingDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="226"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:226</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="189"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:189</a></div>
                         </td>
                     </tr>
 
@@ -1296,9 +1243,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/RatingIdParamDTO.html" target="_self" >RatingIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1322,7 +1269,7 @@
                                         <tr>
                                                 <td>reportRatingDto</td>
                                             <td>
-                                                            <code><a href="../classes/ReportRatingDto.html" target="_self" >ReportRatingDto</a></code>
+                                                            <code><a href="../classes/ReportRatingRequestDTO.html" target="_self" >ReportRatingRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1335,7 +1282,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1353,9 +1300,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>update</b></span>
                         <a href="#update"><span class="icon ion-ios-link"></span></a>
@@ -1365,7 +1309,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type, updateRatingDto: <a href="../classes/UpdateRatingDto.html" target="_self">UpdateRatingDto</a>)</code>
+                    <code>update(param: <a href="../classes/RatingIdParamDTO.html" target="_self">RatingIdParamDTO</a>, req: literal type, updateRatingDto: <a href="../classes/UpdateRatingRequestDTO.html" target="_self">UpdateRatingRequestDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1373,14 +1317,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Patch(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar una calificación&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Calificación actualizada exitosamente&#x27;})<br />@ApiResponse({status: 400, description: &#x27;No se puede editar la calificación después de 24 horas&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No tienes permisos para editar esta calificación&#x27;})<br /></code>
+                    <code>@Patch(&#x27;:id&#x27;)<br />@UpdateRatingDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="190"
-                                    class="link-to-prism">src/api/ratings/ratings.controller.ts:190</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="165"
+                                    class="link-to-prism">src/api/ratings/controllers/ratings.controller.ts:165</a></div>
                         </td>
                     </tr>
 
@@ -1401,9 +1345,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/RatingIdParamDTO.html" target="_self" >RatingIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1427,7 +1371,7 @@
                                         <tr>
                                                 <td>updateRatingDto</td>
                                             <td>
-                                                            <code><a href="../classes/UpdateRatingDto.html" target="_self" >UpdateRatingDto</a></code>
+                                                            <code><a href="../classes/UpdateRatingRequestDTO.html" target="_self" >UpdateRatingRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1440,7 +1384,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1468,23 +1412,42 @@
   HttpCode,
   HttpStatus,
 } from &#x27;@nestjs/common&#x27;;
+import { ApiTags, ApiBearerAuth } from &#x27;@nestjs/swagger&#x27;;
+import { RatingsService } from &#x27;../services/ratings.service&#x27;;
+import { JwtAuthGuard } from &#x27;@auth/guards/jwt-auth.guard&#x27;;
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from &#x27;@nestjs/swagger&#x27;;
-import { RatingsService } from &#x27;./ratings.service&#x27;;
-import { CreateRatingDto } from &#x27;./dto/create-rating.dto&#x27;;
-import { UpdateRatingDto } from &#x27;./dto/update-rating.dto&#x27;;
-import { ReportRatingDto } from &#x27;./dto/report-rating.dto&#x27;;
-import { JwtAuthGuard } from &#x27;../../modules/auth/guards/jwt-auth.guard&#x27;;
+  CreateRatingRequestDTO,
+  UpdateRatingRequestDTO,
+  ReportRatingRequestDTO,
+  RatingIdParamDTO,
+  UserIdParamDTO,
+  ProfessionalIdRatingParamDTO,
+  ServiceRequestIdParamDTO,
+  GetRecentRatingsQueryDTO,
+  GetTopRatedProfessionalsQueryDTO,
+} from &#x27;../dtos/request&#x27;;
 import {
-  ProfessionalRatingStatsDto,
-  UserRatingStatsDto,
-  TopRatedProfessionalDto,
-} from &#x27;./dto/rating-stats.dto&#x27;;
+  RatingDetailResponseDTO,
+  ProfessionalRatingStatsResponseDTO,
+  UserRatingStatsResponseDTO,
+  TopRatedProfessionalResponseDTO,
+} from &#x27;../dtos/response&#x27;;
+import {
+  CreateRatingDocs,
+  FindAllRatingsDocs,
+  GetRecentRatingsDocs,
+  GetTopRatedProfessionalsDocs,
+  FindByUserDocs,
+  GetUserRatingStatsDocs,
+  FindByProfessionalDocs,
+  GetClientRatingsDocs,
+  GetAverageRatingDocs,
+  FindByServiceRequestDocs,
+  FindOneRatingDocs,
+  UpdateRatingDocs,
+  RemoveRatingDocs,
+  ReportRatingDocs,
+} from &#x27;../docs/ratings.docs&#x27;;
 
 @ApiTags(&#x27;Ratings - Sistema de Calificaciones&#x27;)
 @Controller(&#x27;ratings&#x27;)
@@ -1494,201 +1457,145 @@ export class RatingsController {
   constructor(private readonly ratingsService: RatingsService) {}
 
   @Post()
-  @ApiOperation({ summary: &#x27;Crear una nueva calificación&#x27; })
-  @ApiResponse({ status: 201, description: &#x27;Calificación creada exitosamente&#x27; })
-  @ApiResponse({
-    status: 400,
-    description: &#x27;Datos inválidos o calificación duplicada&#x27;,
-  })
+  @CreateRatingDocs()
   async create(
     @Request() req: { user: { id: number } },
-    @Body() createRatingDto: CreateRatingDto,
-  ) {
-    return this.ratingsService.create(req.user.id, createRatingDto);
+    @Body() createRatingDto: CreateRatingRequestDTO,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
+    return this.ratingsService.create(
+      req.user.id,
+      createRatingDto,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO&gt;;
   }
 
   @Get()
-  @ApiOperation({ summary: &#x27;Obtener todas las calificaciones&#x27; })
-  @ApiQuery({ name: &#x27;page&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Lista de calificaciones obtenida exitosamente&#x27;,
-  })
-  async findAll() {
-    return this.ratingsService.findAll();
+  @FindAllRatingsDocs()
+  async findAll(): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return this.ratingsService.findAll() as unknown as Promise&lt;
+      RatingDetailResponseDTO[]
+    &gt;;
   }
 
   @Get(&#x27;recent&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener calificaciones recientes&#x27; })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificaciones recientes obtenidas exitosamente&#x27;,
-  })
-  async getRecentRatings(@Query(&#x27;limit&#x27;) limit: number &#x3D; 20) {
-    return this.ratingsService.getRecentRatings(limit);
+  @GetRecentRatingsDocs()
+  async getRecentRatings(
+    @Query() query: GetRecentRatingsQueryDTO,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return this.ratingsService.getRecentRatings(
+      query.limit,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO[]&gt;;
   }
 
   @Get(&#x27;top-professionals&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener profesionales mejor calificados&#x27; })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Lista de profesionales mejor calificados&#x27;,
-    type: [TopRatedProfessionalDto],
-  })
+  @GetTopRatedProfessionalsDocs()
   async getTopRatedProfessionals(
-    @Query(&#x27;limit&#x27;) limit: number &#x3D; 10,
-  ): Promise&lt;TopRatedProfessionalDto[]&gt; {
-    return this.ratingsService.getTopRatedProfessionals(limit);
-  }
-
-  @Get(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener una calificación específica&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificación encontrada exitosamente&#x27;,
-  })
-  @ApiResponse({ status: 404, description: &#x27;Calificación no encontrada&#x27; })
-  async findOne(@Param(&#x27;id&#x27;) id: string) {
-    return this.ratingsService.findOne(id);
+    @Query() query: GetTopRatedProfessionalsQueryDTO,
+  ): Promise&lt;TopRatedProfessionalResponseDTO[]&gt; {
+    return this.ratingsService.getTopRatedProfessionals(query.limit);
   }
 
   @Get(&#x27;user/:userId&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener calificaciones de un usuario&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificaciones del usuario obtenidas exitosamente&#x27;,
-  })
-  async findByUser(@Param(&#x27;userId&#x27;) userId: string) {
-    return this.ratingsService.findByUser(Number(userId));
-  }
-
-  @Get(&#x27;professional/:professionalId&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener calificaciones de un profesional&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificaciones del profesional obtenidas exitosamente&#x27;,
-  })
-  async findByProfessional(@Param(&#x27;professionalId&#x27;) professionalId: string) {
-    return this.ratingsService.findByProfessional(Number(professionalId));
-  }
-
-  @Get(&#x27;professional/:professionalId/client-ratings&#x27;)
-  @ApiOperation({
-    summary: &#x27;Obtener calificaciones de clientes a un profesional&#x27;,
-  })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificaciones de clientes obtenidas exitosamente&#x27;,
-  })
-  async getClientRatings(@Param(&#x27;professionalId&#x27;) professionalId: string) {
-    return this.ratingsService.findClientRatings(Number(professionalId));
-  }
-
-  @Get(&#x27;professional/:professionalId/average&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener calificación promedio de un profesional&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Estadísticas de calificaciones obtenidas&#x27;,
-    type: ProfessionalRatingStatsDto,
-  })
-  async getAverageRating(
-    @Param(&#x27;professionalId&#x27;) professionalId: string,
-  ): Promise&lt;ProfessionalRatingStatsDto&gt; {
-    return this.ratingsService.getAverageRating(Number(professionalId));
+  @FindByUserDocs()
+  async findByUser(
+    @Param() param: UserIdParamDTO,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return this.ratingsService.findByUser(param.userId) as unknown as Promise&lt;
+      RatingDetailResponseDTO[]
+    &gt;;
   }
 
   @Get(&#x27;user/:userId/stats&#x27;)
-  @ApiOperation({
-    summary: &#x27;Obtener estadísticas de calificaciones de un usuario&#x27;,
-  })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Estadísticas del usuario obtenidas exitosamente&#x27;,
-    type: UserRatingStatsDto,
-  })
+  @GetUserRatingStatsDocs()
   async getUserRatingStats(
-    @Param(&#x27;userId&#x27;) userId: string,
-  ): Promise&lt;UserRatingStatsDto&gt; {
-    return this.ratingsService.getUserRatingStats(userId);
+    @Param() param: UserIdParamDTO,
+  ): Promise&lt;UserRatingStatsResponseDTO&gt; {
+    return this.ratingsService.getUserRatingStats(String(param.userId));
+  }
+
+  @Get(&#x27;professional/:professionalId&#x27;)
+  @FindByProfessionalDocs()
+  async findByProfessional(
+    @Param() param: ProfessionalIdRatingParamDTO,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return this.ratingsService.findByProfessional(
+      param.professionalId,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO[]&gt;;
+  }
+
+  @Get(&#x27;professional/:professionalId/client-ratings&#x27;)
+  @GetClientRatingsDocs()
+  async getClientRatings(
+    @Param() param: ProfessionalIdRatingParamDTO,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return this.ratingsService.findClientRatings(
+      param.professionalId,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO[]&gt;;
+  }
+
+  @Get(&#x27;professional/:professionalId/average&#x27;)
+  @GetAverageRatingDocs()
+  async getAverageRating(
+    @Param() param: ProfessionalIdRatingParamDTO,
+  ): Promise&lt;ProfessionalRatingStatsResponseDTO&gt; {
+    return this.ratingsService.getAverageRating(param.professionalId);
   }
 
   @Get(&#x27;service/:serviceRequestId&#x27;)
-  @ApiOperation({
-    summary: &#x27;Obtener calificaciones de una solicitud de servicio&#x27;,
-  })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificaciones de la solicitud obtenidas exitosamente&#x27;,
-  })
+  @FindByServiceRequestDocs()
   async findByServiceRequest(
-    @Param(&#x27;serviceRequestId&#x27;) serviceRequestId: string,
-  ) {
-    return this.ratingsService.findByServiceRequest(serviceRequestId);
+    @Param() param: ServiceRequestIdParamDTO,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return this.ratingsService.findByServiceRequest(
+      param.serviceRequestId,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO[]&gt;;
+  }
+
+  @Get(&#x27;:id&#x27;)
+  @FindOneRatingDocs()
+  async findOne(
+    @Param() param: RatingIdParamDTO,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
+    return this.ratingsService.findOne(
+      param.id,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO&gt;;
   }
 
   @Patch(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Actualizar una calificación&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificación actualizada exitosamente&#x27;,
-  })
-  @ApiResponse({
-    status: 400,
-    description: &#x27;No se puede editar la calificación después de 24 horas&#x27;,
-  })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No tienes permisos para editar esta calificación&#x27;,
-  })
+  @UpdateRatingDocs()
   async update(
-    @Param(&#x27;id&#x27;) id: string,
+    @Param() param: RatingIdParamDTO,
     @Request() req: { user: { id: number } },
-    @Body() updateRatingDto: UpdateRatingDto,
-  ) {
-    return this.ratingsService.update(id, req.user.id, updateRatingDto);
+    @Body() updateRatingDto: UpdateRatingRequestDTO,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
+    return this.ratingsService.update(
+      param.id,
+      req.user.id,
+      updateRatingDto,
+    ) as unknown as Promise&lt;RatingDetailResponseDTO&gt;;
   }
 
   @Delete(&#x27;:id&#x27;)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: &#x27;Eliminar una calificación&#x27; })
-  @ApiResponse({
-    status: 204,
-    description: &#x27;Calificación eliminada exitosamente&#x27;,
-  })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No tienes permisos para eliminar esta calificación&#x27;,
-  })
+  @RemoveRatingDocs()
   async remove(
-    @Param(&#x27;id&#x27;) id: string,
+    @Param() param: RatingIdParamDTO,
     @Request() req: { user: { id: number } },
   ): Promise&lt;void&gt; {
-    await this.ratingsService.remove(id, req.user.id);
+    await this.ratingsService.remove(param.id, req.user.id);
   }
 
   @Post(&#x27;:id/report&#x27;)
-  @ApiOperation({ summary: &#x27;Reportar una calificación&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Calificación reportada exitosamente&#x27;,
-  })
-  @ApiResponse({
-    status: 400,
-    description: &#x27;No puedes reportar tu propia calificación&#x27;,
-  })
+  @ReportRatingDocs()
   async reportRating(
-    @Param(&#x27;id&#x27;) id: string,
+    @Param() param: RatingIdParamDTO,
     @Request() req: { user: { id: number } },
-    @Body() reportRatingDto: ReportRatingDto,
-  ) {
+    @Body() reportRatingDto: ReportRatingRequestDTO,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
     return this.ratingsService.reportRating(
-      id,
+      param.id,
       req.user.id,
       reportRatingDto.reason,
-    );
+    ) as unknown as Promise&lt;RatingDetailResponseDTO&gt;;
   }
 }
 </code></pre>

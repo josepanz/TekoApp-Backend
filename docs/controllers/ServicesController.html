@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/services/services.controller.ts</code>
+            <code>src/api/services/controllers/services.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -160,16 +160,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#acceptService" >acceptService</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -178,16 +172,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#completeService" >completeService</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -196,14 +184,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#createServiceRequest" >createServiceRequest</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -212,18 +196,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getMyServices" >getMyServices</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -232,14 +208,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getServiceById" >getServiceById</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -248,21 +220,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getServices" >getServices</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -271,16 +232,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#startService" >startService</a>
                             </li>
                             <li>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -311,9 +266,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>acceptService</b></span>
                         <a href="#acceptService"><span class="icon ion-ios-link"></span></a>
@@ -323,7 +275,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>acceptService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type)</code>
+                    <code>acceptService(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -331,14 +283,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/accept&#x27;)<br />@ApiOperation({summary: &#x27;Aceptar un servicio (solo profesionales)&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Servicio aceptado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado o no es profesional&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/accept&#x27;)<br />@AcceptServiceDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="155"
-                                    class="link-to-prism">src/api/services/services.controller.ts:155</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="145"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:145</a></div>
                         </td>
                     </tr>
 
@@ -359,9 +311,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -386,7 +338,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -404,9 +356,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>cancelService</b></span>
                         <a href="#cancelService"><span class="icon ion-ios-link"></span></a>
@@ -416,7 +365,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>cancelService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, reason: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type)</code>
+                    <code>cancelService(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>, dto: <a href="../classes/CancelServiceRequestDTO.html" target="_self">CancelServiceRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -424,14 +373,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Cancelar un servicio&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Servicio cancelado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado para cancelar este servicio&#x27;})<br /></code>
+                    <code>@Delete(&#x27;:id&#x27;)<br />@CancelServiceDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="139"
-                                    class="link-to-prism">src/api/services/services.controller.ts:139</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="131"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:131</a></div>
                         </td>
                     </tr>
 
@@ -452,9 +401,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -464,9 +413,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>reason</td>
+                                                <td>dto</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/CancelServiceRequestDTO.html" target="_self" >CancelServiceRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -491,7 +440,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -509,9 +458,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>completeService</b></span>
                         <a href="#completeService"><span class="icon ion-ios-link"></span></a>
@@ -521,7 +467,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>completeService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type)</code>
+                    <code>completeService(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -529,14 +475,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/complete&#x27;)<br />@ApiOperation({summary: &#x27;Completar un servicio (solo profesionales)&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Servicio completado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado o no es profesional&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/complete&#x27;)<br />@CompleteServiceDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="185"
-                                    class="link-to-prism">src/api/services/services.controller.ts:185</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="163"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:163</a></div>
                         </td>
                     </tr>
 
@@ -557,9 +503,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -584,7 +530,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -602,9 +548,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>createService</b></span>
                         <a href="#createService"><span class="icon ion-ios-link"></span></a>
@@ -614,7 +557,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createService(createServiceDto: <a href="../classes/CreateServiceDto.html" target="_self">CreateServiceDto</a>, req: literal type)</code>
+                    <code>createService(dto: <a href="../classes/CreateServiceRequestDTO.html" target="_self">CreateServiceRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -622,14 +565,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@ApiOperation({summary: &#x27;Crear un nuevo servicio&#x27;})<br />@ApiResponse({status: 201, description: &#x27;Servicio creado exitosamente&#x27;})<br />@ApiResponse({status: 400, description: &#x27;Datos inválidos&#x27;})<br />@ApiResponse({status: 401, description: &#x27;No autorizado&#x27;})<br /></code>
+                    <code>@Post()<br />@CreateServiceDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="45"
-                                    class="link-to-prism">src/api/services/services.controller.ts:45</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="62"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:62</a></div>
                         </td>
                     </tr>
 
@@ -650,9 +593,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>createServiceDto</td>
+                                                <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/CreateServiceDto.html" target="_self" >CreateServiceDto</a></code>
+                                                            <code><a href="../classes/CreateServiceRequestDTO.html" target="_self" >CreateServiceRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -677,7 +620,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -695,9 +638,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>createServiceRequest</b></span>
                         <a href="#createServiceRequest"><span class="icon ion-ios-link"></span></a>
@@ -707,7 +647,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createServiceRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, requestDto: <a href="../classes/CreateServiceRequestDto.html" target="_self">CreateServiceRequestDto</a>, req: literal type)</code>
+                    <code>createServiceRequest(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>, dto: <a href="../classes/CreateServiceRequestRequestDTO.html" target="_self">CreateServiceRequestRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -715,14 +655,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/requests&#x27;)<br />@ApiOperation({summary: &#x27;Crear una solicitud para un servicio (solo profesionales)&#x27;})<br />@ApiResponse({status: 201, description: &#x27;Solicitud creada&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado o no es profesional&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/requests&#x27;)<br />@CreateServiceRequestDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="203"
-                                    class="link-to-prism">src/api/services/services.controller.ts:203</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="172"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:172</a></div>
                         </td>
                     </tr>
 
@@ -743,9 +683,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>serviceId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -755,9 +695,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>requestDto</td>
+                                                <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/CreateServiceRequestDto.html" target="_self" >CreateServiceRequestDto</a></code>
+                                                            <code><a href="../classes/CreateServiceRequestRequestDTO.html" target="_self" >CreateServiceRequestRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -782,7 +722,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceRequestDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -798,7 +738,6 @@
                 <td class="col-md-4">
                     <a name="getDashboardStats"></a>
                     <span class="name">
-                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -818,14 +757,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;dashboard/stats&#x27;)<br />@ApiOperation({summary: &#x27;Obtener estadísticas del dashboard&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Estadísticas obtenidas&#x27;})<br /></code>
+                    <code>@Get(&#x27;dashboard/stats&#x27;)<br />@GetDashboardStatsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="261"
-                                    class="link-to-prism">src/api/services/services.controller.ts:261</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:105</a></div>
                         </td>
                     </tr>
 
@@ -861,7 +800,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceStatsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -879,9 +818,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getMyServices</b></span>
                         <a href="#getMyServices"><span class="icon ion-ios-link"></span></a>
@@ -891,7 +827,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getMyServices(req: literal type, status?: ServiceStatus, role?: "client" | "professional")</code>
+                    <code>getMyServices(req: literal type, query: <a href="../classes/GetMyServicesQueryDTO.html" target="_self">GetMyServicesQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -899,14 +835,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;my-services&#x27;)<br />@ApiOperation({summary: &#x27;Obtener servicios del usuario autenticado&#x27;})<br />@ApiQuery({name: &#x27;status&#x27;, enum: ServiceStatus, required: false})<br />@ApiQuery({name: &#x27;role&#x27;, enum: undefined, required: false})<br />@ApiResponse({status: 200, description: &#x27;Servicios del usuario obtenidos&#x27;})<br /></code>
+                    <code>@Get(&#x27;my-services&#x27;)<br />@GetMyServicesDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="250"
-                                    class="link-to-prism">src/api/services/services.controller.ts:250</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="92"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:92</a></div>
                         </td>
                     </tr>
 
@@ -939,25 +875,13 @@
 
                                         </tr>
                                         <tr>
-                                                <td>status</td>
+                                                <td>query</td>
                                             <td>
-                                                        <code>ServiceStatus</code>
+                                                            <code><a href="../classes/GetMyServicesQueryDTO.html" target="_self" >GetMyServicesQueryDTO</a></code>
                                             </td>
 
                                             <td>
-                                                    Yes
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>role</td>
-                                            <td>
-                                                        <code>&quot;client&quot; | &quot;professional&quot;</code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
+                                                    No
                                             </td>
 
 
@@ -966,7 +890,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -984,11 +908,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getNearbyServices</b></span>
                         <a href="#getNearbyServices"><span class="icon ion-ios-link"></span></a>
@@ -998,7 +917,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getNearbyServices(latitude: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, longitude: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, radius: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, categoryId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getNearbyServices(query: <a href="../classes/GetNearbyServicesQueryDTO.html" target="_self">GetNearbyServicesQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1006,14 +925,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;nearby&#x27;)<br />@ApiOperation({summary: &#x27;Obtener servicios cercanos por ubicación&#x27;})<br />@ApiQuery({name: &#x27;latitude&#x27;, required: true, type: Number})<br />@ApiQuery({name: &#x27;longitude&#x27;, required: true, type: Number})<br />@ApiQuery({name: &#x27;radius&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;categoryId&#x27;, required: false})<br />@ApiResponse({status: 200, description: &#x27;Servicios cercanos obtenidos&#x27;})<br /></code>
+                    <code>@Get(&#x27;nearby&#x27;)<br />@GetNearbyServicesDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="89"
-                                    class="link-to-prism">src/api/services/services.controller.ts:89</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="79"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:79</a></div>
                         </td>
                     </tr>
 
@@ -1030,72 +949,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>latitude</td>
+                                                <td>query</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetNearbyServicesQueryDTO.html" target="_self" >GetNearbyServicesQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>longitude</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>radius</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>categoryId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1113,8 +986,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getServiceById</b></span>
                         <a href="#getServiceById"><span class="icon ion-ios-link"></span></a>
@@ -1124,7 +995,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getServiceById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getServiceById(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1132,14 +1003,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Obtener un servicio por ID&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Servicio encontrado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@GetServiceByIdDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">src/api/services/services.controller.ts:107</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="113"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:113</a></div>
                         </td>
                     </tr>
 
@@ -1160,9 +1031,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1175,7 +1046,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1193,8 +1064,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getServiceRequests</b></span>
                         <a href="#getServiceRequests"><span class="icon ion-ios-link"></span></a>
@@ -1204,7 +1073,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getServiceRequests(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getServiceRequests(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1212,14 +1081,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id/requests&#x27;)<br />@ApiOperation({summary: &#x27;Obtener solicitudes de un servicio&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Solicitudes obtenidas&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id/requests&#x27;)<br />@GetServiceRequestsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="219"
-                                    class="link-to-prism">src/api/services/services.controller.ts:219</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="186"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:186</a></div>
                         </td>
                     </tr>
 
@@ -1240,9 +1109,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>serviceId</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1255,7 +1124,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceRequestsListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1273,14 +1142,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getServices</b></span>
                         <a href="#getServices"><span class="icon ion-ios-link"></span></a>
@@ -1290,7 +1151,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getServices(status?: ServiceStatus, categoryId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, latitude?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, longitude?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, radius?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>getServices(query: <a href="../classes/GetServicesListQueryDTO.html" target="_self">GetServicesListQueryDTO</a>)</code>
                 </td>
             </tr>
 
@@ -1298,14 +1159,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Obtener lista de servicios con filtros&#x27;})<br />@ApiQuery({name: &#x27;status&#x27;, enum: ServiceStatus, required: false})<br />@ApiQuery({name: &#x27;categoryId&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;latitude&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;longitude&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;radius&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;page&#x27;, required: false, type: Number})<br />@ApiQuery({name: &#x27;limit&#x27;, required: false, type: Number})<br />@ApiResponse({status: 200, description: &#x27;Lista de servicios obtenida&#x27;})<br /></code>
+                    <code>@Get()<br />@GetServicesDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="62"
-                                    class="link-to-prism">src/api/services/services.controller.ts:62</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="71"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:71</a></div>
                         </td>
                     </tr>
 
@@ -1322,115 +1183,26 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
-                                                <td>Default value</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>status</td>
+                                                <td>query</td>
                                             <td>
-                                                        <code>ServiceStatus</code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>categoryId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>latitude</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>longitude</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>radius</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    Yes
-                                            </td>
-
-                                            <td>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>page</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../classes/GetServicesListQueryDTO.html" target="_self" >GetServicesListQueryDTO</a></code>
                                             </td>
 
                                             <td>
                                                     No
                                             </td>
 
-                                            <td>
-                                                    <code>1</code>
-                                            </td>
-
-                                        </tr>
-                                        <tr>
-                                                <td>limit</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-                                            <td>
-                                                    <code>10</code>
-                                            </td>
 
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServicesListResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1448,9 +1220,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>respondToServiceRequest</b></span>
                         <a href="#respondToServiceRequest"><span class="icon ion-ios-link"></span></a>
@@ -1460,7 +1229,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>respondToServiceRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, requestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, responseDto: <a href="../classes/RespondServiceRequestDto.html" target="_self">RespondServiceRequestDto</a>, req: literal type)</code>
+                    <code>respondToServiceRequest(params: <a href="../classes/ServiceRequestParamsDTO.html" target="_self">ServiceRequestParamsDTO</a>, dto: <a href="../classes/RespondServiceRequestRequestDTO.html" target="_self">RespondServiceRequestRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1468,14 +1237,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Put(&#x27;:id/requests/:requestId&#x27;)<br />@ApiOperation({summary: &#x27;Responder a una solicitud de servicio&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Solicitud respondida&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Solicitud no encontrada&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado para responder esta solicitud&#x27;})<br /></code>
+                    <code>@Put(&#x27;:id/requests/:requestId&#x27;)<br />@RespondToServiceRequestDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="231"
-                                    class="link-to-prism">src/api/services/services.controller.ts:231</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="194"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:194</a></div>
                         </td>
                     </tr>
 
@@ -1496,9 +1265,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>serviceId</td>
+                                                <td>params</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceRequestParamsDTO.html" target="_self" >ServiceRequestParamsDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1508,21 +1277,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>requestId</td>
+                                                <td>dto</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>responseDto</td>
-                                            <td>
-                                                            <code><a href="../classes/RespondServiceRequestDto.html" target="_self" >RespondServiceRequestDto</a></code>
+                                                            <code><a href="../classes/RespondServiceRequestRequestDTO.html" target="_self" >RespondServiceRequestRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1547,7 +1304,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceRequestDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1565,9 +1322,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>startService</b></span>
                         <a href="#startService"><span class="icon ion-ios-link"></span></a>
@@ -1577,7 +1331,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>startService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, req: literal type)</code>
+                    <code>startService(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1585,14 +1339,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/start&#x27;)<br />@ApiOperation({summary: &#x27;Iniciar un servicio (solo profesionales)&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Servicio iniciado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado o no es profesional&#x27;})<br /></code>
+                    <code>@Post(&#x27;:id/start&#x27;)<br />@StartServiceDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="170"
-                                    class="link-to-prism">src/api/services/services.controller.ts:170</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="154"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:154</a></div>
                         </td>
                     </tr>
 
@@ -1613,9 +1367,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1640,7 +1394,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1658,9 +1412,6 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>updateService</b></span>
                         <a href="#updateService"><span class="icon ion-ios-link"></span></a>
@@ -1670,7 +1421,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateServiceDto: <a href="../classes/UpdateServiceDto.html" target="_self">UpdateServiceDto</a>, req: literal type)</code>
+                    <code>updateService(param: <a href="../classes/ServiceIdParamDTO.html" target="_self">ServiceIdParamDTO</a>, dto: <a href="../classes/UpdateServiceRequestDTO.html" target="_self">UpdateServiceRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -1678,14 +1429,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Put(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar un servicio&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Servicio actualizado&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Servicio no encontrado&#x27;})<br />@ApiResponse({status: 403, description: &#x27;No autorizado para modificar este servicio&#x27;})<br /></code>
+                    <code>@Put(&#x27;:id&#x27;)<br />@UpdateServiceDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="119"
-                                    class="link-to-prism">src/api/services/services.controller.ts:119</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="121"
+                                    class="link-to-prism">src/api/services/controllers/services.controller.ts:121</a></div>
                         </td>
                     </tr>
 
@@ -1706,9 +1457,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/ServiceIdParamDTO.html" target="_self" >ServiceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1718,9 +1469,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>updateServiceDto</td>
+                                                <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/UpdateServiceDto.html" target="_self" >UpdateServiceDto</a></code>
+                                                            <code><a href="../classes/UpdateServiceRequestDTO.html" target="_self" >UpdateServiceRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -1745,7 +1496,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ServiceDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1770,26 +1521,46 @@
   Query,
   UseGuards,
   Request,
-  ParseUUIDPipe,
-  ParseFloatPipe,
 } from &#x27;@nestjs/common&#x27;;
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from &#x27;@nestjs/swagger&#x27;;
-import { JwtAuthGuard } from &#x27;../../modules/auth/guards/jwt-auth.guard&#x27;;
+import { ApiTags, ApiBearerAuth } from &#x27;@nestjs/swagger&#x27;;
+import { JwtAuthGuard } from &#x27;@auth/guards/jwt-auth.guard&#x27;;
 import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
-import { ServicesService } from &#x27;./services.service&#x27;;
-import { ServiceStatus } from &#x27;@prisma/client&#x27;;
+import { ServicesService } from &#x27;../services/services.service&#x27;;
 import {
-  CreateServiceDto,
-  UpdateServiceDto,
-  CreateServiceRequestDto,
-  RespondServiceRequestDto,
-} from &#x27;./dto&#x27;;
+  CreateServiceRequestDTO,
+  UpdateServiceRequestDTO,
+  CreateServiceRequestRequestDTO,
+  RespondServiceRequestRequestDTO,
+  CancelServiceRequestDTO,
+  ServiceIdParamDTO,
+  ServiceRequestParamsDTO,
+  GetServicesListQueryDTO,
+  GetNearbyServicesQueryDTO,
+  GetMyServicesQueryDTO,
+} from &#x27;../dtos/request&#x27;;
+import {
+  ServiceDetailResponseDTO,
+  ServicesListResponseDTO,
+  ServiceRequestDetailResponseDTO,
+  ServiceRequestsListResponseDTO,
+  ServiceStatsResponseDTO,
+} from &#x27;../dtos/response&#x27;;
+import {
+  CreateServiceDocs,
+  GetServicesDocs,
+  GetNearbyServicesDocs,
+  GetMyServicesDocs,
+  GetDashboardStatsDocs,
+  GetServiceByIdDocs,
+  UpdateServiceDocs,
+  CancelServiceDocs,
+  AcceptServiceDocs,
+  StartServiceDocs,
+  CompleteServiceDocs,
+  CreateServiceRequestDocs,
+  GetServiceRequestsDocs,
+  RespondToServiceRequestDocs,
+} from &#x27;../docs/services.docs&#x27;;
 
 @ApiTags(&#x27;services&#x27;)
 @Controller(&#x27;services&#x27;)
@@ -1799,228 +1570,150 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Post()
-  @ApiOperation({ summary: &#x27;Crear un nuevo servicio&#x27; })
-  @ApiResponse({ status: 201, description: &#x27;Servicio creado exitosamente&#x27; })
-  @ApiResponse({ status: 400, description: &#x27;Datos inválidos&#x27; })
-  @ApiResponse({ status: 401, description: &#x27;No autorizado&#x27; })
+  @CreateServiceDocs()
   async createService(
-    @Body() createServiceDto: CreateServiceDto,
+    @Body() dto: CreateServiceRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
-    return this.servicesService.createService(createServiceDto, req.user.id);
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.createService(dto, req.user.id);
   }
 
   @Get()
-  @ApiOperation({ summary: &#x27;Obtener lista de servicios con filtros&#x27; })
-  @ApiQuery({ name: &#x27;status&#x27;, enum: ServiceStatus, required: false })
-  @ApiQuery({ name: &#x27;categoryId&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;latitude&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;longitude&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;radius&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;page&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;limit&#x27;, required: false, type: Number })
-  @ApiResponse({ status: 200, description: &#x27;Lista de servicios obtenida&#x27; })
+  @GetServicesDocs()
   async getServices(
-    @Query(&#x27;status&#x27;) status?: ServiceStatus,
-    @Query(&#x27;categoryId&#x27;) categoryId?: string,
-    @Query(&#x27;latitude&#x27;) latitude?: number,
-    @Query(&#x27;longitude&#x27;) longitude?: number,
-    @Query(&#x27;radius&#x27;) radius?: number,
-    @Query(&#x27;page&#x27;) page: number &#x3D; 1,
-    @Query(&#x27;limit&#x27;) limit: number &#x3D; 10,
-  ) {
-    return this.servicesService.getServices({
-      status,
-      categoryId: categoryId ? Number(categoryId) : undefined,
-      latitude,
-      longitude,
-      radius,
-      page,
-      limit,
-    });
+    @Query() query: GetServicesListQueryDTO,
+  ): Promise&lt;ServicesListResponseDTO&gt; {
+    return this.servicesService.getServices(query);
   }
 
   @Get(&#x27;nearby&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener servicios cercanos por ubicación&#x27; })
-  @ApiQuery({ name: &#x27;latitude&#x27;, required: true, type: Number })
-  @ApiQuery({ name: &#x27;longitude&#x27;, required: true, type: Number })
-  @ApiQuery({ name: &#x27;radius&#x27;, required: false, type: Number })
-  @ApiQuery({ name: &#x27;categoryId&#x27;, required: false })
-  @ApiResponse({ status: 200, description: &#x27;Servicios cercanos obtenidos&#x27; })
+  @GetNearbyServicesDocs()
   async getNearbyServices(
-    @Query(&#x27;latitude&#x27;, ParseFloatPipe) latitude: number,
-    @Query(&#x27;longitude&#x27;, ParseFloatPipe) longitude: number,
-    @Query(&#x27;radius&#x27;) radius: number &#x3D; 10,
-    @Query(&#x27;categoryId&#x27;) categoryId?: string,
-  ) {
+    @Query() query: GetNearbyServicesQueryDTO,
+  ): Promise&lt;ServiceDetailResponseDTO[]&gt; {
     return this.servicesService.getNearbyServices(
-      latitude,
-      longitude,
-      Number(radius),
-      categoryId ? Number(categoryId) : undefined,
+      query.latitude,
+      query.longitude,
+      query.radius,
+      query.categoryId,
     );
   }
 
+  @Get(&#x27;my-services&#x27;)
+  @GetMyServicesDocs()
+  async getMyServices(
+    @Request() req: { user: IUserDataOnJwt },
+    @Query() query: GetMyServicesQueryDTO,
+  ): Promise&lt;ServiceDetailResponseDTO[]&gt; {
+    return this.servicesService.getMyServices(
+      req.user.id,
+      query.status,
+      query.role,
+    );
+  }
+
+  @Get(&#x27;dashboard/stats&#x27;)
+  @GetDashboardStatsDocs()
+  async getDashboardStats(
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ServiceStatsResponseDTO&gt; {
+    return this.servicesService.getDashboardStats(req.user.id);
+  }
+
   @Get(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener un servicio por ID&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Servicio encontrado&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  async getServiceById(@Param(&#x27;id&#x27;, ParseUUIDPipe) id: string) {
-    return this.servicesService.getServiceById(id);
+  @GetServiceByIdDocs()
+  async getServiceById(
+    @Param() param: ServiceIdParamDTO,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.getServiceById(param.id);
   }
 
   @Put(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Actualizar un servicio&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Servicio actualizado&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado para modificar este servicio&#x27;,
-  })
+  @UpdateServiceDocs()
   async updateService(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) id: string,
-    @Body() updateServiceDto: UpdateServiceDto,
+    @Param() param: ServiceIdParamDTO,
+    @Body() dto: UpdateServiceRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
-    return this.servicesService.updateService(
-      id,
-      updateServiceDto,
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.updateService(param.id, dto, req.user.id);
+  }
+
+  @Delete(&#x27;:id&#x27;)
+  @CancelServiceDocs()
+  async cancelService(
+    @Param() param: ServiceIdParamDTO,
+    @Body() dto: CancelServiceRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.cancelService(
+      param.id,
+      dto.reason,
       req.user.id,
     );
   }
 
-  @Delete(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Cancelar un servicio&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Servicio cancelado&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado para cancelar este servicio&#x27;,
-  })
-  async cancelService(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) id: string,
-    @Body(&#x27;reason&#x27;) reason: string,
-    @Request() req: { user: IUserDataOnJwt },
-  ) {
-    return this.servicesService.cancelService(id, reason, req.user.id);
-  }
-
   @Post(&#x27;:id/accept&#x27;)
-  @ApiOperation({ summary: &#x27;Aceptar un servicio (solo profesionales)&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Servicio aceptado&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado o no es profesional&#x27;,
-  })
+  @AcceptServiceDocs()
   async acceptService(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
-    return this.servicesService.acceptService(id, req.user.id);
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.acceptService(param.id, req.user.id);
   }
 
   @Post(&#x27;:id/start&#x27;)
-  @ApiOperation({ summary: &#x27;Iniciar un servicio (solo profesionales)&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Servicio iniciado&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado o no es profesional&#x27;,
-  })
+  @StartServiceDocs()
   async startService(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
-    return this.servicesService.startService(id, req.user.id);
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.startService(param.id, req.user.id);
   }
 
   @Post(&#x27;:id/complete&#x27;)
-  @ApiOperation({ summary: &#x27;Completar un servicio (solo profesionales)&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Servicio completado&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado o no es profesional&#x27;,
-  })
+  @CompleteServiceDocs()
   async completeService(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) id: string,
+    @Param() param: ServiceIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
-    return this.servicesService.completeService(id, req.user.id);
+  ): Promise&lt;ServiceDetailResponseDTO&gt; {
+    return this.servicesService.completeService(param.id, req.user.id);
   }
 
-  // Endpoints para solicitudes de servicio
   @Post(&#x27;:id/requests&#x27;)
-  @ApiOperation({
-    summary: &#x27;Crear una solicitud para un servicio (solo profesionales)&#x27;,
-  })
-  @ApiResponse({ status: 201, description: &#x27;Solicitud creada&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado o no es profesional&#x27;,
-  })
+  @CreateServiceRequestDocs()
   async createServiceRequest(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) serviceId: string,
-    @Body() requestDto: CreateServiceRequestDto,
+    @Param() param: ServiceIdParamDTO,
+    @Body() dto: CreateServiceRequestRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
+  ): Promise&lt;ServiceRequestDetailResponseDTO&gt; {
     return this.servicesService.createServiceRequest(
-      serviceId,
-      requestDto,
+      param.id,
+      dto,
       req.user.id,
     );
   }
 
   @Get(&#x27;:id/requests&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener solicitudes de un servicio&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Solicitudes obtenidas&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Servicio no encontrado&#x27; })
-  async getServiceRequests(@Param(&#x27;id&#x27;, ParseUUIDPipe) serviceId: string) {
-    return this.servicesService.getServiceRequests(serviceId);
+  @GetServiceRequestsDocs()
+  async getServiceRequests(
+    @Param() param: ServiceIdParamDTO,
+  ): Promise&lt;ServiceRequestsListResponseDTO&gt; {
+    return this.servicesService.getServiceRequests(param.id);
   }
 
   @Put(&#x27;:id/requests/:requestId&#x27;)
-  @ApiOperation({ summary: &#x27;Responder a una solicitud de servicio&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Solicitud respondida&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Solicitud no encontrada&#x27; })
-  @ApiResponse({
-    status: 403,
-    description: &#x27;No autorizado para responder esta solicitud&#x27;,
-  })
+  @RespondToServiceRequestDocs()
   async respondToServiceRequest(
-    @Param(&#x27;id&#x27;, ParseUUIDPipe) serviceId: string,
-    @Param(&#x27;requestId&#x27;, ParseUUIDPipe) requestId: string,
-    @Body() responseDto: RespondServiceRequestDto,
+    @Param() params: ServiceRequestParamsDTO,
+    @Body() dto: RespondServiceRequestRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
+  ): Promise&lt;ServiceRequestDetailResponseDTO&gt; {
     return this.servicesService.respondToServiceRequest(
-      serviceId,
-      requestId,
-      responseDto,
+      params.id,
+      params.requestId,
+      dto,
       req.user.id,
     );
-  }
-
-  @Get(&#x27;my-services&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener servicios del usuario autenticado&#x27; })
-  @ApiQuery({ name: &#x27;status&#x27;, enum: ServiceStatus, required: false })
-  @ApiQuery({ name: &#x27;role&#x27;, enum: [&#x27;client&#x27;, &#x27;professional&#x27;], required: false })
-  @ApiResponse({ status: 200, description: &#x27;Servicios del usuario obtenidos&#x27; })
-  async getMyServices(
-    @Request() req: { user: IUserDataOnJwt },
-    @Query(&#x27;status&#x27;) status?: ServiceStatus,
-    @Query(&#x27;role&#x27;) role?: &#x27;client&#x27; | &#x27;professional&#x27;,
-  ) {
-    return this.servicesService.getMyServices(req.user.id, status, role);
-  }
-
-  @Get(&#x27;dashboard/stats&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener estadísticas del dashboard&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Estadísticas obtenidas&#x27; })
-  async getDashboardStats(@Request() req: { user: IUserDataOnJwt }) {
-    return this.servicesService.getDashboardStats(req.user.id);
   }
 }
 </code></pre>

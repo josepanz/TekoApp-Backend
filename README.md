@@ -24,6 +24,7 @@
 
 Inspirada en la eficiencia logística de modelos como Uber o Bolt, pero adaptada al sector de servicios profesionales:
 
+TekoApp ofrece:
 - **Doble Rol:** Una sola cuenta permite operar como Cliente o Profesional indistintamente.
 - **Tracking en Tiempo Real:** Geolocalización y telemetría de profesionales disponibles con índices `2dsphere`.
 - **Reputación Bidireccional:** Calificaciones mutuas para garantizar confianza entre ambas partes.
@@ -32,12 +33,25 @@ Inspirada en la eficiencia logística de modelos como Uber o Bolt, pero adaptada
 
 ---
 
-## El nombre "Teko"
+## ♟️ El poder detrás del nombre "Teko"
 
-| Idioma | Escritura | Significado | Simbolismo |
-|--------|-----------|-------------|------------|
-| **Guaraní** | Teko | *"Vida / Estilo de vida"* | Mejorar el día a día conectando comunidad |
-| **Japonés** | テコ | *"Palanca"* | Apalancamiento tecnológico que multiplica oportunidades |
+El nombre de nuestra plataforma fusiona dos conceptos culturales poderosos que definen nuestra misión:
+
+| Idioma   | Escritura | Significado        | Simbolismo en la Arquitectura de la App                  |
+|----------|-----------|--------------------|----------------------------------------------------------|
+| **Guaraní**  | Teko      | *"Vida / Estilo"*  | Representa nuestra misión de mejorar el día a día y conectar a la comunidad. |
+| **Japonés**  | テコ      | *"Palanca"*        | Simboliza el apalancamiento tecnológico; somos la herramienta que multiplica las oportunidades. |
+
+1. **En guaraní**: El nombre "Teko" proviene del guaraní y significa "vida" o "estilo de vida", representando nuestra misión de mejorar la vida de las personas conectándolas con los mejores profesionales.
+   - Significa *"vida" o "estilo de vida"*, representando nuestra misión de mejorar el día a día de las personas.
+   - Representa la conexión entre los profesionales y los clientes.
+   - Evoca un sentido de comunidad y bienestar.
+3. **En japonés (テコ)**: Significa *"palanca"*, simbolizando cómo nuestra app sirve como herramienta para **conectar y potenciar** oportunidades entre profesionales y clientes, lo que añade un significado poderoso y simbólico reforzando el concepto de conexión y facilitación de servicios.
+   - Escritura japonesa: テコ (katakana) / 梃子 (kanji menos común).
+   - Significado:
+     - Palanca (herramienta física que multiplica fuerza).
+     - Apalancamiento (en contexto figurado: "ser un puente" o "facilitador").
+     - Uso: Es una palabra reconocida en japonés, aunque no es de uso cotidiano (se usa más en contextos técnicos/mecánicos).
 
 ---
 
@@ -52,6 +66,8 @@ Inspirada en la eficiencia logística de modelos como Uber o Bolt, pero adaptada
 ---
 
 ## Arquitectura del Backend
+
+El backend de TekoApp está construido bajo principios estrictos de **Clean Architecture** y **Domain-Driven Design (DDD)**. 
 
 El backend impone una frontera rígida entre la capa HTTP y la de persistencia.
 

@@ -164,6 +164,8 @@
                                 <a href="#amount" >amount</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#currencyCode" >currencyCode</a>
                             </li>
                             <li>
@@ -291,6 +293,8 @@
                 <td class="col-md-4">
                     <a name="currencyCode"></a>
                     <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>currencyCode</b></span>
                         <a href="#currencyCode"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -302,9 +306,18 @@
 
                     </td>
                 </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <b>Decorators : </b>
+                        <br />
+                        <code>
+                            @ApiProperty({description: &#x27;Código de moneda ISO 4217&#x27;, example: &#x27;USD&#x27;})<br />@IsString()<br />
+                        </code>
+                    </td>
+                </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="236" class="link-to-prism">src/api/payments/dtos/request/create-payment.dto.ts:236</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="233" class="link-to-prism">src/api/payments/dtos/request/create-payment.dto.ts:233</a></div>
                         </td>
                     </tr>
 
@@ -420,7 +433,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="234" class="link-to-prism">src/api/payments/dtos/request/create-payment.dto.ts:234</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="241" class="link-to-prism">src/api/payments/dtos/request/create-payment.dto.ts:241</a></div>
                         </td>
                     </tr>
 
@@ -933,14 +946,19 @@ export class CreatePaymentDto {
   recurringInterval?: string;
 
   @ApiProperty({
+    description: &#x27;Código de moneda ISO 4217&#x27;,
+    example: &#x27;USD&#x27;,
+  })
+  @IsString()
+  currencyCode!: string;
+
+  @ApiProperty({
     description: &#x27;Metadatos adicionales&#x27;,
     example: { platform: &#x27;mobile&#x27;, appVersion: &#x27;1.2.0&#x27; },
     required: false,
   })
   @IsOptional()
   metadata?: Record&lt;string, unknown&gt;;
-
-  currencyCode: string;
 }
 </code></pre>
     </div>
