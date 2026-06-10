@@ -16,10 +16,12 @@
       {
         "preset": "conventionalcommits",
         "releaseRules": [
-          { "type": "fix", "release": "patch" },
+          { "breaking": true, "release": "major" },
           { "type": "feat", "release": "minor" },
-          { "type": "docs", "release": "patch" },
           { "type": "refactor", "release": "minor" },
+          { "type": "fix", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "docs", "release": "patch" },
           { "type": "ci", "release": "patch" }
         ],
         "parserOpts": {
@@ -27,7 +29,33 @@
         }
       }
     ],
-    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits",
+        "parserOpts": {
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BC"]
+        },
+        "writerOpts": {
+          "groupBy": "type",
+          "commitGroupsSort": ["feat", "fix", "perf", "refactor", "docs", "ci"],
+          "commitsSort": ["scope", "subject"]
+        },
+        "presetConfig": {
+          "types": [
+            { "type": "feat",     "section": "Features" },
+            { "type": "fix",      "section": "Bug Fixes" },
+            { "type": "perf",     "section": "Performance" },
+            { "type": "refactor", "section": "Refactoring" },
+            { "type": "docs",     "section": "Documentation" },
+            { "type": "ci",       "section": "CI/CD" },
+            { "type": "chore",    "hidden": true },
+            { "type": "test",     "hidden": true },
+            { "type": "style",    "hidden": true }
+          ]
+        }
+      }
+    ],
     "@semantic-release/changelog",
     [
       "@semantic-release/npm",
