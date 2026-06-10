@@ -8,6 +8,7 @@ import { ObservabilityInterceptor } from '@/core/interceptors/observability.inte
 import { TraceIdMiddleware } from '@/core/middlewares/trace-id.middleware';
 import { ObservabilityModule } from '@/modules/observability/observability.module';
 import { ApiModule } from '@/api/api.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ApiModule } from '@/api/api.module';
       envFilePath: ['.env.local', '.env'],
       load: [APP_CONFIG],
     }),
+    HealthModule,
     ScheduleModule.forRoot(),
     DatabaseModule,
     ApiModule,

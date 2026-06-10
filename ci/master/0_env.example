@@ -1,0 +1,56 @@
+# =============================================================
+# Variables de entorno — Ambiente PRODUCTION (master)
+# Estas claves deben existir en Vault bajo:
+#   project/data/prod/tekoapp-backend-configmap
+# =============================================================
+
+# Aplicación
+NODE_ENV=production
+PORT=3000
+APP_URL=https://tekoapp.com.py
+
+# Base de datos PostgreSQL
+DATABASE_URL=postgresql://user:password@prod-db-host:5432/tekoapp
+
+# MongoDB (notificaciones)
+MONGODB_URI=mongodb://user:password@prod-mongo-host:27017/tekoapp
+
+# Redis (colas Bull / caché)
+REDIS_HOST=prod-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=redis_password
+
+# JWT
+JWT_SECRET=prod_jwt_secret_min_32_chars
+JWT_REFRESH_SECRET=prod_refresh_secret_min_32_chars
+JWT_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+# Stripe
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Firebase (notificaciones push)
+FIREBASE_PROJECT_ID=tekoapp-prod
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@tekoapp-prod.iam.gserviceaccount.com
+
+# Twilio (SMS)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_PHONE_NUMBER=+1234567890
+
+# AWS S3
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=tekoapp-prod-storage
+
+# Google Maps
+GOOGLE_MAPS_API_KEY=AIzaSy...
+
+# Email (SMTP)
+SMTP_HOST=smtp.mail.example.com
+SMTP_PORT=587
+SMTP_USER=no-reply@tekoapp.com.py
+SMTP_PASS=smtp_password

@@ -1,4 +1,33 @@
 dist/
 node_modules/
+
+# Entorno y secretos — nunca en imagen
+.env
+.env.*
+!.env.example
+
+# Git e infra
+.git/
+.github/
+.gitignore
+.husky/
+
+# Backups y temporales
+*.bak
+*.log
+*.tmp
+
+# Dev tooling
 .vscode/
 .turbo/
+.claude/
+
+# Tests y documentación (no necesarios en producción)
+test/
+docs/
+uploads/
+
+# Archivos de documentación
+*.md
+CHANGELOG.md
+README.md
