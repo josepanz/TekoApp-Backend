@@ -7,6 +7,16 @@ on:
     branches: [develop, qa, master]
     types: [opened, synchronize, reopened]
   workflow_dispatch:
+    inputs:
+      ambiente:
+        description: 'Ambiente de despliegue'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - qa
+          - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
