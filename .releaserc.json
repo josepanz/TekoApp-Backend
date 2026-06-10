@@ -16,26 +16,11 @@
       {
         "preset": "conventionalcommits",
         "releaseRules": [
-          {
-            "type": "fix",
-            "release": "patch"
-          },
-          {
-            "type": "feat",
-            "release": "minor"
-          },
-          {
-            "type": "docs",
-            "release": "patch"
-          },
-          {
-            "type": "refactor",
-            "release": "minor"
-          },
-          {
-            "type": "ci",
-            "release": "patch"
-          }
+          { "type": "fix",      "release": "patch" },
+          { "type": "feat",     "release": "minor" },
+          { "type": "docs",     "release": "patch" },
+          { "type": "refactor", "release": "minor" },
+          { "type": "ci",       "release": "patch" }
         ],
         "parserOpts": {
           "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BC"]
@@ -44,12 +29,16 @@
     ],
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "./scripts/replace-version.sh ${nextRelease.version} ${branch.name} 1_deployment.yml",
-        "publishCmd": "./scripts/deploy.sh ${nextRelease.version} ${branch.name} ${lastRelease.version}"
+        "prepareCmd": "./scripts/replace-version.sh ${nextRelease.version} ${branch.name} 1_deployment.yml"
       }
     ],
     [
@@ -60,15 +49,12 @@
           "package.json",
           "pnpm-lock.yaml",
           "ci/develop/1_deployment.yml",
-          "ci/develop/1_deployment.yml.bak",
           "ci/qa/1_deployment.yml",
-          "ci/qa/1_deployment.yml.bak",
-          "ci/master/1_deployment.yml",
-          "ci/master/1_deployment.yml.bak"
+          "ci/master/1_deployment.yml"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]"
       }
     ],
-    "@semantic-release/gitlab"
+    "@semantic-release/github"
   ]
 }

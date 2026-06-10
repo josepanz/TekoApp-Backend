@@ -10,6 +10,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // 1. ESTABLECER PREFIJO GLOBAL (Es crítico que sea lo primero para estructurar las rutas base)
+  app.enableVersioning();
   app.setGlobalPrefix('/tekoapp-backend/api');
 
   // 2. Configuración de middleware global y seguridad (Helmet, CORS, Redis-Rate-Limit)
