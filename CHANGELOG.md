@@ -1,0 +1,17 @@
+# 1.0.0-develop.1 (2026-06-10)
+
+
+### Features
+
+* dto reestructure and fee calculator ([c51e2c2](https://github.com/josepanz/TekoApp-Backend/commit/c51e2c2da100f3151a81b93dad5537af2ee3ccba))
+* fix build startup and eslint any cleanup ([a5fd275](https://github.com/josepanz/TekoApp-Backend/commit/a5fd2754b59ed566a4bf2d5da12411fe47e1ec4f))
+* github ci/cd configuration ([#4](https://github.com/josepanz/TekoApp-Backend/issues/4)) ([404bf43](https://github.com/josepanz/TekoApp-Backend/commit/404bf43f91741a3293bfb94025707f7ff3e93cb0)), closes [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+* github ci/cd configuration 2 ([#5](https://github.com/josepanz/TekoApp-Backend/issues/5)) ([3cc40ba](https://github.com/josepanz/TekoApp-Backend/commit/3cc40ba85f29f334c65e300eac0f28f478423d61)), closes [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+* improve readme and files ([95d4d11](https://github.com/josepanz/TekoApp-Backend/commit/95d4d11740a2d6a1a29ebbd9a0429f85c2b05d63))
+* improve redis and some errors ([3db998b](https://github.com/josepanz/TekoApp-Backend/commit/3db998b0fae776b5a4e9a3ec508f45aa12ba52cb))
+* improves, all tests, no pendings ([09abdfe](https://github.com/josepanz/TekoApp-Backend/commit/09abdfe58a90c214ae7ebe2d011ab228d282c514))
+* initial arquitecture and modules ([3f65553](https://github.com/josepanz/TekoApp-Backend/commit/3f655531ddbba99cef21bac695147588b3c9b193))
+* initial arquitecture and modules ([#1](https://github.com/josepanz/TekoApp-Backend/issues/1)) ([a3ddc24](https://github.com/josepanz/TekoApp-Backend/commit/a3ddc240e4833a40d4e2bee8da4bfbdc06d00b43))
+* professionals api and modules db reestructure ([31cfaba](https://github.com/josepanz/TekoApp-Backend/commit/31cfabad8c8fa1905a308120d289cfde582ec909))
+* refactor 1 ([9039ec5](https://github.com/josepanz/TekoApp-Backend/commit/9039ec5dd8a80e4878763dd5909de7162725a9f6))
+* test, migration db module ([3736299](https://github.com/josepanz/TekoApp-Backend/commit/37362995491fa9c6ef4286947ce33651a2bf4583))
