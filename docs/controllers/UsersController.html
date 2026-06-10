@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/modules/users/users.controller.ts</code>
+            <code>src/api/users/controllers/users.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -161,8 +161,9 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#activate" >activate</a>
+                                <a href="#block" >block</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -170,16 +171,11 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#create" >create</a>
+                                <a href="#deleteByReference" >deleteByReference</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#deactivate" >deactivate</a>
-                            </li>
-                            <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
@@ -191,6 +187,7 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#findOne" >findOne</a>
                             </li>
@@ -198,8 +195,19 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#getCount" >getCount</a>
+                                <a href="#findOneByReference" >findOneByReference</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#getEditContext" >getEditContext</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -207,7 +215,7 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#remove" >remove</a>
+                                <a href="#unblock" >unblock</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -221,15 +229,18 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#verifyEmail" >verifyEmail</a>
+                                <a href="#updateByReference" >updateByReference</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#verifyPhone" >verifyPhone</a>
+                                <a href="#updateEditContext" >updateEditContext</a>
                             </li>
                         </ul>
                     </td>
@@ -252,21 +263,22 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="activate"></a>
+                    <a name="block"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>activate</b></span>
-                        <a href="#activate"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>block</b></span>
+                        <a href="#block"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>activate(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>block(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/BlockUserRequestDTO.html" target="_self">DTO.BlockUserRequestDTO</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
@@ -274,14 +286,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/activate&#x27;)<br />@ApiOperation({summary: &#x27;Activar usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Usuario activado exitosamente&#x27;})<br /></code>
+                    <code>@Patch(&#x27;:id/block&#x27;)<br />@Version(&#x27;1&#x27;)<br />@Permissions(undefined.UPDATE, undefined.ALL)<br />@UsersDocs(&#x27;block&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="103"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:103</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="149"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:149</a></div>
                         </td>
                     </tr>
 
@@ -304,7 +316,31 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/BlockUserRequestDTO.html" target="_self" >DTO.BlockUserRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#User" target="_self" >Users</a></code>
                                             </td>
 
                                             <td>
@@ -317,7 +353,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UserResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -331,22 +367,22 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="create"></a>
+                    <a name="deleteByReference"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>create</b></span>
-                        <a href="#create"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>deleteByReference</b></span>
+                        <a href="#deleteByReference"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>create(createUserDto: <a href="../classes/CreateUserDto.html" target="_self">CreateUserDto</a>)</code>
+                    <code>deleteByReference(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
@@ -354,14 +390,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@ApiOperation({summary: &#x27;Crear nuevo usuario&#x27;})<br />@ApiResponse({status: 201, description: &#x27;Usuario creado exitosamente&#x27;})<br />@ApiResponse({status: 400, description: &#x27;Datos inválidos&#x27;})<br /></code>
+                    <code>@Delete(&#x27;reference/:referenceId&#x27;)<br />@Version(&#x27;1&#x27;)<br />@Permissions(undefined.DELETE, undefined.ALL)<br />@UsersDocs(&#x27;deleteByReference&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="34"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:34</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="115"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:115</a></div>
                         </td>
                     </tr>
 
@@ -382,86 +418,7 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>createUserDto</td>
-                                            <td>
-                                                            <code><a href="../classes/CreateUserDto.html" target="_self" >CreateUserDto</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="deactivate"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>deactivate</b></span>
-                        <a href="#deactivate"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deactivate(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@Post(&#x27;:id/deactivate&#x27;)<br />@ApiOperation({summary: &#x27;Desactivar usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Usuario desactivado exitosamente&#x27;})<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="96"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:96</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>id</td>
+                                                <td>referenceId</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
@@ -472,11 +429,23 @@
 
 
                                         </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#User" target="_self" >Users</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -495,6 +464,8 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findAll</b></span>
                         <a href="#findAll"><span class="icon ion-ios-link"></span></a>
@@ -504,7 +475,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findAll()</code>
+                    <code>findAll(query: <a href="../classes/ListUsersRequestDTO.html" target="_self">DTO.ListUsersRequestDTO</a>, merchantCtx: <a href="../interfaces/IMerchantContext.html" target="_self">IMerchantContext</a>, user: <a href="../interfaces/IUserDataOnJwt.html" target="_self">IUserDataOnJwt</a>)</code>
                 </td>
             </tr>
 
@@ -512,14 +483,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@ApiOperation({summary: &#x27;Obtener todos los usuarios&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Lista de usuarios obtenida exitosamente&#x27;})<br /></code>
+                    <code>@Get()<br />@Version(&#x27;1&#x27;)<br />@UseGuards(MerchantContextGuard)<br />@Permissions(undefined.READ, undefined.ALL)<br />@UsersDocs(&#x27;findAll&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="44"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:44</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="48"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:48</a></div>
                         </td>
                     </tr>
 
@@ -527,10 +498,64 @@
             <tr>
                 <td class="col-md-4">
 
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>query</td>
+                                            <td>
+                                                            <code><a href="../classes/ListUsersRequestDTO.html" target="_self" >DTO.ListUsersRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>merchantCtx</td>
+                                            <td>
+                                                            <code><a href="../interfaces/IMerchantContext.html" target="_self" >IMerchantContext</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../interfaces/IUserDataOnJwt.html" target="_self" >IUserDataOnJwt</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UsersListResponseDTO&gt;</a></code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -545,6 +570,7 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>findOne</b></span>
                         <a href="#findOne"><span class="icon ion-ios-link"></span></a>
@@ -554,7 +580,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -562,14 +588,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Obtener usuario por ID&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Usuario obtenido exitosamente&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Usuario no encontrado&#x27;})<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseGuards(MerchantContextGuard)<br />@Permissions(undefined.READ, undefined.ALL)<br />@UsersDocs(&#x27;findOne&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="59"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:59</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="127"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:127</a></div>
                         </td>
                     </tr>
 
@@ -592,7 +618,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -605,7 +631,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UserResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -619,21 +645,23 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getCount"></a>
+                    <a name="findOneByReference"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>getCount</b></span>
-                        <a href="#getCount"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>findOneByReference</b></span>
+                        <a href="#findOneByReference"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getCount()</code>
+                    <code>findOneByReference(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -641,14 +669,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;count&#x27;)<br />@ApiOperation({summary: &#x27;Obtener conteo de usuarios&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Conteo obtenido exitosamente&#x27;})<br /></code>
+                    <code>@Get(&#x27;reference/:referenceId&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseGuards(MerchantContextGuard)<br />@Permissions(undefined.READ, undefined.ALL)<br />@UsersDocs(&#x27;findOneByReference&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="51"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:51</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="89"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:89</a></div>
                         </td>
                     </tr>
 
@@ -656,10 +684,40 @@
             <tr>
                 <td class="col-md-4">
 
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UserResponseDTO&gt;</a></code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -668,22 +726,23 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="remove"></a>
+                    <a name="getEditContext"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>remove</b></span>
-                        <a href="#remove"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>getEditContext</b></span>
+                        <a href="#getEditContext"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getEditContext(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -691,14 +750,94 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Eliminar usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Usuario eliminado exitosamente&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Usuario no encontrado&#x27;})<br /></code>
+                    <code>@Get(&#x27;reference/:referenceId/edit-context&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseGuards(MerchantContextGuard)<br />@Permissions(undefined.READ, undefined.ALL)<br />@UsersDocs(&#x27;getEditContext&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="75"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:75</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="61"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:61</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;GetEditContextResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="unblock"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>unblock</b></span>
+                        <a href="#unblock"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>unblock(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UnblockUserRequestDTO.html" target="_self">DTO.UnblockUserRequestDTO</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Patch(&#x27;:id/unblock&#x27;)<br />@Version(&#x27;1&#x27;)<br />@Permissions(undefined.UPDATE, undefined.ALL)<br />@UsersDocs(&#x27;unblock&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="161"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:161</a></div>
                         </td>
                     </tr>
 
@@ -721,7 +860,31 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/UnblockUserRequestDTO.html" target="_self" >DTO.UnblockUserRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#User" target="_self" >Users</a></code>
                                             </td>
 
                                             <td>
@@ -734,7 +897,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UserResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -763,7 +926,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updateUserDto: <a href="../classes/UpdateUserDto.html" target="_self">UpdateUserDto</a>)</code>
+                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UpdateUserRequestDTO.html" target="_self">DTO.UpdateUserRequestDTO</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
@@ -771,14 +934,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Patch(&#x27;:id&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Usuario actualizado exitosamente&#x27;})<br />@ApiResponse({status: 404, description: &#x27;Usuario no encontrado&#x27;})<br /></code>
+                    <code>@Put(&#x27;:id&#x27;)<br />@Version(&#x27;1&#x27;)<br />@Permissions(undefined.UPDATE, undefined.ALL)<br />@UsersDocs(&#x27;update&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="67"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:67</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="137"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:137</a></div>
                         </td>
                     </tr>
 
@@ -801,7 +964,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -811,9 +974,21 @@
 
                                         </tr>
                                         <tr>
-                                                <td>updateUserDto</td>
+                                                <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/UpdateUserDto.html" target="_self" >UpdateUserDto</a></code>
+                                                            <code><a href="../classes/UpdateUserRequestDTO.html" target="_self" >DTO.UpdateUserRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#User" target="_self" >Users</a></code>
                                             </td>
 
                                             <td>
@@ -826,7 +1001,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UserResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -840,21 +1015,22 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="verifyEmail"></a>
+                    <a name="updateByReference"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>verifyEmail</b></span>
-                        <a href="#verifyEmail"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>updateByReference</b></span>
+                        <a href="#updateByReference"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>verifyEmail(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>updateByReference(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdateUserRequestDTO.html" target="_self">DTO.UpdateUserRequestDTO</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
@@ -862,14 +1038,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/verify-email&#x27;)<br />@ApiOperation({summary: &#x27;Verificar email del usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Email verificado exitosamente&#x27;})<br /></code>
+                    <code>@Put(&#x27;reference/:referenceId&#x27;)<br />@Version(&#x27;1&#x27;)<br />@Permissions(undefined.UPDATE, undefined.ALL)<br />@UsersDocs(&#x27;updateByReference&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="82"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:82</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="99"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:99</a></div>
                         </td>
                     </tr>
 
@@ -890,9 +1066,33 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>referenceId</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateUserRequestDTO.html" target="_self" >DTO.UpdateUserRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#User" target="_self" >Users</a></code>
                                             </td>
 
                                             <td>
@@ -905,7 +1105,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.UserResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -919,21 +1119,23 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="verifyPhone"></a>
+                    <a name="updateEditContext"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>verifyPhone</b></span>
-                        <a href="#verifyPhone"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>updateEditContext</b></span>
+                        <a href="#updateEditContext"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>verifyPhone(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>updateEditContext(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdateEditContextRequestDTO.html" target="_self">UpdateEditContextRequestDTO</a>, operatorUser: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
@@ -941,14 +1143,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;:id/verify-phone&#x27;)<br />@ApiOperation({summary: &#x27;Verificar teléfono del usuario&#x27;})<br />@ApiResponse({status: 200, description: &#x27;Teléfono verificado exitosamente&#x27;})<br /></code>
+                    <code>@Put(&#x27;reference/:referenceId/edit-context&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseGuards(MerchantContextGuard)<br />@Permissions(undefined.UPDATE, undefined.ALL)<br />@UsersDocs(&#x27;updateEditContext&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="89"
-                                    class="link-to-prism">src/modules/users/users.controller.ts:89</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="72"
+                                    class="link-to-prism">src/api/users/controllers/users.controller.ts:72</a></div>
                         </td>
                     </tr>
 
@@ -969,9 +1171,33 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>referenceId</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateEditContextRequestDTO.html" target="_self" >UpdateEditContextRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>operatorUser</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/variables.html#User" target="_self" >Users</a></code>
                                             </td>
 
                                             <td>
@@ -984,7 +1210,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;UpdateEditContextResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -998,110 +1224,172 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Users } from &#x27;@prisma/client&#x27;;
+import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
-  Delete,
+  Put,
+  Query,
+  Version,
   UseGuards,
+  Delete,
+  ParseIntPipe,
 } from &#x27;@nestjs/common&#x27;;
+import { ApiTags, ApiBearerAuth } from &#x27;@nestjs/swagger&#x27;;
+
+import { UsersApiService } from &#x27;@api/users/services/users-api.service&#x27;;
+import * as DTO from &#x27;@api/users/dtos&#x27;;
+import { UsersDocs } from &#x27;@api/users/docs/users-api.docs&#x27;;
+
+import { PermissionsGuard } from &#x27;@modules/auth/guards/permissions.guard&#x27;;
+import { JwtAuthGuard } from &#x27;@modules/auth/guards/jwt-auth.guard&#x27;;
+import { MerchantContextGuard } from &#x27;@modules/auth/guards/merchant-context.guard&#x27;;
+import { Permissions } from &#x27;@common/decorators/permissions.decorator&#x27;;
+import { User } from &#x27;@common/decorators/user.decorator&#x27;;
+import { MerchantContext } from &#x27;@modules/auth/decorators/get-merchant-context.decorator&#x27;;
+import { IMerchantContext } from &#x27;@common/interfaces/merchant-context.interface&#x27;;
+import { PERMISSIONS } from &#x27;@common/enum/permissions.enum&#x27;;
+import { UpdateEditContextRequestDTO } from &#x27;@api/users/dtos/request/edit-context.request.dto&#x27;;
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from &#x27;@nestjs/swagger&#x27;;
+  GetEditContextResponseDTO,
+  UpdateEditContextResponseDTO,
+} from &#x27;@api/users/dtos/response/edit-context.response.dto&#x27;;
+import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
 
-import { UsersService } from &#x27;./users.service&#x27;;
-import { CreateUserDto } from &#x27;./dto/create-user.dto&#x27;;
-import { UpdateUserDto } from &#x27;./dto/update-user.dto&#x27;;
-import { JwtAuthGuard } from &#x27;../auth/guards/jwt-auth.guard&#x27;;
-
-@ApiTags(&#x27;users&#x27;)
-@Controller(&#x27;users&#x27;)
-@UseGuards(JwtAuthGuard)
+@ApiTags(&#x27;Users&#x27;)
 @ApiBearerAuth()
+@Controller(&#x27;users&#x27;)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  @ApiOperation({ summary: &#x27;Crear nuevo usuario&#x27; })
-  @ApiResponse({ status: 201, description: &#x27;Usuario creado exitosamente&#x27; })
-  @ApiResponse({ status: 400, description: &#x27;Datos inválidos&#x27; })
-  async create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  constructor(private readonly usersApiService: UsersApiService) {}
 
   @Get()
-  @ApiOperation({ summary: &#x27;Obtener todos los usuarios&#x27; })
-  @ApiResponse({
-    status: 200,
-    description: &#x27;Lista de usuarios obtenida exitosamente&#x27;,
-  })
-  async findAll() {
-    return this.usersService.findAll();
+  @Version(&#x27;1&#x27;)
+  @UseGuards(MerchantContextGuard)
+  @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;findAll&#x27;)
+  async findAll(
+    @Query() query: DTO.ListUsersRequestDTO,
+    @MerchantContext() merchantCtx: IMerchantContext,
+    @User() user: IUserDataOnJwt,
+  ): Promise&lt;DTO.UsersListResponseDTO&gt; {
+    return await this.usersApiService.findAll(query, merchantCtx, user);
   }
 
-  @Get(&#x27;count&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener conteo de usuarios&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Conteo obtenido exitosamente&#x27; })
-  async getCount() {
-    return this.usersService.getUsersCount();
+  @Get(&#x27;reference/:referenceId/edit-context&#x27;)
+  @Version(&#x27;1&#x27;)
+  @UseGuards(MerchantContextGuard)
+  @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;getEditContext&#x27;)
+  async getEditContext(
+    @Param(&#x27;referenceId&#x27;) referenceId: string,
+  ): Promise&lt;GetEditContextResponseDTO&gt; {
+    return await this.usersApiService.getEditContext(referenceId);
+  }
+
+  @Put(&#x27;reference/:referenceId/edit-context&#x27;)
+  @Version(&#x27;1&#x27;)
+  @UseGuards(MerchantContextGuard)
+  @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;updateEditContext&#x27;)
+  async updateEditContext(
+    @Param(&#x27;referenceId&#x27;) referenceId: string,
+    @Body() dto: UpdateEditContextRequestDTO,
+    @User() operatorUser: Users,
+  ): Promise&lt;UpdateEditContextResponseDTO&gt; {
+    return await this.usersApiService.updateEditContext(
+      referenceId,
+      dto,
+      operatorUser,
+    );
+  }
+
+  @Get(&#x27;reference/:referenceId&#x27;)
+  @Version(&#x27;1&#x27;)
+  @UseGuards(MerchantContextGuard)
+  @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;findOneByReference&#x27;)
+  async findOneByReference(
+    @Param(&#x27;referenceId&#x27;) referenceId: string,
+  ): Promise&lt;DTO.UserResponseDTO&gt; {
+    return await this.usersApiService.findOneByReference(referenceId);
+  }
+
+  @Put(&#x27;reference/:referenceId&#x27;)
+  @Version(&#x27;1&#x27;)
+  @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;updateByReference&#x27;)
+  async updateByReference(
+    @Param(&#x27;referenceId&#x27;) referenceId: string,
+    @Body() dto: DTO.UpdateUserRequestDTO,
+    @User() user: Users,
+  ): Promise&lt;DTO.UserResponseDTO&gt; {
+    return await this.usersApiService.updateByReference(
+      referenceId,
+      dto,
+      user.email,
+    );
+  }
+
+  @Delete(&#x27;reference/:referenceId&#x27;)
+  @Version(&#x27;1&#x27;)
+  @Permissions(PERMISSIONS.USER.DELETE, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;deleteByReference&#x27;)
+  async deleteByReference(
+    @Param(&#x27;referenceId&#x27;) referenceId: string,
+    @User() user: Users,
+  ): Promise&lt;void&gt; {
+    await this.usersApiService.deleteByReference(referenceId, user.email);
   }
 
   @Get(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Obtener usuario por ID&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Usuario obtenido exitosamente&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Usuario no encontrado&#x27; })
-  async findOne(@Param(&#x27;id&#x27;) id: string) {
-    return this.usersService.findOne(id);
+  @Version(&#x27;1&#x27;)
+  @UseGuards(MerchantContextGuard)
+  @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;findOne&#x27;)
+  async findOne(
+    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
+  ): Promise&lt;DTO.UserResponseDTO&gt; {
+    return await this.usersApiService.findOne(id);
   }
 
-  @Patch(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Actualizar usuario&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Usuario actualizado exitosamente&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Usuario no encontrado&#x27; })
-  async update(@Param(&#x27;id&#x27;) id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  @Put(&#x27;:id&#x27;)
+  @Version(&#x27;1&#x27;)
+  @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;update&#x27;)
+  async update(
+    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
+    @Body() dto: DTO.UpdateUserRequestDTO,
+    @User() user: Users,
+  ): Promise&lt;DTO.UserResponseDTO&gt; {
+    return await this.usersApiService.update(id, dto, user.email);
   }
 
-  @Delete(&#x27;:id&#x27;)
-  @ApiOperation({ summary: &#x27;Eliminar usuario&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Usuario eliminado exitosamente&#x27; })
-  @ApiResponse({ status: 404, description: &#x27;Usuario no encontrado&#x27; })
-  async remove(@Param(&#x27;id&#x27;) id: string) {
-    return this.usersService.remove(id);
+  @Patch(&#x27;:id/block&#x27;)
+  @Version(&#x27;1&#x27;)
+  @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;block&#x27;)
+  async block(
+    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
+    @Body() dto: DTO.BlockUserRequestDTO,
+    @User() user: Users,
+  ): Promise&lt;DTO.UserResponseDTO&gt; {
+    return await this.usersApiService.block(id, dto, user.email);
   }
 
-  @Post(&#x27;:id/verify-email&#x27;)
-  @ApiOperation({ summary: &#x27;Verificar email del usuario&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Email verificado exitosamente&#x27; })
-  async verifyEmail(@Param(&#x27;id&#x27;) id: string) {
-    return this.usersService.verifyEmail(id);
-  }
-
-  @Post(&#x27;:id/verify-phone&#x27;)
-  @ApiOperation({ summary: &#x27;Verificar teléfono del usuario&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Teléfono verificado exitosamente&#x27; })
-  async verifyPhone(@Param(&#x27;id&#x27;) id: string) {
-    return this.usersService.verifyPhone(id);
-  }
-
-  @Post(&#x27;:id/deactivate&#x27;)
-  @ApiOperation({ summary: &#x27;Desactivar usuario&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Usuario desactivado exitosamente&#x27; })
-  async deactivate(@Param(&#x27;id&#x27;) id: string) {
-    return this.usersService.deactivate(id);
-  }
-
-  @Post(&#x27;:id/activate&#x27;)
-  @ApiOperation({ summary: &#x27;Activar usuario&#x27; })
-  @ApiResponse({ status: 200, description: &#x27;Usuario activado exitosamente&#x27; })
-  async activate(@Param(&#x27;id&#x27;) id: string) {
-    return this.usersService.activate(id);
+  @Patch(&#x27;:id/unblock&#x27;)
+  @Version(&#x27;1&#x27;)
+  @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
+  @UsersDocs(&#x27;unblock&#x27;)
+  async unblock(
+    @Param(&#x27;id&#x27;, ParseIntPipe) id: number,
+    @Body() dto: DTO.UnblockUserRequestDTO,
+    @User() user: Users,
+  ): Promise&lt;DTO.UserResponseDTO&gt; {
+    return await this.usersApiService.unblock(id, dto, user.email);
   }
 }
 </code></pre>

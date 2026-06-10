@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/promotions/promotions.controller.ts</code>
+            <code>src/api/promotions/controllers/promotions.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -160,26 +160,32 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#applyPromotion" >applyPromotion</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#create" >create</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#findActive" >findActive</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#findAll" >findAll</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#findOne" >findOne</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#getStats" >getStats</a>
@@ -187,14 +193,17 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#remove" >remove</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                 <a href="#update" >update</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                 <a href="#validatePromotion" >validatePromotion</a>
@@ -224,6 +233,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>applyPromotion</b></span>
                         <a href="#applyPromotion"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -232,7 +242,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>applyPromotion(applyPromotionDto: <a href="../classes/ApplyPromotionDto.html" target="_self">ApplyPromotionDto</a>, req: literal type)</code>
+                    <code>applyPromotion(applyPromotionDto: <a href="../classes/ApplyPromotionRequestDTO.html" target="_self">ApplyPromotionRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -240,14 +250,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;apply&#x27;)<br />@UseGuards(JwtAuthGuard)<br /></code>
+                    <code>@Post(&#x27;apply&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiApplyPromotion()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="87"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:87</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="117"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:117</a></div>
                         </td>
                     </tr>
 
@@ -270,7 +280,7 @@
                                         <tr>
                                                 <td>applyPromotionDto</td>
                                             <td>
-                                                            <code><a href="../classes/ApplyPromotionDto.html" target="_self" >ApplyPromotionDto</a></code>
+                                                            <code><a href="../classes/ApplyPromotionRequestDTO.html" target="_self" >ApplyPromotionRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -295,7 +305,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionApplyResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -313,6 +323,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>create</b></span>
                         <a href="#create"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -321,7 +332,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>create(createPromotionDto: <a href="../classes/CreatePromotionDto.html" target="_self">CreatePromotionDto</a>, req: literal type)</code>
+                    <code>create(createPromotionDto: <a href="../classes/CreatePromotionRequestDTO.html" target="_self">CreatePromotionRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -329,14 +340,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post()<br />@UseGuards(JwtAuthGuard)<br /></code>
+                    <code>@Post()<br />@UseGuards(JwtAuthGuard)<br />@ApiCreatePromotion()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="24"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:24</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="46"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:46</a></div>
                         </td>
                     </tr>
 
@@ -359,7 +370,7 @@
                                         <tr>
                                                 <td>createPromotionDto</td>
                                             <td>
-                                                            <code><a href="../classes/CreatePromotionDto.html" target="_self" >CreatePromotionDto</a></code>
+                                                            <code><a href="../classes/CreatePromotionRequestDTO.html" target="_self" >CreatePromotionRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -384,7 +395,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -400,6 +411,7 @@
                 <td class="col-md-4">
                     <a name="findActive"></a>
                     <span class="name">
+                            <span class="modifier"></span>
                             <span class="modifier"></span>
                         <span ><b>findActive</b></span>
                         <a href="#findActive"><span class="icon ion-ios-link"></span></a>
@@ -417,14 +429,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;active&#x27;)<br /></code>
+                    <code>@Get(&#x27;active&#x27;)<br />@ApiGetActivePromotions()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="37"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:37</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="61"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:61</a></div>
                         </td>
                     </tr>
 
@@ -433,7 +445,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -446,6 +458,7 @@
                 <td class="col-md-4">
                     <a name="findAll"></a>
                     <span class="name">
+                            <span class="modifier"></span>
                             <span class="modifier"></span>
                         <span ><b>findAll</b></span>
                         <a href="#findAll"><span class="icon ion-ios-link"></span></a>
@@ -463,14 +476,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br /></code>
+                    <code>@Get()<br />@ApiGetPromotions()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="32"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:32</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="55"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:55</a></div>
                         </td>
                     </tr>
 
@@ -479,7 +492,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -493,6 +506,7 @@
                     <a name="findOne"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>findOne</b></span>
                         <a href="#findOne"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -501,7 +515,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOne(param: <a href="../classes/PromotionIdParamDTO.html" target="_self">PromotionIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -509,14 +523,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:id&#x27;)<br /></code>
+                    <code>@Get(&#x27;:id&#x27;)<br />@ApiGetPromotionById()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="48"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:48</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:74</a></div>
                         </td>
                     </tr>
 
@@ -537,9 +551,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PromotionIdParamDTO.html" target="_self" >PromotionIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -552,7 +566,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -568,6 +582,7 @@
                 <td class="col-md-4">
                     <a name="getStats"></a>
                     <span class="name">
+                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                         <span ><b>getStats</b></span>
@@ -586,14 +601,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;stats&#x27;)<br />@UseGuards(JwtAuthGuard)<br /></code>
+                    <code>@Get(&#x27;stats&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiGetPromotionStats()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="43"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:43</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="68"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:68</a></div>
                         </td>
                     </tr>
 
@@ -602,7 +617,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionStatsResponseDTO&gt;</a></code>
 
                         </div>
                 </td>
@@ -617,6 +632,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>remove</b></span>
                         <a href="#remove"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -625,7 +641,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>remove(param: <a href="../classes/PromotionIdParamDTO.html" target="_self">PromotionIdParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -633,14 +649,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br /></code>
+                    <code>@Delete(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiDeletePromotion()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="63"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:63</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="93"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:93</a></div>
                         </td>
                     </tr>
 
@@ -661,9 +677,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PromotionIdParamDTO.html" target="_self" >PromotionIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -676,7 +692,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -694,6 +710,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>update</b></span>
                         <a href="#update"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -702,7 +719,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, updatePromotionDto: <a href="../classes/CreatePromotionDto.html" target="_self">Partial&lt;CreatePromotionDto&gt;</a>)</code>
+                    <code>update(param: <a href="../classes/PromotionIdParamDTO.html" target="_self">PromotionIdParamDTO</a>, updatePromotionDto: <a href="../classes/CreatePromotionRequestDTO.html" target="_self">Partial&lt;CreatePromotionRequestDTO&gt;</a>)</code>
                 </td>
             </tr>
 
@@ -710,14 +727,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Put(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br /></code>
+                    <code>@Put(&#x27;:id&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiUpdatePromotion()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="54"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:54</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="83"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:83</a></div>
                         </td>
                     </tr>
 
@@ -738,9 +755,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/PromotionIdParamDTO.html" target="_self" >PromotionIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -752,7 +769,7 @@
                                         <tr>
                                                 <td>updatePromotionDto</td>
                                             <td>
-                                                            <code><a href="../classes/CreatePromotionDto.html" target="_self" >Partial&lt;CreatePromotionDto&gt;</a></code>
+                                                            <code><a href="../classes/CreatePromotionRequestDTO.html" target="_self" >Partial&lt;CreatePromotionRequestDTO&gt;</a></code>
                                             </td>
 
                                             <td>
@@ -765,7 +782,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -783,6 +800,7 @@
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                         <span ><b>validatePromotion</b></span>
                         <a href="#validatePromotion"><span class="icon ion-ios-link"></span></a>
                     </span>
@@ -791,7 +809,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>validatePromotion(validationData: literal type, req: literal type)</code>
+                    <code>validatePromotion(dto: <a href="../classes/ValidatePromotionRequestDTO.html" target="_self">ValidatePromotionRequestDTO</a>, req: literal type)</code>
                 </td>
             </tr>
 
@@ -799,14 +817,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;validate&#x27;)<br />@UseGuards(JwtAuthGuard)<br /></code>
+                    <code>@Post(&#x27;validate&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiValidatePromotion()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="69"
-                                    class="link-to-prism">src/api/promotions/promotions.controller.ts:69</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="102"
+                                    class="link-to-prism">src/api/promotions/controllers/promotions.controller.ts:102</a></div>
                         </td>
                     </tr>
 
@@ -827,9 +845,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>validationData</td>
+                                                <td>dto</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../classes/ValidatePromotionRequestDTO.html" target="_self" >ValidatePromotionRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -854,7 +872,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PromotionValidateResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -879,89 +897,119 @@
   UseGuards,
   Request,
 } from &#x27;@nestjs/common&#x27;;
-import { JwtAuthGuard } from &#x27;../../modules/auth/guards/jwt-auth.guard&#x27;;
+import { ApiTags } from &#x27;@nestjs/swagger&#x27;;
+import { JwtAuthGuard } from &#x27;@auth/guards/jwt-auth.guard&#x27;;
 import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
-import { PromotionsService } from &#x27;./promotions.service&#x27;;
-import { CreatePromotionDto } from &#x27;./dto/create-promotion.dto&#x27;;
-import { ApplyPromotionDto } from &#x27;./dto/apply-promotion.dto&#x27;;
+import { PromotionsService } from &#x27;../services/promotions.service&#x27;;
+import { CreatePromotionRequestDTO } from &#x27;../dtos/request/create-promotion.request.dto&#x27;;
+import { ApplyPromotionRequestDTO } from &#x27;../dtos/request/apply-promotion.request.dto&#x27;;
+import { PromotionIdParamDTO } from &#x27;../dtos/request/promotion-id.param.dto&#x27;;
+import { ValidatePromotionRequestDTO } from &#x27;../dtos/request/validate-promotion.request.dto&#x27;;
+import {
+  PromotionDetailResponseDTO,
+  PromotionApplyResponseDTO,
+  PromotionValidateResponseDTO,
+  PromotionStatsResponseDTO,
+} from &#x27;../dtos/response&#x27;;
+import {
+  ApiCreatePromotion,
+  ApiGetPromotions,
+  ApiGetActivePromotions,
+  ApiGetPromotionStats,
+  ApiGetPromotionById,
+  ApiUpdatePromotion,
+  ApiDeletePromotion,
+  ApiValidatePromotion,
+  ApiApplyPromotion,
+} from &#x27;../docs/promotions.docs&#x27;;
 
+@ApiTags(&#x27;Promociones&#x27;)
 @Controller(&#x27;promotions&#x27;)
 export class PromotionsController {
   constructor(private readonly promotionsService: PromotionsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiCreatePromotion()
   create(
-    @Body() createPromotionDto: CreatePromotionDto,
+    @Body() createPromotionDto: CreatePromotionRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
-  ) {
+  ): Promise&lt;PromotionDetailResponseDTO&gt; {
     return this.promotionsService.create(createPromotionDto, req.user.id);
   }
 
   @Get()
-  findAll() {
+  @ApiGetPromotions()
+  findAll(): Promise&lt;PromotionDetailResponseDTO[]&gt; {
     return this.promotionsService.findAll();
   }
 
   @Get(&#x27;active&#x27;)
-  findActive() {
+  @ApiGetActivePromotions()
+  findActive(): Promise&lt;PromotionDetailResponseDTO[]&gt; {
     return this.promotionsService.findActive();
   }
 
   @Get(&#x27;stats&#x27;)
   @UseGuards(JwtAuthGuard)
-  getStats() {
+  @ApiGetPromotionStats()
+  getStats(): Promise&lt;PromotionStatsResponseDTO&gt; {
     return this.promotionsService.getPromotionStats();
   }
 
   @Get(&#x27;:id&#x27;)
-  findOne(@Param(&#x27;id&#x27;) id: string) {
-    return this.promotionsService.findOne(id);
+  @ApiGetPromotionById()
+  findOne(
+    @Param() param: PromotionIdParamDTO,
+  ): Promise&lt;PromotionDetailResponseDTO&gt; {
+    return this.promotionsService.findOne(param.id);
   }
 
   @Put(&#x27;:id&#x27;)
   @UseGuards(JwtAuthGuard)
+  @ApiUpdatePromotion()
   update(
-    @Param(&#x27;id&#x27;) id: string,
-    @Body() updatePromotionDto: Partial&lt;CreatePromotionDto&gt;,
-  ) {
-    return this.promotionsService.update(id, updatePromotionDto);
+    @Param() param: PromotionIdParamDTO,
+    @Body() updatePromotionDto: Partial&lt;CreatePromotionRequestDTO&gt;,
+  ): Promise&lt;PromotionDetailResponseDTO&gt; {
+    return this.promotionsService.update(param.id, updatePromotionDto);
   }
 
   @Delete(&#x27;:id&#x27;)
   @UseGuards(JwtAuthGuard)
-  remove(@Param(&#x27;id&#x27;) id: string) {
-    return this.promotionsService.remove(id);
+  @ApiDeletePromotion()
+  remove(
+    @Param() param: PromotionIdParamDTO,
+  ): Promise&lt;PromotionDetailResponseDTO&gt; {
+    return this.promotionsService.remove(param.id);
   }
 
   @Post(&#x27;validate&#x27;)
   @UseGuards(JwtAuthGuard)
+  @ApiValidatePromotion()
   validatePromotion(
-    @Body()
-    validationData: {
-      code: string;
-      serviceAmount: number;
-    },
+    @Body() dto: ValidatePromotionRequestDTO,
     @Request() req: { user: IUserDataOnJwt &amp; { role?: string } },
-  ) {
+  ): Promise&lt;PromotionValidateResponseDTO&gt; {
     return this.promotionsService.validatePromotion(
-      validationData.code,
+      dto.code,
       req.user.id,
-      req.user.role,
-      validationData.serviceAmount,
+      req.user.role ?? &#x27;&#x27;,
+      dto.serviceAmount,
     );
   }
 
   @Post(&#x27;apply&#x27;)
   @UseGuards(JwtAuthGuard)
+  @ApiApplyPromotion()
   applyPromotion(
-    @Body() applyPromotionDto: ApplyPromotionDto,
+    @Body() applyPromotionDto: ApplyPromotionRequestDTO,
     @Request() req: { user: IUserDataOnJwt &amp; { role?: string } },
-  ) {
+  ): Promise&lt;PromotionApplyResponseDTO&gt; {
     return this.promotionsService.applyPromotion({
       ...applyPromotionDto,
       userId: req.user.id,
-      userType: req.user.role,
+      userType: req.user.role ?? &#x27;&#x27;,
     });
   }
 }

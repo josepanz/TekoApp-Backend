@@ -146,7 +146,9 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>PartialType(CreatePaymentDto)</code>
+                            <code><a href="../classes/CreatePaymentMethodRequestDTO.html" target="_self" >PartialType(
+  CreatePaymentMethodRequestDTO,
+)</a></code>
             </p>
 
 
@@ -165,9 +167,11 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { PartialType } from &#x27;@nestjs/swagger&#x27;;
-import { CreatePaymentDto } from &#x27;./create-payment-method.dto&#x27;;
+import { CreatePaymentMethodRequestDTO } from &#x27;./create-payment-method.request.dto&#x27;;
 
-export class UpdatePaymentMethodDto extends PartialType(CreatePaymentDto) {}
+export class UpdatePaymentMethodDto extends PartialType(
+  CreatePaymentMethodRequestDTO,
+) {}
 </code></pre>
     </div>
 </div>

@@ -130,7 +130,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/uploads/uploads.controller.ts</code>
+            <code>src/api/uploads/controllers/uploads.controller.ts</code>
         </p>
             <p class="comment">
                 <h3>Prefix</h3>
@@ -159,25 +159,28 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#deleteFile" >deleteFile</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
-                                    <span class="modifier">Async</span>
-                                <a href="#getFile" >getFile</a>
-                            </li>
-                            <li>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getFileInfo" >getFileInfo</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#getThumbnail" >getThumbnail</a>
+                                <a href="#getPresignedUrl" >getPresignedUrl</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -186,10 +189,14 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#uploadDocument" >uploadDocument</a>
                             </li>
                             <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
@@ -198,8 +205,10 @@
                             <li>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
-                                <a href="#uploadMultipleFiles" >uploadMultipleFiles</a>
+                                <a href="#uploadMerchantDocs" >uploadMerchantDocs</a>
                             </li>
                         </ul>
                     </td>
@@ -225,6 +234,8 @@
                     <a name="deleteFile"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>deleteFile</b></span>
                         <a href="#deleteFile"><span class="icon ion-ios-link"></span></a>
@@ -234,7 +245,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deleteFile(filename: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>deleteFile(param: <a href="../classes/UploadFileParamDTO.html" target="_self">UploadFileParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -242,14 +253,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Delete(&#x27;:filename&#x27;)<br /></code>
+                    <code>@Delete(&#x27;:filename&#x27;)<br />@Version(&#x27;1&#x27;)<br />@DeleteFileDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="134"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:134</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="130"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:130</a></div>
                         </td>
                     </tr>
 
@@ -270,9 +281,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>filename</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/UploadFileParamDTO.html" target="_self" >UploadFileParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -285,96 +296,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="getFile"></a>
-                    <span class="name">
-                            <span class="modifier"></span>
-                            <span class="modifier">Async</span>
-                        <span ><b>getFile</b></span>
-                        <a href="#getFile"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getFile(filename: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, res: <a href="../interfaces/Response.html" target="_self">Response</a>)</code>
-                </td>
-            </tr>
-
-            <tr>
-                <td class="col-md-4">
-                    <b>Decorators : </b>
-                    <br />
-                    <code>@Get(&#x27;:filename&#x27;)<br /></code>
-                </td>
-            </tr>
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="73"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:73</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>filename</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>res</td>
-                                            <td>
-                                                            <code><a href="../interfaces/Response.html" target="_self" >Response</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -391,6 +313,7 @@
                     <a name="getFileInfo"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>getFileInfo</b></span>
                         <a href="#getFileInfo"><span class="icon ion-ios-link"></span></a>
@@ -400,7 +323,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getFileInfo(filename: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getFileInfo(param: <a href="../classes/UploadFileParamDTO.html" target="_self">UploadFileParamDTO</a>)</code>
                 </td>
             </tr>
 
@@ -408,14 +331,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:filename/info&#x27;)<br /></code>
+                    <code>@Get(&#x27;info/:filename&#x27;)<br />@Version(&#x27;1&#x27;)<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="129"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:129</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="120"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:120</a></div>
                         </td>
                     </tr>
 
@@ -436,9 +359,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>filename</td>
+                                                <td>param</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../classes/UploadFileParamDTO.html" target="_self" >UploadFileParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -451,7 +374,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/FileInfo.html" target="_self" >Promise&lt;FileInfo&gt;</a></code>
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -465,19 +388,22 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="getThumbnail"></a>
+                    <a name="getPresignedUrl"></a>
                     <span class="name">
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>getThumbnail</b></span>
-                        <a href="#getThumbnail"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>getPresignedUrl</b></span>
+                        <a href="#getPresignedUrl"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getThumbnail(filename: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, res: <a href="../interfaces/Response.html" target="_self">Response</a>)</code>
+                    <code>getPresignedUrl(key: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
@@ -485,14 +411,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get(&#x27;:filename/thumbnail&#x27;)<br /></code>
+                    <code>@Get(&#x27;presigned-url&#x27;)<br />@Version(&#x27;1&#x27;)<br />@GetPresignedUrlDocs()<br />@ApiQuery({name: &#x27;key&#x27;, required: true, description: &#x27;Clave S3 del archivo&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="91"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:91</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="112"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:112</a></div>
                         </td>
                     </tr>
 
@@ -513,21 +439,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>filename</td>
+                                                <td>key</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>res</td>
-                                            <td>
-                                                            <code><a href="../interfaces/Response.html" target="_self" >Response</a></code>
                                             </td>
 
                                             <td>
@@ -540,7 +454,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -556,6 +470,8 @@
                 <td class="col-md-4">
                     <a name="uploadAvatar"></a>
                     <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -575,14 +491,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;avatar&#x27;)<br />@UseInterceptors(undefined)<br /></code>
+                    <code>@Post(&#x27;avatar&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseInterceptors(undefined)<br />@UploadAvatarDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="51"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:51</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="76"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:76</a></div>
                         </td>
                     </tr>
 
@@ -618,7 +534,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/FileInfo.html" target="_self" >Promise&lt;FileInfo&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;FileInfoResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -634,6 +550,8 @@
                 <td class="col-md-4">
                     <a name="uploadDocument"></a>
                     <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -653,14 +571,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;document&#x27;)<br />@UseInterceptors(undefined)<br /></code>
+                    <code>@Post(&#x27;document&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseInterceptors(undefined)<br />@UploadDocumentDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="38"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:38</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:65</a></div>
                         </td>
                     </tr>
 
@@ -696,7 +614,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/FileInfo.html" target="_self" >Promise&lt;FileInfo&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;FileInfoResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -712,6 +630,8 @@
                 <td class="col-md-4">
                     <a name="uploadImage"></a>
                     <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier">Async</span>
@@ -731,14 +651,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;image&#x27;)<br />@UseInterceptors(undefined)<br /></code>
+                    <code>@Post(&#x27;image&#x27;)<br />@Version(&#x27;1&#x27;)<br />@UseInterceptors(undefined)<br />@UploadImageDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="25"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:25</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="54"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:54</a></div>
                         </td>
                     </tr>
 
@@ -774,7 +694,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/FileInfo.html" target="_self" >Promise&lt;FileInfo&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;FileInfoResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -788,20 +708,22 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="uploadMultipleFiles"></a>
+                    <a name="uploadMerchantDocs"></a>
                     <span class="name">
                             <span class="modifier"></span>
                             <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
-                        <span ><b>uploadMultipleFiles</b></span>
-                        <a href="#uploadMultipleFiles"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>uploadMerchantDocs</b></span>
+                        <a href="#uploadMerchantDocs"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>uploadMultipleFiles(files: Express.Multer.File[])</code>
+                    <code>uploadMerchantDocs(body: <a href="../classes/UploadMerchantDocsRequestDTO.html" target="_self">UploadMerchantDocsRequestDTO</a>, files: Record<string | Express.Multer.File[]>, user: <a href="../interfaces/IUserDataOnJwt.html" target="_self">IUserDataOnJwt</a>)</code>
                 </td>
             </tr>
 
@@ -809,14 +731,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Post(&#x27;bulk&#x27;)<br />@UseInterceptors(undefined)<br /></code>
+                    <code>@Post(&#x27;merchant-docs&#x27;)<br />@Version(&#x27;1&#x27;)<br />@FileUploader({fields: MERCHANT_DOC_FIELDS, allowedTypes: MERCHANT_DOC_ALLOWED_MIME_TYPES})<br />@UploadMerchantDocsDocs()<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="144"
-                                    class="link-to-prism">src/api/uploads/uploads.controller.ts:144</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="90"
+                                    class="link-to-prism">src/api/uploads/controllers/uploads.controller.ts:90</a></div>
                         </td>
                     </tr>
 
@@ -837,9 +759,33 @@
                                     </thead>
                                     <tbody>
                                         <tr>
+                                                <td>body</td>
+                                            <td>
+                                                            <code><a href="../classes/UploadMerchantDocsRequestDTO.html" target="_self" >UploadMerchantDocsRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
                                                 <td>files</td>
                                             <td>
-                                                        <code>Express.Multer.File[]</code>
+                                                        <code>Record&lt;string | Express.Multer.File[]&gt;</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../interfaces/IUserDataOnJwt.html" target="_self" >IUserDataOnJwt</a></code>
                                             </td>
 
                                             <td>
@@ -852,7 +798,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/FileInfo.html" target="_self" >Promise&lt;FileInfo[]&gt;</a></code>
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -867,176 +813,139 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+  BadRequestException,
+  Body,
   Controller,
-  Post,
+  Delete,
   Get,
   Param,
-  Delete,
+  Post,
+  Query,
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  Res,
-  BadRequestException,
+  Version,
 } from &#x27;@nestjs/common&#x27;;
 import { FileInterceptor } from &#x27;@nestjs/platform-express&#x27;;
-import { Response } from &#x27;express&#x27;;
-import { JwtAuthGuard } from &#x27;../../modules/auth/guards/jwt-auth.guard&#x27;;
-import { UploadsService, FileInfo } from &#x27;./uploads.service&#x27;;
+import { ApiBearerAuth, ApiQuery, ApiTags } from &#x27;@nestjs/swagger&#x27;;
+import { JwtAuthGuard } from &#x27;@modules/auth/guards/jwt-auth.guard&#x27;;
+import { User } from &#x27;@common/decorators/user.decorator&#x27;;
+import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
+import {
+  FileUploader,
+  UploadedFilesValidated,
+} from &#x27;@common/decorators/file-uploader.decorator&#x27;;
+import { UploadsService } from &#x27;../services/uploads.service&#x27;;
+import { FileInfoResponseDTO } from &#x27;../dtos/response&#x27;;
+import {
+  UploadFileParamDTO,
+  UploadMerchantDocsRequestDTO,
+} from &#x27;../dtos/request&#x27;;
+import {
+  MERCHANT_DOC_ALLOWED_MIME_TYPES,
+  MERCHANT_DOC_FIELDS,
+} from &#x27;../const/uploads.const&#x27;;
+import {
+  DeleteFileDocs,
+  GetPresignedUrlDocs,
+  UploadAvatarDocs,
+  UploadDocumentDocs,
+  UploadImageDocs,
+  UploadMerchantDocsDocs,
+} from &#x27;../docs/uploads.docs&#x27;;
 
+@ApiTags(&#x27;Uploads&#x27;)
+@ApiBearerAuth()
 @Controller(&#x27;uploads&#x27;)
 @UseGuards(JwtAuthGuard)
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
   @Post(&#x27;image&#x27;)
+  @Version(&#x27;1&#x27;)
   @UseInterceptors(FileInterceptor(&#x27;file&#x27;))
+  @UploadImageDocs()
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
-  ): Promise&lt;FileInfo&gt; {
-    if (!file) {
-      throw new BadRequestException(&#x27;No se ha subido ningún archivo&#x27;);
-    }
-
-    this.uploadsService.validateFile(file);
-    return this.uploadsService.processImage(file);
+  ): Promise&lt;FileInfoResponseDTO&gt; {
+    if (!file) throw new BadRequestException(&#x27;No se ha subido ningún archivo&#x27;);
+    return this.uploadsService.uploadImage(file);
   }
 
   @Post(&#x27;document&#x27;)
+  @Version(&#x27;1&#x27;)
   @UseInterceptors(FileInterceptor(&#x27;file&#x27;))
+  @UploadDocumentDocs()
   async uploadDocument(
     @UploadedFile() file: Express.Multer.File,
-  ): Promise&lt;FileInfo&gt; {
-    if (!file) {
-      throw new BadRequestException(&#x27;No se ha subido ningún archivo&#x27;);
-    }
-
-    this.uploadsService.validateFile(file);
-    return this.uploadsService.processDocument(file);
+  ): Promise&lt;FileInfoResponseDTO&gt; {
+    if (!file) throw new BadRequestException(&#x27;No se ha subido ningún archivo&#x27;);
+    return this.uploadsService.uploadDocument(file);
   }
 
   @Post(&#x27;avatar&#x27;)
+  @Version(&#x27;1&#x27;)
   @UseInterceptors(FileInterceptor(&#x27;file&#x27;))
+  @UploadAvatarDocs()
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
-  ): Promise&lt;FileInfo&gt; {
-    if (!file) {
-      throw new BadRequestException(&#x27;No se ha subido ningún archivo&#x27;);
-    }
-
-    // Solo permitir imágenes para avatares
-    if (!file.mimetype.startsWith(&#x27;image/&#x27;)) {
-      throw new BadRequestException(&#x27;Solo se permiten imágenes para avatares&#x27;);
-    }
-
-    this.uploadsService.validateFile(file);
-    const fileInfo &#x3D; await this.uploadsService.processImage(file);
-
-    // Crear thumbnail para el avatar
-    await this.uploadsService.createThumbnail(fileInfo.filename, 150, 150);
-
-    return fileInfo;
+  ): Promise&lt;FileInfoResponseDTO&gt; {
+    if (!file) throw new BadRequestException(&#x27;No se ha subido ningún archivo&#x27;);
+    return this.uploadsService.uploadAvatar(file);
   }
 
-  @Get(&#x27;:filename&#x27;)
-  async getFile(@Param(&#x27;filename&#x27;) filename: string, @Res() res: Response) {
-    try {
-      const fileInfo &#x3D; await this.uploadsService.getFileInfo(filename);
-      const filePath &#x3D; fileInfo.path;
-
-      res.setHeader(&#x27;Content-Type&#x27;, fileInfo.mimetype);
-      res.setHeader(
-        &#x27;Content-Disposition&#x27;,
-        &#x60;inline; filename&#x3D;&quot;${fileInfo.originalname}&quot;&#x60;,
-      );
-
-      res.sendFile(filePath);
-    } catch {
-      res.status(404).json({ message: &#x27;Archivo no encontrado&#x27; });
-    }
+  @Post(&#x27;merchant-docs&#x27;)
+  @Version(&#x27;1&#x27;)
+  @FileUploader({
+    fields: MERCHANT_DOC_FIELDS,
+    allowedTypes: MERCHANT_DOC_ALLOWED_MIME_TYPES,
+  })
+  @UploadMerchantDocsDocs()
+  async uploadMerchantDocs(
+    @Body() body: UploadMerchantDocsRequestDTO,
+    @UploadedFilesValidated() files: Record&lt;string, Express.Multer.File[]&gt;,
+    @User() user: IUserDataOnJwt,
+  ): Promise&lt;void&gt; {
+    return this.uploadsService.uploadMerchantDocs({
+      files,
+      userId: user.id,
+      referenceId: user.referenceId,
+      documentType: body.documentType ? Number(body.documentType) : null,
+      documentNumber: body.documentNumber,
+    });
   }
 
-  @Get(&#x27;:filename/thumbnail&#x27;)
-  async getThumbnail(
-    @Param(&#x27;filename&#x27;) filename: string,
-    @Res() res: Response,
-  ) {
-    try {
-      const thumbnailName &#x3D; &#x60;thumb_${filename}&#x60;;
-      const fileInfo &#x3D; await this.uploadsService.getFileInfo(thumbnailName);
-      const filePath &#x3D; fileInfo.path;
-
-      res.setHeader(&#x27;Content-Type&#x27;, fileInfo.mimetype);
-      res.setHeader(
-        &#x27;Content-Disposition&#x27;,
-        &#x60;inline; filename&#x3D;&quot;thumb_${filename}&quot;&#x60;,
-      );
-
-      res.sendFile(filePath);
-    } catch {
-      // Si no existe el thumbnail, crearlo y luego enviarlo
-      try {
-        const thumbnailName &#x3D;
-          await this.uploadsService.createThumbnail(filename);
-        const fileInfo &#x3D; await this.uploadsService.getFileInfo(thumbnailName);
-        const filePath &#x3D; fileInfo.path;
-
-        res.setHeader(&#x27;Content-Type&#x27;, fileInfo.mimetype);
-        res.setHeader(
-          &#x27;Content-Disposition&#x27;,
-          &#x60;inline; filename&#x3D;&quot;${thumbnailName}&quot;&#x60;,
-        );
-
-        res.sendFile(filePath);
-      } catch {
-        res.status(404).json({ message: &#x27;No se pudo generar el thumbnail&#x27; });
-      }
-    }
+  @Get(&#x27;presigned-url&#x27;)
+  @Version(&#x27;1&#x27;)
+  @GetPresignedUrlDocs()
+  @ApiQuery({
+    name: &#x27;key&#x27;,
+    required: true,
+    description: &#x27;Clave S3 del archivo&#x27;,
+  })
+  async getPresignedUrl(@Query(&#x27;key&#x27;) key: string): Promise&lt;{ url: string }&gt; {
+    if (!key) throw new BadRequestException(&#x27;El parámetro key es requerido&#x27;);
+    const url &#x3D; await this.uploadsService.getPresignedUrl(key);
+    return { url };
   }
 
-  @Get(&#x27;:filename/info&#x27;)
-  async getFileInfo(@Param(&#x27;filename&#x27;) filename: string): Promise&lt;FileInfo&gt; {
-    return this.uploadsService.getFileInfo(filename);
+  @Get(&#x27;info/:filename&#x27;)
+  @Version(&#x27;1&#x27;)
+  async getFileInfo(
+    @Param() param: UploadFileParamDTO,
+  ): Promise&lt;{ url: string; key: string }&gt; {
+    const url &#x3D; await this.uploadsService.getPresignedUrl(param.filename);
+    return { key: param.filename, url };
   }
 
   @Delete(&#x27;:filename&#x27;)
-  async deleteFile(@Param(&#x27;filename&#x27;) filename: string) {
-    // Aquí podrías agregar lógica adicional para verificar permisos
-    // Por ejemplo, solo permitir que el usuario elimine sus propios archivos
-
-    await this.uploadsService.deleteFile(filename);
+  @Version(&#x27;1&#x27;)
+  @DeleteFileDocs()
+  async deleteFile(
+    @Param() param: UploadFileParamDTO,
+  ): Promise&lt;{ message: string }&gt; {
+    await this.uploadsService.deleteFile(param.filename);
     return { message: &#x27;Archivo eliminado exitosamente&#x27; };
-  }
-
-  @Post(&#x27;bulk&#x27;)
-  @UseInterceptors(FileInterceptor(&#x27;files&#x27;))
-  async uploadMultipleFiles(
-    @UploadedFile() files: Express.Multer.File[],
-  ): Promise&lt;FileInfo[]&gt; {
-    if (!files || files.length &#x3D;&#x3D;&#x3D; 0) {
-      throw new BadRequestException(&#x27;No se han subido archivos&#x27;);
-    }
-
-    const results: FileInfo[] &#x3D; [];
-
-    for (const file of files) {
-      try {
-        this.uploadsService.validateFile(file);
-
-        let fileInfo: FileInfo;
-        if (file.mimetype.startsWith(&#x27;image/&#x27;)) {
-          fileInfo &#x3D; await this.uploadsService.processImage(file);
-        } else {
-          fileInfo &#x3D; await this.uploadsService.processDocument(file);
-        }
-
-        results.push(fileInfo);
-      } catch (error) {
-        // Continuar con el siguiente archivo si hay error
-        console.error(&#x60;Error procesando archivo ${file.originalname}:&#x60;, error);
-      }
-    }
-
-    return results;
   }
 }
 </code></pre>

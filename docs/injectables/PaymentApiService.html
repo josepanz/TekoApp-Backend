@@ -133,7 +133,7 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/payments/payments.service.ts</code>
+            <code>src/api/payments/services/payments.service.ts</code>
         </p>
 
 
@@ -153,14 +153,6 @@
                 <tr>
                     <td class="col-md-4">
                         <ul class="index-list">
-                            <li>
-                                    <span class="modifier">Private</span>
-                                <a href="#calculateFee" >calculateFee</a>
-                            </li>
-                            <li>
-                                    <span class="modifier">Private</span>
-                                <a href="#calculateTax" >calculateTax</a>
-                            </li>
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#cancelPayment" >cancelPayment</a>
@@ -237,12 +229,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(dbService: <a href="../injectables/PaymentDbService.html" target="_self">PaymentDbService</a>)</code>
+<code>constructor(dbService: <a href="../injectables/PaymentDbService.html" target="_self">PaymentDbService</a>, feeCalculator: <a href="../injectables/FeeCalculatorService.html" target="_self">FeeCalculatorService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="25" class="link-to-prism">src/api/payments/payments.service.ts:25</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/api/payments/services/payments.service.ts:29</a></div>
                             </td>
                         </tr>
 
@@ -271,6 +263,18 @@
                                                     </td>
                                                     
                                                 </tr>
+                                                <tr>
+                                                        <td>feeCalculator</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/FeeCalculatorService.html" target="_self" >FeeCalculatorService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
                                         </tbody>
                                     </table>
                             </div>
@@ -289,156 +293,6 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="calculateFee"></a>
-                    <span class="name">
-                            <span class="modifier">Private</span>
-                        <span ><b>calculateFee</b></span>
-                        <a href="#calculateFee"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>calculateFee(amount: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, provider: PaymentProvider)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="296"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:296</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>amount</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>provider</td>
-                                            <td>
-                                                        <code>PaymentProvider</code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="calculateTax"></a>
-                    <span class="name">
-                            <span class="modifier">Private</span>
-                        <span ><b>calculateTax</b></span>
-                        <a href="#calculateTax"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>calculateTax(amount: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="308"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:308</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>amount</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
                     <a name="cancelPayment"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -450,15 +304,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>cancelPayment(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: number | string)</code>
+                    <code>cancelPayment(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="94"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:94</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="100"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:100</a></div>
                         </td>
                     </tr>
 
@@ -493,7 +347,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -538,8 +392,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="30"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:30</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="37"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:37</a></div>
                         </td>
                     </tr>
 
@@ -612,15 +466,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createPaymentMethod(userId: number | string, dto: <a href="../classes/CreatePaymentDto.html" target="_self">CreatePaymentDto</a>)</code>
+                    <code>createPaymentMethod(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/CreatePaymentMethodRequestDTO.html" target="_self">CreatePaymentMethodRequestDTO</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="151"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:151</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="156"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:156</a></div>
                         </td>
                     </tr>
 
@@ -643,7 +497,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -655,7 +509,7 @@
                                         <tr>
                                                 <td>dto</td>
                                             <td>
-                                                            <code><a href="../classes/CreatePaymentDto.html" target="_self" >CreatePaymentDto</a></code>
+                                                            <code><a href="../classes/CreatePaymentMethodRequestDTO.html" target="_self" >CreatePaymentMethodRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -693,15 +547,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deletePaymentMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: number | string)</code>
+                    <code>deletePaymentMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="181"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:181</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="185"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:185</a></div>
                         </td>
                     </tr>
 
@@ -736,7 +590,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -774,15 +628,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getMetricsSummary(userId?: number | string, professionalId?: number | string)</code>
+                    <code>getMetricsSummary(userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, professionalId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="266"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:266</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="264"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:264</a></div>
                         </td>
                     </tr>
 
@@ -805,7 +659,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -817,7 +671,7 @@
                                         <tr>
                                                 <td>professionalId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -830,7 +684,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentSummaryResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -855,15 +709,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getMetricsTrends(days: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, userId?: number | string)</code>
+                    <code>getMetricsTrends(days: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="289"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:289</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="284"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:284</a></div>
                         </td>
                     </tr>
 
@@ -898,7 +752,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -911,7 +765,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;PaymentTrendsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -943,8 +797,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="84"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:84</a></div>
                         </td>
                     </tr>
 
@@ -1005,15 +859,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getPayments(userId?: number | string, professionalId?: number | string, status?: PaymentStatus)</code>
+                    <code>getPayments(userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, professionalId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, status?: PaymentStatus)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="66"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:66</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="76"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:76</a></div>
                         </td>
                     </tr>
 
@@ -1036,7 +890,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1048,7 +902,7 @@
                                         <tr>
                                                 <td>professionalId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1106,8 +960,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="245"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:245</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="243"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:243</a></div>
                         </td>
                     </tr>
 
@@ -1212,8 +1066,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="217"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:217</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="215"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:215</a></div>
                         </td>
                     </tr>
 
@@ -1281,8 +1135,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="203"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:203</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="201"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:201</a></div>
                         </td>
                     </tr>
 
@@ -1362,8 +1216,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="110"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:110</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="115"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:115</a></div>
                         </td>
                     </tr>
 
@@ -1443,8 +1297,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="84"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:84</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="90"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:90</a></div>
                         </td>
                     </tr>
 
@@ -1517,15 +1371,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updatePaymentMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: number | string, dto: <a href="../classes/UpdatePaymentMethodDto.html" target="_self">UpdatePaymentMethodDto</a>)</code>
+                    <code>updatePaymentMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UpdatePaymentMethodDto.html" target="_self">UpdatePaymentMethodDto</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="166"
-                                    class="link-to-prism">src/api/payments/payments.service.ts:166</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="171"
+                                    class="link-to-prism">src/api/payments/services/payments.service.ts:171</a></div>
                         </td>
                     </tr>
 
@@ -1560,7 +1414,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1608,6 +1462,7 @@
   ForbiddenException,
 } from &#x27;@nestjs/common&#x27;;
 import { PaymentDbService } from &#x27;@modules/payments-db/services/payment-db.service&#x27;;
+import { FeeCalculatorService } from &#x27;@modules/payments-db/services/fee-calculator.service&#x27;;
 import {
   PaymentProvider,
   PaymentStatus,
@@ -1615,17 +1470,23 @@ import {
   PaymentMethodEntity,
   Prisma,
 } from &#x27;@prisma/client&#x27;;
+import { PaymentSummaryResponseDTO } from &#x27;../dtos/response/payment-summary.response.dto&#x27;;
+import { PaymentTrendsResponseDTO } from &#x27;../dtos/response/payment-trends.response.dto&#x27;;
 import { v4 as uuidv4 } from &#x27;uuid&#x27;;
 import {
   CreatePaymentDto,
   UpdatePaymentDto,
   RefundPaymentDto,
   UpdatePaymentMethodDto,
-} from &#x27;@/api/payments/dtos/request&#x27;;
+  CreatePaymentMethodRequestDTO,
+} from &#x27;../dtos/request&#x27;;
 
 @Injectable()
 export class PaymentApiService {
-  constructor(private readonly dbService: PaymentDbService) {}
+  constructor(
+    private readonly dbService: PaymentDbService,
+    private readonly feeCalculator: FeeCalculatorService,
+  ) {}
 
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; PAGOS &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
@@ -1640,8 +1501,11 @@ export class PaymentApiService {
       );
     }
 
-    const fee &#x3D; this.calculateFee(dto.amount, dto.paymentProvider);
-    const tax &#x3D; this.calculateTax(dto.amount + fee);
+    const fee &#x3D; await this.feeCalculator.calculateProviderFee(
+      dto.amount,
+      dto.paymentProvider,
+    );
+    const tax &#x3D; await this.feeCalculator.calculatePlatformFee(dto.amount + fee);
     const totalAmount &#x3D; dto.amount + fee + tax;
 
     const transactionId &#x3D; uuidv4();
@@ -1666,15 +1530,11 @@ export class PaymentApiService {
   }
 
   async getPayments(
-    userId?: number | string,
-    professionalId?: number | string,
+    userId?: number,
+    professionalId?: number,
     status?: PaymentStatus,
   ) {
-    return this.dbService.findAllPayments(
-      userId !&#x3D;&#x3D; undefined ? Number(userId) : undefined,
-      professionalId !&#x3D;&#x3D; undefined ? Number(professionalId) : undefined,
-      status,
-    );
+    return this.dbService.findAllPayments(userId, professionalId, status);
   }
 
   async getPaymentById(id: string) {
@@ -1693,10 +1553,9 @@ export class PaymentApiService {
     return this.dbService.updatePayment(id, dto as unknown);
   }
 
-  async cancelPayment(id: string, userId: number | string) {
-    const numId &#x3D; Number(userId);
+  async cancelPayment(id: string, userId: number) {
     const payment &#x3D; await this.getPaymentById(id);
-    if (payment.userId !&#x3D;&#x3D; numId) {
+    if (payment.userId !&#x3D;&#x3D; userId) {
       throw new ForbiddenException(
         &#x27;No tienes permisos para cancelar este pago&#x27;,
       );
@@ -1751,53 +1610,46 @@ export class PaymentApiService {
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; MÉTODOS DE PAGO &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
   async createPaymentMethod(
-    userId: number | string,
-    dto: CreatePaymentDto,
+    userId: number,
+    dto: CreatePaymentMethodRequestDTO,
   ): Promise&lt;PaymentMethodEntity&gt; {
-    const numId &#x3D; Number(userId);
     return this.dbService.createPaymentMethod({
-      userId: numId,
-      name:
-        ((dto as unknown as Record&lt;string, unknown&gt;).name as string) ??
-        &#x27;default&#x27;,
-      type: dto.paymentMethod,
-      provider: dto.paymentProvider,
+      userId,
+      name: dto.name,
+      type: dto.type,
+      provider: dto.provider,
+      isDefault: dto.isDefault ?? false,
+      details: dto.details ?? {},
+      externalId: dto.externalId,
     } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
   }
 
   async updatePaymentMethod(
     id: string,
-    userId: number | string,
+    userId: number,
     dto: UpdatePaymentMethodDto,
   ): Promise&lt;PaymentMethodEntity&gt; {
-    const numId &#x3D; Number(userId);
-    const method &#x3D; await this.dbService.findPaymentMethodById(id, numId);
+    const method &#x3D; await this.dbService.findPaymentMethodById(id, userId);
     if (!method) throw new NotFoundException(&#x27;Método de pago no encontrado&#x27;);
 
-    if ((dto as unknown as Record&lt;string, unknown&gt;).isDefault) {
-      await this.dbService.clearDefaultPaymentMethods(numId);
+    if (dto.isDefault) {
+      await this.dbService.clearDefaultPaymentMethods(userId);
     }
     return this.dbService.updatePaymentMethod(id, dto as unknown);
   }
 
-  async deletePaymentMethod(
-    id: string,
-    userId: number | string,
-  ): Promise&lt;void&gt; {
-    const numId &#x3D; Number(userId);
-    const method &#x3D; await this.dbService.findPaymentMethodById(id, numId);
+  async deletePaymentMethod(id: string, userId: number): Promise&lt;void&gt; {
+    const method &#x3D; await this.dbService.findPaymentMethodById(id, userId);
     if (!method) throw new NotFoundException(&#x27;Método de pago no encontrado&#x27;);
 
-    const total &#x3D; await this.dbService.countActivePaymentMethods(numId);
+    const total &#x3D; await this.dbService.countActivePaymentMethods(userId);
     if (total &lt;&#x3D; 1) {
       throw new BadRequestException(
         &#x27;No se puede eliminar el único método de pago&#x27;,
       );
     }
 
-    await this.dbService.updatePaymentMethod(id, {
-      isActive: false,
-    });
+    await this.dbService.updatePaymentMethod(id, { isActive: false });
   }
 
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; WEBHOOKS &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -1866,13 +1718,10 @@ export class PaymentApiService {
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; ESTADÍSTICAS Y MATEMÁTICA &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
   async getMetricsSummary(
-    userId?: number | string,
-    professionalId?: number | string,
-  ) {
-    const raw &#x3D; await this.dbService.getPaymentSummary(
-      userId !&#x3D;&#x3D; undefined ? Number(userId) : undefined,
-      professionalId !&#x3D;&#x3D; undefined ? Number(professionalId) : undefined,
-    );
+    userId?: number,
+    professionalId?: number,
+  ): Promise&lt;PaymentSummaryResponseDTO&gt; {
+    const raw &#x3D; await this.dbService.getPaymentSummary(userId, professionalId);
 
     const successRate &#x3D;
       raw.totalPayments &gt; 0
@@ -1888,27 +1737,15 @@ export class PaymentApiService {
     };
   }
 
-  async getMetricsTrends(days: number, userId?: number | string) {
-    return this.dbService.getPaymentTrends(
+  async getMetricsTrends(
+    days: number,
+    userId?: number,
+  ): Promise&lt;PaymentTrendsResponseDTO&gt; {
+    const trends &#x3D; await this.dbService.getPaymentTrends(days, userId);
+    return {
+      trends: trends as PaymentTrendsResponseDTO[&#x27;trends&#x27;],
       days,
-      userId !&#x3D;&#x3D; undefined ? Number(userId) : undefined,
-    );
-  }
-
-  private calculateFee(amount: number, provider: PaymentProvider): number {
-    const feeRates: Record&lt;string, number&gt; &#x3D; {
-      STRIPE: 0.029,
-      PAYPAL: 0.029,
-      MERCADOPAGO: 0.039,
-      CASH: 0,
     };
-    const rate &#x3D; feeRates[provider] || 0.029;
-    const fixedFee &#x3D; provider &#x3D;&#x3D;&#x3D; &#x27;STRIPE&#x27; || provider &#x3D;&#x3D;&#x3D; &#x27;PAYPAL&#x27; ? 0.3 : 0;
-    return Math.round((amount * rate + fixedFee) * 100) / 100;
-  }
-
-  private calculateTax(amount: number): number {
-    return Math.round(amount * 0.21 * 100) / 100;
   }
 }
 </code></pre>
