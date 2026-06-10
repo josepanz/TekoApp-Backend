@@ -1,3 +1,9 @@
+## 1.0.0-develop.3 (2026-06-10)
+
+* Merge branch 'qa' into develop ([94c4138](https://github.com/josepanz/TekoApp-Backend/commit/94c4138))
+* feat: initial arquitecture and modules  (#2) ([974835c](https://github.com/josepanz/TekoApp-Backend/commit/974835c)), closes [#2](https://github.com/josepanz/TekoApp-Backend/issues/2)
+* feat: initial deploy with github ci/cd (#7) ([dbe21e2](https://github.com/josepanz/TekoApp-Backend/commit/dbe21e2)), closes [#7](https://github.com/josepanz/TekoApp-Backend/issues/7) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+
 ## 1.0.0-develop.2 (2026-06-10)
 
 * feat: improve, ci-cd and github config (#8) ([04db574](https://github.com/josepanz/TekoApp-Backend/commit/04db574)), closes [#8](https://github.com/josepanz/TekoApp-Backend/issues/8)
