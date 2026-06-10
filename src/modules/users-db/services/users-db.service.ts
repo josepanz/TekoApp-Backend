@@ -448,6 +448,20 @@ export class UsersDBService {
     });
   }
 
+  async updateDocumentInfo(
+    userId: number,
+    documentNumber: string | null,
+    documentTypeId: number | null,
+  ): Promise<void> {
+    await this.prisma.extended.users.update({
+      where: { id: userId },
+      data: {
+        documentNumber,
+        documentTypeId,
+      },
+    });
+  }
+
   async updateLastLogin(userId: number): Promise<void> {
     await this.prisma.extended.users.update({
       where: { id: userId },
