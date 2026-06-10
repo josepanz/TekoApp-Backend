@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "engram": {
+      "command": "npx",
+      "args": ["@llmindset/mcp-engram"],
+      "env": {
+        "ENGRAM_DB_PATH": "./.engram/memories.db"
+      }
+    }
+  }
+}
