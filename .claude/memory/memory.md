@@ -21,11 +21,12 @@ Al comenzar cualquier sesión:
 Cuando el usuario diga **"guarda sesión"** o **"compact"**:
 
 Crear o actualizar `memory/sessions/session_N_user_accion.md` donde:
+
 - `N` = número de sesión (incrementar del último existente)
 - `user` = usuario que realizo sesión para no pisar los números de session por usuario ya que varios developers trabajan en el mismo proyecto
 - `accion` = slug 2-3 palabras de lo hecho (ej: `auth_jwt`, `fix_payments`, `refactor_users`)
 
-Si no lo dice y cierra la sesión/chat tanto en claude code desktop como la extension vscode, se proactivo y ejecuta el guardado tu. 
+Si no lo dice y cierra la sesión/chat tanto en claude code desktop como la extension vscode, se proactivo y ejecuta el guardado tu.
 
 También, proactivamente aprende de los errores y soluciones aplicadas para cada sesión para no volver a cometerlas o saber como solucionarlas, si es posible, al codificar ya saber que evitar y ajusta y mejoras las reglas mientras vas iterando.
 
@@ -35,19 +36,24 @@ Se proactivo y evalua y reordena (mueve los archivos viejos) las sesiones antigu
 # Sesión N — [Fecha] — [Descripción breve]
 
 ## Qué se hizo
+
 - [Lista de cambios realizados]
 
 ## Decisiones tomadas
+
 - [Por qué X sobre Y]
 
 ## Archivos modificados
+
 - `ruta/archivo.ext` — descripción del cambio
 
 ## Próximos pasos
+
 - [ ] Tarea pendiente 1
 - [ ] Tarea pendiente 2
 
 ## Estado al cerrar
+
 [1-2 líneas describiendo en qué punto quedó todo]
 ```
 
@@ -55,14 +61,14 @@ Se proactivo y evalua y reordena (mueve los archivos viejos) las sesiones antigu
 
 ## Triggers automáticos
 
-| Trigger | Acción |
-|---------|--------|
-| "nueva regla: ..." | Agregar a `rules/*.md` correspondiente |
-| "recuerda que siempre..." | Agregar a `rules/*.md` |
-| "corrige esto..." | Agregar corrección a `rules/*.md` |
+| Trigger                     | Acción                                                          |
+| --------------------------- | --------------------------------------------------------------- |
+| "nueva regla: ..."          | Agregar a `rules/*.md` correspondiente                          |
+| "recuerda que siempre..."   | Agregar a `rules/*.md`                                          |
+| "corrige esto..."           | Agregar corrección a `rules/*.md`                               |
 | "guarda sesión" / "compact" | Crear archivo de sesión + actualizar `documentation/context.md` |
-| "¿qué hicimos?" | Leer y resumir la última sesión |
-| "¿dónde quedamos?" | Leer `documentation/context.md` + última sesión y responder |
+| "¿qué hicimos?"             | Leer y resumir la última sesión                                 |
+| "¿dónde quedamos?"          | Leer `documentation/context.md` + última sesión y responder     |
 
 ---
 

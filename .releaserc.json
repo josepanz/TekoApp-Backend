@@ -16,11 +16,11 @@
       {
         "preset": "conventionalcommits",
         "releaseRules": [
-          { "type": "fix",      "release": "patch" },
-          { "type": "feat",     "release": "minor" },
-          { "type": "docs",     "release": "patch" },
+          { "type": "fix", "release": "patch" },
+          { "type": "feat", "release": "minor" },
+          { "type": "docs", "release": "patch" },
           { "type": "refactor", "release": "minor" },
-          { "type": "ci",       "release": "patch" }
+          { "type": "ci", "release": "patch" }
         ],
         "parserOpts": {
           "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BC"]
