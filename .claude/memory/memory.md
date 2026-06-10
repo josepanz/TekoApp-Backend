@@ -20,15 +20,16 @@ Al comenzar cualquier sesión:
 
 Cuando el usuario diga **"guarda sesión"** o **"compact"**:
 
-Crear o actualizar `memory/sessions/session_N_accion.md` donde:
+Crear o actualizar `memory/sessions/session_N_user_accion.md` donde:
 - `N` = número de sesión (incrementar del último existente)
+- `user` = usuario que realizo sesión para no pisar los números de session por usuario ya que varios developers trabajan en el mismo proyecto
 - `accion` = slug 2-3 palabras de lo hecho (ej: `auth_jwt`, `fix_payments`, `refactor_users`)
 
 Si no lo dice y cierra la sesión/chat tanto en claude code desktop como la extension vscode, se proactivo y ejecuta el guardado tu. 
 
 También, proactivamente aprende de los errores y soluciones aplicadas para cada sesión para no volver a cometerlas o saber como solucionarlas, si es posible, al codificar ya saber que evitar y ajusta y mejoras las reglas mientras vas iterando.
 
-Se proactivo y evalua y reordena (mueve los archivos viejos) las sesiones antiguas (> 5 sesiones atrás) → archivar en `memory/sessions/archive/` crear si no existe
+Se proactivo y evalua y reordena (mueve los archivos viejos) las sesiones antiguas (> 5 sesiones atrás) → archivar en `memory/sessions/archive/` crear si no existe la carpeta `memory/sessions/archive/` y mueve los archivos viejos alli.
 
 ```markdown
 # Sesión N — [Fecha] — [Descripción breve]
@@ -78,6 +79,7 @@ Se proactivo y evalua y reordena (mueve los archivos viejos) las sesiones antigu
 └── memory/
     ├── memory.md               ← este archivo: protocolo de memoria
     └── sessions/               ← historial de sesiones (session_N_accion.md)
+        └── archive/              ← historial de sesiones viejas, menores a 5 sesiones anteriores
 ```
 
 ---
