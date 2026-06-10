@@ -5,7 +5,7 @@
 # =============================================================
 
 # Aplicación
-NODE_ENV=staging
+NODE_ENV=qa
 PORT=3000
 APP_URL=https://qa-tekoapp.com.py
 
