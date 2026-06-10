@@ -1,0 +1,641 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tekoapp-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+          <script>
+              // --- Iframe navigation tracking for Template Playground ---
+              function sendCurrentUrlToParent() {
+                  if (window.parent && window.parent !== window) {
+                      window.parent.postMessage({
+                          type: 'compodoc-iframe-navigate',
+                          url: window.location.pathname + window.location.hash
+                      }, '*');
+                  }
+              }
+              window.addEventListener('hashchange', sendCurrentUrlToParent, false);
+              window.addEventListener('popstate', sendCurrentUrlToParent, false);
+              window.addEventListener('DOMContentLoaded', sendCurrentUrlToParent, false);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="../" class="navbar-brand">tekoapp-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content miscellaneous-typealiases">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Miscellaneous</li>
+  <li class="breadcrumb-item">Type aliases</li>
+</ol>
+
+<section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <ul class="index-list">
+                        <li>
+                            <a href="#AppConfigType" title="src/core/config/config-loader.ts" ><b>AppConfigType</b>&nbsp;&nbsp;&nbsp;(src/.../config-loader.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#CacheEntry" title="src/modules/payments-db/services/fee-calculator.service.ts" ><b>CacheEntry</b>&nbsp;&nbsp;&nbsp;(src/.../fee-calculator.service.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#CacheTypeKey" title="src/core/config/constants/cache-ttl.constant.ts" ><b>CacheTypeKey</b>&nbsp;&nbsp;&nbsp;(src/.../cache-ttl.constant.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#DeleteFileTarget" title="src/modules/storage/types/storage.types.ts" ><b>DeleteFileTarget</b>&nbsp;&nbsp;&nbsp;(src/.../storage.types.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#ExportFormat" title="src/core/interceptors/file-download.interceptor.ts" ><b>ExportFormat</b>&nbsp;&nbsp;&nbsp;(src/.../file-download.interceptor.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#GeoTrackingLogLean" title="src/modules/tracking-db/services/tacking-db.service.ts" ><b>GeoTrackingLogLean</b>&nbsp;&nbsp;&nbsp;(src/.../tacking-db.service.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#HtmlPdfNode" title="src/modules/report/infrastructure/pdf-html-generator.hint.ts" ><b>HtmlPdfNode</b>&nbsp;&nbsp;&nbsp;(src/.../pdf-html-generator.hint.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IPdfEngine" title="src/modules/report/domain/types/report.type.ts" ><b>IPdfEngine</b>&nbsp;&nbsp;&nbsp;(src/.../report.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IReportFormat" title="src/modules/report/domain/types/report.type.ts" ><b>IReportFormat</b>&nbsp;&nbsp;&nbsp;(src/.../report.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#PermissionType" title="src/common/enum/permissions.enum.ts" ><b>PermissionType</b>&nbsp;&nbsp;&nbsp;(src/.../permissions.enum.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#PresignedUrlTarget" title="src/modules/storage/types/storage.types.ts" ><b>PresignedUrlTarget</b>&nbsp;&nbsp;&nbsp;(src/.../storage.types.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#PrismaModelDelegate" title="src/core/database/types/prisma.type.ts" ><b>PrismaModelDelegate</b>&nbsp;&nbsp;&nbsp;(src/.../prisma.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#ProfessionalReviewWithRelations" title="src/modules/professionals-db/types/professionals-db.type.ts" ><b>ProfessionalReviewWithRelations</b>&nbsp;&nbsp;&nbsp;(src/.../professionals-db.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#ProfessionalServiceWithRelations" title="src/modules/professionals-db/types/professionals-db.type.ts" ><b>ProfessionalServiceWithRelations</b>&nbsp;&nbsp;&nbsp;(src/.../professionals-db.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#ProfessionalWithRelations" title="src/modules/professionals-db/types/professionals-db.type.ts" ><b>ProfessionalWithRelations</b>&nbsp;&nbsp;&nbsp;(src/.../professionals-db.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#SortDirection" title="src/common/validators/is-order-by-format.validator.ts" ><b>SortDirection</b>&nbsp;&nbsp;&nbsp;(src/.../is-order-by-format.validator.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#StoragePresignedUrlInput" title="src/modules/storage/types/storage.types.ts" ><b>StoragePresignedUrlInput</b>&nbsp;&nbsp;&nbsp;(src/.../storage.types.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#UserCredentialsWithUser" title="src/modules/auth/types/user-credentials.types.ts" ><b>UserCredentialsWithUser</b>&nbsp;&nbsp;&nbsp;(src/.../user-credentials.types.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#UserWithDetail" title="src/modules/users-db/types/users-db.type.ts" ><b>UserWithDetail</b>&nbsp;&nbsp;&nbsp;(src/.../users-db.type.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#UserWithSecurities" title="src/modules/auth/types/user.types.ts" ><b>UserWithSecurities</b>&nbsp;&nbsp;&nbsp;(src/.../user.types.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#UserWithSecuritiesExtended" title="src/modules/auth/types/user.types.ts" ><b>UserWithSecuritiesExtended</b>&nbsp;&nbsp;&nbsp;(src/.../user.types.ts)</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    <h3>src/core/config/config-loader.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="AppConfigType"></a>
+                    <span class="name "><b>AppConfigType</b><a href="#AppConfigType"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>unknown</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/payments-db/services/fee-calculator.service.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="CacheEntry"></a>
+                    <span class="name "><b>CacheEntry</b><a href="#CacheEntry"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/core/config/constants/cache-ttl.constant.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="CacheTypeKey"></a>
+                    <span class="name "><b>CacheTypeKey</b><a href="#CacheTypeKey"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>unknown</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/storage/types/storage.types.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="DeleteFileTarget"></a>
+                    <span class="name "><b>DeleteFileTarget</b><a href="#DeleteFileTarget"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>string | literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="PresignedUrlTarget"></a>
+                    <span class="name "><b>PresignedUrlTarget</b><a href="#PresignedUrlTarget"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../interfaces/StoragePresignedUrlInput.html" target="_self" >string | StoragePresignedUrlInput</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="StoragePresignedUrlInput"></a>
+                    <span class="name "><b>StoragePresignedUrlInput</b><a href="#StoragePresignedUrlInput"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/core/interceptors/file-download.interceptor.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ExportFormat"></a>
+                    <span class="name "><b>ExportFormat</b><a href="#ExportFormat"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;xlsx&quot; | &quot;pdf&quot; | &quot;csv&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/tracking-db/services/tacking-db.service.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="GeoTrackingLogLean"></a>
+                    <span class="name "><b>GeoTrackingLogLean</b><a href="#GeoTrackingLogLean"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>unknown</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/report/infrastructure/pdf-html-generator.hint.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="HtmlPdfNode"></a>
+                    <span class="name "><b>HtmlPdfNode</b><a href="#HtmlPdfNode"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/report/domain/types/report.type.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IPdfEngine"></a>
+                    <span class="name "><b>IPdfEngine</b><a href="#IPdfEngine"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;html&quot; | &quot;native&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IReportFormat"></a>
+                    <span class="name "><b>IReportFormat</b><a href="#IReportFormat"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;pdf&quot; | &quot;xlsx&quot; | &quot;csv&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/common/enum/permissions.enum.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="PermissionType"></a>
+                    <span class="name "><b>PermissionType</b><a href="#PermissionType"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>unknown</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/core/database/types/prisma.type.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="PrismaModelDelegate"></a>
+                    <span class="name "><b>PrismaModelDelegate</b><a href="#PrismaModelDelegate"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/professionals-db/types/professionals-db.type.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ProfessionalReviewWithRelations"></a>
+                    <span class="name "><b>ProfessionalReviewWithRelations</b><a href="#ProfessionalReviewWithRelations"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>Prisma.RatingGetPayload&lt;literal type&gt;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ProfessionalServiceWithRelations"></a>
+                    <span class="name "><b>ProfessionalServiceWithRelations</b><a href="#ProfessionalServiceWithRelations"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>Prisma.ServicesGetPayload&lt;literal type&gt;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ProfessionalWithRelations"></a>
+                    <span class="name "><b>ProfessionalWithRelations</b><a href="#ProfessionalWithRelations"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>Prisma.ProfessionalsGetPayload&lt;literal type&gt;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/common/validators/is-order-by-format.validator.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="SortDirection"></a>
+                    <span class="name "><b>SortDirection</b><a href="#SortDirection"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;desc&quot; | &quot;asc&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/auth/types/user-credentials.types.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="UserCredentialsWithUser"></a>
+                    <span class="name "><b>UserCredentialsWithUser</b><a href="#UserCredentialsWithUser"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../miscellaneous/variables.html#User" target="_self" >Prisma.UserCredentialsGetPayload&lt;unknown&gt;</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/users-db/types/users-db.type.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="UserWithDetail"></a>
+                    <span class="name "><b>UserWithDetail</b><a href="#UserWithDetail"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../miscellaneous/variables.html#User" target="_self" >Prisma.UsersGetPayload&lt;literal type&gt;</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/modules/auth/types/user.types.ts</h3>
+    <section data-compodoc="block-typealias">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="UserWithSecurities"></a>
+                    <span class="name "><b>UserWithSecurities</b><a href="#UserWithSecurities"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../miscellaneous/variables.html#User" target="_self" >Prisma.UsersGetPayload&lt;unknown&gt;</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="UserWithSecuritiesExtended"></a>
+                    <span class="name "><b>UserWithSecuritiesExtended</b><a href="#UserWithSecuritiesExtended"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../miscellaneous/variables.html#User" target="_self" >Prisma.UsersGetPayload&lt;unknown&gt;</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'miscellaneous-typealiases';
+            var COMPODOC_CURRENT_PAGE_URL = 'typealiases.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

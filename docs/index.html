@@ -1,0 +1,1000 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>tekoapp-backend documentation</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+	   <link rel="stylesheet" href="./styles/style.css">
+        <link rel="stylesheet" href="./styles/dark.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+          <script>
+              // --- Iframe navigation tracking for Template Playground ---
+              function sendCurrentUrlToParent() {
+                  if (window.parent && window.parent !== window) {
+                      window.parent.postMessage({
+                          type: 'compodoc-iframe-navigate',
+                          url: window.location.pathname + window.location.hash
+                      }, '*');
+                  }
+              }
+              window.addEventListener('hashchange', sendCurrentUrlToParent, false);
+              window.addEventListener('popstate', sendCurrentUrlToParent, false);
+              window.addEventListener('DOMContentLoaded', sendCurrentUrlToParent, false);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-md-none p-0">
+               <div class="d-flex">
+                    <a href="./" class="navbar-brand">tekoapp-backend documentation</a>
+                    <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+               </div>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="d-none d-md-block menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content readme">
+                   <div class="content-data">
+
+
+<div align="center">
+
+<h1>TekoApp テコ — Plataforma de Servicios Profesionales</h1>
+<p><img src="https://example.com/path/to/your/banner.png" alt="TekoApp Banner" class="img-responsive"></p>
+<p><strong>Conectando talento con necesidad, donde sea, cuando sea.</strong></p>
+<p><a href="https://nestjs.com/"><img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" class="img-responsive"></a>
+<a href="https://www.prisma.io/"><img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" class="img-responsive"></a>
+<a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" class="img-responsive"></a>
+<a href="https://www.mongodb.com/"><img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" class="img-responsive"></a>
+<a href="https://flutter.dev/"><img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" class="img-responsive"></a>
+<a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" class="img-responsive"></a>
+<a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" class="img-responsive"></a></p>
+</div>
+
+<hr>
+<h2>Descripción</h2>
+<p><strong>TekoApp</strong> es una plataforma de economía colaborativa que conecta usuarios con profesionales de servicios de oficio (electricistas, plomeros, pintores, carpinteros, etc.) de manera rápida, segura y geolocalizada.</p>
+<p>Inspirada en la eficiencia logística de modelos como Uber o Bolt, pero adaptada al sector de servicios profesionales:</p>
+<p>TekoApp ofrece:</p>
+<ul>
+<li><strong>Doble Rol:</strong> Una sola cuenta permite operar como Cliente o Profesional indistintamente.</li>
+<li><strong>Tracking en Tiempo Real:</strong> Geolocalización y telemetría de profesionales disponibles con índices <code>2dsphere</code>.</li>
+<li><strong>Reputación Bidireccional:</strong> Calificaciones mutuas para garantizar confianza entre ambas partes.</li>
+<li><strong>Economía Dinámica:</strong> Precios establecidos por cada profesional, pagos integrados vía Stripe.</li>
+<li><strong>Ecosistema Completo:</strong> App móvil nativa (Flutter) y panel de administración web (Next.js).</li>
+</ul>
+<hr>
+<h2>♟️ El poder detrás del nombre &quot;Teko&quot;</h2>
+<p>El nombre de nuestra plataforma fusiona dos conceptos culturales poderosos que definen nuestra misión:</p>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Idioma</th>
+<th>Escritura</th>
+<th>Significado</th>
+<th>Simbolismo en la Arquitectura de la App</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Guaraní</strong></td>
+<td>Teko</td>
+<td><em>&quot;Vida / Estilo&quot;</em></td>
+<td>Representa nuestra misión de mejorar el día a día y conectar a la comunidad.</td>
+</tr>
+<tr>
+<td><strong>Japonés</strong></td>
+<td>テコ</td>
+<td><em>&quot;Palanca&quot;</em></td>
+<td>Simboliza el apalancamiento tecnológico; somos la herramienta que multiplica las oportunidades.</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li><strong>En guaraní</strong>: El nombre &quot;Teko&quot; proviene del guaraní y significa &quot;vida&quot; o &quot;estilo de vida&quot;, representando nuestra misión de mejorar la vida de las personas conectándolas con los mejores profesionales.<ul>
+<li>Significa <em>&quot;vida&quot; o &quot;estilo de vida&quot;</em>, representando nuestra misión de mejorar el día a día de las personas.</li>
+<li>Representa la conexión entre los profesionales y los clientes.</li>
+<li>Evoca un sentido de comunidad y bienestar.</li>
+</ul>
+</li>
+<li><strong>En japonés (テコ)</strong>: Significa <em>&quot;palanca&quot;</em>, simbolizando cómo nuestra app sirve como herramienta para <strong>conectar y potenciar</strong> oportunidades entre profesionales y clientes, lo que añade un significado poderoso y simbólico reforzando el concepto de conexión y facilitación de servicios.<ul>
+<li>Escritura japonesa: テコ (katakana) / 梃子 (kanji menos común).</li>
+<li>Significado:<ul>
+<li>Palanca (herramienta física que multiplica fuerza).</li>
+<li>Apalancamiento (en contexto figurado: &quot;ser un puente&quot; o &quot;facilitador&quot;).</li>
+<li>Uso: Es una palabra reconocida en japonés, aunque no es de uso cotidiano (se usa más en contextos técnicos/mecánicos).</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>Ecosistema de Repositorios</h2>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Componente</th>
+<th>Repositorio</th>
+<th>Stack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Backend Core</strong></td>
+<td><a href="https://github.com/josepanz/TekoApp-Backend">TekoApp-Backend</a></td>
+<td>NestJS 10, Prisma, Mongoose, Redis, Sharp</td>
+</tr>
+<tr>
+<td><strong>Mobile App</strong></td>
+<td><a href="https://github.com/josepanz/TekoApp-Frontend-Mobile">TekoApp-Mobile</a></td>
+<td>Flutter 3, Riverpod, go_router, dio</td>
+</tr>
+<tr>
+<td><strong>Web Admin</strong></td>
+<td><a href="https://github.com/josepanz/TekoApp-Frontend-Web">TekoApp-Web</a></td>
+<td>Next.js 14, shadcn/ui, TanStack Query</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Arquitectura del Backend</h2>
+<p>El backend de TekoApp está construido bajo principios estrictos de <strong>Clean Architecture</strong> y <strong>Domain-Driven Design (DDD)</strong>. </p>
+<p>El backend impone una frontera rígida entre la capa HTTP y la de persistencia.</p>
+<h3>Estructura en dos capas</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-none">src/
+├── api/                    # Capa HTTP — controllers, DTOs, services orquestadores
+│   ├── analytics/          # Métricas y reportes
+│   ├── categories/         # Categorías de servicios
+│   ├── locations/          # Geolocalización
+│   ├── payments/           # Stripe: pagos y webhooks
+│   ├── professionals/      # Gestión de profesionales
+│   ├── promotions/         # Promociones y descuentos
+│   ├── ratings/            # Calificaciones bidireccionales
+│   ├── roles-permission/   # Control de acceso RBAC
+│   ├── services/           # Solicitudes de servicio
+│   ├── uploads/            # Subida de archivos (S3 + Sharp)
+│   └── users/              # Gestión de usuarios
+├── modules/                # Capa de dominio — lógica reutilizable, conexiones DB
+│   ├── auth/               # JWT custom: guards, decorators, access/refresh tokens
+│   ├── email/              # Nodemailer SMTP
+│   ├── notifications/      # Firebase FCM + colas Bull
+│   ├── onboarding/         # Flujo de registro
+│   ├── report/             # Generación de reportes
+│   ├── storage/            # Abstracción AWS S3
+│   ├── users/              # Gestión core de usuarios
+│   └── *-db/               # Abstracción Prisma por dominio
+│       ├── analytics-db/
+│       ├── categories-db/
+│       ├── locations-db/
+│       ├── payments-db/
+│       ├── professionals-db/
+│       ├── promotions-db/
+│       ├── ratings-db/
+│       ├── roles-permission-db/
+│       ├── services-db/
+│       ├── tracking-db/
+│       └── users-db/
+├── core/
+│   ├── database/           # PrismaDatasource (&#64;Global, usa .extended para auditoría)
+│   └── config/             # APP_CONFIG con validación JOI — nunca process.env directo
+└── common/                 # Validators, pipes, decorators, helpers compartidos</code></pre></div><blockquote>
+<p><strong>Regla de oro:</strong> <code>api/*</code> nunca accede a Prisma directamente. Siempre a través del módulo <code>*-db</code> correspondiente.</p>
+</blockquote>
+<h3>Estrategia de persistencia híbrida</h3>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>DB</th>
+<th>Propósito</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PostgreSQL</strong> (Prisma)</td>
+<td>Transacciones financieras, perfiles, roles, facturación</td>
+<td>ACID garantizado</td>
+</tr>
+<tr>
+<td><strong>MongoDB</strong> (Mongoose)</td>
+<td>Telemetría, GeoTracking (<code>2dsphere</code>), logs de notificaciones</td>
+<td>Writes masivos, schema flexible</td>
+</tr>
+<tr>
+<td><strong>Redis</strong> (BullMQ)</td>
+<td>Colas asíncronas: webhooks Stripe, push notifications, presigned URL cache</td>
+<td>Desacopla procesamiento pesado del request cycle</td>
+</tr>
+</tbody>
+</table>
+<h3>Proveedores externos</h3>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Proveedor</th>
+<th>Propósito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stripe</td>
+<td>Pagos, métodos de pago, webhooks</td>
+</tr>
+<tr>
+<td>Firebase</td>
+<td>Notificaciones push (FCM)</td>
+</tr>
+<tr>
+<td>Twilio</td>
+<td>Verificación por SMS</td>
+</tr>
+<tr>
+<td>AWS S3</td>
+<td>Almacenamiento de archivos e imágenes</td>
+</tr>
+<tr>
+<td>Google Maps</td>
+<td>Geolocalización, servicios cercanos</td>
+</tr>
+<tr>
+<td>Sharp</td>
+<td>Procesamiento de imágenes en memoria (resize, JPEG, thumbnails)</td>
+</tr>
+</tbody>
+</table>
+<h3>Estado del proyecto (Sesión 13 — 2026-06-09)</h3>
+<ul>
+<li><code>pnpm lint</code> — <strong>0 errores, 0 warnings</strong></li>
+<li><code>pnpm build</code> (tsc --noEmit) — <strong>0 errores TypeScript</strong></li>
+<li><code>pnpm test</code> — <strong>59 suites, ~867 tests, todos PASS</strong></li>
+<li><code>node dist/main</code> — Arranca correctamente (todos los módulos DI inicializan)</li>
+</ul>
+<hr>
+<h2>Instalación y Desarrollo Local — Backend</h2>
+<p><strong>Requisitos:</strong> Node.js 22+, pnpm, Docker.</p>
+<h3>1. Clonar el repositorio</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">git clone https://github.com/josepanz/TekoApp-Backend.git
+cd TekoApp-Backend</code></pre></div><h3>2. Instalar dependencias</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">pnpm install</code></pre></div><h3>3. Levantar infraestructura local</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash"># Levanta PostgreSQL, MongoDB y Redis con Docker
+docker-compose up -d</code></pre></div><h3>4. Configurar el entorno</h3>
+<p>Crea <code>.env</code> en la raíz (usa <code>.env.example</code> como referencia):</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-properties"># App
+PORT=3000
+NODE_ENV=development
+
+# Databases
+DATABASE_URL=&quot;postgresql://postgres:password&#64;localhost:5432/tekoapp?schema=public&quot;
+MONGODB_URI=&quot;mongodb://localhost:27017/tekoapp_logs&quot;
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Auth — JWT con RS256 (generar con: openssl genrsa -out private.pem 2048)
+JWT_PRIVATE_KEY=&quot;-----BEGIN RSA PRIVATE KEY-----\n...&quot;
+JWT_PUBLIC_KEY=&quot;-----BEGIN PUBLIC KEY-----\n...&quot;
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+# AWS S3
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=tekoapp-dev
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Firebase (JSON stringificado del service account)
+FIREBASE_SERVICE_ACCOUNT={&quot;type&quot;:&quot;service_account&quot;,...}
+
+# Twilio
+TWILIO_ACCOUNT_SID=ACxxxxx
+TWILIO_AUTH_TOKEN=your_token
+TWILIO_PHONE_NUMBER=+1234567890
+
+# Google Maps
+GOOGLE_MAPS_API_KEY=AIzaSy...
+
+# Email SMTP
+SMTP_HOST=smtp.mailtrap.io
+SMTP_PORT=587
+SMTP_USER=your_user
+SMTP_PASS=your_pass
+SMTP_FROM=&quot;TekoApp &lt;noreply&#64;tekoapp.com&gt;&quot;</code></pre></div><h3>5. Generar cliente Prisma e iniciar</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">pnpm prisma generate
+pnpm prisma db push        # aplica el schema sin migraciones (dev)
+pnpm run start:dev         # hot-reload con watch mode</code></pre></div><h3>6. Comandos útiles</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">pnpm test                  # ejecutar todos los tests
+pnpm test:watch            # modo watch
+pnpm test:cov              # reporte de cobertura
+pnpm lint                  # ESLint + auto-fix
+pnpm build                 # compilar con tsc</code></pre></div><hr>
+<h2>Despliegue en Producción (Kubernetes / K3s)</h2>
+<p>TekoApp está diseñado para entornos distribuidos con Kubernetes (K3s/K8s):</p>
+<ul>
+<li><strong>Secretos:</strong> HashiCorp Vault con Agent Injectors — nunca en ConfigMap</li>
+<li><strong>Escalado:</strong> HPA (Horizontal Pod Autoscaler) por CPU/memoria</li>
+<li><strong>Imágenes:</strong> Multi-stage Docker build con <code>node:22-alpine</code>, <code>USER node</code> antes de <code>CMD</code></li>
+<li><strong>Health checks:</strong> Readiness y liveness probes en cada Deployment (<code>/health</code>)</li>
+<li><strong>CI/CD:</strong> Pipeline <code>lint → test → build → scan → deploy</code></li>
+</ul>
+<p>Los manifiestos YAML de infraestructura se encuentran en <code>/ci</code>.</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash"># Build de imagen de producción
+docker build -t tekoapp-backend:latest .
+
+# Deploy con Helm / kubectl
+kubectl apply -f ci/k8s/</code></pre></div><hr>
+<h2>TekoApp-Web — Panel de Administración</h2>
+<h3>Stack recomendado</h3>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Capa</th>
+<th>Tecnología</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framework</td>
+<td><strong>Next.js 14+ (App Router)</strong></td>
+<td>SSR/SSG, server components, routing nativo, mejor DX que CRA</td>
+</tr>
+<tr>
+<td>UI</td>
+<td><strong>shadcn/ui + Tailwind CSS</strong></td>
+<td>Componentes accesibles pre-construidos, personalizables, sin bundle overhead</td>
+</tr>
+<tr>
+<td>Estado servidor</td>
+<td><strong>TanStack Query v5</strong></td>
+<td>Cache, refetch, optimistic updates — reemplaza Redux para server state</td>
+</tr>
+<tr>
+<td>Estado cliente</td>
+<td><strong>Zustand</strong></td>
+<td>Más simple que Redux para estado UI local (modales, filtros, etc.)</td>
+</tr>
+<tr>
+<td>Formularios</td>
+<td><strong>React Hook Form + Zod</strong></td>
+<td>Validación isomórfica compartida con el backend</td>
+</tr>
+<tr>
+<td>Tablas</td>
+<td><strong>TanStack Table v8</strong></td>
+<td>El panel tendrá muchas grids — esta lib es la mejor opción</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td><strong>Axios</strong> con interceptores para JWT refresh automático</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Si el equipo ya conoce Redux, usar <strong>Redux Toolkit + RTK Query</strong> es válido — no instalar Redux &quot;vanilla&quot;.</p>
+</blockquote>
+<h3>Estructura de carpetas (Next.js App Router)</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-none">TekoApp-Web/
+├── src/
+│   ├── app/                              # Next.js App Router — server components por defecto
+│   │   ├── (auth)/                       # Rutas públicas (sin sidebar)
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx             # Server component — muestra LoginForm (client)
+│   │   │   └── forgot-password/
+│   │   │       └── page.tsx
+│   │   ├── (dashboard)/                  # Rutas protegidas — comparten layout con sidebar
+│   │   │   ├── layout.tsx               # DashboardLayout: Sidebar + Header + auth check
+│   │   │   ├── page.tsx                 # Overview: stats cards (server component)
+│   │   │   ├── professionals/
+│   │   │   │   ├── page.tsx             # Lista paginada (server: fetch inicial)
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx         # Detalle + edición del profesional
+│   │   │   ├── services/
+│   │   │   │   ├── page.tsx             # Solicitudes de servicio con filtros
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── payments/
+│   │   │   │   └── page.tsx             # Historial de pagos + Stripe webhooks
+│   │   │   ├── promotions/
+│   │   │   │   └── page.tsx
+│   │   │   ├── analytics/
+│   │   │   │   └── page.tsx             # Gráficas (client component — usa recharts)
+│   │   │   ├── categories/
+│   │   │   │   └── page.tsx
+│   │   │   ├── users/
+│   │   │   │   └── page.tsx
+│   │   │   └── settings/
+│   │   │       └── page.tsx
+│   │   ├── layout.tsx                   # Root layout: fuentes, QueryClientProvider, AuthProvider
+│   │   └── globals.css
+│   │
+│   ├── components/
+│   │   ├── ui/                          # shadcn/ui — NO modificar manualmente, regenerar con CLI
+│   │   │   ├── button.tsx
+│   │   │   ├── table.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── badge.tsx
+│   │   │   └── ...
+│   │   └── shared/                      # Componentes de dominio reutilizables
+│   │       ├── data-table.tsx           # Tabla genérica con TanStack Table (sorting, pagination)
+│   │       ├── page-header.tsx          # Título + breadcrumb + acciones
+│   │       ├── sidebar.tsx              # Sidebar con navegación
+│   │       ├── auth-guard.tsx           # HOC/wrapper para rutas protegidas client-side
+│   │       └── confirm-dialog.tsx       # Modal de confirmación reutilizable
+│   │
+│   ├── features/                        # Módulos de feature (co-located: api + hooks + types + components)
+│   │   ├── auth/
+│   │   │   ├── api/
+│   │   │   │   └── auth.api.ts          # loginUser(), refreshToken(), logout()
+│   │   │   ├── hooks/
+│   │   │   │   ├── use-login.ts         # useMutation → auth.api.loginUser
+│   │   │   │   ├── use-logout.ts
+│   │   │   │   └── use-auth-store.ts    # Zustand: { user, accessToken, isAuthenticated }
+│   │   │   ├── types/
+│   │   │   │   └── auth.types.ts        # LoginRequestDTO, AuthResponseDTO (espejo del backend)
+│   │   │   └── components/
+│   │   │       └── login-form.tsx       # &#39;use client&#39; — React Hook Form + Zod
+│   │   │
+│   │   ├── professionals/
+│   │   │   ├── api/
+│   │   │   │   └── professionals.api.ts # getProfessionals(), getProfessional(id), updateProfessional()
+│   │   │   ├── hooks/
+│   │   │   │   ├── use-professionals-list.ts  # useQuery — lista paginada
+│   │   │   │   ├── use-professional.ts        # useQuery — detalle por id
+│   │   │   │   └── use-update-professional.ts # useMutation + invalidateQueries
+│   │   │   ├── types/
+│   │   │   │   └── professional.types.ts
+│   │   │   └── components/
+│   │   │       ├── professionals-table.tsx    # DataTable con columnas tipadas
+│   │   │       └── professional-form.tsx
+│   │   │
+│   │   ├── services/                    # (misma estructura que professionals/)
+│   │   ├── payments/
+│   │   ├── analytics/
+│   │   ├── categories/
+│   │   └── users/
+│   │
+│   ├── lib/
+│   │   ├── api/
+│   │   │   ├── axios.ts                 # Instancia Axios con baseURL + interceptores JWT refresh
+│   │   │   └── query-client.ts          # TanStack Query: QueryClient con staleTime + retry config
+│   │   └── utils/
+│   │       ├── cn.ts                    # clsx + tailwind-merge (helper de shadcn/ui)
+│   │       └── format.ts               # formatDate, formatCurrency, formatFileSize
+│   │
+│   ├── hooks/
+│   │   ├── use-pagination.ts            # Hook genérico de paginación con URL params
+│   │   └── use-debounce.ts
+│   │
+│   └── types/
+│       ├── api.types.ts                 # PaginatedResponse&lt;T&gt;, ApiError, RequestStatus
+│       └── index.ts
+│
+├── public/
+│   ├── logo.svg
+│   └── favicon.ico
+├── .env.example
+├── components.json                      # shadcn/ui CLI config
+├── tailwind.config.ts
+├── next.config.ts
+└── tsconfig.json                        # paths: { &quot;&#64;/*&quot;: [&quot;./src/*&quot;] }</code></pre></div><h4>Convenciones clave (Web)</h4>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Regla</th>
+<th>Aplicación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server vs Client components</td>
+<td>Server por defecto — agregar <code>&#39;use client&#39;</code> solo si hay estado, eventos o hooks</td>
+</tr>
+<tr>
+<td>Estado servidor</td>
+<td>TanStack Query — nunca usar Zustand para datos del backend</td>
+</tr>
+<tr>
+<td>Estado cliente</td>
+<td>Zustand — solo UI state (sidebar abierto, modal activo, filtros locales)</td>
+</tr>
+<tr>
+<td>Formularios</td>
+<td>React Hook Form + Zod — el schema Zod puede ser el mismo que el DTO del backend</td>
+</tr>
+<tr>
+<td>Convención de archivos</td>
+<td>kebab-case para archivos, PascalCase para componentes</td>
+</tr>
+<tr>
+<td>Naming de hooks</td>
+<td><code>use-&lt;feature&gt;-&lt;acción&gt;.ts</code> (ej: <code>use-professionals-list.ts</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3>Instalación (Web)</h3>
+<p><strong>Requisitos:</strong> Node.js 22+, pnpm.</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">git clone https://github.com/josepanz/TekoApp-Frontend-Web.git
+cd TekoApp-Frontend-Web
+
+pnpm install
+
+# Configurar entorno
+cp .env.example .env.local
+# NEXT_PUBLIC_API_URL=http://localhost:3000
+# NEXT_PUBLIC_GOOGLE_MAPS_KEY=AIzaSy...
+
+pnpm dev                   # http://localhost:3001
+pnpm build &amp;&amp; pnpm start   # producción local</code></pre></div><hr>
+<h2>TekoApp-Mobile — App Multiplataforma</h2>
+<h3>Stack recomendado</h3>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Capa</th>
+<th>Tecnología</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framework</td>
+<td><strong>Flutter 3.19+</strong></td>
+<td>Multiplataforma nativo (iOS/Android), un solo codebase</td>
+</tr>
+<tr>
+<td>Estado</td>
+<td><strong>Riverpod 2.x</strong></td>
+<td>Reemplaza Provider: null-safe, testable, sin BuildContext en lógica</td>
+</tr>
+<tr>
+<td>Navegación</td>
+<td><strong>go_router 13+</strong></td>
+<td>Deep linking, guards, rutas tipadas — mucho mejor que Navigator 2.0 manual</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td><strong>dio</strong></td>
+<td>Interceptores, FormData, cancel tokens — mejor que el paquete <code>http</code></td>
+</tr>
+<tr>
+<td>Modelos</td>
+<td><strong>freezed + json_serializable</strong></td>
+<td>Clases inmutables con copyWith, fromJson/toJson autogenerado</td>
+</tr>
+<tr>
+<td>Mapas</td>
+<td><strong>google_maps_flutter</strong></td>
+<td>Integración nativa con Google Maps SDK</td>
+</tr>
+<tr>
+<td>Push</td>
+<td><strong>firebase_messaging</strong></td>
+<td>FCM para notificaciones push del backend</td>
+</tr>
+</tbody>
+</table>
+<h3>Arquitectura: Clean Architecture por features</h3>
+<p>Cada feature tiene 3 capas: <strong>data</strong> (implementación), <strong>domain</strong> (contratos puros), <strong>presentation</strong> (UI + Riverpod).</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-none">TekoApp-Mobile/
+├── lib/
+│   ├── core/
+│   │   ├── config/
+│   │   │   └── app_config.dart           # apiBaseUrl, googleMapsKey, isDev flag
+│   │   ├── network/
+│   │   │   ├── dio_client.dart           # Instancia Dio con baseOptions + timeouts
+│   │   │   └── auth_interceptor.dart     # Agrega Bearer token; llama refreshToken si 401
+│   │   ├── router/
+│   │   │   ├── app_router.dart           # GoRouter con todas las rutas declaradas
+│   │   │   └── auth_guard.dart           # redirect: (ctx, state) → &#39;/login&#39; si no autenticado
+│   │   ├── theme/
+│   │   │   ├── app_theme.dart            # ThemeData claro + oscuro
+│   │   │   ├── app_colors.dart           # Paleta de colores de la marca
+│   │   │   └── app_text_styles.dart      # TextStyle por tamaño/peso
+│   │   └── utils/
+│   │       ├── extensions.dart           # BuildContext.go(), String.capitalize(), etc.
+│   │       └── validators.dart           # Funciones de validación reutilizables
+│   │
+│   ├── features/
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── data/
+│   │   │   │   ├── datasources/
+│   │   │   │   │   └── auth_remote_datasource.dart   # dio.post(&#39;/auth/login&#39;), refreshToken()
+│   │   │   │   ├── models/
+│   │   │   │   │   ├── login_request_model.dart      # &#64;freezed — toJson para el body
+│   │   │   │   │   └── auth_response_model.dart      # &#64;freezed + fromJson — accessToken, user
+│   │   │   │   └── repositories/
+│   │   │   │       └── auth_repository_impl.dart     # implements AuthRepository
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   │   └── auth_user.dart                # Entidad pura (id, email, roles, etc.)
+│   │   │   │   ├── repositories/
+│   │   │   │   │   └── auth_repository.dart          # abstract interface AuthRepository
+│   │   │   │   └── usecases/
+│   │   │   │       ├── login_usecase.dart            # call(email, password) → AuthUser
+│   │   │   │       ├── logout_usecase.dart
+│   │   │   │       └── refresh_token_usecase.dart
+│   │   │   └── presentation/
+│   │   │       ├── providers/
+│   │   │       │   ├── auth_provider.dart            # authNotifierProvider (AsyncNotifier&lt;AuthUser?&gt;)
+│   │   │       │   └── auth_state.dart               # &#64;freezed: AuthState (loading/authenticated/unauthenticated)
+│   │   │       ├── screens/
+│   │   │       │   ├── login_screen.dart
+│   │   │       │   └── register_screen.dart
+│   │   │       └── widgets/
+│   │   │           └── login_form.dart
+│   │   │
+│   │   ├── home/                         # Mapa principal con profesionales disponibles
+│   │   │   ├── data/
+│   │   │   │   └── datasources/
+│   │   │   │       └── location_datasource.dart      # Geolocator + Google Maps
+│   │   │   └── presentation/
+│   │   │       ├── providers/
+│   │   │       │   └── nearby_professionals_provider.dart
+│   │   │       └── screens/
+│   │   │           └── home_screen.dart              # GoogleMap widget + markers dinámicos
+│   │   │
+│   │   ├── search/                       # Búsqueda por categoría y geolocalización
+│   │   │   ├── data/
+│   │   │   ├── domain/
+│   │   │   └── presentation/
+│   │   │       └── screens/
+│   │   │           └── search_screen.dart            # SearchBar + CategoryGrid + ResultsList
+│   │   │
+│   │   ├── service_request/              # Solicitar / gestionar servicios
+│   │   │   ├── data/
+│   │   │   ├── domain/
+│   │   │   │   └── usecases/
+│   │   │   │       ├── create_service_request_usecase.dart
+│   │   │   │       └── accept_service_request_usecase.dart
+│   │   │   └── presentation/
+│   │   │       └── screens/
+│   │   │           ├── request_service_screen.dart
+│   │   │           └── active_request_screen.dart
+│   │   │
+│   │   ├── tracking/                     # Tracking en tiempo real (WebSocket o polling)
+│   │   │   └── presentation/
+│   │   │       └── screens/
+│   │   │           └── tracking_screen.dart          # GoogleMap + live marker del profesional
+│   │   │
+│   │   ├── profile/                      # Perfil dual: cliente o profesional
+│   │   │   └── presentation/
+│   │   │       └── screens/
+│   │   │           ├── profile_screen.dart
+│   │   │           └── edit_profile_screen.dart
+│   │   │
+│   │   ├── payments/                     # Stripe: métodos de pago, historial
+│   │   │   └── presentation/
+│   │   │       └── screens/
+│   │   │           ├── payment_methods_screen.dart
+│   │   │           └── payment_history_screen.dart
+│   │   │
+│   │   └── ratings/                      # Calificación post-servicio
+│   │       └── presentation/
+│   │           └── widgets/
+│   │               └── rating_dialog.dart            # Modal 1-5 estrellas + comentario
+│   │
+│   ├── shared/
+│   │   ├── widgets/
+│   │   │   ├── app_button.dart           # Botón primario/secundario con loading state
+│   │   │   ├── app_text_field.dart       # TextField con validación y estilo unificado
+│   │   │   ├── loading_overlay.dart      # Overlay de carga que bloquea la pantalla
+│   │   │   ├── error_view.dart           # Vista de error con retry
+│   │   │   └── avatar_widget.dart        # Avatar con presigned URL de S3
+│   │   └── providers/
+│   │       └── app_providers.dart        # dioClientProvider, authRepositoryProvider, etc.
+│   │
+│   └── main.dart                         # ProviderScope(child: MaterialApp.router(routerConfig: appRouter))
+│
+├── test/
+│   ├── features/
+│   │   └── auth/
+│   │       ├── data/
+│   │       │   └── auth_repository_impl_test.dart
+│   │       └── presentation/
+│   │           └── auth_notifier_test.dart
+│   └── helpers/
+│       └── mock_providers.dart           # ProviderContainer con mocks para tests
+│
+├── assets/
+│   ├── images/                           # PNG/SVG de la app
+│   ├── icons/                            # Iconos personalizados
+│   └── fonts/                            # Fuentes (declarar en pubspec.yaml)
+│
+├── android/
+│   └── app/
+│       └── google-services.json          # Firebase — NO commitear (agregar a .gitignore)
+├── ios/
+│   └── Runner/
+│       └── GoogleService-Info.plist      # Firebase — NO commitear
+│
+└── pubspec.yaml</code></pre></div><h4>pubspec.yaml — dependencias principales</h4>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-yaml">dependencies:
+  flutter:
+    sdk: flutter
+
+  # Estado
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navegación
+  go_router: ^13.2.0
+
+  # HTTP
+  dio: ^5.4.3+1
+
+  # Modelos inmutables
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.9.0
+
+  # Firebase
+  firebase_core: ^2.31.1
+  firebase_messaging: ^14.9.1
+
+  # Mapas
+  google_maps_flutter: ^2.6.1
+  geolocator: ^12.0.0
+
+  # Storage local (tokens JWT)
+  flutter_secure_storage: ^9.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.9
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  riverpod_generator: ^2.4.0
+  mockito: ^5.4.4</code></pre></div><h4>Convenciones clave (Mobile)</h4>
+<table class="table table-bordered compodoc-table">
+<thead>
+<tr>
+<th>Regla</th>
+<th>Aplicación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nombres de archivos</td>
+<td>snake_case siempre (<code>auth_screen.dart</code>, no <code>AuthScreen.dart</code>)</td>
+</tr>
+<tr>
+<td>Providers</td>
+<td>Un archivo por provider/notifier — nunca mezclar varios en el mismo archivo</td>
+</tr>
+<tr>
+<td>Repositorios</td>
+<td>domain/ define el <code>abstract interface</code>, data/ provee la implementación</td>
+</tr>
+<tr>
+<td>Modelos vs Entidades</td>
+<td><code>model</code> = data layer (tiene <code>fromJson</code>). <code>entity</code> = domain layer (sin deps externas)</td>
+</tr>
+<tr>
+<td>Generación de código</td>
+<td><code>dart run build_runner build --delete-conflicting-outputs</code> después de modificar <code>@freezed</code> o <code>@riverpod</code></td>
+</tr>
+<tr>
+<td>Tokens JWT</td>
+<td>Almacenar con <code>flutter_secure_storage</code> — nunca en <code>SharedPreferences</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Instalación (Mobile)</h3>
+<p><strong>Requisitos:</strong> Flutter 3.19+, Dart 3.3+, Android Studio / Xcode.</p>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-bash">git clone https://github.com/josepanz/TekoApp-Frontend-Mobile.git
+cd TekoApp-Frontend-Mobile
+
+flutter pub get
+
+# Generar código de freezed y json_serializable
+dart run build_runner build --delete-conflicting-outputs
+
+# Configurar en lib/core/config/app_config.dart:
+#   const String apiBaseUrl = &#39;http://10.0.2.2:3000&#39;;  // Android emulator → localhost
+#   const String googleMapsApiKey = &#39;tu_api_key&#39;;
+
+# Agregar google-services.json (Android) y GoogleService-Info.plist (iOS)
+# desde Firebase Console
+
+flutter run                        # debug en emulador/dispositivo
+flutter build apk --release        # APK Android
+flutter build ios --release        # IPA iOS (requiere Mac + Xcode)</code></pre></div><h3>Patrones clave en Flutter</h3>
+<b>Example :</b><div><pre class="line-numbers"><code class="language-dart">// Provider con Riverpod (ejemplo: obtener profesionales)
+final professionalsProvider = AsyncNotifierProvider&lt;ProfessionalsNotifier, List&lt;Professional&gt;&gt;(
+  ProfessionalsNotifier.new,
+);
+
+// Repositorio: depende del contrato abstracto, no de la implementación
+final professionalRepository = Provider&lt;ProfessionalRepository&gt;(
+  (ref) =&gt; ProfessionalRepositoryImpl(ref.watch(dioProvider)),
+);
+
+// go_router con guard de autenticación
+GoRoute(
+  path: &#39;/home&#39;,
+  redirect: (context, state) =&gt; ref.read(authProvider).isAuthenticated ? null : &#39;/login&#39;,
+  builder: (context, state) =&gt; const HomeScreen(),
+)</code></pre></div><hr>
+<h2>Contribuir</h2>
+<ol>
+<li>Haz un Fork del repositorio.</li>
+<li>Crea tu rama: <code>git checkout -b feature/nueva-feature</code>.</li>
+<li>Respeta el linter y los tests: <code>pnpm lint &amp;&amp; pnpm test</code> (backend) / <code>flutter analyze &amp;&amp; flutter test</code> (mobile).</li>
+<li>Commit siguiendo Conventional Commits: <code>git commit -m &#39;feat: descripción de la feature&#39;</code>.</li>
+<li>Abre un Pull Request describiendo el cambio y su motivación.</li>
+</ol>
+<blockquote>
+<p>Todo el código debe estar fuertemente tipado. No se aceptan PRs con <code>any</code> (TypeScript) o sin cobertura de tests en lógica nueva.</p>
+</blockquote>
+<hr>
+<h2>Contacto</h2>
+<p><strong>José Panza</strong> — CEO/CTO, Tech Lead, Architect &amp; Senior Staff Engineer</p>
+<ul>
+<li>𝕏 (Twitter): <a href="https://twitter.com/PanzerPy">@PanzerPy</a></li>
+<li>Email: <a href="mailto:josepanza1@gmail.com">josepanza1@gmail.com</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 0;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'readme';
+            var COMPODOC_CURRENT_PAGE_URL = 'index.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="./js/libs/custom-elements.min.js"></script>
+       <script src="./js/libs/lit-html.js"></script>
+
+       <script src="./js/menu-wc.js" defer></script>
+       <script nomodule src="./js/menu-wc_es5.js" defer></script>
+
+       <script src="./js/libs/bootstrap-native.js"></script>
+
+       <script src="./js/libs/es6-shim.min.js"></script>
+       <script src="./js/libs/EventDispatcher.js"></script>
+       <script src="./js/libs/promise.min.js"></script>
+
+       <script src="./js/compodoc.js"></script>
+
+       <script src="./js/tabs.js"></script>
+       <script src="./js/menu.js"></script>
+       <script src="./js/libs/clipboard.min.js"></script>
+       <script src="./js/libs/prism.js"></script>
+       <script src="./js/sourceCode.js"></script>
+          <script src="./js/search/search.js"></script>
+          <script src="./js/search/lunr.min.js"></script>
+          <script src="./js/search/search-lunr.js"></script>
+          <script src="./js/search/search_index.js"></script>
+       <script src="./js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

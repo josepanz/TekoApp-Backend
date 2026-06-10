@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-tekoapp-backend
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 10005
+      targetPort: 3000
+      name: service-tekoapp-backend
+  selector:
+    app: deploy-tekoapp-backend
