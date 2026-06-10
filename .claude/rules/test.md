@@ -7,7 +7,7 @@
 - Los nombres de tests deben estar en español y describir el COMPORTAMIENTO esperado, no el método.
   - ❌ `it('llama a prisma.create')`
   - ✅ `it('debe retornar el usuario creado con su ID generado')`
-
+- SIEMPRE solucionar hasta el más minimo mensaje debe quedar clean 0 WARNINGS y 0 ERRORES tanto de test, format o lint.
 ## Patrón AAA (obligatorio)
 
 Cada test debe seguir Arrange / Act / Assert — nunca mezclar las tres fases en una sola línea.

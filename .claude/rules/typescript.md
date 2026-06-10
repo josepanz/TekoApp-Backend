@@ -293,3 +293,4 @@ src/modules/<domain>-db/
     totalPages!: number;
   }
   ```
+- SIEMPRE solucionar hasta el más minimo mensaje debe quedar clean 0 WARNINGS y 0 ERRORES tanto de test, format o lint.

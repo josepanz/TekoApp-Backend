@@ -26,6 +26,10 @@ Crear o actualizar `memory/sessions/session_N_accion.md` donde:
 
 Si no lo dice y cierra la sesión/chat tanto en claude code desktop como la extension vscode, se proactivo y ejecuta el guardado tu. 
 
+También, proactivamente aprende de los errores y soluciones aplicadas para cada sesión para no volver a cometerlas o saber como solucionarlas, si es posible, al codificar ya saber que evitar y ajusta y mejoras las reglas mientras vas iterando.
+
+Se proactivo y evalua y reordena (mueve los archivos viejos) las sesiones antiguas (> 5 sesiones atrás) → archivar en `memory/sessions/archive/` crear si no existe
+
 ```markdown
 # Sesión N — [Fecha] — [Descripción breve]
 
@@ -80,7 +84,7 @@ Si no lo dice y cierra la sesión/chat tanto en claude code desktop como la exte
 
 ## Economía de tokens
 
-- Sesiones antiguas (> 5 sesiones atrás) → archivar en `memory/sessions/archive/`
+- Se proactivo y guarda las Sesiones antiguas (> 5 sesiones atrás) → archivar en `memory/sessions/archive/`
 - `context.md` no debe superar 150 líneas — resumir agresivamente
 - Al hacer "compact": resumir historial en la sesión y limpiar lo redundante
 - Nunca copiar código completo en archivos de sesión — solo referencias a archivos y cambios
