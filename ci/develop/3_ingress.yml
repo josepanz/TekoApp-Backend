@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-tekoapp-backend
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: dev-tekoapp.com.py
+      http:
+        paths:
+          - path: /tekoapp-backend/api
+            pathType: Prefix
+            backend:
+              service:
+                name: service-tekoapp-backend
+                port:
+                  number: 10005
