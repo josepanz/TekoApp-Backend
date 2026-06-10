@@ -1,3 +1,12 @@
+## 1.0.0-develop.5 (2026-06-10)
+
+* Merge branch 'qa' into develop ([8c12f1c](https://github.com/josepanz/TekoApp-Backend/commit/8c12f1c))
+* feat: improve, ci-cd and github config (#10) ([36dd1cb](https://github.com/josepanz/TekoApp-Backend/commit/36dd1cb)), closes [#10](https://github.com/josepanz/TekoApp-Backend/issues/10) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+
+## 1.0.0-develop.4 (2026-06-10)
+
+* feat: add input for deployment environment in pipeline ([21963d3](https://github.com/josepanz/TekoApp-Backend/commit/21963d3))
+
 ## 1.0.0-develop.3 (2026-06-10)
 
 * Merge branch 'qa' into develop ([94c4138](https://github.com/josepanz/TekoApp-Backend/commit/94c4138))
