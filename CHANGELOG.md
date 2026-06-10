@@ -1,3 +1,8 @@
+## 1.0.0-develop.2 (2026-06-10)
+
+* feat: improve, ci-cd and github config (#8) ([04db574](https://github.com/josepanz/TekoApp-Backend/commit/04db574)), closes [#8](https://github.com/josepanz/TekoApp-Backend/issues/8)
+* feat: improve, ci-cd and github config (#9) ([7191fd8](https://github.com/josepanz/TekoApp-Backend/commit/7191fd8)), closes [#9](https://github.com/josepanz/TekoApp-Backend/issues/9)
+
 # 1.0.0-develop.1 (2026-06-10)
 
 
