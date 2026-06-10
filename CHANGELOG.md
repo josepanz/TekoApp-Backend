@@ -1,3 +1,7 @@
+## 1.0.0-develop.4 (2026-06-10)
+
+* feat: add input for deployment environment in pipeline ([21963d3](https://github.com/josepanz/TekoApp-Backend/commit/21963d3))
+
 ## 1.0.0-develop.3 (2026-06-10)
 
 * Merge branch 'qa' into develop ([94c4138](https://github.com/josepanz/TekoApp-Backend/commit/94c4138))
