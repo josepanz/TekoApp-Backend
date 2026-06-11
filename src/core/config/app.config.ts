@@ -15,7 +15,7 @@ export class AppConfig {
     return {
       name: this.configService.get<string>('config.app.name', 'TekoApp'),
       version: this.configService.get<string>('config.app.version', '1.0.0'),
-      environment: this.configService.get<string>('config.env', 'development'),
+      environment: this.configService.get<string>('config.env', 'develop'),
       port: this.configService.get<number>('config.app.port', 3000),
       url: this.configService.get<string>(
         'config.app.url',
