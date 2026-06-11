@@ -1,3 +1,7 @@
+## 1.0.0-develop.6 (2026-06-11)
+
+* feat: improve deploy qa pipeline ([617ce52](https://github.com/josepanz/TekoApp-Backend/commit/617ce52))
+
 ## 1.0.0-develop.5 (2026-06-10)
 
 * Merge branch 'qa' into develop ([8c12f1c](https://github.com/josepanz/TekoApp-Backend/commit/8c12f1c))
