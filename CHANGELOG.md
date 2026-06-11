@@ -1,3 +1,7 @@
+## 1.0.0-develop.7 (2026-06-11)
+
+* feat: replace staging with qa, develop ([98761f9](https://github.com/josepanz/TekoApp-Backend/commit/98761f9))
+
 ## 1.0.0-develop.6 (2026-06-11)
 
 * feat: improve deploy qa pipeline ([617ce52](https://github.com/josepanz/TekoApp-Backend/commit/617ce52))
