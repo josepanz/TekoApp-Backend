@@ -9,7 +9,7 @@ export const getMongooseConfig = (
   const maxPoolSize = configService.get<number>(
     'config.database.mongodbMaxPoolSize',
   );
-  const isDev = configService.get<string>('config.env') === 'development';
+  const isDev = configService.get<string>('config.env') === 'develop';
 
   return {
     uri: mongodbUri,

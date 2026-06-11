@@ -8,7 +8,7 @@ export const configSchema = Joi.object({
   PORT: Joi.number().required(),
   NODE_ENV: Joi.string()
     .required()
-    .allow('local', 'development', 'qa', 'production'),
+    .allow('local', 'develop', 'qa', 'production'),
   ALLOWED_ORIGINS: Joi.string().required(),
 
   JWT_PRIVATE_KEY: Joi.string().required(),
