@@ -126,6 +126,11 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ambiente || github.ref_name }}
 
+      # semantic-release requiere refs locales para ejecutar `git tag --merged <branch>`
+      # actions/checkout solo crea ref local para la rama actual; las demás quedan solo en origin/*
+      - name: Setup local branches for semantic-release
+        run: git fetch origin develop:develop qa:qa master:master --update-head-ok 2>/dev/null || true
+
       - uses: pnpm/action-setup@v4
         with:
           version: 10
