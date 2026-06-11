@@ -1,3 +1,7 @@
+## 1.0.0-develop.9 (2026-06-11)
+
+* feat: improve pipeline 2 ([e577647](https://github.com/josepanz/TekoApp-Backend/commit/e577647))
+
 ## 1.0.0-develop.6 (2026-06-11)
 
 * feat: improve deploy qa pipeline ([617ce52](https://github.com/josepanz/TekoApp-Backend/commit/617ce52))
