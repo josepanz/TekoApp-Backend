@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
@@ -24,7 +24,7 @@ services:
     environment:
       MONGO_INITDB_DATABASE: tekoapp
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -35,7 +35,7 @@ services:
     image: redis:7-alpine
     container_name: tekoapp-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
@@ -48,9 +48,9 @@ services:
       dockerfile: Dockerfile
     container_name: tekoapp-backend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=develop
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=postgres

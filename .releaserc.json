@@ -16,40 +16,57 @@
       {
         "preset": "conventionalcommits",
         "releaseRules": [
-          {
-            "type": "fix",
-            "release": "patch"
-          },
-          {
-            "type": "feat",
-            "release": "minor"
-          },
-          {
-            "type": "docs",
-            "release": "patch"
-          },
-          {
-            "type": "refactor",
-            "release": "minor"
-          },
-          {
-            "type": "ci",
-            "release": "patch"
-          }
+          { "breaking": true, "release": "major" },
+          { "type": "feat", "release": "minor" },
+          { "type": "refactor", "release": "minor" },
+          { "type": "fix", "release": "patch" },
+          { "type": "perf", "release": "patch" },
+          { "type": "docs", "release": "patch" },
+          { "type": "ci", "release": "patch" }
         ],
         "parserOpts": {
           "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BC"]
         }
       }
     ],
-    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits",
+        "parserOpts": {
+          "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BC"]
+        },
+        "writerOpts": {
+          "groupBy": "type",
+          "commitGroupsSort": ["feat", "fix", "perf", "refactor", "docs", "ci"],
+          "commitsSort": ["scope", "subject"]
+        },
+        "presetConfig": {
+          "types": [
+            { "type": "feat", "section": "Features" },
+            { "type": "fix", "section": "Bug Fixes" },
+            { "type": "perf", "section": "Performance" },
+            { "type": "refactor", "section": "Refactoring" },
+            { "type": "docs", "section": "Documentation" },
+            { "type": "ci", "section": "CI/CD" },
+            { "type": "chore", "hidden": true },
+            { "type": "test", "hidden": true },
+            { "type": "style", "hidden": true }
+          ]
+        }
+      }
+    ],
     "@semantic-release/changelog",
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "./scripts/replace-version.sh ${nextRelease.version} ${branch.name} 1_deployment.yml",
-        "publishCmd": "./scripts/deploy.sh ${nextRelease.version} ${branch.name} ${lastRelease.version}"
+        "prepareCmd": "./scripts/replace-version.sh ${nextRelease.version} ${branch.name} 1_deployment.yml"
       }
     ],
     [
@@ -60,15 +77,12 @@
           "package.json",
           "pnpm-lock.yaml",
           "ci/develop/1_deployment.yml",
-          "ci/develop/1_deployment.yml.bak",
           "ci/qa/1_deployment.yml",
-          "ci/qa/1_deployment.yml.bak",
-          "ci/master/1_deployment.yml",
-          "ci/master/1_deployment.yml.bak"
+          "ci/master/1_deployment.yml"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]"
       }
     ],
-    "@semantic-release/gitlab"
+    "@semantic-release/github"
   ]
 }

@@ -2900,7 +2900,7 @@
   PORT: Joi.number().required(),
   NODE_ENV: Joi.string()
     .required()
-    .allow(&#x27;local&#x27;, &#x27;development&#x27;, &#x27;qa&#x27;, &#x27;production&#x27;),
+    .allow(&#x27;local&#x27;, &#x27;develop&#x27;, &#x27;qa&#x27;, &#x27;production&#x27;),
   ALLOWED_ORIGINS: Joi.string().required(),
 
   JWT_PRIVATE_KEY: Joi.string().required(),
@@ -4259,7 +4259,11 @@ para su descarga directa en el cliente.</p>
   const maxPoolSize &#x3D; configService.get&lt;number&gt;(
     &#x27;config.database.mongodbMaxPoolSize&#x27;,
   );
+<<<<<<< HEAD
   const isDev &#x3D; configService.get&lt;string&gt;(&#x27;config.env&#x27;) &#x3D;&#x3D;&#x3D; &#x27;development&#x27;;
+=======
+  const isDev &#x3D; configService.get&lt;string&gt;(&#x27;config.env&#x27;) &#x3D;&#x3D;&#x3D; &#x27;develop&#x27;;
+>>>>>>> qa
 
   return {
     uri: mongodbUri,

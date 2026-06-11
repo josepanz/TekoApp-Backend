@@ -22,7 +22,6 @@ spec:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/auth-path: auth/qa-k3s
         vault.hashicorp.com/role: tekoapp-backend-role
-        # Sincroniza el UID del contenedor de Vault con el del Dockerfile (nodeuser: 1001)
         vault.hashicorp.com/agent-run-as-user: '1001'
         vault.hashicorp.com/agent-inject-secret-tekoapp-backend-configmap: project/data/qa/tekoapp-backend-configmap
         vault.hashicorp.com/agent-inject-template-tekoapp-backend-configmap: |
@@ -37,7 +36,7 @@ spec:
         - name: regcred
       enableServiceLinks: false
       containers:
-        - image: host:port/ruta/tekoapp-backend:1.0.0
+        - image: ghcr.io/josepanz/tekoapp-backend:1.0.0-qa.1
           resources:
             limits:
               cpu: '800m'
@@ -47,9 +46,35 @@ spec:
               memory: 100Mi
           name: deploy-tekoapp-backend
           imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
           command:
             - '/bin/sh'
             - '-c'
             - |
               . /vault/secrets/tekoapp-backend-configmap
               node dist/main
+          startupProbe:
+            httpGet:
+              path: /tekoapp-backend/api/healthcheck
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /tekoapp-backend/api/healthcheck
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /tekoapp-backend/api/healthcheck
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3

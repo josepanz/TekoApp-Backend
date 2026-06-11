@@ -1,0 +1,56 @@
+# =============================================================
+# Variables de entorno — Ambiente QA
+# Estas claves deben existir en Vault bajo:
+#   project/data/qa/tekoapp-backend-configmap
+# =============================================================
+
+# Aplicación
+NODE_ENV=qa
+PORT=3000
+APP_URL=https://qa-tekoapp.com.py
+
+# Base de datos PostgreSQL
+DATABASE_URL=postgresql://user:password@qa-db-host:5432/tekoapp
+
+# MongoDB (notificaciones)
+MONGODB_URI=mongodb://user:password@qa-mongo-host:27017/tekoapp
+
+# Redis (colas Bull / caché)
+REDIS_HOST=qa-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=redis_password
+
+# JWT
+JWT_SECRET=qa_jwt_secret_min_32_chars
+JWT_REFRESH_SECRET=qa_refresh_secret_min_32_chars
+JWT_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Firebase (notificaciones push)
+FIREBASE_PROJECT_ID=tekoapp-qa
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk@tekoapp-qa.iam.gserviceaccount.com
+
+# Twilio (SMS)
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_PHONE_NUMBER=+1234567890
+
+# AWS S3
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=tekoapp-qa-storage
+
+# Google Maps
+GOOGLE_MAPS_API_KEY=AIzaSy...
+
+# Email (SMTP)
+SMTP_HOST=smtp.qa-mail.example.com
+SMTP_PORT=587
+SMTP_USER=no-reply@qa-tekoapp.com.py
+SMTP_PASS=smtp_password
