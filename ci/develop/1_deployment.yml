@@ -36,7 +36,7 @@ spec:
         - name: regcred
       enableServiceLinks: false
       containers:
-        - image: ghcr.io/josepanz/tekoapp-backend:1.0.0-develop.8
+        - image: ghcr.io/josepanz/tekoapp-backend:1.0.0-develop.9
           resources:
             limits:
               cpu: '800m'
