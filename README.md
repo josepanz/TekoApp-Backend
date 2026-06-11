@@ -174,7 +174,7 @@ Crea `.env` en la raíz (usa `.env.example` como referencia):
 ```properties
 # App
 PORT=3000
-NODE_ENV=development
+NODE_ENV=develop
 
 # Databases
 DATABASE_URL="postgresql://postgres:password@localhost:5432/tekoapp?schema=public"
