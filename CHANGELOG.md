@@ -1,3 +1,13 @@
+## 1.0.0 (2026-06-11)
+
+* feat: chmod .sh files ([e64360a](https://github.com/josepanz/TekoApp-Backend/commit/e64360a))
+* feat: initial architecture and module setup with ci/cd configuration (#14) ([ba494e9](https://github.com/josepanz/TekoApp-Backend/commit/ba494e9)), closes [#14](https://github.com/josepanz/TekoApp-Backend/issues/14) [#7](https://github.com/josepanz/TekoApp-Backend/issues/7) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+* feat: initial arquitecture and modules (#3) ([18869c7](https://github.com/josepanz/TekoApp-Backend/commit/18869c7)), closes [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+* Initial commit ([add3760](https://github.com/josepanz/TekoApp-Backend/commit/add3760))
+* Update README.md ([31c509b](https://github.com/josepanz/TekoApp-Backend/commit/31c509b))
+* Update README.md ([c1d61b8](https://github.com/josepanz/TekoApp-Backend/commit/c1d61b8))
+* Update README.md ([1af2460](https://github.com/josepanz/TekoApp-Backend/commit/1af2460))
+
 ## 1.0.0-qa.1 (2026-06-11)
 
 * feat: dto reestructure and fee calculator ([c51e2c2](https://github.com/josepanz/TekoApp-Backend/commit/c51e2c2))
