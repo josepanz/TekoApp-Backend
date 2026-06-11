@@ -1,3 +1,8 @@
+## 1.0.0-develop.8 (2026-06-11)
+
+* Merge branch 'qa' into develop ([80a37c9](https://github.com/josepanz/TekoApp-Backend/commit/80a37c9))
+* feat: enhance ci/cd configuration and initial architecture setup (#11) ([23386d4](https://github.com/josepanz/TekoApp-Backend/commit/23386d4)), closes [#11](https://github.com/josepanz/TekoApp-Backend/issues/11) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+
 ## 1.0.0-develop.7 (2026-06-11)
 
 * feat: replace staging with qa, develop ([98761f9](https://github.com/josepanz/TekoApp-Backend/commit/98761f9))
