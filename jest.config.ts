@@ -28,7 +28,11 @@ const config: Config = {
     '!**/*.interface.ts',
     '!**/*.enum.ts',
     '!**/index.ts',
+    '!**/node_modules/**',
+    '!**/dist/**',
+    '!**/test/**',
   ],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/test/'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
   coverageThreshold: {
@@ -37,6 +41,11 @@ const config: Config = {
       functions: 80,
       lines: 80,
       statements: 80,
+    },
+  },
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
     },
   },
 };
