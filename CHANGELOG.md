@@ -1,3 +1,8 @@
+## <small>1.0.1 (2026-07-20)</small>
+
+* ci: fetch tags explicitly for semantic-release, ignore .engram, log session 12 ([e062f58](https://github.com/josepanz/TekoApp-Backend/commit/e062f58))
+* chore: jest improve ([2fbdcdd](https://github.com/josepanz/TekoApp-Backend/commit/2fbdcdd))
+
 ## 1.0.0 (2026-06-11)
 
 * feat: chmod .sh files ([e64360a](https://github.com/josepanz/TekoApp-Backend/commit/e64360a))
