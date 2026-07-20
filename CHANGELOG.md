@@ -1,3 +1,10 @@
+## 1.0.0-develop.10 (2026-07-20)
+
+* ci: enable semantic-release debug logging (temp) ([07aa6d7](https://github.com/josepanz/TekoApp-Backend/commit/07aa6d7))
+* ci: fetch tags explicitly for semantic-release, ignore .engram, log session 12 ([5715d41](https://github.com/josepanz/TekoApp-Backend/commit/5715d41))
+* ci: temp diagnostics for semantic-release tag detection ([3c1d22f](https://github.com/josepanz/TekoApp-Backend/commit/3c1d22f))
+* chore: jest improve ([7a1d551](https://github.com/josepanz/TekoApp-Backend/commit/7a1d551))
+
 ## 1.0.0-develop.9 (2026-06-11)
 
 * feat: improve pipeline 2 ([e577647](https://github.com/josepanz/TekoApp-Backend/commit/e577647))
