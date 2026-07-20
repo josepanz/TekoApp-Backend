@@ -1,3 +1,7 @@
+## 1.0.0-qa.3 (2026-07-20)
+
+* docs: remove temp CI diagnostics, update context.md and session log ([53cf560](https://github.com/josepanz/TekoApp-Backend/commit/53cf560))
+
 ## 1.0.0-qa.2 (2026-07-20)
 
 * ci: fetch tags explicitly for semantic-release, ignore .engram, log session 12 ([31d575e](https://github.com/josepanz/TekoApp-Backend/commit/31d575e))
