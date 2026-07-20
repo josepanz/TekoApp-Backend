@@ -128,8 +128,12 @@ jobs:
 
       # semantic-release requiere refs locales para ejecutar `git tag --merged <branch>`
       # actions/checkout solo crea ref local para la rama actual; las demás quedan solo en origin/*
+      # --tags es explícito: el auto-follow de git no es confiable cuando los objetos ya están
+      # descargados por el checkout inicial (no hay "objetos nuevos" que disparen el follow)
       - name: Setup local branches for semantic-release
-        run: git fetch origin develop:develop qa:qa master:master --update-head-ok 2>/dev/null || true
+        run: |
+          git fetch origin develop:develop qa:qa master:master --update-head-ok 2>/dev/null || true
+          git fetch origin --tags --force
 
       - uses: pnpm/action-setup@v4
         with:
