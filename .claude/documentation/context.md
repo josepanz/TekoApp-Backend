@@ -5,7 +5,7 @@
 | Campo | Valor |
 |-------|-------|
 | Proyecto | TekoApp-Backend |
-| Versión | 1.0.0-develop.1 |
+| Versión | 1.0.0-develop.10 (develop) / 1.0.0-qa.2 (qa) / 1.0.1 (master) |
 | Framework | NestJS 10, TypeScript strict |
 | ORM | Prisma 6.18 (PostgreSQL) |
 | Auth | JWT custom (access + refresh + cookies) + Basic Auth pre-login |
@@ -105,9 +105,18 @@ src/
 | `api/uploads/` usa `memoryStorage()` | Sin disk I/O — buffer directo a Sharp → S3 |
 | `api/storage/` eliminado (era dead code) | Nunca registrado en `api.module.ts`; `api/uploads/` es el único endpoint de archivos |
 
-## Estado actual — Sesión 13 (2026-06-09)
+## Estado actual — Sesión 13 (2026-07-20)
 
-**Última actualización: 2026-06-09 — Sesión 13**
+**Última actualización: 2026-07-20 — Sesión 13**
+
+### CI/CD
+- 3 ramas activas con pipeline propio: `develop` (`1.0.0-develop.10`), `qa` (`1.0.0-qa.2`),
+  `master` (`1.0.1`) — versionado vía `semantic-release`, ver `.releaserc.json`
+- Historial de git reescrito el 2026-07-20 (autoría unificada, sin referencias a Claude ni al
+  email del empleador anterior) — ver `memory/sessions/session_13_git_history_cleanup_ci_notes_fix.md`
+  si se necesita entender por qué las notes de `refs/notes/semantic-release-*` importan para el CI
+- `jest.config.ts` / `tsconfig.json` / `package.json` (flags de recursos de test) en paridad entre
+  las 3 ramas
 
 ### Build y runtime
 - `pnpm lint` — **0 errores, 0 warnings** ✅
@@ -152,4 +161,4 @@ src/
 - `sharp`: `jest.mock('sharp', factory)` con factory completamente self-contained (ver feedback_jest_lint_patterns.md #8)
 
 ### Pendientes
-_(ninguno al cierre de sesión 13)_
+- [ ] Frontend web (TekoApp-Web) — próximo foco de trabajo, backend queda como base estable
