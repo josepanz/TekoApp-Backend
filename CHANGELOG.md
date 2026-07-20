@@ -1,3 +1,8 @@
+## 1.0.0-qa.2 (2026-07-20)
+
+* ci: fetch tags explicitly for semantic-release, ignore .engram, log session 12 ([31d575e](https://github.com/josepanz/TekoApp-Backend/commit/31d575e))
+* chore: jest improve ([d66ed36](https://github.com/josepanz/TekoApp-Backend/commit/d66ed36))
+
 ## 1.0.0-qa.1 (2026-06-11)
 
 * feat: dto reestructure and fee calculator ([c51e2c2](https://github.com/josepanz/TekoApp-Backend/commit/c51e2c2))
