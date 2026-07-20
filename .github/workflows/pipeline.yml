@@ -134,14 +134,6 @@ jobs:
         run: |
           git fetch origin develop:develop qa:qa master:master --update-head-ok 2>/dev/null || true
           git fetch origin --tags --force
-          echo "--- DEBUG: HEAD state ---"
-          git status
-          echo "--- DEBUG: branches ---"
-          git branch -vv
-          echo "--- DEBUG: tags ---"
-          git tag -l
-          echo "--- DEBUG: tags merged into develop ---"
-          git tag --merged develop || echo "FAILED to run --merged develop"
 
       - uses: pnpm/action-setup@v4
         with:
@@ -168,7 +160,6 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
           HUSKY: 0
-          DEBUG: semantic-release:*
         run: npx semantic-release
 
       # Captura el tag recién creado para pasar a los pasos siguientes
