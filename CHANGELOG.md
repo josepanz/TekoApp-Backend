@@ -1,3 +1,7 @@
+## 1.0.0-develop.11 (2026-07-20)
+
+* docs: remove temp CI diagnostics, update context.md and session log ([9eb81d9](https://github.com/josepanz/TekoApp-Backend/commit/9eb81d9))
+
 ## 1.0.0-develop.10 (2026-07-20)
 
 * ci: enable semantic-release debug logging (temp) ([07aa6d7](https://github.com/josepanz/TekoApp-Backend/commit/07aa6d7))
