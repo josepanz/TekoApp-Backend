@@ -21,8 +21,9 @@ export function convertToISO(value: string | Date): string | null {
  * @returns A new Date object at the start of the same day.
  */
 export function toStartOfDay(value: Date): Date {
-  value.setUTCHours(0, 0, 0, 0);
-  return value;
+  const result = new Date(value);
+  result.setUTCHours(0, 0, 0, 0);
+  return result;
 }
 
 /**
@@ -31,8 +32,9 @@ export function toStartOfDay(value: Date): Date {
  * @returns A new Date object at the end of the same day.
  */
 export function toEndOfDay(value: Date): Date {
-  value.setUTCHours(23, 59, 59, 999);
-  return value;
+  const result = new Date(value);
+  result.setUTCHours(23, 59, 59, 999);
+  return result;
 }
 
 /**

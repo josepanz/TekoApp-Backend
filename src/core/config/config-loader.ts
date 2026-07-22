@@ -45,6 +45,7 @@ export const APP_CONFIG = registerAs('config', () => {
     database: {
       connectionString: process.env.DATABASE_CONNECTION_STRING,
       url: process.env.DATABASE_URL,
+      auditSecretPepper: process.env.AUDIT_SECRET_PEPPER,
       // Configuración unificada para MongoDB
       mongodbUri: process.env.MONGODB_URI,
       mongodbMaxPoolSize: process.env.MONGODB_MAX_POOL_SIZE

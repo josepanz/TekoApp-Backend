@@ -8,6 +8,8 @@
 NODE_ENV=production
 PORT=3000
 APP_URL=https://tekoapp.com.py
+ALLOWED_ORIGINS=https://tekoapp.com.py
+FRONTEND_URL=https://tekoapp.com.py
 
 # Base de datos PostgreSQL
 DATABASE_URL=postgresql://user:password@prod-db-host:5432/tekoapp
