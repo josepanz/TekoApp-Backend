@@ -6,6 +6,7 @@ import {
 
 interface IRolePermission {
   id: number;
+  referenceId?: string;
   name: string;
   displayName: string | null;
   description: string | null;
@@ -21,6 +22,10 @@ export class RolesPermissionsMapper {
   roleToResponse(role: IRolePermission): RoleResponseDTO {
     return {
       id: role.id,
+      // Los roles siempre tienen referenceId (columna `reference_id` NOT NULL en `Roles`) — a
+      // diferencia de `IRolePermission`, que es una interfaz compartida con `Permissions` (sin
+      // referenceId), por eso queda opcional ahí y se afirma acá.
+      referenceId: role.referenceId,
       name: role.name,
       displayName: role.displayName,
       description: role.description,

@@ -6,6 +6,12 @@ export class CategoryDetailResponseDTO {
   id!: number;
 
   @ApiProperty({
+    description: 'referenceId (UUID) público de la categoría',
+    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+  })
+  referenceId!: string;
+
+  @ApiProperty({
     description: 'Nombre único de la categoría',
     example: 'Plomería',
   })

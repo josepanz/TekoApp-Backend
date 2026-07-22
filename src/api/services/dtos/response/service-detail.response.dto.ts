@@ -5,6 +5,9 @@ export class ServiceUserSummaryResponseDTO {
   @ApiProperty({ example: 1 })
   id!: number;
 
+  @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
+  referenceId!: string;
+
   @ApiProperty({ example: 'juan@example.com' })
   email!: string;
 
@@ -16,6 +19,17 @@ export class ServiceUserSummaryResponseDTO {
 
   @ApiPropertyOptional({ example: '+595981234567' })
   phoneNumber?: string | null;
+}
+
+export class ServiceProfessionalSummaryResponseDTO {
+  @ApiProperty({ example: 2 })
+  id!: number;
+
+  @ApiProperty({ example: 'b2c3d4e5-f6a7-8901-bcde-f12345678901' })
+  referenceId!: string;
+
+  @ApiProperty({ type: ServiceUserSummaryResponseDTO })
+  user!: ServiceUserSummaryResponseDTO;
 }
 
 export class ServiceCategorySummaryResponseDTO {
@@ -116,6 +130,9 @@ export class ServiceDetailResponseDTO {
 
   @ApiProperty({ type: ServiceUserSummaryResponseDTO })
   users!: ServiceUserSummaryResponseDTO;
+
+  @ApiPropertyOptional({ type: ServiceProfessionalSummaryResponseDTO })
+  professional?: ServiceProfessionalSummaryResponseDTO | null;
 
   @ApiPropertyOptional({ type: ServiceCategorySummaryResponseDTO })
   category?: ServiceCategorySummaryResponseDTO | null;

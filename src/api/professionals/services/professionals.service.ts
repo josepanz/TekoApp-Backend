@@ -75,6 +75,21 @@ export class ProfessionalsService {
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
+  async getMyProfessionalProfile(
+    userId: number,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const result = await this.professionalsDb.findByUserId(userId);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  async getProfessionalByReference(
+    referenceId: string,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const result =
+      await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
   async updateProfessional(
     id: number,
     dto: UpdateProfessionalRequestDTO,
@@ -87,6 +102,22 @@ export class ProfessionalsService {
       );
     }
     const result = await this.professionalsDb.update(id, dto);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  async updateProfessionalByReference(
+    referenceId: string,
+    dto: UpdateProfessionalRequestDTO,
+    userId: number,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const professional =
+      await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    if (professional.userId !== userId) {
+      throw new ForbiddenException(
+        'No tienes permisos para modificar este profesional',
+      );
+    }
+    const result = await this.professionalsDb.update(professional.id, dto);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 

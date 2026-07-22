@@ -4,6 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
@@ -11,11 +12,14 @@ import {
   PaymentProvider,
   PaymentStatus,
   TransactionStatus,
-  PaymentMethodEntity,
   Prisma,
 } from '@prisma/client';
 import { PaymentSummaryResponseDTO } from '../dtos/response/payment-summary.response.dto';
 import { PaymentTrendsResponseDTO } from '../dtos/response/payment-trends.response.dto';
+import {
+  PaymentDetailResponseDTO,
+  PaymentMethodDetailResponseDTO,
+} from '../dtos/response';
 import { v4 as uuidv4 } from 'uuid';
 import {
   CreatePaymentDto,
@@ -24,6 +28,11 @@ import {
   UpdatePaymentMethodDto,
   CreatePaymentMethodRequestDTO,
 } from '../dtos/request';
+import {
+  mapPaymentToResponse,
+  mapPaymentsToResponse,
+  mapPaymentMethodToResponse,
+} from '../helpers/payments-response.helper';
 
 @Injectable()
 export class PaymentApiService {
@@ -34,15 +43,31 @@ export class PaymentApiService {
 
   // ==================== PAGOS ====================
 
-  async createPayment(userId: number, dto: CreatePaymentDto) {
+  /**
+   * Resuelve el UUID público del pago (recibido en la URL) a la entidad completa con su PK interna
+   * (Int). Lanza NotFound si no existe. El id numérico nunca se expone en la respuesta.
+   */
+  private async getPaymentEntityByRef(referenceId: string) {
+    const payment = await this.dbService.findPaymentByReferenceId(referenceId);
+    if (!payment) throw new NotFoundException('Pago no encontrado');
+    return payment;
+  }
+
+  async createPayment(
+    userId: number,
+    dto: CreatePaymentDto,
+  ): Promise<PaymentDetailResponseDTO> {
+    const service = await this.dbService.findServiceByReferenceId(
+      dto.serviceId,
+    );
+    if (!service) throw new NotFoundException('Servicio no encontrado');
+
     const existingPayment = await this.dbService.findExistingPayment(
       userId,
-      dto.serviceRequestId,
+      service.id,
     );
     if (existingPayment) {
-      throw new BadRequestException(
-        'Ya existe un pago para esta solicitud de servicio',
-      );
+      throw new BadRequestException('Ya existe un pago para este servicio');
     }
 
     const fee = await this.feeCalculator.calculateProviderFee(
@@ -54,11 +79,11 @@ export class PaymentApiService {
 
     const transactionId = uuidv4();
 
-    return this.dbService.createPaymentWithTransaction(
+    const payment = await this.dbService.createPaymentWithTransaction(
       {
         userId,
         professionalId: Number(dto.professionalId),
-        serviceRequestId: dto.serviceRequestId,
+        serviceId: service.id,
         currencyCode: dto.currencyCode,
         amount: dto.amount,
         paymentMethod: dto.paymentMethod,
@@ -71,34 +96,49 @@ export class PaymentApiService {
       },
       transactionId,
     );
+    return mapPaymentToResponse(payment);
   }
 
   async getPayments(
     userId?: number,
     professionalId?: number,
     status?: PaymentStatus,
-  ) {
-    return this.dbService.findAllPayments(userId, professionalId, status);
+  ): Promise<PaymentDetailResponseDTO[]> {
+    const payments = await this.dbService.findAllPayments(
+      userId,
+      professionalId,
+      status,
+    );
+    return mapPaymentsToResponse(payments);
   }
 
-  async getPaymentById(id: string) {
-    const payment = await this.dbService.findPaymentById(id);
-    if (!payment) throw new NotFoundException('Pago no encontrado');
-    return payment;
+  async getPaymentById(id: string): Promise<PaymentDetailResponseDTO> {
+    const payment = await this.getPaymentEntityByRef(id);
+    return mapPaymentToResponse(payment);
   }
 
-  async updatePayment(id: string, dto: UpdatePaymentDto) {
-    const payment = await this.getPaymentById(id);
+  async updatePayment(
+    id: string,
+    dto: UpdatePaymentDto,
+  ): Promise<PaymentDetailResponseDTO> {
+    const payment = await this.getPaymentEntityByRef(id);
     if (payment.status !== PaymentStatus.PENDING) {
       throw new BadRequestException(
         'Solo se pueden actualizar pagos pendientes',
       );
     }
-    return this.dbService.updatePayment(id, dto as unknown);
+    const updated = await this.dbService.updatePayment(
+      payment.id,
+      dto as unknown,
+    );
+    return mapPaymentToResponse(updated);
   }
 
-  async cancelPayment(id: string, userId: number) {
-    const payment = await this.getPaymentById(id);
+  async cancelPayment(
+    id: string,
+    userId: number,
+  ): Promise<PaymentDetailResponseDTO> {
+    const payment = await this.getPaymentEntityByRef(id);
     if (payment.userId !== userId) {
       throw new ForbiddenException(
         'No tienes permisos para cancelar este pago',
@@ -107,48 +147,33 @@ export class PaymentApiService {
     if (payment.status !== PaymentStatus.PENDING) {
       throw new BadRequestException('Este pago no puede ser cancelado');
     }
-    return this.dbService.updatePayment(id, {
-      status: PaymentStatus.CANCELLED,
-    });
+
+    // updateMany + count en vez de update() incondicional: evita que dos escrituras
+    // concurrentes (ej. esta cancelación y el webhook de confirmación) pisen el estado sin
+    // detectar el conflicto — ver .claude/rules/typescript.md.
+    const updatedCount = await this.dbService.updatePaymentConditional(
+      payment.id,
+      [PaymentStatus.PENDING],
+      { status: PaymentStatus.CANCELLED },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        'El pago cambió de estado antes de poder cancelarlo',
+      );
+    }
+    return this.getPaymentById(id);
   }
 
-  async refundPayment(id: string, dto: RefundPaymentDto) {
-    const payment = await this.getPaymentById(id);
-
-    if (payment.status !== PaymentStatus.COMPLETED) {
-      throw new BadRequestException(
-        'Solo se pueden reembolsar pagos completados',
-      );
-    }
-
-    // Parseo seguro del JSON de prisma
-    const currentRefundDetails = payment.refundDetails as Record<
-      string,
-      unknown
-    > | null;
-    const currentlyRefunded =
-      typeof currentRefundDetails?.refundedAmount === 'number'
-        ? currentRefundDetails.refundedAmount
-        : 0;
-
-    const availableToRefund = Number(payment.totalAmount) - currentlyRefunded;
-
-    if (dto.amount > availableToRefund) {
-      throw new BadRequestException(
-        'El monto del reembolso excede el monto disponible',
-      );
-    }
-
-    const newTotalRefunded = currentlyRefunded + dto.amount;
-    const isFullRefund = newTotalRefunded >= Number(payment.totalAmount);
-
-    return this.dbService.executeRefund(
-      payment.id,
-      dto.amount,
-      dto.reason,
-      isFullRefund,
-      newTotalRefunded,
-    );
+  async refundPayment(
+    id: string,
+    dto: RefundPaymentDto,
+  ): Promise<PaymentDetailResponseDTO> {
+    // 404 rápido si el pago no existe. La validación real de estado/monto disponible se hace
+    // de forma atómica dentro de executeRefund (bajo lock de fila), no acá — un chequeo previo
+    // sin lock sería una condición de carrera si dos reembolsos llegan al mismo tiempo.
+    const payment = await this.getPaymentEntityByRef(id);
+    await this.dbService.executeRefund(payment.id, dto.amount, dto.reason);
+    return this.getPaymentById(id);
   }
 
   // ==================== MÉTODOS DE PAGO ====================
@@ -156,8 +181,8 @@ export class PaymentApiService {
   async createPaymentMethod(
     userId: number,
     dto: CreatePaymentMethodRequestDTO,
-  ): Promise<PaymentMethodEntity> {
-    return this.dbService.createPaymentMethod({
+  ): Promise<PaymentMethodDetailResponseDTO> {
+    const created = await this.dbService.createPaymentMethod({
       userId,
       name: dto.name,
       type: dto.type,
@@ -166,24 +191,35 @@ export class PaymentApiService {
       details: dto.details ?? {},
       externalId: dto.externalId,
     } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
+    return mapPaymentMethodToResponse(created);
   }
 
   async updatePaymentMethod(
     id: string,
     userId: number,
     dto: UpdatePaymentMethodDto,
-  ): Promise<PaymentMethodEntity> {
-    const method = await this.dbService.findPaymentMethodById(id, userId);
+  ): Promise<PaymentMethodDetailResponseDTO> {
+    const method = await this.dbService.findPaymentMethodByReferenceId(
+      id,
+      userId,
+    );
     if (!method) throw new NotFoundException('Método de pago no encontrado');
 
     if (dto.isDefault) {
       await this.dbService.clearDefaultPaymentMethods(userId);
     }
-    return this.dbService.updatePaymentMethod(id, dto as unknown);
+    const updated = await this.dbService.updatePaymentMethod(
+      method.id,
+      dto as unknown,
+    );
+    return mapPaymentMethodToResponse(updated);
   }
 
   async deletePaymentMethod(id: string, userId: number): Promise<void> {
-    const method = await this.dbService.findPaymentMethodById(id, userId);
+    const method = await this.dbService.findPaymentMethodByReferenceId(
+      id,
+      userId,
+    );
     if (!method) throw new NotFoundException('Método de pago no encontrado');
 
     const total = await this.dbService.countActivePaymentMethods(userId);
@@ -193,7 +229,7 @@ export class PaymentApiService {
       );
     }
 
-    await this.dbService.updatePaymentMethod(id, { isActive: false });
+    await this.dbService.updatePaymentMethod(method.id, { isActive: false });
   }
 
   // ==================== WEBHOOKS ====================

@@ -86,7 +86,6 @@ CREATE TABLE "access_level" (
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
     "reference_id" TEXT NOT NULL,
-    "legacy_user_id" TEXT,
     "email" TEXT NOT NULL,
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "profile_status" "UserProfileStatus" NOT NULL DEFAULT 'INCOMPLETE',
@@ -105,8 +104,7 @@ CREATE TABLE "users" (
     "unverified_email" TEXT,
     "changed_reason" TEXT,
     "accepted_terms_at" TIMESTAMP(3),
-    "accessLevelId" INTEGER,
-    "current_level" INTEGER NOT NULL,
+    "access_level_id" INTEGER,
     "checksum" TEXT,
     "change_signature" TEXT,
 
@@ -149,6 +147,7 @@ CREATE TABLE "user_roles" (
 -- CreateTable
 CREATE TABLE "roles" (
     "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -266,6 +265,7 @@ CREATE TABLE "service_type" (
 -- CreateTable
 CREATE TABLE "professionals" (
     "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "category_id" INTEGER NOT NULL,
     "description" TEXT NOT NULL,
@@ -298,7 +298,8 @@ CREATE TABLE "professionals" (
 
 -- CreateTable
 CREATE TABLE "services" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "professional_id" INTEGER,
     "category_id" INTEGER NOT NULL,
@@ -336,8 +337,9 @@ CREATE TABLE "services" (
 
 -- CreateTable
 CREATE TABLE "service_requests" (
-    "id" TEXT NOT NULL,
-    "service_id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
+    "service_id" INTEGER NOT NULL,
     "professional_id" INTEGER NOT NULL,
     "status" "RequestStatus" NOT NULL DEFAULT 'PENDING',
     "proposed_price" DECIMAL(10,2),
@@ -358,6 +360,7 @@ CREATE TABLE "service_requests" (
 -- CreateTable
 CREATE TABLE "categories" (
     "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "slug" VARCHAR(150) NOT NULL,
     "description" TEXT,
@@ -382,7 +385,8 @@ CREATE TABLE "categories" (
 
 -- CreateTable
 CREATE TABLE "payment_methods" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "type" "PaymentMethod" NOT NULL,
     "provider" "PaymentProvider" NOT NULL,
@@ -444,10 +448,11 @@ CREATE TABLE "currencies" (
 
 -- CreateTable
 CREATE TABLE "payments" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "professional_id" INTEGER NOT NULL,
-    "service_request_id" TEXT NOT NULL,
+    "service_id" INTEGER NOT NULL,
     "amount" DECIMAL(10,2) NOT NULL,
     "currency_code" VARCHAR(3) NOT NULL,
     "fee" DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -484,9 +489,10 @@ CREATE TABLE "payments" (
 
 -- CreateTable
 CREATE TABLE "payment_transactions" (
-    "id" UUID NOT NULL,
-    "payment_id" UUID NOT NULL,
-    "payment_method_id" UUID,
+    "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
+    "payment_id" INTEGER NOT NULL,
+    "payment_method_id" INTEGER,
     "type" "TransactionType" NOT NULL,
     "status" "TransactionStatus" NOT NULL DEFAULT 'PENDING',
     "amount" DECIMAL(10,2) NOT NULL,
@@ -511,10 +517,11 @@ CREATE TABLE "payment_transactions" (
 
 -- CreateTable
 CREATE TABLE "ratings" (
-    "id" UUID NOT NULL,
+    "id" SERIAL NOT NULL,
+    "reference_id" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "professional_id" INTEGER NOT NULL,
-    "service_id" TEXT,
+    "service_id" INTEGER,
     "type" "RatingType" NOT NULL DEFAULT 'CLIENT_TO_PROFESSIONAL',
     "rating" DECIMAL(3,2) NOT NULL,
     "review" TEXT,
@@ -555,6 +562,7 @@ CREATE TABLE "promotions" (
     "specific_user_ids" INTEGER[] DEFAULT ARRAY[]::INTEGER[],
     "created_by_id" INTEGER,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "created_by" TEXT,
     "last_changed_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
     "last_changed_by" TEXT,
     "changed_reason" TEXT,
@@ -655,6 +663,9 @@ CREATE INDEX "user_roles_role_id_idx" ON "user_roles"("role_id");
 CREATE UNIQUE INDEX "user_roles_user_id_role_id_key" ON "user_roles"("user_id", "role_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "roles_reference_id_key" ON "roles"("reference_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "roles_name_key" ON "roles"("name");
 
 -- CreateIndex
@@ -700,6 +711,9 @@ CREATE UNIQUE INDEX "api_client_credential_secret_key_key" ON "api_client_creden
 CREATE UNIQUE INDEX "service_type_name_key" ON "service_type"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "professionals_reference_id_key" ON "professionals"("reference_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "professionals_user_id_key" ON "professionals"("user_id");
 
 -- CreateIndex
@@ -709,6 +723,9 @@ CREATE INDEX "professionals_status_idx" ON "professionals"("status");
 CREATE INDEX "professionals_is_available_idx" ON "professionals"("is_available");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "services_reference_id_key" ON "services"("reference_id");
+
+-- CreateIndex
 CREATE INDEX "services_status_idx" ON "services"("status");
 
 -- CreateIndex
@@ -716,6 +733,12 @@ CREATE INDEX "services_user_id_idx" ON "services"("user_id");
 
 -- CreateIndex
 CREATE INDEX "services_professional_id_idx" ON "services"("professional_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "service_requests_reference_id_key" ON "service_requests"("reference_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "categories_reference_id_key" ON "categories"("reference_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "categories_name_key" ON "categories"("name");
@@ -730,6 +753,9 @@ CREATE INDEX "categories_name_status_idx" ON "categories"("name", "status");
 CREATE INDEX "categories_slug_idx" ON "categories"("slug");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "payment_methods_reference_id_key" ON "payment_methods"("reference_id");
+
+-- CreateIndex
 CREATE INDEX "payment_methods_user_id_is_default_idx" ON "payment_methods"("user_id", "is_default");
 
 -- CreateIndex
@@ -742,6 +768,9 @@ CREATE INDEX "countries_is_active_idx" ON "countries"("is_active");
 CREATE INDEX "currencies_is_active_idx" ON "currencies"("is_active");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "payments_reference_id_key" ON "payments"("reference_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "payments_transaction_id_key" ON "payments"("transaction_id");
 
 -- CreateIndex
@@ -751,6 +780,9 @@ CREATE INDEX "payments_professional_id_status_idx" ON "payments"("professional_i
 CREATE INDEX "payments_status_created_at_idx" ON "payments"("status", "created_at");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "payment_transactions_reference_id_key" ON "payment_transactions"("reference_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "payment_transactions_external_transaction_id_key" ON "payment_transactions"("external_transaction_id");
 
 -- CreateIndex
@@ -758,6 +790,9 @@ CREATE INDEX "payment_transactions_payment_id_type_idx" ON "payment_transactions
 
 -- CreateIndex
 CREATE INDEX "payment_transactions_status_created_at_idx" ON "payment_transactions"("status", "created_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ratings_reference_id_key" ON "ratings"("reference_id");
 
 -- CreateIndex
 CREATE INDEX "ratings_user_id_idx" ON "ratings"("user_id");
@@ -796,7 +831,7 @@ CREATE INDEX "platform_commission_config_is_default_is_active_idx" ON "platform_
 ALTER TABLE "users" ADD CONSTRAINT "users_document_type_id_fkey" FOREIGN KEY ("document_type_id") REFERENCES "documents_type"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_accessLevelId_fkey" FOREIGN KEY ("accessLevelId") REFERENCES "access_level"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_access_level_id_fkey" FOREIGN KEY ("access_level_id") REFERENCES "access_level"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -853,7 +888,7 @@ ALTER TABLE "payment_methods" ADD CONSTRAINT "payment_methods_user_id_fkey" FORE
 ALTER TABLE "currencies" ADD CONSTRAINT "currencies_country_id_fkey" FOREIGN KEY ("country_id") REFERENCES "countries"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "payments" ADD CONSTRAINT "payments_service_request_id_fkey" FOREIGN KEY ("service_request_id") REFERENCES "services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "payments" ADD CONSTRAINT "payments_service_id_fkey" FOREIGN KEY ("service_id") REFERENCES "services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_currency_code_fkey" FOREIGN KEY ("currency_code") REFERENCES "currencies"("alphaCode") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -884,3 +919,173 @@ ALTER TABLE "promotion_usages" ADD CONSTRAINT "promotion_usages_promotion_id_fke
 
 -- AddForeignKey
 ALTER TABLE "promotion_usages" ADD CONSTRAINT "promotion_usages_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- ============================================================================
+-- Auditoría genérica: función de trigger
+-- ============================================================================
+-- Verificado contra la DB real (2026-07-21): el patrón COALESCE(NEW.x, OLD.x) en un
+-- trigger combinado BEFORE INSERT OR UPDATE OR DELETE es seguro en Postgres — NEW/OLD
+-- no están "sin asignar" para la rama que no aplica, simplemente valen NULL. No hay bug
+-- de crash en DELETE. Los bugs reales confirmados y corregidos acá:
+--   1. aud_version no incrementaba en DELETE (quedaba igual a la última versión de UPDATE).
+--   2. El pepper de firma estaba hardcodeado en este archivo (en git) — ahora se lee de
+--      una GUC de sesión que setea la app (PrismaDatasource#extended), con fallback solo
+--      para conexiones fuera de la app (psql manual, etc.).
+--   3. created_at se pisaba siempre con CURRENT_TIMESTAMP en INSERT, incluso si el caller
+--      ya había seteado un valor explícito (ej. seeds/migraciones de datos históricos).
+--   4. last_changed_at se pisaba siempre en UPDATE — ahora solo se auto-completa si el
+--      caller no lo tocó en este UPDATE (NEW igual a OLD todavía); si el caller seteó un
+--      valor propio, se respeta.
+CREATE OR REPLACE FUNCTION fn_audit_generic_trigger()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_old_data JSONB := NULL;
+    v_new_data JSONB := NULL;
+    v_data_to_sign TEXT;
+    v_secret_key TEXT;
+    v_current_user TEXT;
+    v_aud_version INT := 1;
+    v_current_ip TEXT;
+BEGIN
+    v_secret_key := COALESCE(
+        current_setting('app.audit_secret_pepper', true),
+        'CHANGE_ME_LOCAL_DEV_ONLY_SET_app.audit_secret_pepper'
+    );
+    v_current_user := COALESCE(COALESCE(NEW.last_changed_by, OLD.last_changed_by), COALESCE(current_setting('app.current_user_id', true), session_user));
+    v_current_ip := COALESCE(current_setting('app.client_ip', true), inet_client_addr()::text);
+
+    IF (TG_OP = 'UPDATE') THEN
+        v_old_data := to_jsonb(OLD) - 'last_changed_at' - 'last_changed_by' - 'checksum' - 'change_signature' - 'aud_version';
+        v_new_data := to_jsonb(NEW) - 'last_changed_at' - 'last_changed_by' - 'checksum' - 'change_signature' - 'aud_version';
+
+        IF (v_old_data = v_new_data) THEN
+            RETURN NEW;
+        END IF;
+
+        IF NEW.last_changed_at IS NOT DISTINCT FROM OLD.last_changed_at THEN
+            NEW.last_changed_at := CURRENT_TIMESTAMP;
+        END IF;
+
+        IF NEW.last_changed_by IS NULL THEN
+            NEW.last_changed_by := v_current_user;
+        ELSE
+            v_current_user := NEW.last_changed_by;
+        END IF;
+
+        SELECT COALESCE(MAX(aud_version), 0) + 1
+        INTO v_aud_version
+        FROM audit_logs
+        WHERE
+            table_name = TG_TABLE_NAME
+            AND record_id = COALESCE(NEW.id::text, OLD.id::text);
+
+    ELSIF (TG_OP = 'INSERT') THEN
+        v_new_data := to_jsonb(NEW) - 'last_changed_at' - 'last_changed_by' - 'checksum' - 'change_signature' - 'aud_version';
+        v_aud_version := 1;
+
+        IF NEW.created_at IS NULL THEN
+            NEW.created_at := CURRENT_TIMESTAMP;
+        END IF;
+
+        IF NEW.created_by IS NULL THEN
+            NEW.created_by := v_current_user;
+        ELSE
+            v_current_user := NEW.created_by;
+        END IF;
+
+    ELSIF (TG_OP = 'DELETE') THEN
+        v_old_data := to_jsonb(OLD);
+        SELECT COALESCE(MAX(aud_version), 0) + 1
+        INTO v_aud_version
+        FROM audit_logs
+        WHERE
+            table_name = TG_TABLE_NAME
+            AND record_id = OLD.id::text;
+    END IF;
+
+    IF (TG_OP <> 'DELETE') THEN
+        NEW.checksum := md5(v_new_data::text);
+        v_data_to_sign := (COALESCE(NEW.id::text, '') || NEW.checksum || v_aud_version::text || v_secret_key);
+        NEW.change_signature := md5(v_data_to_sign);
+    END IF;
+
+    INSERT INTO audit_logs (
+        table_name,
+        record_id,
+        operation_type,
+        old_data,
+        new_data,
+        changed_at,
+        changed_by,
+        reason,
+        ip_address,
+        user_agent,
+        aud_version,
+        extra_data,
+        change_signature
+    ) VALUES (
+        TG_TABLE_NAME,
+        COALESCE(NEW.id::text, OLD.id::text),
+        TG_OP,
+        v_old_data,
+        v_new_data,
+        CURRENT_TIMESTAMP,
+        v_current_user,
+        COALESCE(NEW.changed_reason, OLD.changed_reason),
+        v_current_ip,
+        COALESCE(NULLIF(current_setting('app.user_agent', true), ''), NULLIF(current_setting('application_name', true), ''), 'unknown'),
+        v_aud_version,
+        CASE
+            WHEN NULLIF(current_setting('app.application_name', true), '') IS NOT NULL
+            THEN jsonb_build_object('applicationName', current_setting('app.application_name', true))::text
+            ELSE NULL
+        END,
+        COALESCE(NEW.change_signature, OLD.change_signature)
+    );
+
+    IF (TG_OP = 'DELETE') THEN
+        RETURN OLD;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- Asociación de triggers a tablas: función reusable e idempotente (en vez del DO-block
+-- de una sola vez de la migración original). Requiere `id` + `created_by` +
+-- `change_signature` — excluye automáticamente tablas de catálogo con PK natural sin
+-- columna `id` (ej. currencies, PK=alpha_code) en vez de necesitar una excepción manual.
+-- Volver a invocar `SELECT fn_attach_audit_triggers();` (o `pnpm run db:attach-audit-triggers`)
+-- después de agregar tablas nuevas que necesiten auditoría — Prisma no tiene hook
+-- post-migración automático para SQL crudo.
+-- ============================================================================
+CREATE OR REPLACE FUNCTION fn_attach_audit_triggers()
+RETURNS void AS $$
+DECLARE
+    t RECORD;
+BEGIN
+    FOR t IN
+        SELECT c1.table_name
+        FROM information_schema.columns c1
+        WHERE c1.table_schema = 'public'
+            AND c1.column_name = 'change_signature'
+            AND c1.table_name <> 'audit_logs'
+            AND EXISTS (
+                SELECT 1 FROM information_schema.columns c2
+                WHERE c2.table_schema = 'public' AND c2.table_name = c1.table_name AND c2.column_name = 'id'
+            )
+            AND EXISTS (
+                SELECT 1 FROM information_schema.columns c3
+                WHERE c3.table_schema = 'public' AND c3.table_name = c1.table_name AND c3.column_name = 'created_by'
+            )
+    LOOP
+        EXECUTE format('DROP TRIGGER IF EXISTS trg_audit_%I ON %I', t.table_name, t.table_name);
+        EXECUTE format('CREATE TRIGGER trg_audit_%I
+                        BEFORE INSERT OR UPDATE OR DELETE ON %I
+                        FOR EACH ROW EXECUTE FUNCTION fn_audit_generic_trigger()',
+                        t.table_name, t.table_name);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT fn_attach_audit_triggers();

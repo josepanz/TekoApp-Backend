@@ -46,7 +46,6 @@ export class OnboardingService {
         isLdap: false,
         acceptedTermsAt: data.acceptedTerms ? new Date() : null,
         documentTypeId: 1,
-        access_level: 0,
       });
 
       // 2. Crear credenciales (reutilizar lógica de passwords)

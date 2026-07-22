@@ -63,10 +63,7 @@ export class PaymentController {
     @Body() dto: CreatePaymentDto,
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.createPayment(
-      req.user.id,
-      dto,
-    ) as unknown as Promise<PaymentDetailResponseDTO>;
+    return this.apiService.createPayment(req.user.id, dto);
   }
 
   @Get()
@@ -78,7 +75,7 @@ export class PaymentController {
       query.userId,
       query.professionalId,
       query.status,
-    ) as unknown as Promise<PaymentDetailResponseDTO[]>;
+    );
   }
 
   @Get('summary')
@@ -105,9 +102,7 @@ export class PaymentController {
   async findOne(
     @Param() param: PaymentIdParamDTO,
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.getPaymentById(
-      param.id,
-    ) as unknown as Promise<PaymentDetailResponseDTO>;
+    return this.apiService.getPaymentById(param.id);
   }
 
   @Put(':id')
@@ -116,10 +111,7 @@ export class PaymentController {
     @Param() param: PaymentIdParamDTO,
     @Body() dto: UpdatePaymentDto,
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.updatePayment(
-      param.id,
-      dto,
-    ) as unknown as Promise<PaymentDetailResponseDTO>;
+    return this.apiService.updatePayment(param.id, dto);
   }
 
   @Post(':id/cancel')
@@ -129,10 +121,7 @@ export class PaymentController {
     @Param() param: PaymentIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.cancelPayment(
-      param.id,
-      req.user.id,
-    ) as unknown as Promise<PaymentDetailResponseDTO>;
+    return this.apiService.cancelPayment(param.id, req.user.id);
   }
 
   @Post(':id/refund')
@@ -142,10 +131,7 @@ export class PaymentController {
     @Param() param: PaymentIdParamDTO,
     @Body() dto: RefundPaymentDto,
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.refundPayment(
-      param.id,
-      dto,
-    ) as unknown as Promise<PaymentDetailResponseDTO>;
+    return this.apiService.refundPayment(param.id, dto);
   }
 
   // --- MÉTODOS DE PAGO ---
@@ -157,10 +143,7 @@ export class PaymentController {
     @Body() dto: CreatePaymentMethodRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<PaymentMethodDetailResponseDTO> {
-    return this.apiService.createPaymentMethod(
-      req.user.id,
-      dto,
-    ) as unknown as Promise<PaymentMethodDetailResponseDTO>;
+    return this.apiService.createPaymentMethod(req.user.id, dto);
   }
 
   @Put('methods/:id')
@@ -170,11 +153,7 @@ export class PaymentController {
     @Body() dto: UpdatePaymentMethodDto,
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<PaymentMethodDetailResponseDTO> {
-    return this.apiService.updatePaymentMethod(
-      param.id,
-      req.user.id,
-      dto,
-    ) as unknown as Promise<PaymentMethodDetailResponseDTO>;
+    return this.apiService.updatePaymentMethod(param.id, req.user.id, dto);
   }
 
   @Delete('methods/:id')

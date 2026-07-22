@@ -47,7 +47,6 @@ const mockUser = {
   isEmployee: false,
   documentNumber: '12345678',
   documentTypeId: 1,
-  legacyUserId: null,
   isLdap: false,
   lastLogin: null,
   createdAt: new Date('2024-01-01'),

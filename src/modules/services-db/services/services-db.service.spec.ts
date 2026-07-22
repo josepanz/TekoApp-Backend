@@ -3,6 +3,8 @@ import { ServiceStatus, RequestStatus } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { ServicesDbService } from './services-db.service';
 
+const serviceRefInclude = { service: { select: { referenceId: true } } };
+
 // ─── Mocks de category ────────────────────────────────────────────────────────
 const mockCategoryFindUnique = jest.fn();
 
@@ -11,6 +13,7 @@ const mockServicesFindMany = jest.fn();
 const mockServicesFindUnique = jest.fn();
 const mockServicesCreate = jest.fn();
 const mockServicesUpdate = jest.fn();
+const mockServicesUpdateMany = jest.fn();
 const mockServicesCount = jest.fn();
 const mockServicesAggregate = jest.fn();
 
@@ -41,6 +44,7 @@ const mockPrisma = {
       findUnique: mockServicesFindUnique,
       create: mockServicesCreate,
       update: mockServicesUpdate,
+      updateMany: mockServicesUpdateMany,
       count: mockServicesCount,
       aggregate: mockServicesAggregate,
     },
@@ -110,7 +114,7 @@ describe('ServicesDbService', () => {
     it('debe retornar el servicio creado con los datos provistos', async () => {
       // Arrange
       const data = { title: 'Reparación de cañería', userId: 1, categoryId: 2 };
-      const created = { id: 'svc-1', ...data };
+      const created = { id: 1, referenceId: 'svc-uuid-1', ...data };
       mockServicesCreate.mockResolvedValue(created);
 
       // Act
@@ -126,7 +130,7 @@ describe('ServicesDbService', () => {
   describe('findManyWithCount', () => {
     it('debe retornar el arreglo de servicios y el total de registros en paralelo', async () => {
       // Arrange
-      const services = [{ id: 'svc-1' }, { id: 'svc-2' }];
+      const services = [{ id: 1 }, { id: 2 }];
       const total = 20;
       mockServicesFindMany.mockResolvedValue(services);
       mockServicesCount.mockResolvedValue(total);
@@ -161,7 +165,7 @@ describe('ServicesDbService', () => {
   describe('findNearby', () => {
     it('debe retornar hasta 50 servicios cercanos con el filtro aplicado', async () => {
       // Arrange
-      const services = [{ id: 'svc-1' }];
+      const services = [{ id: 1 }];
       mockServicesFindMany.mockResolvedValue(services);
 
       // Act
@@ -180,18 +184,18 @@ describe('ServicesDbService', () => {
 
   // ─── findServiceById ─────────────────────────────────────────────────────
   describe('findServiceById', () => {
-    it('debe retornar el servicio con todas sus relaciones cuando existe', async () => {
+    it('debe retornar el servicio con todas sus relaciones cuando existe la PK interna', async () => {
       // Arrange
-      const svc = { id: 'svc-1', title: 'Pintura' };
+      const svc = { id: 1, referenceId: 'svc-uuid-1', title: 'Pintura' };
       mockServicesFindUnique.mockResolvedValue(svc);
 
       // Act
-      const result = await service.findServiceById('svc-1');
+      const result = await service.findServiceById(1);
 
       // Assert
       expect(result).toEqual(svc);
       expect(mockServicesFindUnique).toHaveBeenCalledWith({
-        where: { id: 'svc-1' },
+        where: { id: 1 },
         include: {
           users: true,
           professional: true,
@@ -206,10 +210,34 @@ describe('ServicesDbService', () => {
       mockServicesFindUnique.mockResolvedValue(null);
 
       // Act
-      const result = await service.findServiceById('no-existe');
+      const result = await service.findServiceById(999);
 
       // Assert
       expect(result).toBeNull();
+    });
+  });
+
+  // ─── findServiceByReferenceId ────────────────────────────────────────────
+  describe('findServiceByReferenceId', () => {
+    it('debe buscar el servicio por su referenceId (UUID público) con sus relaciones', async () => {
+      // Arrange
+      const svc = { id: 1, referenceId: 'svc-uuid-1', title: 'Pintura' };
+      mockServicesFindUnique.mockResolvedValue(svc);
+
+      // Act
+      const result = await service.findServiceByReferenceId('svc-uuid-1');
+
+      // Assert
+      expect(result).toEqual(svc);
+      expect(mockServicesFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'svc-uuid-1' },
+        include: {
+          users: true,
+          professional: true,
+          category: true,
+          requests: true,
+        },
+      });
     });
   });
 
@@ -217,18 +245,22 @@ describe('ServicesDbService', () => {
   describe('updateService', () => {
     it('debe retornar el servicio actualizado con los datos provistos', async () => {
       // Arrange
-      const updated = { id: 'svc-1', title: 'Nuevo título' };
+      const updated = {
+        id: 1,
+        referenceId: 'svc-uuid-1',
+        title: 'Nuevo título',
+      };
       mockServicesUpdate.mockResolvedValue(updated);
 
       // Act
-      const result = await service.updateService('svc-1', {
+      const result = await service.updateService(1, {
         title: 'Nuevo título',
       });
 
       // Assert
       expect(result).toEqual(updated);
       expect(mockServicesUpdate).toHaveBeenCalledWith({
-        where: { id: 'svc-1' },
+        where: { id: 1 },
         data: { title: 'Nuevo título' },
       });
     });
@@ -238,7 +270,7 @@ describe('ServicesDbService', () => {
   describe('findMyServices', () => {
     it('debe retornar los servicios del usuario con el filtro aplicado', async () => {
       // Arrange
-      const services = [{ id: 'svc-1', userId: 5 }];
+      const services = [{ id: 1, userId: 5 }];
       mockServicesFindMany.mockResolvedValue(services);
 
       // Act
@@ -248,7 +280,11 @@ describe('ServicesDbService', () => {
       expect(result).toEqual(services);
       expect(mockServicesFindMany).toHaveBeenCalledWith({
         where: { userId: 5 },
-        include: { users: true, professional: true, category: true },
+        include: {
+          users: true,
+          professional: { include: { user: true } },
+          category: true,
+        },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -359,16 +395,16 @@ describe('ServicesDbService', () => {
   describe('findDuplicateRequest', () => {
     it('debe retornar la solicitud existente cuando ya fue creada para ese servicio y profesional', async () => {
       // Arrange
-      const req = { id: 'req-1', serviceId: 'svc-1', professionalId: 2 };
+      const req = { id: 1, serviceId: 1, professionalId: 2 };
       mockServiceRequestsFindFirst.mockResolvedValue(req);
 
       // Act
-      const result = await service.findDuplicateRequest('svc-1', 2);
+      const result = await service.findDuplicateRequest(1, 2);
 
       // Assert
       expect(result).toEqual(req);
       expect(mockServiceRequestsFindFirst).toHaveBeenCalledWith({
-        where: { serviceId: 'svc-1', professionalId: 2 },
+        where: { serviceId: 1, professionalId: 2 },
       });
     });
 
@@ -377,7 +413,7 @@ describe('ServicesDbService', () => {
       mockServiceRequestsFindFirst.mockResolvedValue(null);
 
       // Act
-      const result = await service.findDuplicateRequest('svc-nuevo', 99);
+      const result = await service.findDuplicateRequest(77, 99);
 
       // Assert
       expect(result).toBeNull();
@@ -386,10 +422,15 @@ describe('ServicesDbService', () => {
 
   // ─── createServiceRequest ────────────────────────────────────────────────
   describe('createServiceRequest', () => {
-    it('debe retornar la solicitud de servicio creada', async () => {
+    it('debe retornar la solicitud de servicio creada incluyendo el referenceId del servicio', async () => {
       // Arrange
-      const data = { serviceId: 'svc-1', professionalId: 2 };
-      const created = { id: 'req-1', ...data };
+      const data = { serviceId: 1, professionalId: 2 };
+      const created = {
+        id: 1,
+        referenceId: 'req-uuid-1',
+        ...data,
+        service: { referenceId: 'svc-uuid-1' },
+      };
       mockServiceRequestsCreate.mockResolvedValue(created);
 
       // Act
@@ -397,62 +438,69 @@ describe('ServicesDbService', () => {
 
       // Assert
       expect(result).toEqual(created);
-      expect(mockServiceRequestsCreate).toHaveBeenCalledWith({ data });
+      expect(mockServiceRequestsCreate).toHaveBeenCalledWith({
+        data,
+        include: serviceRefInclude,
+      });
     });
   });
 
   // ─── findServiceRequests ─────────────────────────────────────────────────
   describe('findServiceRequests', () => {
-    it('debe retornar todas las solicitudes de un servicio con el profesional incluido', async () => {
+    it('debe retornar todas las solicitudes de un servicio con el profesional y el referenceId del servicio', async () => {
       // Arrange
-      const requests = [{ id: 'req-1', serviceId: 'svc-1' }];
+      const requests = [{ id: 1, serviceId: 1 }];
       mockServiceRequestsFindMany.mockResolvedValue(requests);
 
       // Act
-      const result = await service.findServiceRequests('svc-1');
+      const result = await service.findServiceRequests(1);
 
       // Assert
       expect(result).toEqual(requests);
       expect(mockServiceRequestsFindMany).toHaveBeenCalledWith({
-        where: { serviceId: 'svc-1' },
-        include: { professional: true },
+        where: { serviceId: 1 },
+        include: { professional: true, ...serviceRefInclude },
         orderBy: { createdAt: 'desc' },
       });
     });
   });
 
-  // ─── findServiceRequest ──────────────────────────────────────────────────
-  describe('findServiceRequest', () => {
-    it('debe retornar la solicitud que coincida con el id y serviceId dados', async () => {
+  // ─── findServiceRequestByReferenceId ─────────────────────────────────────
+  describe('findServiceRequestByReferenceId', () => {
+    it('debe retornar la solicitud que coincida con el referenceId dentro del servicio dado', async () => {
       // Arrange
-      const req = { id: 'req-1', serviceId: 'svc-1' };
+      const req = { id: 1, referenceId: 'req-uuid-1', serviceId: 1 };
       mockServiceRequestsFindFirst.mockResolvedValue(req);
 
       // Act
-      const result = await service.findServiceRequest('req-1', 'svc-1');
+      const result = await service.findServiceRequestByReferenceId(
+        'req-uuid-1',
+        1,
+      );
 
       // Assert
       expect(result).toEqual(req);
       expect(mockServiceRequestsFindFirst).toHaveBeenCalledWith({
-        where: { id: 'req-1', serviceId: 'svc-1' },
+        where: { referenceId: 'req-uuid-1', serviceId: 1 },
       });
     });
   });
 
   // ─── findServiceRequestById ──────────────────────────────────────────────
   describe('findServiceRequestById', () => {
-    it('debe retornar la solicitud cuando existe el id', async () => {
+    it('debe retornar la solicitud cuando existe la PK interna', async () => {
       // Arrange
-      const req = { id: 'req-1', status: RequestStatus.PENDING };
+      const req = { id: 1, status: RequestStatus.PENDING };
       mockServiceRequestsFindUnique.mockResolvedValue(req);
 
       // Act
-      const result = await service.findServiceRequestById('req-1');
+      const result = await service.findServiceRequestById(1);
 
       // Assert
       expect(result).toEqual(req);
       expect(mockServiceRequestsFindUnique).toHaveBeenCalledWith({
-        where: { id: 'req-1' },
+        where: { id: 1 },
+        include: serviceRefInclude,
       });
     });
   });
@@ -461,66 +509,138 @@ describe('ServicesDbService', () => {
   describe('updateServiceRequest', () => {
     it('debe retornar la solicitud actualizada con el nuevo estado', async () => {
       // Arrange
-      const updated = { id: 'req-1', status: RequestStatus.ACCEPTED };
+      const updated = { id: 1, status: RequestStatus.ACCEPTED };
       mockServiceRequestsUpdate.mockResolvedValue(updated);
 
       // Act
-      const result = await service.updateServiceRequest('req-1', {
+      const result = await service.updateServiceRequest(1, {
         status: RequestStatus.ACCEPTED,
       });
 
       // Assert
       expect(result).toEqual(updated);
       expect(mockServiceRequestsUpdate).toHaveBeenCalledWith({
-        where: { id: 'req-1' },
+        where: { id: 1 },
         data: { status: RequestStatus.ACCEPTED },
+        include: serviceRefInclude,
       });
     });
   });
 
   // ─── acceptRequestTransaction ────────────────────────────────────────────
   describe('acceptRequestTransaction', () => {
-    it('debe ejecutar la transacción con las tres operaciones de aceptación sin retornar valor', async () => {
+    it('debe aceptar la solicitud y rechazar las demás cuando el servicio sigue PENDING', async () => {
       // Arrange
-      mockTransaction.mockResolvedValue(undefined);
-      // La transacción recibe un arreglo de promesas; mockear update y updateMany
-      mockServiceRequestsUpdate.mockReturnValue({
-        id: 'req-1',
+      const mockServicesUpdateManyTx = jest
+        .fn()
+        .mockResolvedValue({ count: 1 });
+      const mockServiceRequestsUpdateTx = jest.fn().mockResolvedValue({
+        id: 1,
         status: RequestStatus.ACCEPTED,
       });
-      mockServicesUpdate.mockReturnValue({
-        id: 'svc-1',
-        status: ServiceStatus.ACCEPTED,
-      });
-      mockServiceRequestsUpdateMany.mockReturnValue({ count: 2 });
+      const mockServiceRequestsUpdateManyTx = jest
+        .fn()
+        .mockResolvedValue({ count: 2 });
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            services: { updateMany: mockServicesUpdateManyTx },
+            serviceRequests: {
+              update: mockServiceRequestsUpdateTx,
+              updateMany: mockServiceRequestsUpdateManyTx,
+            },
+          };
+          return callback(txClient);
+        },
+      );
 
       // Act
-      await service.acceptRequestTransaction('req-1', 'svc-1', 5);
+      const result = await service.acceptRequestTransaction(1, 10, 5);
 
       // Assert
-      expect(mockTransaction).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.anything(),
-          expect.anything(),
-          expect.anything(),
-        ]),
-      );
-      expect(mockServiceRequestsUpdate).toHaveBeenCalledWith({
-        where: { id: 'req-1' },
-        data: { status: RequestStatus.ACCEPTED },
-      });
-      expect(mockServicesUpdate).toHaveBeenCalledWith({
-        where: { id: 'svc-1' },
+      expect(result).toBe(1);
+      expect(mockServicesUpdateManyTx).toHaveBeenCalledWith({
+        where: { id: 10, status: ServiceStatus.PENDING },
         data: { status: ServiceStatus.ACCEPTED, professionalId: 5 },
       });
-      expect(mockServiceRequestsUpdateMany).toHaveBeenCalledWith({
+      expect(mockServiceRequestsUpdateTx).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { status: RequestStatus.ACCEPTED },
+      });
+      expect(mockServiceRequestsUpdateManyTx).toHaveBeenCalledWith({
         where: {
-          serviceId: 'svc-1',
+          serviceId: 10,
           status: RequestStatus.PENDING,
-          id: { not: 'req-1' },
+          id: { not: 1 },
         },
         data: { status: RequestStatus.REJECTED },
       });
+    });
+
+    it('debe devolver 0 sin tocar las solicitudes cuando el servicio ya no está PENDING', async () => {
+      // Arrange
+      const mockServicesUpdateManyTx = jest
+        .fn()
+        .mockResolvedValue({ count: 0 });
+      const mockServiceRequestsUpdateTx = jest.fn();
+      const mockServiceRequestsUpdateManyTx = jest.fn();
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            services: { updateMany: mockServicesUpdateManyTx },
+            serviceRequests: {
+              update: mockServiceRequestsUpdateTx,
+              updateMany: mockServiceRequestsUpdateManyTx,
+            },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act
+      const result = await service.acceptRequestTransaction(1, 10, 5);
+
+      // Assert
+      expect(result).toBe(0);
+      expect(mockServiceRequestsUpdateTx).not.toHaveBeenCalled();
+      expect(mockServiceRequestsUpdateManyTx).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── updateServiceConditional ────────────────────────────────────────────
+  describe('updateServiceConditional', () => {
+    it('debe actualizar y devolver 1 cuando el estado actual coincide con uno de los esperados', async () => {
+      // Arrange
+      mockServicesUpdateMany.mockResolvedValue({ count: 1 });
+
+      // Act
+      const result = await service.updateServiceConditional(
+        1,
+        [ServiceStatus.PENDING],
+        { status: ServiceStatus.ACCEPTED },
+      );
+
+      // Assert
+      expect(result).toBe(1);
+      expect(mockServicesUpdateMany).toHaveBeenCalledWith({
+        where: { id: 1, status: { in: [ServiceStatus.PENDING] } },
+        data: { status: ServiceStatus.ACCEPTED },
+      });
+    });
+
+    it('debe devolver 0 cuando el estado actual ya no coincide (carrera con otro proceso)', async () => {
+      // Arrange
+      mockServicesUpdateMany.mockResolvedValue({ count: 0 });
+
+      // Act
+      const result = await service.updateServiceConditional(
+        1,
+        [ServiceStatus.PENDING],
+        { status: ServiceStatus.ACCEPTED },
+      );
+
+      // Assert
+      expect(result).toBe(0);
     });
   });
 });

@@ -8,6 +8,8 @@ import {
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { PaymentDbService } from './payment-db.service';
 
+const serviceRefInclude = { service: { select: { referenceId: true } } };
+
 // ── Mock functions ─────────────────────────────────────────────────────────────
 const mockPaymentsFindFirst = jest.fn();
 const mockPaymentsFindMany = jest.fn();
@@ -16,6 +18,8 @@ const mockPaymentsCreate = jest.fn();
 const mockPaymentsUpdate = jest.fn();
 const mockPaymentsAggregate = jest.fn();
 const mockPaymentsCount = jest.fn();
+
+const mockServicesFindUnique = jest.fn();
 
 const mockPaymentMethodFindFirst = jest.fn();
 const mockPaymentMethodFindMany = jest.fn();
@@ -33,6 +37,9 @@ const mockTransaction = jest.fn();
 
 const mockPrisma = {
   extended: {
+    services: {
+      findUnique: mockServicesFindUnique,
+    },
     payments: {
       findFirst: mockPaymentsFindFirst,
       findMany: mockPaymentsFindMany,
@@ -62,10 +69,12 @@ const mockPrisma = {
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 const fakePayment = {
-  id: 'pay-1',
+  id: 1,
+  referenceId: 'pay-uuid-1',
   userId: 10,
   professionalId: 20,
-  serviceRequestId: 'req-1',
+  serviceId: 30,
+  service: { referenceId: 'svc-uuid-1' },
   totalAmount: new Prisma.Decimal(1500),
   platformFee: new Prisma.Decimal(150),
   status: PaymentStatus.PENDING,
@@ -74,15 +83,16 @@ const fakePayment = {
 };
 
 const fakePaymentMethod = {
-  id: 'pm-1',
+  id: 1,
+  referenceId: 'pm-uuid-1',
   userId: 10,
   isDefault: false,
   isActive: true,
 };
 
 const fakeTransaction = {
-  id: 'txn-1',
-  paymentId: 'pay-1',
+  id: 1,
+  paymentId: 1,
   externalTransactionId: 'ext-123',
   status: TransactionStatus.PENDING,
   type: TransactionType.PAYMENT,
@@ -104,28 +114,46 @@ describe('PaymentDbService', () => {
 
   afterEach(() => jest.clearAllMocks());
 
+  // ── findServiceByReferenceId ─────────────────────────────────────────────────
+  describe('findServiceByReferenceId', () => {
+    it('debe resolver el UUID público del servicio a su PK interna', async () => {
+      // Arrange
+      mockServicesFindUnique.mockResolvedValue({ id: 30 });
+
+      // Act
+      const result = await service.findServiceByReferenceId('svc-uuid-1');
+
+      // Assert
+      expect(result).toEqual({ id: 30 });
+      expect(mockServicesFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'svc-uuid-1' },
+        select: { id: true },
+      });
+    });
+  });
+
   // ── findExistingPayment ──────────────────────────────────────────────────────
   describe('findExistingPayment', () => {
-    it('debe retornar el pago existente para un usuario y solicitud dados', async () => {
+    it('debe retornar el pago existente para un usuario y servicio dados', async () => {
       // Arrange
       mockPaymentsFindFirst.mockResolvedValue(fakePayment);
 
       // Act
-      const result = await service.findExistingPayment(10, 'req-1');
+      const result = await service.findExistingPayment(10, 30);
 
       // Assert
       expect(result).toEqual(fakePayment);
       expect(mockPaymentsFindFirst).toHaveBeenCalledWith({
-        where: { userId: 10, serviceRequestId: 'req-1' },
+        where: { userId: 10, serviceId: 30 },
       });
     });
 
-    it('debe retornar null cuando no existe pago para la combinación usuario/solicitud', async () => {
+    it('debe retornar null cuando no existe pago para la combinación usuario/servicio', async () => {
       // Arrange
       mockPaymentsFindFirst.mockResolvedValue(null);
 
       // Act
-      const result = await service.findExistingPayment(99, 'req-999');
+      const result = await service.findExistingPayment(99, 999);
 
       // Assert
       expect(result).toBeNull();
@@ -148,7 +176,7 @@ describe('PaymentDbService', () => {
 
       const data = {
         userId: 10,
-        serviceRequestId: 'req-1',
+        serviceId: 30,
         amount: 1500,
         totalAmount: 1500,
         platformFee: 150,
@@ -160,7 +188,7 @@ describe('PaymentDbService', () => {
         professionalId: 20,
       } as unknown as Omit<
         Prisma.PaymentsUncheckedCreateInput,
-        'id' | 'createdAt' | 'updatedAt'
+        'id' | 'referenceId' | 'createdAt' | 'updatedAt'
       >;
 
       // Act
@@ -230,17 +258,18 @@ describe('PaymentDbService', () => {
 
   // ── findPaymentById ──────────────────────────────────────────────────────────
   describe('findPaymentById', () => {
-    it('debe retornar el pago cuando existe el ID', async () => {
+    it('debe retornar el pago cuando existe la PK interna', async () => {
       // Arrange
       mockPaymentsFindUnique.mockResolvedValue(fakePayment);
 
       // Act
-      const result = await service.findPaymentById('pay-1');
+      const result = await service.findPaymentById(1);
 
       // Assert
       expect(result).toEqual(fakePayment);
       expect(mockPaymentsFindUnique).toHaveBeenCalledWith({
-        where: { id: 'pay-1' },
+        where: { id: 1 },
+        include: serviceRefInclude,
       });
     });
 
@@ -249,10 +278,28 @@ describe('PaymentDbService', () => {
       mockPaymentsFindUnique.mockResolvedValue(null);
 
       // Act
-      const result = await service.findPaymentById('pay-999');
+      const result = await service.findPaymentById(999);
 
       // Assert
       expect(result).toBeNull();
+    });
+  });
+
+  // ── findPaymentByReferenceId ─────────────────────────────────────────────────
+  describe('findPaymentByReferenceId', () => {
+    it('debe buscar el pago por su referenceId (UUID público) incluyendo el servicio', async () => {
+      // Arrange
+      mockPaymentsFindUnique.mockResolvedValue(fakePayment);
+
+      // Act
+      const result = await service.findPaymentByReferenceId('pay-uuid-1');
+
+      // Assert
+      expect(result).toEqual(fakePayment);
+      expect(mockPaymentsFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'pay-uuid-1' },
+        include: serviceRefInclude,
+      });
     });
   });
 
@@ -264,15 +311,16 @@ describe('PaymentDbService', () => {
       mockPaymentsUpdate.mockResolvedValue(updated);
 
       // Act
-      const result = await service.updatePayment('pay-1', {
+      const result = await service.updatePayment(1, {
         status: PaymentStatus.COMPLETED,
       });
 
       // Assert
       expect(result).toEqual(updated);
       expect(mockPaymentsUpdate).toHaveBeenCalledWith({
-        where: { id: 'pay-1' },
+        where: { id: 1 },
         data: { status: PaymentStatus.COMPLETED },
+        include: serviceRefInclude,
       });
     });
   });
@@ -337,19 +385,22 @@ describe('PaymentDbService', () => {
     });
   });
 
-  // ── findPaymentMethodById ────────────────────────────────────────────────────
-  describe('findPaymentMethodById', () => {
-    it('debe retornar el método de pago que coincide con id y userId', async () => {
+  // ── findPaymentMethodByReferenceId ───────────────────────────────────────────
+  describe('findPaymentMethodByReferenceId', () => {
+    it('debe retornar el método de pago que coincide con referenceId y userId', async () => {
       // Arrange
       mockPaymentMethodFindFirst.mockResolvedValue(fakePaymentMethod);
 
       // Act
-      const result = await service.findPaymentMethodById('pm-1', 10);
+      const result = await service.findPaymentMethodByReferenceId(
+        'pm-uuid-1',
+        10,
+      );
 
       // Assert
       expect(result).toEqual(fakePaymentMethod);
       expect(mockPaymentMethodFindFirst).toHaveBeenCalledWith({
-        where: { id: 'pm-1', userId: 10 },
+        where: { referenceId: 'pm-uuid-1', userId: 10 },
       });
     });
 
@@ -358,7 +409,10 @@ describe('PaymentDbService', () => {
       mockPaymentMethodFindFirst.mockResolvedValue(null);
 
       // Act
-      const result = await service.findPaymentMethodById('pm-1', 99);
+      const result = await service.findPaymentMethodByReferenceId(
+        'pm-uuid-1',
+        99,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -390,14 +444,14 @@ describe('PaymentDbService', () => {
       mockPaymentMethodUpdate.mockResolvedValue(updated);
 
       // Act
-      const result = await service.updatePaymentMethod('pm-1', {
+      const result = await service.updatePaymentMethod(1, {
         isDefault: true,
       });
 
       // Assert
       expect(result).toEqual(updated);
       expect(mockPaymentMethodUpdate).toHaveBeenCalledWith({
-        where: { id: 'pm-1' },
+        where: { id: 1 },
         data: { isDefault: true },
       });
     });
@@ -405,33 +459,58 @@ describe('PaymentDbService', () => {
 
   // ── executeRefund ────────────────────────────────────────────────────────────
   describe('executeRefund', () => {
-    it('debe crear una transacción de reembolso y actualizar el estado del pago en una transacción ACID', async () => {
+    function mockLockedPayment(overrides: {
+      status: PaymentStatus;
+      total_amount: number;
+      refund_details?: Record<string, unknown> | null;
+    }) {
+      return jest.fn().mockResolvedValue([
+        {
+          id: 1,
+          status: overrides.status,
+          total_amount: new Prisma.Decimal(overrides.total_amount),
+          refund_details: overrides.refund_details ?? null,
+        },
+      ]);
+    }
+
+    it('debe bloquear la fila (FOR UPDATE), crear la transacción de reembolso y actualizar el pago en una transacción ACID', async () => {
       // Arrange
       const refundedPayment = {
         ...fakePayment,
         status: PaymentStatus.REFUNDED,
       };
+      const mockCreate = jest
+        .fn<Promise<Record<string, unknown>>, unknown[]>()
+        .mockResolvedValue({});
+      const mockUpdate = jest
+        .fn<Promise<typeof refundedPayment>, unknown[]>()
+        .mockResolvedValue(refundedPayment);
       mockTransaction.mockImplementation(
         async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
           const txClient = {
-            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
-            payments: { update: jest.fn().mockResolvedValue(refundedPayment) },
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.COMPLETED,
+              total_amount: 1500,
+            }),
+            paymentTransaction: { create: mockCreate },
+            payments: { update: mockUpdate },
           };
           return callback(txClient);
         },
       );
 
       // Act
-      const result = await service.executeRefund(
-        'pay-1',
-        1500,
-        'defecto',
-        true,
-        1500,
-      );
+      const result = await service.executeRefund(1, 1500, 'defecto');
 
       // Assert
       expect(mockTransaction).toHaveBeenCalled();
+      const updateCall = mockUpdate.mock.calls[0]?.[0] as {
+        where: { id: number };
+        data: { status: PaymentStatus };
+      };
+      expect(updateCall.where).toEqual({ id: 1 });
+      expect(updateCall.data.status).toBe(PaymentStatus.REFUNDED);
       expect(result).toEqual(refundedPayment);
     });
 
@@ -444,6 +523,10 @@ describe('PaymentDbService', () => {
       mockTransaction.mockImplementation(
         async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
           const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.COMPLETED,
+              total_amount: 1500,
+            }),
             paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
             payments: {
               update: jest
@@ -461,16 +544,55 @@ describe('PaymentDbService', () => {
       );
 
       // Act
-      const result = await service.executeRefund(
-        'pay-1',
-        500,
-        'parcial',
-        false,
-        500,
-      );
+      const result = await service.executeRefund(1, 500, 'parcial');
 
       // Assert
       expect(result).toEqual(partialRefundedPayment);
+    });
+
+    it('debe sumar reembolsos previos (leídos bajo lock) al validar el monto disponible', async () => {
+      // Arrange
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.COMPLETED,
+              total_amount: 1000,
+              refund_details: { refundedAmount: 400 },
+            }),
+            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+            payments: { update: jest.fn().mockResolvedValue(fakePayment) },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act & Assert — 400 ya reembolsados + 700 nuevos > 1000 disponibles
+      await expect(service.executeRefund(1, 700, 'excede')).rejects.toThrow(
+        'El monto del reembolso excede el monto disponible',
+      );
+    });
+
+    it('debe rechazar el reembolso si el estado ya no es COMPLETED (otro reembolso ganó la carrera)', async () => {
+      // Arrange
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.REFUNDED,
+              total_amount: 1500,
+            }),
+            paymentTransaction: { create: jest.fn() },
+            payments: { update: jest.fn() },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act & Assert
+      await expect(service.executeRefund(1, 100, 'tarde')).rejects.toThrow(
+        'Solo se pueden reembolsar pagos completados',
+      );
     });
   });
 
@@ -519,8 +641,8 @@ describe('PaymentDbService', () => {
 
       // Act
       await service.updateTransactionAndPaymentStatus(
-        'txn-1',
-        'pay-1',
+        1,
+        1,
         TransactionStatus.COMPLETED,
         PaymentStatus.COMPLETED,
       );
@@ -554,8 +676,8 @@ describe('PaymentDbService', () => {
 
       // Act
       await service.updateTransactionAndPaymentStatus(
-        'txn-1',
-        'pay-1',
+        1,
+        1,
         TransactionStatus.FAILED,
         PaymentStatus.FAILED,
         'Fondos insuficientes',

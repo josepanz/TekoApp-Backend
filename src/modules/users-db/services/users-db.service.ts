@@ -48,11 +48,9 @@ export class UsersDBService {
     lastName: string;
     documentNumber?: string;
     documentTypeId?: number;
-    access_level?: number;
     isEmployee: boolean;
     isLdap: boolean;
     status?: UserStatus;
-    legacyUserId?: string;
     lastLogin?: Date;
     createdBy: string;
     accessLevelId?: AccessLevel | number;
@@ -77,7 +75,6 @@ export class UsersDBService {
     const created = await this.create({
       ...data,
       documentTypeId: data.documentTypeId ?? 1,
-      access_level: data.access_level ?? accessLevelIdNum ?? 0,
       accessLevelId: accessLevelIdNum,
     });
 
@@ -107,7 +104,6 @@ export class UsersDBService {
     status: UserStatus;
     createdBy: string;
     accessLevelId?: AccessLevel | number;
-    access_level?: number;
     roleIds?: number[];
     merchantCtx?: {
       ruc: string;
@@ -151,7 +147,6 @@ export class UsersDBService {
           status: data.status,
           createdBy: data.createdBy,
           accessLevelId: accessLevelIdNum,
-          access_level: data.access_level ?? accessLevelIdNum ?? 0,
           profileStatus: UserProfileStatus.COMPLETE,
         },
       });
