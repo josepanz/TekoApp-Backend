@@ -51,26 +51,29 @@ export class LocationsDbService {
       onlineOnly,
     } = dto;
 
-    // Construcción dinámica de condiciones seguras de tipado para inyección en Query Raw
+    // Fragmentos parametrizados vía Prisma.sql — nunca interpolación de string cruda
     const categoryFilter = categoryId
-      ? `AND category_id = '${categoryId}'::uuid`
-      : '';
-    const availableFilter = availableOnly ? `AND is_available = true` : '';
-    const onlineFilter = onlineOnly ? `AND is_online = true` : '';
+      ? Prisma.sql`AND category_id = ${categoryId}`
+      : Prisma.empty;
+    const availableFilter = availableOnly
+      ? Prisma.sql`AND is_available = true`
+      : Prisma.empty;
+    const onlineFilter = onlineOnly
+      ? Prisma.sql`AND is_online = true`
+      : Prisma.empty;
 
-    // SQL puro parametrizado contra inyección usando Haversine Fórmula
-    return this.prisma.extended.$queryRawUnsafe<
+    // SQL parametrizado (tagged template) usando Haversine Fórmula
+    return this.prisma.extended.$queryRaw<
       (Professionals & { distance: number })[]
-    >(
-      `
+    >`
       SELECT *, (
         6371 * acos(
-          cos(radians($1)) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians($2)) + 
-          sin(radians($1)) * sin(radians(current_latitude))
+          cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
+          sin(radians(${latitude})) * sin(radians(current_latitude))
         )
       ) AS distance
       FROM professionals
-      WHERE current_latitude IS NOT NULL 
+      WHERE current_latitude IS NOT NULL
         AND current_longitude IS NOT NULL
         AND status = 'approved'
         AND verification_status = 'verified'
@@ -80,17 +83,12 @@ export class LocationsDbService {
       GROUP BY id
       HAVING (
         6371 * acos(
-          cos(radians($1)) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians($2)) + 
-          sin(radians($1)) * sin(radians(current_latitude))
+          cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
+          sin(radians(${latitude})) * sin(radians(current_latitude))
         )
-      ) <= $3
+      ) <= ${radius}
       ORDER BY distance ASC, average_rating DESC
-      LIMIT $4
-    `,
-      latitude,
-      longitude,
-      radius,
-      limit,
-    );
+      LIMIT ${limit}
+    `;
   }
 }

@@ -8,7 +8,7 @@ const mockFindUnique = jest.fn();
 const mockCount = jest.fn();
 const mockFindMany = jest.fn();
 const mockUpdate = jest.fn();
-const mockQueryRawUnsafe = jest.fn();
+const mockQueryRaw = jest.fn();
 
 const mockPrisma = {
   extended: {
@@ -18,7 +18,7 @@ const mockPrisma = {
       findMany: mockFindMany,
       update: mockUpdate,
     },
-    $queryRawUnsafe: mockQueryRawUnsafe,
+    $queryRaw: mockQueryRaw,
   },
 };
 
@@ -161,11 +161,23 @@ describe('LocationsDbService', () => {
   });
 
   // ── findNearby ─────────────────────────────────────────────────────────
+  // Con $queryRaw (tagged template), el mock recibe (stringsArray, ...valores
+  // interpolados) — los filtros condicionales viajan como fragmentos `Prisma.Sql`
+  // (objeto con `.text`/`.values`), no como texto plano, así que se inspeccionan
+  // por valor en vez de por substring en el string de la query.
+  const sqlFragmentsOf = (callArgs: unknown[]): { text: string }[] =>
+    callArgs
+      .slice(1)
+      .filter(
+        (v): v is { text: string } =>
+          typeof v === 'object' && v !== null && 'text' in v,
+      );
+
   describe('findNearby', () => {
     it('debe ejecutar la query raw y retornar los profesionales cercanos con distancia', async () => {
       // Arrange
       const nearby = [{ ...baseProfessional, distance: 1.2 }];
-      mockQueryRawUnsafe.mockResolvedValue(nearby);
+      mockQueryRaw.mockResolvedValue(nearby);
 
       const dto: FindNearbyQueryDTO = {
         latitude: -25.2867,
@@ -181,25 +193,29 @@ describe('LocationsDbService', () => {
 
       // Assert
       expect(result).toEqual(nearby);
-      expect(mockQueryRawUnsafe).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT *'),
-        dto.latitude,
-        dto.longitude,
-        dto.radius,
-        dto.limit,
+      const [stringsArray, ...values]: unknown[] = mockQueryRaw.mock
+        .calls[0] as unknown[];
+      expect((stringsArray as string[]).join('')).toContain('SELECT *');
+      expect(values).toEqual(
+        expect.arrayContaining([
+          dto.latitude,
+          dto.longitude,
+          dto.radius,
+          dto.limit,
+        ]),
       );
     });
 
     it('debe incluir filtro de categoryId en la query cuando se provee', async () => {
       // Arrange
-      mockQueryRawUnsafe.mockResolvedValue([]);
+      mockQueryRaw.mockResolvedValue([]);
 
       const dto: FindNearbyQueryDTO = {
         latitude: -25.2867,
         longitude: -57.647,
         radius: 5,
         limit: 10,
-        categoryId: 'abc-123',
+        categoryId: 2,
         availableOnly: false,
         onlineOnly: false,
       };
@@ -208,15 +224,13 @@ describe('LocationsDbService', () => {
       await service.findNearby(dto);
 
       // Assert
-      const calledSql: string = (
-        mockQueryRawUnsafe.mock.calls[0] as unknown[]
-      )[0] as string;
-      expect(calledSql).toContain('category_id');
+      const fragments = sqlFragmentsOf(mockQueryRaw.mock.calls[0] as unknown[]);
+      expect(fragments.some((f) => f.text.includes('category_id'))).toBe(true);
     });
 
     it('debe incluir filtro de disponibilidad cuando availableOnly es true', async () => {
       // Arrange
-      mockQueryRawUnsafe.mockResolvedValue([]);
+      mockQueryRaw.mockResolvedValue([]);
 
       const dto: FindNearbyQueryDTO = {
         latitude: -25.2867,
@@ -231,15 +245,15 @@ describe('LocationsDbService', () => {
       await service.findNearby(dto);
 
       // Assert
-      const calledSql: string = (
-        mockQueryRawUnsafe.mock.calls[0] as unknown[]
-      )[0] as string;
-      expect(calledSql).toContain('is_available = true');
+      const fragments = sqlFragmentsOf(mockQueryRaw.mock.calls[0] as unknown[]);
+      expect(
+        fragments.some((f) => f.text.includes('is_available = true')),
+      ).toBe(true);
     });
 
     it('debe incluir filtro de online cuando onlineOnly es true', async () => {
       // Arrange
-      mockQueryRawUnsafe.mockResolvedValue([]);
+      mockQueryRaw.mockResolvedValue([]);
 
       const dto: FindNearbyQueryDTO = {
         latitude: -25.2867,
@@ -254,15 +268,15 @@ describe('LocationsDbService', () => {
       await service.findNearby(dto);
 
       // Assert
-      const calledSql: string = (
-        mockQueryRawUnsafe.mock.calls[0] as unknown[]
-      )[0] as string;
-      expect(calledSql).toContain('is_online = true');
+      const fragments = sqlFragmentsOf(mockQueryRaw.mock.calls[0] as unknown[]);
+      expect(fragments.some((f) => f.text.includes('is_online = true'))).toBe(
+        true,
+      );
     });
 
     it('debe retornar lista vacía cuando no hay profesionales en el radio', async () => {
       // Arrange
-      mockQueryRawUnsafe.mockResolvedValue([]);
+      mockQueryRaw.mockResolvedValue([]);
 
       const dto: FindNearbyQueryDTO = {
         latitude: 0,
