@@ -62,6 +62,8 @@ PostgreSQL local vía Prisma. Cada módulo `-db` encapsula su dominio.
 - @./rules/infra.md
 - @./rules/typescript.md
 - @./rules/test.md
+- @./rules/datetime.md
+- @./rules/database-conventions.md
 
 ## Agentes
 
@@ -69,3 +71,18 @@ PostgreSQL local vía Prisma. Cada módulo `-db` encapsula su dominio.
 - @./agents/db-advisor.md
 - @./agents/testing-agent.md
 - @./agents/tdd-refactor.md
+
+## graphify
+
+Este proyecto tiene un grafo de conocimiento en `graphify-out/` (god nodes, comunidades,
+relaciones cross-file), generado 2026-07-21 sobre `src/`, `.claude/`, `prisma/`, `ci/`, etc.
+(se excluyó `docs/`, output auto-generado de compodoc).
+
+- Para preguntas sobre el código, primero correr `graphify query "<pregunta>"` cuando
+  `graphify-out/graph.json` exista. Usar `graphify path "<A>" "<B>"` para relaciones y
+  `graphify explain "<concepto>"` para conceptos puntuales — devuelven un subgrafo acotado, mucho
+  más chico que `GRAPH_REPORT.md` o un grep crudo.
+- Leer `graphify-out/GRAPH_REPORT.md` completo solo para revisión de arquitectura amplia, o cuando
+  query/path/explain no alcancen.
+- Después de modificar código, correr `graphify update .` para mantener el grafo al día (solo AST,
+  sin costo de API).
