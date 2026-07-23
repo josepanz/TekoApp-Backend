@@ -5,6 +5,7 @@ import { Users, UserProfileStatus, UserStatus } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { AuthTokenService } from './auth-token.service';
 import { AuthPasswordService } from './auth-password.service';
+import { NonceService } from './nonce.service';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserCredentialsWithUser } from '@/modules/auth/types';
 
@@ -22,6 +23,8 @@ const mockFindById = jest.fn();
 // ─── Mocks de AuthPasswordService ────────────────────────────────────────────
 
 const mockValidateEncryptedPassword = jest.fn();
+const mockValidatePassword = jest.fn();
+const mockDecryptLoginPayload = jest.fn();
 const mockHandleFailedAttempt = jest.fn();
 const mockResetFailedAttempts = jest.fn();
 const mockCreateOrUpdateEncryptedPassword = jest.fn();
@@ -33,6 +36,11 @@ const mockCreateOrUpdatePassword = jest.fn();
 
 const mockGenerateTokens = jest.fn();
 const mockGenerateAccessTokenFromRefresh = jest.fn();
+
+// ─── Mocks de NonceService ────────────────────────────────────────────────────
+
+const mockNonceIssue = jest.fn();
+const mockNonceConsume = jest.fn();
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -64,12 +72,10 @@ function buildCredentials(
       documentNumber: null,
       documentTypeId: 1,
       profileStatus: UserProfileStatus.COMPLETE,
-      access_level: 0,
       accessLevelId: null,
       lastLogin: null,
       acceptedTermsAt: null,
       unverifiedEmail: null,
-      legacyUserId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: 'system',
@@ -97,12 +103,10 @@ function buildUser(statusOverride: UserStatus = UserStatus.ACTIVE): Users {
     documentNumber: null,
     documentTypeId: 1,
     profileStatus: UserProfileStatus.COMPLETE,
-    access_level: 0,
     accessLevelId: null,
     lastLogin: null,
     acceptedTermsAt: null,
     unverifiedEmail: null,
-    legacyUserId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     createdBy: 'system',
@@ -138,6 +142,8 @@ describe('AuthService', () => {
           provide: AuthPasswordService,
           useValue: {
             validateEncryptedPassword: mockValidateEncryptedPassword,
+            validatePassword: mockValidatePassword,
+            decryptLoginPayload: mockDecryptLoginPayload,
             handleFailedAttempt: mockHandleFailedAttempt,
             resetFailedAttempts: mockResetFailedAttempts,
             createOrUpdateEncryptedPassword:
@@ -152,6 +158,13 @@ describe('AuthService', () => {
           useValue: {
             generateTokens: mockGenerateTokens,
             generateAccessTokenFromRefresh: mockGenerateAccessTokenFromRefresh,
+          },
+        },
+        {
+          provide: NonceService,
+          useValue: {
+            issue: mockNonceIssue,
+            consume: mockNonceConsume,
           },
         },
       ],
@@ -177,7 +190,12 @@ describe('AuthService', () => {
       // Arrange
       const credentials = buildCredentials();
       mockFindCredentialsByEmail.mockResolvedValue(credentials);
-      mockValidateEncryptedPassword.mockReturnValue(true);
+      mockDecryptLoginPayload.mockReturnValue({
+        password: 'plain',
+        nonce: 'nonce-123',
+      });
+      mockNonceConsume.mockResolvedValue(true);
+      mockValidatePassword.mockReturnValue(true);
       mockResetFailedAttempts.mockResolvedValue(undefined);
       mockUpdateLastLogin.mockResolvedValue(undefined);
       mockGenerateTokens.mockReturnValue({
@@ -193,6 +211,7 @@ describe('AuthService', () => {
       expect(result.accessToken).toBe('access_tok');
       expect(result.refreshToken).toBe('refresh_tok');
       expect(result.requiresPasswordCreation).toBe(false);
+      expect(mockNonceConsume).toHaveBeenCalledWith('nonce-123');
     });
 
     it('debe retornar requiresPasswordCreation true cuando existe usuario pero sin credenciales', async () => {
@@ -221,11 +240,33 @@ describe('AuthService', () => {
       expect(result.requiresPasswordCreation).toBe(false);
     });
 
+    it('debe lanzar UnauthorizedException cuando el nonce es inválido o ya fue usado', async () => {
+      // Arrange
+      const credentials = buildCredentials();
+      mockFindCredentialsByEmail.mockResolvedValue(credentials);
+      mockDecryptLoginPayload.mockReturnValue({
+        password: 'plain',
+        nonce: 'nonce-usado',
+      });
+      mockNonceConsume.mockResolvedValue(false);
+
+      // Act & Assert
+      await expect(service.login(loginPayload)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(mockValidatePassword).not.toHaveBeenCalled();
+    });
+
     it('debe lanzar UnauthorizedException cuando la contraseña es incorrecta', async () => {
       // Arrange
       const credentials = buildCredentials();
       mockFindCredentialsByEmail.mockResolvedValue(credentials);
-      mockValidateEncryptedPassword.mockReturnValue(false);
+      mockDecryptLoginPayload.mockReturnValue({
+        password: 'plain',
+        nonce: 'nonce-123',
+      });
+      mockNonceConsume.mockResolvedValue(true);
+      mockValidatePassword.mockReturnValue(false);
       mockHandleFailedAttempt.mockResolvedValue({ shouldBlock: false });
 
       // Act & Assert
@@ -233,6 +274,25 @@ describe('AuthService', () => {
         UnauthorizedException,
       );
       expect(mockHandleFailedAttempt).toHaveBeenCalledWith(credentials);
+    });
+
+    it('debe lanzar PASSWORD_EXPIRED cuando la contraseña activa expiró', async () => {
+      // Arrange
+      const credentials = buildCredentials();
+      credentials.expiredAt = new Date(Date.now() - 1000);
+      mockFindCredentialsByEmail.mockResolvedValue(credentials);
+      mockDecryptLoginPayload.mockReturnValue({
+        password: 'plain',
+        nonce: 'nonce-123',
+      });
+      mockNonceConsume.mockResolvedValue(true);
+      mockValidatePassword.mockReturnValue(true);
+
+      // Act & Assert
+      await expect(service.login(loginPayload)).rejects.toMatchObject({
+        response: { code: 'PASSWORD_EXPIRED' },
+      });
+      expect(mockGenerateTokens).not.toHaveBeenCalled();
     });
 
     it('debe lanzar UnauthorizedException cuando el usuario está bloqueado', async () => {
@@ -254,6 +314,60 @@ describe('AuthService', () => {
       // Act & Assert
       await expect(service.login(loginPayload)).rejects.toThrow(
         UnauthorizedException,
+      );
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // generateNonce
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('generateNonce', () => {
+    it('debe delegar en NonceService y retornar el nonce emitido', async () => {
+      // Arrange
+      mockNonceIssue.mockResolvedValue('nonce-generado');
+
+      // Act
+      const result = await service.generateNonce();
+
+      // Assert
+      expect(result).toEqual({ nonce: 'nonce-generado' });
+      expect(mockNonceIssue).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // changeExpiredPassword
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('changeExpiredPassword', () => {
+    const payload = {
+      email: 'user@test.com',
+      encryptedOldPassword: 'enc_old',
+      encryptedNewPassword: 'enc_new',
+    };
+
+    it('debe cambiar la contraseña reutilizando el flujo de changePassword aunque haya expirado', async () => {
+      // Arrange
+      mockFindActiveUserByEmail.mockResolvedValue(buildUser());
+      mockFindCredentialsByEmail.mockResolvedValue(buildCredentials());
+      mockChangeEncryptedPassword.mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.changeExpiredPassword(payload);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(mockChangeEncryptedPassword).toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando el usuario no existe', async () => {
+      // Arrange
+      mockFindActiveUserByEmail.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.changeExpiredPassword(payload)).rejects.toThrow(
+        NotFoundException,
       );
     });
   });

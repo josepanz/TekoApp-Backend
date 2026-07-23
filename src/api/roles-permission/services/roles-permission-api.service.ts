@@ -38,13 +38,13 @@ export class RolesApiService {
       description: dto.description,
       createdBy,
     });
-    return this.mapper.permissionToResponse(role);
+    return this.mapper.roleToResponse(role);
   }
 
   async getRoleById(id: number): Promise<ResponseDTO.RoleResponseDTO> {
     this.logger.log(`Obteniendo rol con ID: ${id}`);
     const role = await this.rolesDBService.getRoleById(id);
-    return this.mapper.permissionToResponse(role);
+    return this.mapper.roleToResponse(role);
   }
 
   async getAllRoles(
@@ -55,7 +55,7 @@ export class RolesApiService {
     const stats = await this.rolesDBService.getRolesStats();
 
     return {
-      roles: roles.map((role) => this.mapper.permissionToResponse(role)),
+      roles: roles.map((role) => this.mapper.roleToResponse(role)),
       total: stats.total,
       active: stats.active,
       inactive: stats.inactive,
@@ -74,7 +74,7 @@ export class RolesApiService {
       isActive: dto.isActive,
       lastChangedBy: updatedBy,
     });
-    return this.mapper.permissionToResponse(role);
+    return this.mapper.roleToResponse(role);
   }
 
   // ==================== USER ROLES ====================

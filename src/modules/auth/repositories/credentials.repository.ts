@@ -7,11 +7,63 @@ export class CredentialsRepository {
   constructor(private readonly prisma: PrismaDatasource) {}
 
   /**
-   * Busca credenciales por userId
+   * Busca la credencial activa más reciente de un usuario.
    */
   async findByUserId(userId: number): Promise<UserCredentials | null> {
     return await this.prisma.extended.userCredentials.findFirst({
+      where: { userId, isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Devuelve las últimas `limit` credenciales del usuario (activas + inactivas),
+   * ordenadas de la más reciente a la más antigua. Se usa para validar el reuso
+   * de contraseñas contra el histórico.
+   */
+  async findRecentByUserId(
+    userId: number,
+    limit: number,
+  ): Promise<UserCredentials[]> {
+    return await this.prisma.extended.userCredentials.findMany({
       where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  /**
+   * Rota la contraseña de un usuario manteniendo el histórico:
+   * desactiva TODAS las credenciales activas actuales (`updateMany`, patrón
+   * TOCTOU-safe) e inserta una nueva fila activa con la contraseña nueva. Todo
+   * dentro de una única transacción para que login/consultas siempre encuentren
+   * exactamente una credencial activa.
+   *
+   * `expiredAt` de la nueva fila se recibe ya calculado por el servicio (a partir
+   * de `PASSWORD_EXPIRATION_DAYS`): `null` = expiración indefinida (default), lo
+   * que además "limpia" cualquier expiración previa; una fecha = expira en ese
+   * instante.
+   */
+  async rotatePassword(
+    userId: number,
+    passwordHash: string,
+    expiredAt: Date | null = null,
+  ): Promise<UserCredentials> {
+    return await this.prisma.extended.$transaction(async (tx) => {
+      await tx.userCredentials.updateMany({
+        where: { userId, isActive: true },
+        data: { isActive: false },
+      });
+
+      return await tx.userCredentials.create({
+        data: {
+          userId,
+          passwordHash,
+          attempts: 0,
+          isActive: true,
+          expiredAt,
+        },
+      });
     });
   }
 

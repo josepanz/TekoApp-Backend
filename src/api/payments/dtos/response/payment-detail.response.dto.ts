@@ -11,8 +11,11 @@ export class PaymentDetailResponseDTO {
   @ApiProperty({ example: 5 })
   professionalId!: number;
 
-  @ApiProperty({ example: 'req-uuid-123' })
-  serviceRequestId!: string;
+  @ApiProperty({
+    example: 'a63b5212-db5e-4ef5-9614-726614174000',
+    description: 'ID (UUID público) del servicio pagado',
+  })
+  serviceId!: string;
 
   @ApiProperty({ example: 150000 })
   amount!: number;

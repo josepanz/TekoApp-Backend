@@ -147,11 +147,11 @@ export class CreatePaymentDto {
   professionalId: string;
 
   @ApiProperty({
-    description: 'ID de la solicitud de servicio',
+    description: 'ID (UUID público) del servicio a pagar',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID()
-  serviceRequestId: string;
+  serviceId: string;
 
   @ApiProperty({
     description: 'Monto del pago (sin comisiones ni impuestos)',

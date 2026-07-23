@@ -256,11 +256,28 @@ describe('PromotionsDbService', () => {
 
   // ─── applyTransaction ────────────────────────────────────────────────────
   describe('applyTransaction', () => {
-    it('debe ejecutar la transacción creando el uso e incrementando el contador sin retornar valor', async () => {
+    function mockTxWithIncrement(incrementedRows: { id: string }[]) {
+      const mockQueryRaw = jest
+        .fn<Promise<{ id: string }[]>, unknown[]>()
+        .mockResolvedValue(incrementedRows);
+      const mockUsageCreate = jest
+        .fn<Promise<Record<string, unknown>>, unknown[]>()
+        .mockResolvedValue({});
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockQueryRaw,
+            promotionUsage: { create: mockUsageCreate },
+          };
+          return callback(txClient);
+        },
+      );
+      return { mockQueryRaw, mockUsageCreate };
+    }
+
+    it('debe incrementar el contador y crear el uso cuando todavía hay cupo', async () => {
       // Arrange
-      mockTransaction.mockResolvedValue(undefined);
-      mockPromotionUsageCreate.mockReturnValue({});
-      mockPromotionUpdate.mockReturnValue({});
+      const { mockUsageCreate } = mockTxWithIncrement([{ id: 'promo-1' }]);
 
       const data = {
         promotionId: 'promo-1',
@@ -273,13 +290,11 @@ describe('PromotionsDbService', () => {
       };
 
       // Act
-      await service.applyTransaction(data);
+      const result = await service.applyTransaction(data);
 
       // Assert
-      expect(mockTransaction).toHaveBeenCalledWith(
-        expect.arrayContaining([expect.anything(), expect.anything()]),
-      );
-      expect(mockPromotionUsageCreate).toHaveBeenCalledWith({
+      expect(result).toBe(true);
+      expect(mockUsageCreate).toHaveBeenCalledWith({
         data: {
           promotionId: 'promo-1',
           userId: 5,
@@ -290,17 +305,11 @@ describe('PromotionsDbService', () => {
           metadata: { source: 'mobile' },
         },
       });
-      expect(mockPromotionUpdate).toHaveBeenCalledWith({
-        where: { id: 'promo-1' },
-        data: { currentUsage: { increment: 1 } },
-      });
     });
 
     it('debe funcionar sin serviceId ni metadata opcionales', async () => {
       // Arrange
-      mockTransaction.mockResolvedValue(undefined);
-      mockPromotionUsageCreate.mockReturnValue({});
-      mockPromotionUpdate.mockReturnValue({});
+      const { mockUsageCreate } = mockTxWithIncrement([{ id: 'promo-1' }]);
 
       // Act
       await service.applyTransaction({
@@ -312,12 +321,30 @@ describe('PromotionsDbService', () => {
       });
 
       // Assert
-      expect(mockPromotionUsageCreate).toHaveBeenCalledWith({
+      expect(mockUsageCreate).toHaveBeenCalledWith({
         data: expect.objectContaining({
           serviceId: undefined,
           metadata: undefined,
         }) as unknown,
       });
+    });
+
+    it('debe devolver false y no crear el uso cuando ya no hay cupo (maxUsage alcanzado)', async () => {
+      // Arrange
+      const { mockUsageCreate } = mockTxWithIncrement([]);
+
+      // Act
+      const result = await service.applyTransaction({
+        promotionId: 'promo-1',
+        userId: 5,
+        originalAmount: 50,
+        discountAmount: 10,
+        finalAmount: 40,
+      });
+
+      // Assert
+      expect(result).toBe(false);
+      expect(mockUsageCreate).not.toHaveBeenCalled();
     });
   });
 

@@ -1,7 +1,7 @@
 import {
+  IsInt,
   IsNumber,
   IsOptional,
-  IsUUID,
   Min,
   Max,
   IsBoolean,
@@ -49,12 +49,15 @@ export class FindNearbyQueryDTO {
   readonly radius: number = 10;
 
   @ApiPropertyOptional({
-    description: 'Filtrar por ID de categoría única (UUID v4)',
-    example: 'a63b5212-db5e-4ef5-9614-726614174000',
+    description: 'Filtrar por ID interno de categoría',
+    example: 2,
+    minimum: 1,
   })
   @IsOptional()
-  @IsUUID('4')
-  readonly categoryId?: string;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  readonly categoryId?: number;
 
   @ApiPropertyOptional({
     description: 'Número máximo de registros a retornar',

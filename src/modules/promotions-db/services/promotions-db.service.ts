@@ -75,6 +75,21 @@ export class PromotionsDbService {
     });
   }
 
+  /**
+   * Aplica la promoción de forma atómica: el `UPDATE ... WHERE (max_usage = -1 OR current_usage
+   * < max_usage)` es la guarda contra la carrera — sin esto, dos aplicaciones concurrentes
+   * pueden leer el mismo `currentUsage` antes de que ninguna escriba (vía `validatePromotion`) y
+   * ambas pasar la validación, excediendo `maxUsage`. El UPDATE toma el lock de fila al escribir,
+   * así que el WHERE se re-evalúa contra el valor más reciente incluso bajo concurrencia — no
+   * hace falta un `SELECT FOR UPDATE` separado. Devuelve `false` si ya no había cupo (el caller
+   * no debe crear el registro de uso ni cobrar el descuento en ese caso).
+   *
+   * Gap conocido, no resuelto acá: el límite POR USUARIO (`maxUsagePerUser`) se sigue validando
+   * con una lectura previa no atómica (`countUsageByUser` en el service) — dos aplicaciones
+   * concurrentes del mismo usuario podrían igual exceder su propio límite individual. Resolverlo
+   * de forma general requeriría una constraint/lock adicional; el límite GLOBAL (el caso que
+   * reportó la auditoría) es el que se corrige acá.
+   */
   async applyTransaction(data: {
     promotionId: string;
     userId: number;
@@ -83,9 +98,20 @@ export class PromotionsDbService {
     discountAmount: number;
     finalAmount: number;
     metadata?: Record<string, unknown>;
-  }): Promise<void> {
-    await this.prisma.extended.$transaction([
-      this.prisma.extended.promotionUsage.create({
+  }): Promise<boolean> {
+    return this.prisma.extended.$transaction(async (tx) => {
+      const incremented = await tx.$queryRaw<{ id: string }[]>`
+        UPDATE promotions
+        SET current_usage = current_usage + 1
+        WHERE id = ${data.promotionId}::uuid
+          AND (max_usage = -1 OR current_usage < max_usage)
+        RETURNING id
+      `;
+      if (incremented.length === 0) {
+        return false;
+      }
+
+      await tx.promotionUsage.create({
         data: {
           promotionId: data.promotionId,
           userId: data.userId,
@@ -95,12 +121,9 @@ export class PromotionsDbService {
           finalAmount: data.finalAmount,
           metadata: data.metadata,
         },
-      }),
-      this.prisma.extended.promotion.update({
-        where: { id: data.promotionId },
-        data: { currentUsage: { increment: 1 } },
-      }),
-    ]);
+      });
+      return true;
+    });
   }
 
   async countPromotions(where?: Prisma.PromotionWhereInput) {

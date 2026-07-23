@@ -22,6 +22,27 @@ export const CreateRatingDocs = () =>
     }),
   );
 
+export const CreateProfessionalToClientRatingDocs = () =>
+  applyDecorators(
+    ApiOperation({
+      summary: 'Calificar a un cliente (profesional autenticado)',
+    }),
+    ApiResponse({
+      status: 201,
+      description: 'Calificación creada exitosamente',
+      type: RatingDetailResponseDTO,
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Datos inválidos o calificación duplicada',
+    }),
+    ApiResponse({
+      status: 403,
+      description: 'El usuario autenticado no tiene perfil profesional',
+    }),
+    ApiResponse({ status: 404, description: 'Cliente no encontrado' }),
+  );
+
 export const FindAllRatingsDocs = () =>
   applyDecorators(
     ApiOperation({ summary: 'Obtener todas las calificaciones' }),

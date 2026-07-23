@@ -9,6 +9,9 @@ import { RatingsService } from './ratings.service';
 import { RatingsDbService } from '@modules/ratings-db/services/ratings-db.service';
 
 const mockFindProfessionalByUserRef = jest.fn();
+const mockFindProfessionalByUserId = jest.fn();
+const mockFindUserByReferenceId = jest.fn();
+const mockFindServiceByReferenceId = jest.fn();
 const mockFindDuplicate = jest.fn();
 const mockCreate = jest.fn();
 const mockFindAll = jest.fn();
@@ -18,7 +21,7 @@ const mockFindByProfessional = jest.fn();
 const mockFindClientRatings = jest.fn();
 const mockFindProfessionalRatings = jest.fn();
 const mockFindByServiceId = jest.fn();
-const mockFindById = jest.fn();
+const mockFindByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
 const mockDeactivate = jest.fn();
 const mockReport = jest.fn();
@@ -26,11 +29,19 @@ const mockAggregateUserStats = jest.fn();
 const mockGetAggregateAndRatings = jest.fn();
 const mockGroupTopRated = jest.fn();
 
+// PK interna (Int) vs UUID público (referenceId, lo que viaja en la wire API).
+const RATING_REF = 'rating-001';
+const RATING_PK = 1;
+const SERVICE_REF = 'svc-001';
+const SERVICE_PK = 30;
+
 const mockRating = {
-  id: 'rating-001',
+  id: RATING_PK,
+  referenceId: RATING_REF,
   userId: 1,
   professionalId: 5,
-  serviceId: 'svc-001',
+  serviceId: SERVICE_PK,
+  service: { referenceId: SERVICE_REF },
   type: RatingType.CLIENT_TO_PROFESSIONAL,
   rating: 4.5,
   review: 'Excelente trabajo',
@@ -51,6 +62,9 @@ describe('RatingsService', () => {
           provide: RatingsDbService,
           useValue: {
             findProfessionalByUserRef: mockFindProfessionalByUserRef,
+            findProfessionalByUserId: mockFindProfessionalByUserId,
+            findUserByReferenceId: mockFindUserByReferenceId,
+            findServiceByReferenceId: mockFindServiceByReferenceId,
             findDuplicate: mockFindDuplicate,
             create: mockCreate,
             findAll: mockFindAll,
@@ -60,7 +74,7 @@ describe('RatingsService', () => {
             findClientRatings: mockFindClientRatings,
             findProfessionalRatings: mockFindProfessionalRatings,
             findByServiceId: mockFindByServiceId,
-            findById: mockFindById,
+            findByReferenceId: mockFindByReferenceId,
             update: mockUpdate,
             deactivate: mockDeactivate,
             report: mockReport,
@@ -78,7 +92,7 @@ describe('RatingsService', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('create', () => {
-    it('debe crear la calificación cuando no existe una previa para el mismo servicio', async () => {
+    it('debe crear la calificación resolviendo el servicio (UUID→PK) cuando no existe una previa', async () => {
       // Arrange
       const dto = {
         professionalId: 5,
@@ -86,8 +100,9 @@ describe('RatingsService', () => {
         rating: 4.5,
         review: 'Excelente',
         isAnonymous: false,
-        serviceId: 'svc-001',
+        serviceId: SERVICE_REF,
       } as never;
+      mockFindServiceByReferenceId.mockResolvedValue({ id: SERVICE_PK });
       mockFindDuplicate.mockResolvedValue(null);
       mockCreate.mockResolvedValue(mockRating);
 
@@ -95,14 +110,18 @@ describe('RatingsService', () => {
       const result = await service.create(1, dto);
 
       // Assert
+      expect(mockFindServiceByReferenceId).toHaveBeenCalledWith(SERVICE_REF);
       expect(mockFindDuplicate).toHaveBeenCalledWith(
         1,
         5,
-        'svc-001',
+        SERVICE_PK,
         RatingType.CLIENT_TO_PROFESSIONAL,
       );
-      expect(mockCreate).toHaveBeenCalled();
-      expect(result).toEqual(mockRating);
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceId: SERVICE_PK }),
+      );
+      expect(result.id).toBe(RATING_REF);
+      expect(result.serviceId).toBe(SERVICE_REF);
     });
 
     it('debe lanzar BadRequestException cuando ya existe una calificación para el mismo servicio y profesional', async () => {
@@ -140,6 +159,88 @@ describe('RatingsService', () => {
     });
   });
 
+  describe('createProfessionalToClientRating', () => {
+    const dto = {
+      clientId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      serviceRequestId: SERVICE_REF,
+      rating: 5,
+      comment: 'Cliente puntual',
+    } as never;
+
+    it('debe crear la calificación profesional→cliente cuando no existe una previa', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 5 });
+      mockFindUserByReferenceId.mockResolvedValue({ id: 1 });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: SERVICE_PK });
+      mockFindDuplicate.mockResolvedValue(null);
+      mockCreate.mockResolvedValue({
+        ...mockRating,
+        type: RatingType.PROFESSIONAL_TO_CLIENT,
+      });
+
+      // Act
+      const result = await service.createProfessionalToClientRating(10, dto);
+
+      // Assert
+      expect(mockFindProfessionalByUserId).toHaveBeenCalledWith(10);
+      expect(mockFindUserByReferenceId).toHaveBeenCalledWith(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+      expect(mockFindDuplicate).toHaveBeenCalledWith(
+        1,
+        5,
+        SERVICE_PK,
+        RatingType.PROFESSIONAL_TO_CLIENT,
+      );
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 1,
+          professionalId: 5,
+          serviceId: SERVICE_PK,
+          type: RatingType.PROFESSIONAL_TO_CLIENT,
+        }),
+      );
+      expect(result).toBeDefined();
+    });
+
+    it('debe lanzar ForbiddenException cuando el usuario autenticado no es profesional', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.createProfessionalToClientRating(10, dto),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando el cliente no existe', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 5 });
+      mockFindUserByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.createProfessionalToClientRating(10, dto),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar BadRequestException cuando ya existe una calificación para el mismo servicio', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 5 });
+      mockFindUserByReferenceId.mockResolvedValue({ id: 1 });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: SERVICE_PK });
+      mockFindDuplicate.mockResolvedValue(mockRating);
+
+      // Act & Assert
+      await expect(
+        service.createProfessionalToClientRating(10, dto),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findAll', () => {
     it('debe retornar todas las calificaciones con sus relaciones', async () => {
       // Arrange
@@ -149,27 +250,28 @@ describe('RatingsService', () => {
       const result = await service.findAll();
 
       // Assert
-      expect(result).toEqual([mockRating]);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(RATING_REF);
       expect(mockFindAll).toHaveBeenCalled();
     });
   });
 
   describe('findOne', () => {
-    it('debe retornar la calificación cuando el ID existe', async () => {
+    it('debe resolver la calificación por su referenceId y exponerla bajo la clave id', async () => {
       // Arrange
-      mockFindById.mockResolvedValue(mockRating);
+      mockFindByReferenceId.mockResolvedValue(mockRating);
 
       // Act
-      const result = await service.findOne('rating-001');
+      const result = await service.findOne(RATING_REF);
 
       // Assert
-      expect(result).toEqual(mockRating);
-      expect(mockFindById).toHaveBeenCalledWith('rating-001');
+      expect(result.id).toBe(RATING_REF);
+      expect(mockFindByReferenceId).toHaveBeenCalledWith(RATING_REF);
     });
 
     it('debe lanzar NotFoundException cuando la calificación no existe', async () => {
       // Arrange
-      mockFindById.mockResolvedValue(null);
+      mockFindByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.findOne('no-existe')).rejects.toThrow(
@@ -234,16 +336,28 @@ describe('RatingsService', () => {
   });
 
   describe('findByServiceRequest', () => {
-    it('debe retornar las calificaciones de una solicitud de servicio', async () => {
+    it('debe resolver el servicio por UUID y retornar sus calificaciones', async () => {
       // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({ id: SERVICE_PK });
       mockFindByServiceId.mockResolvedValue([mockRating]);
 
       // Act
-      const result = await service.findByServiceRequest('svc-001');
+      const result = await service.findByServiceRequest(SERVICE_REF);
 
       // Assert
       expect(result).toHaveLength(1);
-      expect(mockFindByServiceId).toHaveBeenCalledWith('svc-001');
+      expect(mockFindServiceByReferenceId).toHaveBeenCalledWith(SERVICE_REF);
+      expect(mockFindByServiceId).toHaveBeenCalledWith(SERVICE_PK);
+    });
+
+    it('debe lanzar NotFoundException cuando el servicio no existe', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.findByServiceRequest('no-existe')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -282,27 +396,27 @@ describe('RatingsService', () => {
   });
 
   describe('update', () => {
-    it('debe actualizar la calificación cuando el userId coincide y está dentro de la ventana de 24h', async () => {
+    it('debe actualizar la calificación (por PK interna) cuando el userId coincide y está dentro de la ventana de 24h', async () => {
       // Arrange
       const recentRating = { ...mockRating, createdAt: new Date() };
-      mockFindById.mockResolvedValue(recentRating);
+      mockFindByReferenceId.mockResolvedValue(recentRating);
       mockUpdate.mockResolvedValue({ ...recentRating, rating: 3 });
       const dto = { rating: 3 } as never;
 
       // Act
-      const result = await service.update('rating-001', 1, dto);
+      const result = await service.update(RATING_REF, 1, dto);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith('rating-001', dto);
+      expect(mockUpdate).toHaveBeenCalledWith(RATING_PK, dto);
       expect(result).toBeDefined();
     });
 
     it('debe lanzar ForbiddenException cuando el userId no es el autor de la calificación', async () => {
       // Arrange
-      mockFindById.mockResolvedValue({ ...mockRating, userId: 99 });
+      mockFindByReferenceId.mockResolvedValue({ ...mockRating, userId: 99 });
 
       // Act & Assert
-      await expect(service.update('rating-001', 1, {})).rejects.toThrow(
+      await expect(service.update(RATING_REF, 1, {})).rejects.toThrow(
         ForbiddenException,
       );
       expect(mockUpdate).not.toHaveBeenCalled();
@@ -311,10 +425,13 @@ describe('RatingsService', () => {
     it('debe lanzar BadRequestException cuando han pasado más de 24 horas desde la creación', async () => {
       // Arrange
       const oldDate = new Date(Date.now() - 25 * 60 * 60 * 1000);
-      mockFindById.mockResolvedValue({ ...mockRating, createdAt: oldDate });
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        createdAt: oldDate,
+      });
 
       // Act & Assert
-      await expect(service.update('rating-001', 1, {})).rejects.toThrow(
+      await expect(service.update(RATING_REF, 1, {})).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -324,22 +441,22 @@ describe('RatingsService', () => {
     it('debe desactivar (soft-delete) la calificación dentro de la ventana de 24h', async () => {
       // Arrange
       const recentRating = { ...mockRating, createdAt: new Date() };
-      mockFindById.mockResolvedValue(recentRating);
+      mockFindByReferenceId.mockResolvedValue(recentRating);
       mockDeactivate.mockResolvedValue(undefined);
 
       // Act
-      await service.remove('rating-001', 1);
+      await service.remove(RATING_REF, 1);
 
       // Assert
-      expect(mockDeactivate).toHaveBeenCalledWith('rating-001');
+      expect(mockDeactivate).toHaveBeenCalledWith(RATING_PK);
     });
 
     it('debe lanzar ForbiddenException cuando el userId no es el autor', async () => {
       // Arrange
-      mockFindById.mockResolvedValue({ ...mockRating, userId: 99 });
+      mockFindByReferenceId.mockResolvedValue({ ...mockRating, userId: 99 });
 
       // Act & Assert
-      await expect(service.remove('rating-001', 1)).rejects.toThrow(
+      await expect(service.remove(RATING_REF, 1)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -347,31 +464,34 @@ describe('RatingsService', () => {
     it('debe lanzar BadRequestException cuando han pasado más de 24 horas', async () => {
       // Arrange
       const oldDate = new Date(Date.now() - 25 * 60 * 60 * 1000);
-      mockFindById.mockResolvedValue({ ...mockRating, createdAt: oldDate });
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        createdAt: oldDate,
+      });
 
       // Act & Assert
-      await expect(service.remove('rating-001', 1)).rejects.toThrow(
+      await expect(service.remove(RATING_REF, 1)).rejects.toThrow(
         BadRequestException,
       );
     });
   });
 
   describe('reportRating', () => {
-    it('debe reportar la calificación de otro usuario', async () => {
+    it('debe reportar la calificación de otro usuario (por PK interna)', async () => {
       // Arrange
-      mockFindById.mockResolvedValue({ ...mockRating, userId: 99 });
+      mockFindByReferenceId.mockResolvedValue({ ...mockRating, userId: 99 });
       mockReport.mockResolvedValue({ ...mockRating, isReported: true });
 
       // Act
       const result = await service.reportRating(
-        'rating-001',
+        RATING_REF,
         1,
         'Contenido inapropiado',
       );
 
       // Assert
       expect(mockReport).toHaveBeenCalledWith(
-        'rating-001',
+        RATING_PK,
         'Contenido inapropiado',
       );
       expect(result).toBeDefined();
@@ -379,11 +499,11 @@ describe('RatingsService', () => {
 
     it('debe lanzar BadRequestException cuando el usuario intenta reportar su propia calificación', async () => {
       // Arrange
-      mockFindById.mockResolvedValue({ ...mockRating, userId: 1 });
+      mockFindByReferenceId.mockResolvedValue({ ...mockRating, userId: 1 });
 
       // Act & Assert
       await expect(
-        service.reportRating('rating-001', 1, 'razón'),
+        service.reportRating(RATING_REF, 1, 'razón'),
       ).rejects.toThrow(BadRequestException);
       expect(mockReport).not.toHaveBeenCalled();
     });

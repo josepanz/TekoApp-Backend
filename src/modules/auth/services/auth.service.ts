@@ -8,8 +8,10 @@ import { Users, UserStatus } from '@prisma/client';
 
 import { AuthTokenService } from '@modules/auth/services/auth-token.service';
 import { AuthPasswordService } from '@modules/auth/services/auth-password.service';
+import { NonceService } from '@modules/auth/services/nonce.service';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserCredentialsWithUser } from '@/modules/auth/types';
+import { PasswordExpirationHelper } from '@modules/auth/helpers';
 
 /**
  * Servicio principal de autenticación - Lógica de Negocio
@@ -23,6 +25,7 @@ export class AuthService {
     private readonly userRepository: UsersDBService,
     private readonly authTokenService: AuthTokenService,
     private readonly authPasswordService: AuthPasswordService,
+    private readonly nonceService: NonceService,
   ) {}
 
   /**
@@ -62,9 +65,22 @@ export class AuthService {
     // Validar estado
     this.validateUserStatus(userCredentials.user.status);
 
-    // Validar contraseña encriptada
-    const isPasswordValid = this.authPasswordService.validateEncryptedPassword(
+    // Desencriptar y parsear el payload: { password, nonce }
+    const { password, nonce } = this.authPasswordService.decryptLoginPayload(
       payload.encryptedPassword,
+    );
+
+    // Nonce anti-replay de uso único: se valida y consume atómicamente ANTES de
+    // validar la contraseña. Si no existe (nunca emitido, ya usado o expirado),
+    // se rechaza con el mismo mensaje genérico para no filtrar la causa.
+    const nonceValid = await this.nonceService.consume(nonce);
+    if (!nonceValid) {
+      throw new UnauthorizedException('Credenciales inválidas.');
+    }
+
+    // Validar contraseña (texto plano ya extraído del payload)
+    const isPasswordValid = this.authPasswordService.validatePassword(
+      password,
       userCredentials.passwordHash,
     );
 
@@ -72,6 +88,9 @@ export class AuthService {
       await this.authPasswordService.handleFailedAttempt(userCredentials);
       throw new UnauthorizedException('Credenciales inválidas.');
     }
+
+    // Rechazar el login si la contraseña de la credencial activa expiró
+    PasswordExpirationHelper.assertNotExpired(userCredentials.expiredAt);
 
     // Resetear intentos fallidos
     await this.authPasswordService.resetFailedAttempts(userCredentials);
@@ -151,6 +170,34 @@ export class AuthService {
       success: true,
       message: 'Contraseña actualizada correctamente.',
     };
+  }
+
+  /**
+   * Cambia la contraseña de un usuario cuya contraseña YA expiró.
+   *
+   * Flujo pre-login (sin sesión JWT): valida la contraseña vieja contra el hash
+   * de la credencial activa MÁS RECIENTE (aunque `expiredAt` ya pasó — la
+   * expiración bloquea el login normal, no este flujo de recuperación), aplica
+   * complejidad a la nueva y rota manteniendo el histórico. La nueva credencial
+   * queda con `expiredAt = null`, restaurando el acceso.
+   *
+   * Reutiliza íntegramente la lógica de `changePassword` (que no valida
+   * expiración), evitando duplicar reglas de negocio.
+   */
+  async changeExpiredPassword(payload: {
+    email: string;
+    encryptedOldPassword: string;
+    encryptedNewPassword: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return await this.changePassword(payload);
+  }
+
+  /**
+   * Genera un nonce anti-replay de uso único para el login.
+   */
+  async generateNonce(): Promise<{ nonce: string }> {
+    const nonce = await this.nonceService.issue();
+    return { nonce };
   }
 
   /**

@@ -341,6 +341,72 @@ describe('ProfessionalsDbService', () => {
     });
   });
 
+  // ─── findByReferenceId / findProfessionalByReferenceId ──────────────────
+  describe('findByReferenceId', () => {
+    it('debe retornar el profesional cuando el referenceId existe', async () => {
+      // Arrange
+      const professional = {
+        id: 1,
+        referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        userId: 5,
+      };
+      mockProfessionalsFindUnique.mockResolvedValue(professional);
+
+      // Act
+      const result = await service.findByReferenceId(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+
+      // Assert
+      expect(result).toEqual(professional);
+      expect(mockProfessionalsFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
+        include: professionalWithRelationsInclude,
+      });
+    });
+
+    it('debe retornar null cuando no existe el profesional con ese referenceId', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findByReferenceId('inexistente');
+
+      // Assert
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('findProfessionalByReferenceId', () => {
+    it('debe retornar el profesional cuando el referenceId existe', async () => {
+      // Arrange
+      const professional = {
+        id: 1,
+        referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        userId: 5,
+      };
+      mockProfessionalsFindUnique.mockResolvedValue(professional);
+
+      // Act
+      const result = await service.findProfessionalByReferenceId(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+
+      // Assert
+      expect(result).toEqual(professional);
+    });
+
+    it('debe lanzar NotFoundException cuando no existe el profesional con ese referenceId', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.findProfessionalByReferenceId('inexistente'),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
   // ─── update ──────────────────────────────────────────────────────────────
   describe('update', () => {
     it('debe retornar el perfil profesional actualizado con los datos provistos', async () => {

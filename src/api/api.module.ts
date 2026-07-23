@@ -10,6 +10,7 @@ import { ProfessionalsModule } from '@/api/professionals/professionals.module';
 import { PromotionsModule } from '@/api/promotions/promotions.module';
 import { RatingsModule } from '@/api/ratings';
 import { ServicesModule } from '@/api/services/services.module';
+import { ServiceTypesModule } from '@/api/service-types/service-types.module';
 import { UploadsModule } from '@/api/uploads/uploads.module';
 import { NotificationsApiModule } from '@/api/notifications/notifications.module';
 import { UsersApiModule } from '@/api/users/users-api.module';
@@ -22,6 +23,7 @@ import { UsersApiModule } from '@/api/users/users-api.module';
     UsersApiModule,
     ProfessionalsModule,
     ServicesModule,
+    ServiceTypesModule,
     LocationsModule,
     PaymentsModule,
     NotificationsApiModule,

@@ -175,7 +175,10 @@ export class PromotionsService {
     const { promotion, discountAmount } = validation;
     const finalAmount = serviceAmount - discountAmount;
 
-    await this.db.applyTransaction({
+    // El increment de currentUsage es condicional y atómico (ver applyTransaction) — la
+    // validación de arriba pudo haber leído un currentUsage ya desactualizado si otra
+    // aplicación concurrente acaba de agotar el cupo entre la lectura y este punto.
+    const applied = await this.db.applyTransaction({
       promotionId: promotion.id,
       userId,
       serviceId,
@@ -184,6 +187,15 @@ export class PromotionsService {
       finalAmount,
       metadata: serviceId ? { serviceId } : undefined,
     });
+
+    if (!applied) {
+      return {
+        success: false,
+        discountAmount: 0,
+        finalAmount: serviceAmount,
+        message: 'La promoción alcanzó su límite de usos',
+      };
+    }
 
     this.logger.log(
       `Promoción ${promotion.code} aplicada. Descuento: ${discountAmount}`,

@@ -22,7 +22,10 @@ const passGuard = { canActivate: jest.fn().mockReturnValue(true) };
 const mockHandleLogin = jest.fn();
 const mockCreatePasswordWithToken = jest.fn();
 const mockUpdatePassword = jest.fn();
+const mockChangeExpiredPassword = jest.fn();
 const mockForgotPassword = jest.fn();
+const mockGenerateNonce = jest.fn();
+const mockMe = jest.fn();
 const mockRefreshAccessToken = jest.fn();
 const mockScope = jest.fn();
 const mockUserVerify = jest.fn();
@@ -50,7 +53,10 @@ describe('AuthApiController', () => {
             handleLogin: mockHandleLogin,
             createPasswordWithToken: mockCreatePasswordWithToken,
             updatePassword: mockUpdatePassword,
+            changeExpiredPassword: mockChangeExpiredPassword,
             forgotPassword: mockForgotPassword,
+            generateNonce: mockGenerateNonce,
+            me: mockMe,
             refreshAccessToken: mockRefreshAccessToken,
             scope: mockScope,
             userVerify: mockUserVerify,
@@ -249,6 +255,77 @@ describe('AuthApiController', () => {
       await expect(controller.changePassword(dto)).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+  });
+
+  // ── changeExpiredPassword ──────────────────────────────────────────────────
+
+  describe('changeExpiredPassword', () => {
+    const dto: DTO.ChangeExpiredPasswordDTO = {
+      email: 'u@t.com',
+      encryptedOldPassword: 'old',
+      encryptedNewPassword: 'new',
+    };
+
+    it('debe delegar el cambio de contraseña expirada al servicio y retornar su respuesta', async () => {
+      mockChangeExpiredPassword.mockResolvedValue({
+        success: true,
+        message: 'Actualizado.',
+      });
+
+      const result = await controller.changeExpiredPassword(dto);
+
+      expect(mockChangeExpiredPassword).toHaveBeenCalledWith(dto);
+      expect(result).toEqual({ success: true, message: 'Actualizado.' });
+    });
+
+    it('debe propagar UnauthorizedException cuando la contraseña vieja es incorrecta', async () => {
+      mockChangeExpiredPassword.mockRejectedValue(new UnauthorizedException());
+
+      await expect(controller.changeExpiredPassword(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  // ── nonce ────────────────────────────────────────────────────────────────────
+
+  describe('nonce', () => {
+    it('debe retornar el nonce generado por el servicio', async () => {
+      mockGenerateNonce.mockResolvedValue({ nonce: 'abc123' });
+
+      const result = await controller.nonce();
+
+      expect(mockGenerateNonce).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ nonce: 'abc123' });
+    });
+  });
+
+  // ── me ─────────────────────────────────────────────────────────────────────
+
+  describe('me', () => {
+    it('debe retornar el perfil del usuario autenticado delegando el user del JWT', () => {
+      const user = {
+        referenceId: 'ref-1',
+        email: 'u@t.com',
+      } as unknown as IUserDataOnJwt;
+      const profile = {
+        id: 'ref-1',
+        email: 'u@t.com',
+        firstName: 'Juan',
+        lastName: 'Perez',
+        status: 'ACTIVE',
+        profileStatus: 'COMPLETE',
+        accessLevelId: null,
+        roles: [],
+        permissions: [],
+      };
+      mockMe.mockReturnValue(profile);
+
+      const result = controller.me(user);
+
+      expect(mockMe).toHaveBeenCalledWith(user);
+      expect(result).toEqual(profile);
     });
   });
 

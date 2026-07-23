@@ -159,6 +159,23 @@ export class ProfessionalsDbService {
     return professional;
   }
 
+  async findByReferenceId(
+    referenceId: string,
+  ): Promise<ProfessionalWithRelations | null> {
+    return this.prisma.extended.professionals.findUnique({
+      where: { referenceId },
+      include: professionalWithRelationsInclude,
+    });
+  }
+
+  async findProfessionalByReferenceId(
+    referenceId: string,
+  ): Promise<ProfessionalWithRelations> {
+    const professional = await this.findByReferenceId(referenceId);
+    if (!professional) throw new NotFoundException('Profesional no encontrado');
+    return professional;
+  }
+
   async update(
     id: number,
     data: Prisma.ProfessionalsUpdateInput,

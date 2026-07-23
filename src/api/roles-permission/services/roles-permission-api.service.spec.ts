@@ -32,6 +32,7 @@ const mockGetRolePermissions = jest.fn();
 
 // --- RolesPermissionsMapper mocks ---
 const mockPermissionToResponse = jest.fn();
+const mockRoleToResponse = jest.fn();
 
 describe('RolesApiService', () => {
   let service: RolesApiService;
@@ -83,6 +84,7 @@ describe('RolesApiService', () => {
           provide: RolesPermissionsMapper,
           useValue: {
             permissionToResponse: mockPermissionToResponse,
+            roleToResponse: mockRoleToResponse,
           },
         },
       ],
@@ -104,7 +106,7 @@ describe('RolesApiService', () => {
       const roleEntity = { id: 1, name: 'admin', description: 'Administrador' };
       const mappedResponse = { id: 1, name: 'admin' };
       mockCreateRole.mockResolvedValue(roleEntity);
-      mockPermissionToResponse.mockReturnValue(mappedResponse);
+      mockRoleToResponse.mockReturnValue(mappedResponse);
 
       // Act
       const result = await service.createRole(dto, createdBy);
@@ -115,7 +117,7 @@ describe('RolesApiService', () => {
         description: dto.description,
         createdBy,
       });
-      expect(mockPermissionToResponse).toHaveBeenCalledWith(roleEntity);
+      expect(mockRoleToResponse).toHaveBeenCalledWith(roleEntity);
       expect(result).toEqual(mappedResponse);
     });
   });
@@ -129,14 +131,14 @@ describe('RolesApiService', () => {
       const roleEntity = { id: 5, name: 'editor' };
       const mappedResponse = { id: 5, name: 'editor' };
       mockGetRoleById.mockResolvedValue(roleEntity);
-      mockPermissionToResponse.mockReturnValue(mappedResponse);
+      mockRoleToResponse.mockReturnValue(mappedResponse);
 
       // Act
       const result = await service.getRoleById(5);
 
       // Assert
       expect(mockGetRoleById).toHaveBeenCalledWith(5);
-      expect(mockPermissionToResponse).toHaveBeenCalledWith(roleEntity);
+      expect(mockRoleToResponse).toHaveBeenCalledWith(roleEntity);
       expect(result).toEqual(mappedResponse);
     });
   });
@@ -155,7 +157,7 @@ describe('RolesApiService', () => {
       const stats = { total: 2, active: 2, inactive: 0 };
       mockGetAllRoles.mockResolvedValue(rolesEntities);
       mockGetRolesStats.mockResolvedValue(stats);
-      mockPermissionToResponse.mockImplementation(
+      mockRoleToResponse.mockImplementation(
         (role: { id: number; name: string }) => ({
           id: role.id,
           name: role.name,
@@ -204,7 +206,7 @@ describe('RolesApiService', () => {
       const updatedEntity = { id: 3, name: 'superadmin' };
       const mappedResponse = { id: 3, name: 'superadmin' };
       mockUpdateRole.mockResolvedValue(updatedEntity);
-      mockPermissionToResponse.mockReturnValue(mappedResponse);
+      mockRoleToResponse.mockReturnValue(mappedResponse);
 
       // Act
       const result = await service.updateRole(id, dto, updatedBy);
@@ -216,7 +218,7 @@ describe('RolesApiService', () => {
         isActive: dto.isActive,
         lastChangedBy: updatedBy,
       });
-      expect(mockPermissionToResponse).toHaveBeenCalledWith(updatedEntity);
+      expect(mockRoleToResponse).toHaveBeenCalledWith(updatedEntity);
       expect(result).toEqual(mappedResponse);
     });
   });

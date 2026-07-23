@@ -15,10 +15,38 @@ export class RatingsDbService {
     });
   }
 
+  async findProfessionalByUserId(
+    userId: number,
+  ): Promise<{ id: number } | null> {
+    return this.prisma.extended.professionals.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+  }
+
+  async findUserByReferenceId(
+    referenceId: string,
+  ): Promise<{ id: number } | null> {
+    return this.prisma.extended.users.findUnique({
+      where: { referenceId },
+      select: { id: true },
+    });
+  }
+
+  /** Resuelve el UUID público de un servicio a su PK interna (Int), o null si no existe. */
+  async findServiceByReferenceId(
+    referenceId: string,
+  ): Promise<{ id: number } | null> {
+    return this.prisma.extended.services.findUnique({
+      where: { referenceId },
+      select: { id: true },
+    });
+  }
+
   async findDuplicate(
     userId: number,
     professionalId: number,
-    serviceId: string | undefined,
+    serviceId: number | undefined,
     type: RatingType,
   ) {
     return this.prisma.extended.rating.findFirst({
@@ -27,7 +55,10 @@ export class RatingsDbService {
   }
 
   async create(data: Prisma.RatingUncheckedCreateInput) {
-    return this.prisma.extended.rating.create({ data });
+    return this.prisma.extended.rating.create({
+      data,
+      include: { service: true },
+    });
   }
 
   async findAll() {
@@ -87,36 +118,49 @@ export class RatingsDbService {
     });
   }
 
-  async findByServiceId(serviceId: string) {
+  async findByServiceId(serviceId: number) {
     return this.prisma.extended.rating.findMany({
       where: { serviceId, isActive: true },
-      include: { user: true, professional: true },
+      include: { user: true, professional: true, service: true },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return this.prisma.extended.rating.findUnique({
       where: { id },
       include: { user: true, professional: true, service: true },
     });
   }
 
-  async update(id: string, data: Prisma.RatingUpdateInput) {
-    return this.prisma.extended.rating.update({ where: { id }, data });
+  /** Busca una calificación por su referenceId (UUID público recibido en la URL). */
+  async findByReferenceId(referenceId: string) {
+    return this.prisma.extended.rating.findUnique({
+      where: { referenceId },
+      include: { user: true, professional: true, service: true },
+    });
   }
 
-  async deactivate(id: string): Promise<void> {
+  async update(id: number, data: Prisma.RatingUpdateInput) {
+    return this.prisma.extended.rating.update({
+      where: { id },
+      data,
+      include: { service: true },
+    });
+  }
+
+  async deactivate(id: number): Promise<void> {
     await this.prisma.extended.rating.update({
       where: { id },
       data: { isActive: false },
     });
   }
 
-  async report(id: string, reason: string) {
+  async report(id: number, reason: string) {
     return this.prisma.extended.rating.update({
       where: { id },
       data: { isReported: true, reportReason: reason },
+      include: { service: true },
     });
   }
 

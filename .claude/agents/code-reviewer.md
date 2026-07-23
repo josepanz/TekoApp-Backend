@@ -27,7 +27,9 @@ tools: read
 5. WARN: Java — resource leak (Stream/Connection not closed), raw type usage
 6. WARN: NestJS — business logic in controller, missing DTO validation pipe
 7. WARN: Prisma — missing `$transaction` on multi-table write
-8. STYLE: Naming, complexity > 10, test coverage gap (note only, not WARN)
+8. WARN: DRY — repeated blocks that should be a shared helper (if it applies project-wide, put it in `common/`)
+9. WARN: KISS — unnecessary abstraction/indirection for what the task actually needs
+10. STYLE: Naming, complexity > 10, test coverage gap (note only, not WARN)
 
 ## Stack-specific rules
 

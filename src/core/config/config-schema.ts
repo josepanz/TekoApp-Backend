@@ -8,7 +8,7 @@ export const configSchema = Joi.object({
   PORT: Joi.number().required(),
   NODE_ENV: Joi.string()
     .required()
-    .allow('local', 'develop', 'qa', 'production'),
+    .valid('local', 'develop', 'qa', 'production'),
   ALLOWED_ORIGINS: Joi.string().required(),
 
   JWT_PRIVATE_KEY: Joi.string().required(),
@@ -18,11 +18,18 @@ export const configSchema = Joi.object({
   REFRESH_TOKEN_EXPIRES: Joi.string().required(),
   REFRESH_TOKEN_SHORT_EXPIRES: Joi.string().required(),
 
-  SEQ_ENABLED: Joi.boolean().required().allow('true', 'false').default('false'),
+  // Expiración de contraseña en días. Opcional; sin setear o `0` = expiración indefinida
+  // (default ya decidido). Si es > 0, al rotar la contraseña se calcula `expiredAt = ahora + N días`.
+  PASSWORD_EXPIRATION_DAYS: Joi.number().integer().min(0).default(0),
+  // Cantidad de contraseñas históricas contra las que se valida el reuso al rotar. Default 5.
+  PASSWORD_HISTORY_LIMIT: Joi.number().integer().min(1).default(5),
+
+  SEQ_ENABLED: Joi.boolean().default(false),
   SEQ_URL: Joi.string().uri().required(),
 
   DATABASE_URL: Joi.string().required(),
   DATABASE_CONNECTION_STRING: Joi.string().required(),
+  AUDIT_SECRET_PEPPER: Joi.string().required(),
 
   MONGODB_URI: Joi.string().required(),
   MONGODB_MAX_POOL_SIZE: Joi.number().integer().default(10),

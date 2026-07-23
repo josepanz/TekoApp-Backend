@@ -72,15 +72,6 @@ export class CreateUserRequestDTO {
   phoneNumber?: string;
 
   @ApiProperty({
-    example: 'legacy-123',
-    required: false,
-    description: 'ID del usuario en el sistema legacy.',
-  })
-  @IsString()
-  @IsOptional()
-  legacyUserId?: string;
-
-  @ApiProperty({
     example: 1,
     required: false,
     description: 'El nivel de acceso del usuario.',

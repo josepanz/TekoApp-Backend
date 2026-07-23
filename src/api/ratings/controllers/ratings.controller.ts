@@ -17,6 +17,7 @@ import { RatingsService } from '../services/ratings.service';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import {
   CreateRatingRequestDTO,
+  CreateProfessionalToClientRatingRequestDTO,
   UpdateRatingRequestDTO,
   ReportRatingRequestDTO,
   RatingIdParamDTO,
@@ -34,6 +35,7 @@ import {
 } from '../dtos/response';
 import {
   CreateRatingDocs,
+  CreateProfessionalToClientRatingDocs,
   FindAllRatingsDocs,
   GetRecentRatingsDocs,
   GetTopRatedProfessionalsDocs,
@@ -62,18 +64,25 @@ export class RatingsController {
     @Request() req: { user: { id: number } },
     @Body() createRatingDto: CreateRatingRequestDTO,
   ): Promise<RatingDetailResponseDTO> {
-    return this.ratingsService.create(
+    return this.ratingsService.create(req.user.id, createRatingDto);
+  }
+
+  @Post('professional-to-client')
+  @CreateProfessionalToClientRatingDocs()
+  async createProfessionalToClientRating(
+    @Request() req: { user: { id: number } },
+    @Body() dto: CreateProfessionalToClientRatingRequestDTO,
+  ): Promise<RatingDetailResponseDTO> {
+    return this.ratingsService.createProfessionalToClientRating(
       req.user.id,
-      createRatingDto,
-    ) as unknown as Promise<RatingDetailResponseDTO>;
+      dto,
+    );
   }
 
   @Get()
   @FindAllRatingsDocs()
   async findAll(): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findAll() as unknown as Promise<
-      RatingDetailResponseDTO[]
-    >;
+    return this.ratingsService.findAll();
   }
 
   @Get('recent')
@@ -81,9 +90,7 @@ export class RatingsController {
   async getRecentRatings(
     @Query() query: GetRecentRatingsQueryDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.getRecentRatings(
-      query.limit,
-    ) as unknown as Promise<RatingDetailResponseDTO[]>;
+    return this.ratingsService.getRecentRatings(query.limit);
   }
 
   @Get('top-professionals')
@@ -99,9 +106,7 @@ export class RatingsController {
   async findByUser(
     @Param() param: UserIdParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findByUser(param.userId) as unknown as Promise<
-      RatingDetailResponseDTO[]
-    >;
+    return this.ratingsService.findByUser(param.userId);
   }
 
   @Get('user/:userId/stats')
@@ -117,9 +122,7 @@ export class RatingsController {
   async findByProfessional(
     @Param() param: ProfessionalIdRatingParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findByProfessional(
-      param.professionalId,
-    ) as unknown as Promise<RatingDetailResponseDTO[]>;
+    return this.ratingsService.findByProfessional(param.professionalId);
   }
 
   @Get('professional/:professionalId/client-ratings')
@@ -127,9 +130,7 @@ export class RatingsController {
   async getClientRatings(
     @Param() param: ProfessionalIdRatingParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findClientRatings(
-      param.professionalId,
-    ) as unknown as Promise<RatingDetailResponseDTO[]>;
+    return this.ratingsService.findClientRatings(param.professionalId);
   }
 
   @Get('professional/:professionalId/average')
@@ -145,9 +146,7 @@ export class RatingsController {
   async findByServiceRequest(
     @Param() param: ServiceRequestIdParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findByServiceRequest(
-      param.serviceRequestId,
-    ) as unknown as Promise<RatingDetailResponseDTO[]>;
+    return this.ratingsService.findByServiceRequest(param.serviceRequestId);
   }
 
   @Get(':id')
@@ -155,9 +154,7 @@ export class RatingsController {
   async findOne(
     @Param() param: RatingIdParamDTO,
   ): Promise<RatingDetailResponseDTO> {
-    return this.ratingsService.findOne(
-      param.id,
-    ) as unknown as Promise<RatingDetailResponseDTO>;
+    return this.ratingsService.findOne(param.id);
   }
 
   @Patch(':id')
@@ -167,11 +164,7 @@ export class RatingsController {
     @Request() req: { user: { id: number } },
     @Body() updateRatingDto: UpdateRatingRequestDTO,
   ): Promise<RatingDetailResponseDTO> {
-    return this.ratingsService.update(
-      param.id,
-      req.user.id,
-      updateRatingDto,
-    ) as unknown as Promise<RatingDetailResponseDTO>;
+    return this.ratingsService.update(param.id, req.user.id, updateRatingDto);
   }
 
   @Delete(':id')
@@ -195,6 +188,6 @@ export class RatingsController {
       param.id,
       req.user.id,
       reportRatingDto.reason,
-    ) as unknown as Promise<RatingDetailResponseDTO>;
+    );
   }
 }

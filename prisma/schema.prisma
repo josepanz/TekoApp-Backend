@@ -66,7 +66,6 @@ model AccessLevel {
 model Users {
   id              Int               @id @default(autoincrement())
   referenceId     String            @unique @default(uuid()) @map("reference_id")
-  legacyUserId    String?           @map("legacy_user_id")
   email           String            @unique @map("email")
   status          UserStatus        @default(ACTIVE) @map("status")
   profileStatus   UserProfileStatus @default(INCOMPLETE) @map("profile_status")
@@ -85,9 +84,7 @@ model Users {
   unverifiedEmail String?           @map("unverified_email")
   changedReason   String?           @map("changed_reason")
   acceptedTermsAt DateTime?         @map("accepted_terms_at")
-  accessLevelId   Int?
-
-  access_level Int @map("current_level")
+  accessLevelId   Int?              @map("access_level_id")
 
   checksum        String? @map("checksum")
   changeSignature String? @map("change_signature")
@@ -153,6 +150,7 @@ model UserRoles {
 
 model Roles {
   id          Int     @id @default(autoincrement())
+  referenceId String  @unique @default(uuid()) @map("reference_id")
   name        String  @unique @map("name")
   description String? @map("description")
 
@@ -259,6 +257,13 @@ model UserCredentials {
   expiredAt    DateTime? @map("expired_at")
   attempts     Int       @default(0) @map("attempts")
 
+  lastChangedAt   DateTime? @map("last_changed_at")
+  createdBy       String?   @map("created_by")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
   user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -269,7 +274,7 @@ model ApiClientCredential {
   id            Int       @id @default(autoincrement())
   clientId      String    @unique @map("client_id")
   clientName    String?   @map("client_name")
-  secretKey     String    @unique @map("secret_key")
+  secretKey     String    @map("secret_key")
   isActive      Boolean   @default(true) @map("is_active")
   createdAt     DateTime  @default(now()) @map("created_at")
   lastChangedAt DateTime? @map("last_changed_at")
@@ -329,6 +334,7 @@ enum RequestStatus {
 
 model Professionals {
   id                Int                @id @default(autoincrement())
+  referenceId       String             @unique @default(uuid()) @map("reference_id")
   userId            Int                @unique @map("user_id") // Relación 1:1 con tu tabla Users
   categoryId        Int                @map("category_id")
   description       String             @db.Text
@@ -376,7 +382,8 @@ model Professionals {
 }
 
 model Services {
-  id             String        @id @default(uuid()) // Usamos UUID para los códigos de servicio públicos
+  id             Int           @id @default(autoincrement())
+  referenceId    String        @unique @default(uuid()) @map("reference_id") // Id público (UUID) expuesto por la API
   userId         Int           @map("user_id")
   professionalId Int?          @map("professional_id")
   categoryId     Int           @map("category_id")
@@ -431,8 +438,9 @@ model Services {
 }
 
 model ServiceRequests {
-  id             String        @id @default(uuid())
-  serviceId      String        @map("service_id")
+  id             Int           @id @default(autoincrement())
+  referenceId    String        @unique @default(uuid()) @map("reference_id")
+  serviceId      Int           @map("service_id")
   professionalId Int           @map("professional_id")
   status         RequestStatus @default(PENDING)
   proposedPrice  Decimal?      @map("proposed_price") @db.Decimal(10, 2)
@@ -462,6 +470,7 @@ enum CategoryStatus {
 
 model Category {
   id                   Int            @id @default(autoincrement())
+  referenceId          String         @unique @default(uuid()) @map("reference_id")
   name                 String         @unique @db.VarChar(100)
   slug                 String         @unique @db.VarChar(150)
   description          String?        @db.Text
@@ -551,20 +560,21 @@ enum TransactionStatus {
 }
 
 model PaymentMethodEntity {
-  id         String          @id @default(uuid()) @db.Uuid
-  userId     Int             @map("user_id")
-  type       PaymentMethod
-  provider   PaymentProvider
-  name       String          @db.VarChar(255)
-  isDefault  Boolean         @default(false) @map("is_default")
-  isActive   Boolean         @default(true) @map("is_active")
-  details    Json            @db.JsonB
-  externalId String?         @map("external_id") @db.VarChar(255)
-  metadata   Json?           @db.JsonB
-  lastUsedAt DateTime?       @map("last_used_at") @db.Timestamp
-  expiresAt  DateTime?       @map("expires_at") @db.Timestamp
-  createdAt  DateTime        @default(now()) @map("created_at") @db.Timestamp
-  updatedAt  DateTime        @updatedAt @map("updated_at") @db.Timestamp
+  id          Int             @id @default(autoincrement())
+  referenceId String          @unique @default(uuid()) @map("reference_id")
+  userId      Int             @map("user_id")
+  type        PaymentMethod
+  provider    PaymentProvider
+  name        String          @db.VarChar(255)
+  isDefault   Boolean         @default(false) @map("is_default")
+  isActive    Boolean         @default(true) @map("is_active")
+  details     Json            @db.JsonB
+  externalId  String?         @map("external_id") @db.VarChar(255)
+  metadata    Json?           @db.JsonB
+  lastUsedAt  DateTime?       @map("last_used_at") @db.Timestamp
+  expiresAt   DateTime?       @map("expires_at") @db.Timestamp
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamp
 
   // Relaciones y Transacciones
   transactions PaymentTransaction[]
@@ -625,10 +635,11 @@ model Currency {
 }
 
 model Payments {
-  id                    String          @id @default(uuid()) @db.Uuid
+  id                    Int             @id @default(autoincrement())
+  referenceId           String          @unique @default(uuid()) @map("reference_id")
   userId                Int             @map("user_id")
   professionalId        Int             @map("professional_id")
-  serviceRequestId      String          @map("service_request_id")
+  serviceId             Int             @map("service_id")
   amount                Decimal         @db.Decimal(10, 2)
   currencyCode          String          @map("currency_code") @db.VarChar(3)
   fee                   Decimal         @default(0.00) @db.Decimal(10, 2)
@@ -662,7 +673,7 @@ model Payments {
   changeSignature String?   @map("change_signature")
 
   transactions  PaymentTransaction[]
-  service       Services             @relation(fields: [serviceRequestId], references: [id])
+  service       Services             @relation(fields: [serviceId], references: [id])
   currency      Currency             @relation(fields: [currencyCode], references: [alphaCode])
   users         Users                @relation(fields: [userId], references: [id])
   professionals Professionals?       @relation(fields: [professionalId], references: [id])
@@ -673,9 +684,10 @@ model Payments {
 }
 
 model PaymentTransaction {
-  id                    String            @id @default(uuid()) @db.Uuid
-  paymentId             String            @map("payment_id") @db.Uuid
-  paymentMethodId       String?           @map("payment_method_id") @db.Uuid
+  id                    Int               @id @default(autoincrement())
+  referenceId           String            @unique @default(uuid()) @map("reference_id")
+  paymentId             Int               @map("payment_id")
+  paymentMethodId       Int?              @map("payment_method_id")
   type                  TransactionType
   status                TransactionStatus @default(PENDING)
   amount                Decimal           @db.Decimal(10, 2)
@@ -713,10 +725,11 @@ enum RatingType {
 }
 
 model Rating {
-  id             String     @id @default(uuid()) @db.Uuid
+  id             Int        @id @default(autoincrement())
+  referenceId    String     @unique @default(uuid()) @map("reference_id")
   userId         Int        @map("user_id")
   professionalId Int        @map("professional_id")
-  serviceId      String?    @map("service_id")
+  serviceId      Int?       @map("service_id")
   type           RatingType @default(CLIENT_TO_PROFESSIONAL)
   rating         Decimal    @db.Decimal(3, 2)
   review         String?    @db.Text
@@ -783,6 +796,7 @@ model Promotion {
   createdById        Int?            @map("created_by_id")
 
   createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
   lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
   lastChangedBy   String?   @map("last_changed_by")
   changedReason   String?   @map("changed_reason")
