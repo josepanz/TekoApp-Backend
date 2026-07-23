@@ -62,6 +62,30 @@ export class AuthApiService {
     return await this.authService.changePassword(dto);
   }
 
+  async changeExpiredPassword(
+    dto: DTO.ChangeExpiredPasswordDTO,
+  ): Promise<{ success: boolean; message: string }> {
+    return await this.authService.changeExpiredPassword(dto);
+  }
+
+  async generateNonce(): Promise<DTO.NonceResponseDTO> {
+    return await this.authService.generateNonce();
+  }
+
+  me(user: IUserDataOnJwt): DTO.MeResponseDTO {
+    return {
+      id: user.referenceId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: user.userStatus,
+      profileStatus: user.profileStatus,
+      accessLevelId: user.accessLevelId,
+      roles: user.roles,
+      permissions: user.permissions,
+    };
+  }
+
   async forgotPassword(
     dto: DTO.ForgotUserPasswordDTO,
   ): Promise<{ success: boolean; message: string }> {

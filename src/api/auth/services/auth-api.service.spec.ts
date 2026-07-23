@@ -16,6 +16,8 @@ import * as DTO from '@api/auth/dtos';
 const mockLogin = jest.fn();
 const mockCreatePassword = jest.fn();
 const mockChangePassword = jest.fn();
+const mockChangeExpiredPassword = jest.fn();
+const mockGenerateNonce = jest.fn();
 const mockResetPassword = jest.fn();
 const mockAuthRefreshAccessToken = jest.fn();
 const mockGetUserScope = jest.fn();
@@ -89,6 +91,8 @@ describe('AuthApiService', () => {
             login: mockLogin,
             createPassword: mockCreatePassword,
             changePassword: mockChangePassword,
+            changeExpiredPassword: mockChangeExpiredPassword,
+            generateNonce: mockGenerateNonce,
             resetPassword: mockResetPassword,
             refreshAccessToken: mockAuthRefreshAccessToken,
             getUserScope: mockGetUserScope,
@@ -257,6 +261,63 @@ describe('AuthApiService', () => {
         message: 'Contraseña actualizada correctamente.',
       });
       expect(mockChangePassword).toHaveBeenCalledWith(payload);
+    });
+  });
+
+  // ─── changeExpiredPassword ────────────────────────────────────────────────
+
+  describe('changeExpiredPassword', () => {
+    it('delega el cambio de contraseña expirada al AuthService y retorna el resultado', async () => {
+      const payload: DTO.ChangeExpiredPasswordDTO = {
+        email: 'usuario@test.com',
+        encryptedOldPassword: 'oldPass',
+        encryptedNewPassword: 'newPass',
+      };
+      mockChangeExpiredPassword.mockResolvedValue({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+      });
+
+      const result = await service.changeExpiredPassword(payload);
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+      });
+      expect(mockChangeExpiredPassword).toHaveBeenCalledWith(payload);
+    });
+  });
+
+  // ─── generateNonce ────────────────────────────────────────────────────────
+
+  describe('generateNonce', () => {
+    it('retorna el nonce emitido por el AuthService', async () => {
+      mockGenerateNonce.mockResolvedValue({ nonce: 'nonce-abc' });
+
+      const result = await service.generateNonce();
+
+      expect(result).toEqual({ nonce: 'nonce-abc' });
+      expect(mockGenerateNonce).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ─── me ───────────────────────────────────────────────────────────────────
+
+  describe('me', () => {
+    it('mapea el usuario del JWT al perfil público sin exponer el id interno', () => {
+      const result = service.me(mockJwtUser);
+
+      expect(result).toEqual({
+        id: mockJwtUser.referenceId,
+        email: mockJwtUser.email,
+        firstName: mockJwtUser.firstName,
+        lastName: mockJwtUser.lastName,
+        status: mockJwtUser.userStatus,
+        profileStatus: mockJwtUser.profileStatus,
+        accessLevelId: mockJwtUser.accessLevelId,
+        roles: mockJwtUser.roles,
+        permissions: mockJwtUser.permissions,
+      });
     });
   });
 

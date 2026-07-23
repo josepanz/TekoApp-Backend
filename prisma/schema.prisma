@@ -257,6 +257,13 @@ model UserCredentials {
   expiredAt    DateTime? @map("expired_at")
   attempts     Int       @default(0) @map("attempts")
 
+  lastChangedAt   DateTime? @map("last_changed_at")
+  createdBy       String?   @map("created_by")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
   user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -267,7 +274,7 @@ model ApiClientCredential {
   id            Int       @id @default(autoincrement())
   clientId      String    @unique @map("client_id")
   clientName    String?   @map("client_name")
-  secretKey     String    @unique @map("secret_key")
+  secretKey     String    @map("secret_key")
   isActive      Boolean   @default(true) @map("is_active")
   createdAt     DateTime  @default(now()) @map("created_at")
   lastChangedAt DateTime? @map("last_changed_at")

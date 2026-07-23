@@ -5,8 +5,10 @@ import { UsersDBModule } from '@modules/users-db/users-db.module';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { AuthTokenService } from '@modules/auth/services/auth-token.service';
 import { AuthPasswordService } from '@modules/auth/services/auth-password.service';
+import { NonceService } from '@modules/auth/services/nonce.service';
 
 import { CredentialsRepository } from '@modules/auth/repositories';
+import { nonceRedisProvider } from '@modules/auth/providers/nonce-redis.provider';
 
 @Module({
   imports: [DatabaseModule, UsersDBModule],
@@ -14,9 +16,11 @@ import { CredentialsRepository } from '@modules/auth/repositories';
     AuthService,
     AuthTokenService,
     AuthPasswordService,
+    NonceService,
+    nonceRedisProvider,
 
     CredentialsRepository,
   ],
-  exports: [AuthService, AuthTokenService, AuthPasswordService],
+  exports: [AuthService, AuthTokenService, AuthPasswordService, NonceService],
 })
 export class AuthModule {}

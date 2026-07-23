@@ -9,6 +9,7 @@ import {
 import { Request as ExpressRequest } from 'express';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { ApiClientCredential } from '@prisma/client';
+import { CryptoHelper } from '@common/helpers/crypto-helpers';
 
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
@@ -78,7 +79,11 @@ export class BasicAuthGuard implements CanActivate {
       );
     }
 
-    const isPasswordValid = clientSecret === apiClientCredential.secretKey;
+    // El secreto se guarda hasheado (bcrypt); comparación segura, no `===`.
+    const isPasswordValid = CryptoHelper.compareHashes(
+      clientSecret,
+      apiClientCredential.secretKey,
+    );
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Secreto incorrecto.');

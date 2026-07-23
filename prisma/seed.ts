@@ -13,13 +13,20 @@ const SEED_USER_PASSWORD = 'Tekoapp123!';
  */
 async function main() {
   // ─── Cliente BFF (Basic Auth) ──────────────────────────────────────────────
+  // El secretKey se guarda HASHEADO (bcrypt); el guard compara con
+  // CryptoHelper.compareHashes. `update` también refresca el hash para que
+  // re-ejecutar el seed sobre una DB existente lo deje consistente.
+  const clientSecretHash = bcrypt.hashSync(
+    process.env.WEB_CLIENT_SECRET ?? 'dev-only-change-me',
+    bcrypt.genSaltSync(),
+  );
   await prisma.apiClientCredential.upsert({
     where: { clientId: 'tekoapp-web' },
-    update: {},
+    update: { secretKey: clientSecretHash, isActive: true },
     create: {
       clientId: 'tekoapp-web',
       clientName: 'TekoApp-Frontend-Web',
-      secretKey: process.env.WEB_CLIENT_SECRET ?? 'dev-only-change-me',
+      secretKey: clientSecretHash,
       isActive: true,
       createdBy: 'seed',
     },

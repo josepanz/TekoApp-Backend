@@ -98,6 +98,17 @@ export class AuthApiController {
     return await this.authApiService.updatePassword(dto);
   }
 
+  @Put('change-expired-password')
+  @ApiBasicAuth()
+  @Version('1')
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs('changeExpiredPassword')
+  async changeExpiredPassword(
+    @Body() dto: DTO.ChangeExpiredPasswordDTO,
+  ): Promise<DTO.PasswordResponseDTO> {
+    return await this.authApiService.changeExpiredPassword(dto);
+  }
+
   @Put('forgot-password')
   @ApiBasicAuth()
   @Version('1')
@@ -107,6 +118,24 @@ export class AuthApiController {
     @Body() dto: DTO.ForgotUserPasswordDTO,
   ): Promise<DTO.PasswordResponseDTO> {
     return await this.authApiService.forgotPassword(dto);
+  }
+
+  @Post('nonce')
+  @Version('1')
+  @ApiBasicAuth()
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs('nonce')
+  async nonce(): Promise<DTO.NonceResponseDTO> {
+    return await this.authApiService.generateNonce();
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Version('1')
+  @AuthDocs('me')
+  me(@User() user: IUserDataOnJwt): DTO.MeResponseDTO {
+    return this.authApiService.me(user);
   }
 
   @Post('refresh-token')

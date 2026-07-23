@@ -18,6 +18,12 @@ export const configSchema = Joi.object({
   REFRESH_TOKEN_EXPIRES: Joi.string().required(),
   REFRESH_TOKEN_SHORT_EXPIRES: Joi.string().required(),
 
+  // Expiración de contraseña en días. Opcional; sin setear o `0` = expiración indefinida
+  // (default ya decidido). Si es > 0, al rotar la contraseña se calcula `expiredAt = ahora + N días`.
+  PASSWORD_EXPIRATION_DAYS: Joi.number().integer().min(0).default(0),
+  // Cantidad de contraseñas históricas contra las que se valida el reuso al rotar. Default 5.
+  PASSWORD_HISTORY_LIMIT: Joi.number().integer().min(1).default(5),
+
   SEQ_ENABLED: Joi.boolean().default(false),
   SEQ_URL: Joi.string().uri().required(),
 
