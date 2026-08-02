@@ -44,14 +44,6 @@ const mockUserDetailResponse = {
   phoneNumber: '0981000000',
 };
 
-const mockMerchantCtx = {
-  merchantCode: 'MC001',
-  ruc: '80012345-6',
-  level: 'BRANCH' as never,
-  groupingId: null as never,
-  branchCode: 'BR001',
-};
-
 const mockJwtUser = { referenceId: 'op-ref-001', email: 'operador@test.com' };
 
 describe('UsersApiService', () => {
@@ -103,11 +95,7 @@ describe('UsersApiService', () => {
       mockFindAllUsers.mockResolvedValue({ data: [mockUserBase], total: 1 });
 
       // Act
-      const result = await service.findAll(
-        dto,
-        mockMerchantCtx,
-        mockJwtUser as never,
-      );
+      const result = await service.findAll(dto, mockJwtUser as never);
 
       // Assert
       expect(result.data).toHaveLength(1);
@@ -123,7 +111,7 @@ describe('UsersApiService', () => {
       mockFindAllUsers.mockResolvedValue({ data: [], total: 0 });
 
       // Act
-      await service.findAll(dto, mockMerchantCtx, mockJwtUser as never);
+      await service.findAll(dto, mockJwtUser as never);
 
       // Assert
       expect(mockFindAllUsers).toHaveBeenCalledWith(
@@ -142,7 +130,7 @@ describe('UsersApiService', () => {
       mockFindAllUsers.mockResolvedValue({ data: [], total: 0 });
 
       // Act
-      await service.findAll(dto, mockMerchantCtx, mockJwtUser as never);
+      await service.findAll(dto, mockJwtUser as never);
 
       // Assert
       expect(mockFindAllUsers).toHaveBeenCalledWith(

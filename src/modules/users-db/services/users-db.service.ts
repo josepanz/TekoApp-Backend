@@ -4,14 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import {
-  AccessLevel,
-  DocumentsType,
-  Prisma,
-  UserProfileStatus,
-  Users,
-  UserStatus,
-} from '@prisma/client';
+import { AccessLevel, Prisma, Users, UserStatus } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { UserCredentialsWithUser } from '@modules/auth/types';
 import {
@@ -91,96 +84,6 @@ export class UsersDBService {
     return created;
   }
 
-  async createUserWithContext(data: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    documentNumber?: string;
-    documentTypeId?: number;
-    documentType?: DocumentsType;
-    phoneNumber?: string;
-    isEmployee: boolean;
-    isLdap: boolean;
-    status: UserStatus;
-    createdBy: string;
-    accessLevelId?: AccessLevel | number;
-    roleIds?: number[];
-    merchantCtx?: {
-      ruc: string;
-      merchantCode: string;
-      level: AccessLevel;
-      branchCodes?: string[];
-      groupingIds?: number[];
-    };
-  }): Promise<Users> {
-    const existing = await this.findByEmailAndDocument(
-      data.email,
-      data.documentNumber || '',
-    );
-
-    if (existing) {
-      throw new BadRequestException(
-        `El usuario con el email ${data.email} ya existe.`,
-      );
-    }
-
-    const accessLevelIdNum =
-      typeof data.accessLevelId === 'object'
-        ? data.accessLevelId.id
-        : data.accessLevelId;
-
-    const created = await this.prisma.extended.$transaction(async (tx) => {
-      const user = await tx.users.create({
-        data: {
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          documentNumber: data.documentNumber ?? null,
-          documentTypeId:
-            data.documentTypeId ??
-            (data.documentType as unknown as DocumentsType & { id: number })
-              ?.id ??
-            1,
-          phoneNumber: data.phoneNumber ?? null,
-          isEmployee: data.isEmployee,
-          isLdap: data.isLdap,
-          status: data.status,
-          createdBy: data.createdBy,
-          accessLevelId: accessLevelIdNum,
-          profileStatus: UserProfileStatus.COMPLETE,
-        },
-      });
-
-      if (data.roleIds?.length) {
-        await this.userRolesDBService.replaceUserRoles(
-          user.id,
-          data.roleIds,
-          data.createdBy,
-          tx as unknown as Prisma.TransactionClient,
-        );
-      }
-
-      return user;
-    });
-
-    try {
-      await this.emailService.sendEmailByType(
-        data.email,
-        EmailTypeEnum.VERIFICATION,
-        created,
-      );
-      await this.emailService.sendEmailByType(
-        data.email,
-        EmailTypeEnum.CREATE_PASSWORD,
-        created,
-      );
-    } catch (error) {
-      this.logger.error(`Error enviando email de verificación: ${error}`);
-    }
-
-    return created;
-  }
-
   // ─── Find many ───────────────────────────────────────────────────────────
 
   async findAll(params: {
@@ -194,11 +97,7 @@ export class UsersDBService {
     email?: string;
     documentNumber?: string;
     status?: UserStatus;
-    merchantCode?: string;
     accessLevelId?: AccessLevel;
-    level?: AccessLevel;
-    groupingId?: number;
-    branchCode?: string;
     operatorReferenceId?: string;
   }): Promise<{ data: Users[]; total: number }> {
     const {
@@ -275,11 +174,6 @@ export class UsersDBService {
     email?: string;
     documentNumber?: string;
     status?: UserStatus;
-    merchantCode?: string;
-    currentLevel?: AccessLevel;
-    level?: AccessLevel;
-    groupingId?: number;
-    branchCode?: string;
     operatorReferenceId?: string;
   }): Promise<{ data: Users[]; total: number }> {
     return this.findAll(params);
