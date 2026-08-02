@@ -2,6 +2,12 @@ import { Users } from '@prisma/client';
 import { UserDetailResponseDTO, UserResponseDTO } from '../dtos';
 import { UserWithDetail } from '@modules/users-db/types/users-db.type';
 export class UserHelper {
+  /**
+   * `avatarUrl` acá todavía es la KEY cruda de `user.avatarKey`, NO una URL — este helper es
+   * estático/sync y no puede resolver la URL presignada (requiere una llamada a S3). El caller
+   * (`UsersApiService`) DEBE sobrescribir `avatarUrl` con `UploadsService.getPresignedUrl(key)`
+   * antes de devolver la respuesta al cliente. Ver `UsersApiService#resolveAvatarUrl`.
+   */
   static mapUserToResponse(user: Users): UserResponseDTO {
     return {
       id: user.id,
@@ -12,7 +18,7 @@ export class UserHelper {
       lastName: user.lastName,
       documentNumber: user.documentNumber,
       phoneNumber: user.phoneNumber,
-      avatarUrl: user.avatarUrl,
+      avatarUrl: user.avatarKey,
       isEmployee: user.isEmployee,
       isLdap: user.isLdap,
       lastLogin: user.lastLogin ?? new Date(0),

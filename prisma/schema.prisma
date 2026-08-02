@@ -75,9 +75,12 @@ model Users {
   documentTypeId  Int               @map("document_type_id")
   documentNumber  String?           @map("document_number")
   phoneNumber     String?           @map("phone_number")
-  // Foto de perfil (URL pública S3/CDN) — usada para identificación visual de usuarios y
-  // profesionales (seguridad/confianza). Nullable: sin foto se muestra un fallback de iniciales.
-  avatarUrl       String?           @map("avatar_url")
+  // Foto de perfil: guarda la KEY de S3 (permanente), no una URL — las URLs que devuelve
+  // `POST /uploads/avatar` son presignadas y expiran en 900s (`S3_PRESIGNED_URL_EXPIRES_IN`).
+  // Cada response que expone esto al cliente resuelve una URL presignada fresca a partir de la
+  // key en el momento de la lectura (ver `UploadsService.getPresignedUrl()`), nunca sirve una URL
+  // vieja guardada. Nullable: sin foto se muestra un fallback de iniciales.
+  avatarKey       String?           @map("avatar_key")
   isEmployee      Boolean           @default(false) @map("is_employee")
   isLdap          Boolean           @default(false) @map("ldap")
   createdAt       DateTime          @default(now()) @map("created_at")

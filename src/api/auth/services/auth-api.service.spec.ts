@@ -9,6 +9,7 @@ import { AuthService } from '@modules/auth/services/auth.service';
 import { EmailService } from '@modules/email/services/email.service';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import * as DTO from '@api/auth/dtos';
 
 // ─── Mock functions (module-scope standalone, evita @typescript-eslint/unbound-method) ───
@@ -34,6 +35,7 @@ const mockVerifyTempToken = jest.fn();
 const mockVerifyForgotPasswordToken = jest.fn();
 
 const mockSendEmailByType = jest.fn();
+const mockGetPresignedUrl = jest.fn();
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -115,6 +117,10 @@ describe('AuthApiService', () => {
             verifyTempToken: mockVerifyTempToken,
             verifyForgotPasswordToken: mockVerifyForgotPasswordToken,
           },
+        },
+        {
+          provide: UploadsService,
+          useValue: { getPresignedUrl: mockGetPresignedUrl },
         },
       ],
     }).compile();
@@ -328,18 +334,21 @@ describe('AuthApiService', () => {
   // ─── updateMe ─────────────────────────────────────────────────────────────
 
   describe('updateMe', () => {
-    it('debe actualizar los datos propios del usuario y devolver el perfil con el avatar nuevo', async () => {
+    it('debe actualizar los datos propios del usuario y devolver el perfil con la URL del avatar resuelta fresca', async () => {
       // Arrange
       const dto: DTO.UpdateMeRequestDTO = {
         firstName: 'Juana',
-        avatarUrl: 'https://cdn.tekoapp.com.py/avatars/nuevo.jpg',
+        avatarKey: 'a1b2c3.jpg',
       };
       const updatedUser = {
         ...mockUser,
         firstName: 'Juana',
-        avatarUrl: 'https://cdn.tekoapp.com.py/avatars/nuevo.jpg',
+        avatarKey: 'a1b2c3.jpg',
       };
       mockUpdateUser.mockResolvedValue(updatedUser);
+      mockGetPresignedUrl.mockResolvedValue(
+        'https://s3.amazonaws.com/tekoapp/a1b2c3.jpg?X-Amz-Signature=...',
+      );
 
       // Act
       const result = await service.updateMe(mockJwtUser, dto);
@@ -351,16 +360,18 @@ describe('AuthApiService', () => {
           firstName: dto.firstName,
           lastName: dto.lastName,
           phoneNumber: dto.phoneNumber,
-          avatarUrl: dto.avatarUrl,
+          avatarKey: dto.avatarKey,
         },
         mockJwtUser.email,
       );
+      expect(mockGetPresignedUrl).toHaveBeenCalledWith('a1b2c3.jpg');
       expect(result).toEqual({
         id: updatedUser.referenceId,
         email: updatedUser.email,
         firstName: 'Juana',
         lastName: updatedUser.lastName,
-        avatarUrl: 'https://cdn.tekoapp.com.py/avatars/nuevo.jpg',
+        avatarUrl:
+          'https://s3.amazonaws.com/tekoapp/a1b2c3.jpg?X-Amz-Signature=...',
         status: updatedUser.status,
         profileStatus: updatedUser.profileStatus,
         accessLevelId: updatedUser.accessLevelId,
@@ -444,6 +455,7 @@ describe('AuthApiService', () => {
         id: mockUser.referenceId,
         email: mockUser.email,
         phoneNumber: mockUser.phoneNumber,
+        avatarUrl: null,
         firstName: mockUser.firstName,
         lastName: mockUser.lastName,
         status: mockUser.status,

@@ -315,7 +315,7 @@ export class UsersDBService {
       lastName?: string;
       documentNumber?: string;
       phoneNumber?: string;
-      avatarUrl?: string;
+      avatarKey?: string;
       isEmployee?: boolean;
       isLdap?: boolean;
       status?: UserStatus;

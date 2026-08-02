@@ -3,9 +3,11 @@ import { UserStatus } from '@prisma/client';
 import { UsersApiService } from './users-api.service';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserRolesDBService } from '@modules/users-db/services/user-roles-db.service';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import { UserHelper } from '../helpers/user.helper';
 
 const mockFindAllUsers = jest.fn();
+const mockGetPresignedUrl = jest.fn();
 const mockFindUserByIdWithDetail = jest.fn();
 const mockFindUserByReferenceIdWithDetail = jest.fn();
 const mockUpdateUserWithContext = jest.fn();
@@ -72,6 +74,10 @@ describe('UsersApiService', () => {
             getUserRoleIds: mockGetUserRoleIds,
             getAllAvailableRoles: mockGetAllAvailableRoles,
           },
+        },
+        {
+          provide: UploadsService,
+          useValue: { getPresignedUrl: mockGetPresignedUrl },
         },
       ],
     }).compile();

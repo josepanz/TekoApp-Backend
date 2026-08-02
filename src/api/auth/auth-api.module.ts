@@ -7,6 +7,7 @@ import { DatabaseModule } from '@core/database/database.module';
 import { UsersDBModule } from '@modules/users-db/users-db.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { EmailModule } from '@modules/email/email.module';
+import { UploadsModule } from '@api/uploads/uploads.module';
 
 import { AuthApiController } from '@api/auth/controllers/auth-api.controller';
 import { JwtStrategy, JwtRefreshStrategy } from '@modules/auth/strategies';
@@ -20,6 +21,7 @@ import { AuthMigrationService } from '@api/auth/services/auth-migration.service'
     AuthModule,
     UsersDBModule,
     EmailModule,
+    UploadsModule,
     JwtModule.register({}),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],

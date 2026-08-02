@@ -17,6 +17,7 @@ import {
 } from '@api/users/dtos/response/edit-context.response.dto';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserRolesDBService } from '@modules/users-db/services/user-roles-db.service';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import { UserHelper } from '../helpers/user.helper';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
@@ -26,7 +27,29 @@ export class UsersApiService {
   constructor(
     private readonly usersService: UsersDBService,
     private readonly userRolesDBService: UserRolesDBService,
+    private readonly uploadsService: UploadsService,
   ) {}
+
+  /**
+   * `UserHelper.mapUserToResponse()` deja en `avatarUrl` la key cruda de S3 (no puede resolver la
+   * URL presignada, es estático/sync) — acá se resuelve la URL real antes de devolver la
+   * respuesta al cliente. Nunca se persiste esta URL resuelta, se recalcula en cada request.
+   */
+  private async resolveAvatarUrl<T extends { avatarUrl?: string | null }>(
+    dto: T,
+  ): Promise<T> {
+    if (!dto.avatarUrl) return dto;
+    return {
+      ...dto,
+      avatarUrl: await this.uploadsService.getPresignedUrl(dto.avatarUrl),
+    };
+  }
+
+  private async resolveAvatarUrls<T extends { avatarUrl?: string | null }>(
+    dtos: T[],
+  ): Promise<T[]> {
+    return Promise.all(dtos.map((dto) => this.resolveAvatarUrl(dto)));
+  }
 
   async findAll(
     dto: ListUsersRequestDTO,
@@ -52,7 +75,9 @@ export class UsersApiService {
     });
 
     return {
-      data: data.map((user) => UserHelper.mapUserToResponse(user)),
+      data: await this.resolveAvatarUrls(
+        data.map((user) => UserHelper.mapUserToResponse(user)),
+      ),
       pagination: {
         total,
         page,
@@ -65,7 +90,7 @@ export class UsersApiService {
   async findOne(id: number): Promise<UserDetailResponseDTO> {
     const user = await this.usersService.findUserByIdWithDetail(id);
 
-    return UserHelper.mapUserToDetailResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToDetailResponse(user));
   }
 
   async findOneByReference(
@@ -74,7 +99,7 @@ export class UsersApiService {
     const user =
       await this.usersService.findUserByReferenceIdWithDetail(referenceId);
 
-    return UserHelper.mapUserToDetailResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToDetailResponse(user));
   }
 
   async getEditContext(
@@ -156,7 +181,7 @@ export class UsersApiService {
         lastName: dto.lastName,
         documentNumber: dto.documentNumber,
         phoneNumber: dto.phoneNumber,
-        avatarUrl: dto.avatarUrl,
+        avatarKey: dto.avatarKey,
         isEmployee: dto.isEmployee,
         isLdap: dto.isLdap,
         status: dto.status,
@@ -165,7 +190,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(user));
   }
 
   async updateByReference(
@@ -183,7 +208,7 @@ export class UsersApiService {
         lastName: dto.lastName,
         documentNumber: dto.documentNumber,
         phoneNumber: dto.phoneNumber,
-        avatarUrl: dto.avatarUrl,
+        avatarKey: dto.avatarKey,
         isEmployee: dto.isEmployee,
         isLdap: dto.isLdap,
         status: dto.status,
@@ -192,7 +217,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(updated);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(updated));
   }
 
   async deleteByReference(
@@ -217,7 +242,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(user));
   }
 
   async unblock(
@@ -234,6 +259,6 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(user));
   }
 }

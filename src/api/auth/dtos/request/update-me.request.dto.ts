@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 /**
  * Autoedición de perfil (`PUT /auth/me`) — solo campos que el propio usuario puede tocar sobre sí
@@ -26,11 +26,13 @@ export class UpdateMeRequestDTO {
   phoneNumber?: string;
 
   @ApiPropertyOptional({
-    example: 'https://cdn.tekoapp.com.py/avatars/abc123.jpg',
+    example: 'a1b2c3d4-e5f6.jpg',
     description:
-      'URL devuelta por POST /uploads/avatar — este endpoint solo persiste la URL, no sube el archivo.',
+      'Key de S3 devuelta por el campo `key` de POST /uploads/avatar — este endpoint solo ' +
+      'persiste la key, no sube el archivo. La respuesta expone `avatarUrl` (una URL presignada ' +
+      'resuelta fresca en el momento de la lectura, nunca la key cruda).',
   })
   @IsOptional()
-  @IsUrl()
-  avatarUrl?: string;
+  @IsString()
+  avatarKey?: string;
 }

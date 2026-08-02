@@ -32,10 +32,13 @@ export class UserResponseDTO {
   phoneNumber?: string | null;
 
   @ApiProperty({
-    example: 'https://cdn.tekoapp.com.py/avatars/abc123.jpg',
+    example:
+      'https://tekoapp-uploads.s3.amazonaws.com/avatars/abc123.jpg?X-Amz-...',
     required: false,
     nullable: true,
-    description: 'URL pública de la foto de perfil.',
+    description:
+      'URL presignada de la foto de perfil, resuelta fresca en el momento de la respuesta (expira ' +
+      'en 900s) — nunca almacenar/cachear este valor, siempre volver a pedirlo.',
   })
   @IsString()
   @IsOptional()

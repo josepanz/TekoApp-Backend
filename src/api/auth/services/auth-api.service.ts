@@ -7,6 +7,7 @@ import { AuthService } from '@modules/auth/services/auth.service';
 import { EmailService } from '@modules/email/services/email.service';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import { AuthMigrationService } from './auth-migration.service';
 
 @Injectable()
@@ -16,7 +17,17 @@ export class AuthApiService {
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
     private readonly authMigrationService: AuthMigrationService,
+    private readonly uploadsService: UploadsService,
   ) {}
+
+  /**
+   * `avatarKey` es la key de S3 (permanente); acá se resuelve a una URL presignada fresca (expira
+   * en 900s) en el momento de la respuesta — nunca se persiste ni cachea esta URL.
+   */
+  private resolveAvatarUrl(avatarKey: string | null): Promise<string | null> {
+    if (!avatarKey) return Promise.resolve(null);
+    return this.uploadsService.getPresignedUrl(avatarKey);
+  }
 
   async handleLogin(
     dto: DTO.LoginUserDTO,
@@ -101,7 +112,7 @@ export class AuthApiService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         phoneNumber: dto.phoneNumber,
-        avatarUrl: dto.avatarUrl,
+        avatarKey: dto.avatarKey,
       },
       user.email,
     );
@@ -111,7 +122,7 @@ export class AuthApiService {
       email: updated.email,
       firstName: updated.firstName,
       lastName: updated.lastName,
-      avatarUrl: updated.avatarUrl,
+      avatarUrl: await this.resolveAvatarUrl(updated.avatarKey),
       status: updated.status,
       profileStatus: updated.profileStatus,
       accessLevelId: updated.accessLevelId,
@@ -144,13 +155,14 @@ export class AuthApiService {
       this.userService.findUserById(user.id),
       this.authService.getUserScope(user.id),
     ]);
+    const avatarUrl = await this.resolveAvatarUrl(fullUser.avatarKey);
 
     return {
       user: {
         id: fullUser.referenceId,
         email: fullUser.email,
         phoneNumber: fullUser.phoneNumber,
-        avatarUrl: fullUser.avatarUrl,
+        avatarUrl,
         firstName: fullUser.firstName,
         lastName: fullUser.lastName,
         status: fullUser.status,
