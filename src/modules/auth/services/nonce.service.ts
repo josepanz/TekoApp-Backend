@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import * as crypto from 'crypto';
 import Redis from 'ioredis';
 import {
@@ -17,10 +23,34 @@ import {
  *   garantizando uso único incluso ante requests concurrentes.
  */
 @Injectable()
-export class NonceService implements OnModuleDestroy {
+export class NonceService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(NonceService.name);
 
   constructor(@Inject(NONCE_REDIS_CLIENT) private readonly redis: Redis) {}
+
+  /**
+   * Conecta el cliente al arrancar el módulo en vez de esperar al primer
+   * comando real. El provider usa `lazyConnect: true` + `enableOfflineQueue:
+   * false` (falla rápido si Redis está caído en vez de acumular comandos en
+   * una cola invisible) — pero esa combinación tiene una trampa: el PRIMER
+   * comando después de un boot dispara el connect de forma asíncrona y, como
+   * la cola offline está deshabilitada, ese mismo comando se rechaza de
+   * inmediato con "Stream isn't writeable" antes de que el socket llegue a
+   * abrirse (confirmado en pruebas manuales: el primer login tras un restart
+   * siempre fallaba, el segundo intento ya funcionaba). Conectar acá elimina
+   * la carrera sin volver a habilitar la cola offline.
+   */
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.redis.connect();
+    } catch (error) {
+      this.logger.error(
+        `No se pudo conectar el cliente Redis de nonces al iniciar: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
 
   /**
    * Genera y persiste un nuevo nonce. Devuelve el valor (32 chars hex).

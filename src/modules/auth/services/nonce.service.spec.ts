@@ -7,6 +7,7 @@ import { NONCE_REDIS_CLIENT } from '@modules/auth/constants';
 const mockSet = jest.fn();
 const mockGetDel = jest.fn();
 const mockDisconnect = jest.fn();
+const mockConnect = jest.fn();
 
 describe('NonceService', () => {
   let service: NonceService;
@@ -21,6 +22,7 @@ describe('NonceService', () => {
             set: mockSet,
             getdel: mockGetDel,
             disconnect: mockDisconnect,
+            connect: mockConnect,
           },
         },
       ],
@@ -76,6 +78,27 @@ describe('NonceService', () => {
       // Assert
       expect(result).toBe(false);
       expect(mockGetDel).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onModuleInit', () => {
+    it('debe conectar el cliente Redis al iniciar el módulo', async () => {
+      // Arrange
+      mockConnect.mockResolvedValue(undefined);
+
+      // Act
+      await service.onModuleInit();
+
+      // Assert
+      expect(mockConnect).toHaveBeenCalledTimes(1);
+    });
+
+    it('no debe propagar el error si la conexión inicial falla', async () => {
+      // Arrange
+      mockConnect.mockRejectedValue(new Error('ECONNREFUSED'));
+
+      // Act & Assert
+      await expect(service.onModuleInit()).resolves.toBeUndefined();
     });
   });
 
