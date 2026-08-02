@@ -1,17 +1,16 @@
 # Regla de fechas / zona horaria
 
-## Contexto del stack (2026-07-21, comparado contra portal-comercios-backend)
+## Contexto del stack (actualizado en Fase C — fix de TZ ya aplicado)
 
 - PostgreSQL `TIMESTAMP` sin TZ almacena el string UTC que Prisma envía tal cual — no convierte.
-- El `Dockerfile` de este proyecto fija `ENV TZ=America/Asuncion` (+ copia zoneinfo) — este es
-  **el mismo patrón que `portal-comercios-backend` identificó como problemático y descartó**: la
-  zona IANA `America/Asuncion` sigue cargando reglas de DST aunque Paraguay abolió el horario de
-  verano por Ley 7127 (quedó fijo en UTC-3), y su resolución depende del tzdata instalado en cada
-  host — puede desfasar ±1h según el ambiente sin que el código haya cambiado. `nowParaguay()`/
-  `'Etc/GMT+3'` (offset fijo, sin reglas de DST) es el patrón correcto — ver decisión pendiente en
-  la Fase C (internacionalización) antes de tocar el Dockerfile o el runtime en producción.
-- `src/modules/health/health.controller.ts` usa `toZonedTime(new Date(), 'America/Asuncion')` —
-  **no copiar este patrón en código nuevo** hasta que la Fase C decida la estrategia de TZ.
+- **Ya corregido**: el `Dockerfile` fijaba `ENV TZ=America/Asuncion` (+ copia zoneinfo) — el mismo
+  patrón que `portal-comercios-backend` identificó como problemático y descartó, porque la zona
+  IANA `America/Asuncion` sigue cargando reglas de DST aunque Paraguay abolió el horario de verano
+  por Ley 7127 (quedó fijo en UTC-3), y su resolución depende del tzdata instalado en cada host —
+  podía desfasar ±1h según el ambiente sin que el código cambiara. Ahora usa `Etc/GMT+3` (offset
+  fijo, sin reglas de DST, signo invertido por convención POSIX: `GMT+3` = `UTC-3`).
+- `src/modules/health/health.controller.ts` usa `toZonedTime(new Date(), 'Etc/GMT+3')` — mismo
+  patrón correcto, replicalo en código nuevo que necesite la hora de pared de Paraguay.
 
 ## Helpers existentes hoy en `@common/helpers/date.helper.ts`
 
