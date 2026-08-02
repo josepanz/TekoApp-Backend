@@ -139,6 +139,18 @@ export class AuthApiController {
     return this.authApiService.me(user);
   }
 
+  @Put('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Version('1')
+  @AuthDocs('updateMe')
+  async updateMe(
+    @User() user: IUserDataOnJwt,
+    @Body() dto: DTO.UpdateMeRequestDTO,
+  ): Promise<DTO.MeResponseDTO> {
+    return await this.authApiService.updateMe(user, dto);
+  }
+
   @Post('refresh-token')
   @UseGuards(AuthGuard('jwt-refresh'), BasicAuthGuard)
   @Version('1')

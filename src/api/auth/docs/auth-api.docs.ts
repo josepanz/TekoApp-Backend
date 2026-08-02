@@ -103,6 +103,21 @@ export const AuthApiDocs = {
     ApiUnauthorizedResponse({ description: 'Token inválido o expirado.' }),
   ),
 
+  updateMe: applyDecorators(
+    HttpCode(200),
+    ApiOperation({
+      summary: 'Autoedición de perfil del usuario autenticado.',
+      description:
+        'El propio usuario actualiza sus datos básicos (nombre, teléfono, avatar) — nunca email, status ni campos administrativos, eso sigue en PUT /users/:id (requiere permiso de admin).',
+    }),
+    ApiOkResponse({
+      description: 'Perfil actualizado con éxito.',
+      type: DTO.MeResponseDTO,
+    }),
+    ApiUnauthorizedResponse({ description: 'Token inválido o expirado.' }),
+    ApiBadRequestResponse({ description: 'Datos inválidos.' }),
+  ),
+
   refreshToken: applyDecorators(
     HttpCode(200),
     ApiOperation({

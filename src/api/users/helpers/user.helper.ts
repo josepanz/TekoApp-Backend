@@ -12,6 +12,7 @@ export class UserHelper {
       lastName: user.lastName,
       documentNumber: user.documentNumber,
       phoneNumber: user.phoneNumber,
+      avatarUrl: user.avatarUrl,
       isEmployee: user.isEmployee,
       isLdap: user.isLdap,
       lastLogin: user.lastLogin ?? new Date(0),

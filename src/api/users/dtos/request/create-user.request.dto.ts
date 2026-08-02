@@ -72,6 +72,15 @@ export class CreateUserRequestDTO {
   phoneNumber?: string;
 
   @ApiProperty({
+    example: 'https://cdn.tekoapp.com.py/avatars/abc123.jpg',
+    required: false,
+    description: 'URL pública de la foto de perfil.',
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
+
+  @ApiProperty({
     example: 1,
     required: false,
     description: 'El nivel de acceso del usuario.',

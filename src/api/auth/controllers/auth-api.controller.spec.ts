@@ -26,6 +26,7 @@ const mockChangeExpiredPassword = jest.fn();
 const mockForgotPassword = jest.fn();
 const mockGenerateNonce = jest.fn();
 const mockMe = jest.fn();
+const mockUpdateMe = jest.fn();
 const mockRefreshAccessToken = jest.fn();
 const mockScope = jest.fn();
 const mockUserVerify = jest.fn();
@@ -57,6 +58,7 @@ describe('AuthApiController', () => {
             forgotPassword: mockForgotPassword,
             generateNonce: mockGenerateNonce,
             me: mockMe,
+            updateMe: mockUpdateMe,
             refreshAccessToken: mockRefreshAccessToken,
             scope: mockScope,
             userVerify: mockUserVerify,
@@ -325,6 +327,36 @@ describe('AuthApiController', () => {
       const result = controller.me(user);
 
       expect(mockMe).toHaveBeenCalledWith(user);
+      expect(result).toEqual(profile);
+    });
+  });
+
+  // ── updateMe ───────────────────────────────────────────────────────────────
+
+  describe('updateMe', () => {
+    it('debe delegar la autoedición de perfil al service con el user del JWT y el body', async () => {
+      const user = {
+        referenceId: 'ref-1',
+        email: 'u@t.com',
+      } as unknown as IUserDataOnJwt;
+      const dto = { firstName: 'Juana' };
+      const profile = {
+        id: 'ref-1',
+        email: 'u@t.com',
+        firstName: 'Juana',
+        lastName: 'Perez',
+        avatarUrl: null,
+        status: 'ACTIVE',
+        profileStatus: 'COMPLETE',
+        accessLevelId: null,
+        roles: [],
+        permissions: [],
+      };
+      mockUpdateMe.mockResolvedValue(profile);
+
+      const result = await controller.updateMe(user, dto);
+
+      expect(mockUpdateMe).toHaveBeenCalledWith(user, dto);
       expect(result).toEqual(profile);
     });
   });

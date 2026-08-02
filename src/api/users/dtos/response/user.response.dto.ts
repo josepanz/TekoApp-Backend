@@ -31,6 +31,16 @@ export class UserResponseDTO {
   @IsOptional()
   phoneNumber?: string | null;
 
+  @ApiProperty({
+    example: 'https://cdn.tekoapp.com.py/avatars/abc123.jpg',
+    required: false,
+    nullable: true,
+    description: 'URL pública de la foto de perfil.',
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string | null;
+
   @ApiProperty({ example: true })
   isEmployee!: boolean;
 

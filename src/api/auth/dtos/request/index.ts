@@ -5,3 +5,4 @@ export * from './change-expired-password.dto';
 export * from './create-password.dto';
 export * from './email-send.request.dto';
 export * from './verification-status.query.dto';
+export * from './update-me.request.dto';

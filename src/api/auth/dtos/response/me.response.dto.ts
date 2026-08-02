@@ -21,6 +21,13 @@ export class MeResponseDTO {
   @ApiProperty({ example: 'Pérez', description: 'Apellido.' })
   lastName!: string;
 
+  @ApiPropertyOptional({
+    example: 'https://cdn.tekoapp.com.py/avatars/abc123.jpg',
+    description: 'URL pública de la foto de perfil.',
+    nullable: true,
+  })
+  avatarUrl?: string | null;
+
   @ApiProperty({ example: 'ACTIVE', description: 'Estado del usuario.' })
   status!: string;
 

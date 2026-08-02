@@ -25,6 +25,7 @@ const mockVerifyUser = jest.fn();
 const mockCheckVerificationStatus = jest.fn();
 
 const mockFindUserById = jest.fn();
+const mockUpdateUser = jest.fn();
 
 const mockLoginAndVerifyLegacyUser = jest.fn();
 
@@ -83,7 +84,10 @@ describe('AuthApiService', () => {
         AuthApiService,
         {
           provide: UsersDBService,
-          useValue: { findUserById: mockFindUserById },
+          useValue: {
+            findUserById: mockFindUserById,
+            updateUser: mockUpdateUser,
+          },
         },
         {
           provide: AuthService,
@@ -315,6 +319,51 @@ describe('AuthApiService', () => {
         status: mockJwtUser.userStatus,
         profileStatus: mockJwtUser.profileStatus,
         accessLevelId: mockJwtUser.accessLevelId,
+        roles: mockJwtUser.roles,
+        permissions: mockJwtUser.permissions,
+      });
+    });
+  });
+
+  // ─── updateMe ─────────────────────────────────────────────────────────────
+
+  describe('updateMe', () => {
+    it('debe actualizar los datos propios del usuario y devolver el perfil con el avatar nuevo', async () => {
+      // Arrange
+      const dto: DTO.UpdateMeRequestDTO = {
+        firstName: 'Juana',
+        avatarUrl: 'https://cdn.tekoapp.com.py/avatars/nuevo.jpg',
+      };
+      const updatedUser = {
+        ...mockUser,
+        firstName: 'Juana',
+        avatarUrl: 'https://cdn.tekoapp.com.py/avatars/nuevo.jpg',
+      };
+      mockUpdateUser.mockResolvedValue(updatedUser);
+
+      // Act
+      const result = await service.updateMe(mockJwtUser, dto);
+
+      // Assert
+      expect(mockUpdateUser).toHaveBeenCalledWith(
+        mockJwtUser.id,
+        {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          phoneNumber: dto.phoneNumber,
+          avatarUrl: dto.avatarUrl,
+        },
+        mockJwtUser.email,
+      );
+      expect(result).toEqual({
+        id: updatedUser.referenceId,
+        email: updatedUser.email,
+        firstName: 'Juana',
+        lastName: updatedUser.lastName,
+        avatarUrl: 'https://cdn.tekoapp.com.py/avatars/nuevo.jpg',
+        status: updatedUser.status,
+        profileStatus: updatedUser.profileStatus,
+        accessLevelId: updatedUser.accessLevelId,
         roles: mockJwtUser.roles,
         permissions: mockJwtUser.permissions,
       });

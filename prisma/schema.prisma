@@ -75,6 +75,9 @@ model Users {
   documentTypeId  Int               @map("document_type_id")
   documentNumber  String?           @map("document_number")
   phoneNumber     String?           @map("phone_number")
+  // Foto de perfil (URL pública S3/CDN) — usada para identificación visual de usuarios y
+  // profesionales (seguridad/confianza). Nullable: sin foto se muestra un fallback de iniciales.
+  avatarUrl       String?           @map("avatar_url")
   isEmployee      Boolean           @default(false) @map("is_employee")
   isLdap          Boolean           @default(false) @map("ldap")
   createdAt       DateTime          @default(now()) @map("created_at")

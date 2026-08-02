@@ -86,6 +86,40 @@ export class AuthApiService {
     };
   }
 
+  /**
+   * Autoedición de perfil — el propio usuario actualiza sus datos básicos (nunca email, status,
+   * ni nada administrativo, ver `UpdateMeRequestDTO`). No requiere `USER.UPDATE`: la propiedad
+   * viene de `user.id` (JWT), no de un permiso.
+   */
+  async updateMe(
+    user: IUserDataOnJwt,
+    dto: DTO.UpdateMeRequestDTO,
+  ): Promise<DTO.MeResponseDTO> {
+    const updated = await this.userService.updateUser(
+      user.id,
+      {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        phoneNumber: dto.phoneNumber,
+        avatarUrl: dto.avatarUrl,
+      },
+      user.email,
+    );
+
+    return {
+      id: updated.referenceId,
+      email: updated.email,
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      avatarUrl: updated.avatarUrl,
+      status: updated.status,
+      profileStatus: updated.profileStatus,
+      accessLevelId: updated.accessLevelId,
+      roles: user.roles,
+      permissions: user.permissions,
+    };
+  }
+
   async forgotPassword(
     dto: DTO.ForgotUserPasswordDTO,
   ): Promise<{ success: boolean; message: string }> {
@@ -116,6 +150,7 @@ export class AuthApiService {
         id: fullUser.referenceId,
         email: fullUser.email,
         phoneNumber: fullUser.phoneNumber,
+        avatarUrl: fullUser.avatarUrl,
         firstName: fullUser.firstName,
         lastName: fullUser.lastName,
         status: fullUser.status,
