@@ -106,6 +106,54 @@ async function main() {
     create: { name: 'Instalación', createdBy: 'seed' },
   });
 
+  // ─── Catálogos de internacionalización (i18n) ──────────────────────────────
+  // Estructura preparada para expansión futura; hoy el negocio es Paraguay-only.
+  // `countries` no tiene columna única natural más allá del PK => upsert por `id` fijo
+  // (mismo patrón que `documents_type` arriba). `currencies` (PK natural alphaCode) y
+  // `languages` (code @unique) permiten upsert por su clave natural.
+  const paraguay = await prisma.country.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      commonName: 'Paraguay',
+      officialName: 'República del Paraguay',
+      iso2: 'PY',
+      iso3: 'PRY',
+      numericCode: '600',
+      phonePrefixCode: '+595',
+      isActive: true,
+      createdBy: 'seed',
+    },
+  });
+
+  await prisma.currency.upsert({
+    where: { alphaCode: 'PYG' },
+    update: {},
+    create: {
+      alphaCode: 'PYG',
+      numberCode: '600', // ISO 4217
+      decimalQuantity: 0, // El Guaraní no usa decimales
+      name: 'Guaraní paraguayo',
+      symbol: '₲',
+      countryId: paraguay.id,
+      isActive: true,
+      createdBy: 'seed',
+    },
+  });
+
+  await prisma.language.upsert({
+    where: { code: 'es' },
+    update: {},
+    create: { code: 'es', name: 'Español', isActive: true, createdBy: 'seed' },
+  });
+
+  await prisma.language.upsert({
+    where: { code: 'en' },
+    update: {},
+    create: { code: 'en', name: 'English', isActive: true, createdBy: 'seed' },
+  });
+
   // ─── Usuario de prueba (admin + profesional a la vez, para probar los 3 modos) ──
   const passwordHash = bcrypt.hashSync(
     SEED_USER_PASSWORD,

@@ -85,6 +85,9 @@ model Users {
   changedReason   String?           @map("changed_reason")
   acceptedTermsAt DateTime?         @map("accepted_terms_at")
   accessLevelId   Int?              @map("access_level_id")
+  // Idioma preferido del usuario. Nullable: sin preferencia explícita => se usa el default `es`
+  // del sistema (ver catálogo `languages`). No cambia comportamiento hoy (negocio Paraguay-only).
+  preferredLanguageId Int?          @map("preferred_language_id")
 
   checksum        String? @map("checksum")
   changeSignature String? @map("change_signature")
@@ -96,6 +99,7 @@ model Users {
   services              Services[]
   documentTypes         DocumentsType         @relation(fields: [documentTypeId], references: [id])
   accessLevel           AccessLevel?          @relation(fields: [accessLevelId], references: [id])
+  preferredLanguage     Language?             @relation(fields: [preferredLanguageId], references: [id])
   payments              Payments[]
   paymentMethodEntities PaymentMethodEntity[]
   ratings               Rating[]
@@ -632,6 +636,30 @@ model Currency {
 
   @@index([isActive])
   @@map("currencies")
+}
+
+// Catálogo de idiomas. Mismo patrón que Country: `id` secuencial + auditoría estándar,
+// SIN `referenceId` (es un catálogo de referencia de solo-lectura, no una entidad de negocio
+// con URL pública propia). Califica para el trigger de auditoría genérico (tiene id +
+// created_by + change_signature) — ver fn_attach_audit_triggers() en la migración.
+model Language {
+  id       Int     @id @default(autoincrement())
+  code     String  @unique @db.VarChar(5) // ISO 639-1; VarChar(5) cubre región (ej. es-PY)
+  name     String  @db.VarChar(100) // Nombre en su propio idioma (Español, English)
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  users Users[] // Usuarios que eligieron este idioma como preferido
+
+  @@index([isActive])
+  @@map("languages")
 }
 
 model Payments {
