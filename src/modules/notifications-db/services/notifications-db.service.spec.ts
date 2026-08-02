@@ -94,7 +94,7 @@ describe('NotificationsDbService', () => {
         userId,
         title: 'Prueba',
         message: 'Mensaje de prueba',
-      } as unknown as Partial<NotificationDocument>);
+      });
 
       // Assert
       expect(result).toEqual(baseNotification);

@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Types } from 'mongoose';
 import { NotificationsDbService } from '@modules/notifications-db/services/notifications-db.service';
 import { CreateNotificationRequestDTO } from '../dtos/request/create-notification-request.dto';
 import { NotificationStatus } from '@/modules/notifications-db/enums/notification-status.enum';
@@ -22,7 +21,7 @@ export class NotificationsService {
   ): Promise<NotificationDocument> {
     const saved = await this.dbService.create({
       ...dto,
-      userId: new Types.ObjectId(userId),
+      userId,
       status: NotificationStatus.PENDING,
     });
 
@@ -75,7 +74,6 @@ export class NotificationsService {
   ): Promise<void> {
     const payloads = notifications.map((n) => ({
       ...n,
-      userId: new Types.ObjectId(n.userId),
       status: NotificationStatus.PENDING,
     }));
 

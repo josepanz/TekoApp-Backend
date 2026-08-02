@@ -25,13 +25,6 @@ export class NotificationsDbService {
     >;
   }
 
-  // `userId` es el id (Int) de Postgres, no un ObjectId de Mongo — el campo `userId` del schema
-  // SÍ está tipado como ObjectId (ver notification.schema.ts), pero Mongoose castea un `number`
-  // plano automáticamente vía `new ObjectId(numero)` (encoding determinístico, no aleatorio) al
-  // construir el filtro. Un STRING numérico (`"5"`) o un UUID NO castea (`ObjectId.isValid`
-  // devuelve `false` para ambos) y tira `BSONError` — bug real que rompía todo este módulo antes
-  // de este fix (el controller mandaba `String(req.user.id)`). Nunca envolver `userId` en
-  // `String(...)` antes de llamar a este service.
   async findByUserId(
     userId: number,
     limit: number,
