@@ -63,7 +63,7 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockCreate).toHaveBeenCalledWith(dto, '42');
+      expect(mockCreate).toHaveBeenCalledWith(dto, 42);
     });
   });
 
@@ -81,7 +81,7 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindAll).toHaveBeenCalledWith('42', 10, 0);
+      expect(mockFindAll).toHaveBeenCalledWith(42, 10, 0);
     });
 
     it('debe retornar arreglo vacío cuando el usuario no tiene notificaciones', async () => {
@@ -111,7 +111,7 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindUnread).toHaveBeenCalledWith('42');
+      expect(mockFindUnread).toHaveBeenCalledWith(42);
     });
   });
 
@@ -127,7 +127,7 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual({ count: 7 });
-      expect(mockGetUnreadCount).toHaveBeenCalledWith('42');
+      expect(mockGetUnreadCount).toHaveBeenCalledWith(42);
     });
 
     it('debe retornar count 0 cuando el usuario no tiene notificaciones pendientes', async () => {
@@ -157,7 +157,7 @@ describe('NotificationsController', () => {
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockMarkAsRead).toHaveBeenCalledWith('notif-001', '42');
+      expect(mockMarkAsRead).toHaveBeenCalledWith('notif-001', 42);
     });
 
     it('debe propagar NotFoundException cuando la notificación no pertenece al usuario', async () => {
@@ -184,7 +184,7 @@ describe('NotificationsController', () => {
       await controller.markAllAsRead(req);
 
       // Assert
-      expect(mockMarkAllAsRead).toHaveBeenCalledWith('42');
+      expect(mockMarkAllAsRead).toHaveBeenCalledWith(42);
     });
   });
 
@@ -200,7 +200,7 @@ describe('NotificationsController', () => {
       await controller.remove(param, req);
 
       // Assert
-      expect(mockDelete).toHaveBeenCalledWith('notif-001', '42');
+      expect(mockDelete).toHaveBeenCalledWith('notif-001', 42);
     });
 
     it('debe propagar NotFoundException cuando la notificación no existe', async () => {

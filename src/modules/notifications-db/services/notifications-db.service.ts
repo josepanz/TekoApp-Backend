@@ -25,8 +25,15 @@ export class NotificationsDbService {
     >;
   }
 
+  // `userId` es el id (Int) de Postgres, no un ObjectId de Mongo — el campo `userId` del schema
+  // SÍ está tipado como ObjectId (ver notification.schema.ts), pero Mongoose castea un `number`
+  // plano automáticamente vía `new ObjectId(numero)` (encoding determinístico, no aleatorio) al
+  // construir el filtro. Un STRING numérico (`"5"`) o un UUID NO castea (`ObjectId.isValid`
+  // devuelve `false` para ambos) y tira `BSONError` — bug real que rompía todo este módulo antes
+  // de este fix (el controller mandaba `String(req.user.id)`). Nunca envolver `userId` en
+  // `String(...)` antes de llamar a este service.
   async findByUserId(
-    userId: string,
+    userId: number,
     limit: number,
     offset: number,
   ): Promise<NotificationDocument[]> {
@@ -38,14 +45,14 @@ export class NotificationsDbService {
       .exec();
   }
 
-  async findUnreadByUserId(userId: string): Promise<NotificationDocument[]> {
+  async findUnreadByUserId(userId: number): Promise<NotificationDocument[]> {
     return this.model
       .find({ userId, status: { $ne: NotificationStatus.READ } })
       .sort({ createdAt: -1 })
       .exec();
   }
 
-  async countUnreadByUserId(userId: string): Promise<number> {
+  async countUnreadByUserId(userId: number): Promise<number> {
     return this.model
       .countDocuments({ userId, status: { $ne: NotificationStatus.READ } })
       .exec();
@@ -53,7 +60,7 @@ export class NotificationsDbService {
 
   async updateStatus(
     id: string,
-    userId: string,
+    userId: number,
     updateData: Partial<NotificationDocument>,
   ): Promise<NotificationDocument | null> {
     return this.model
@@ -61,7 +68,7 @@ export class NotificationsDbService {
       .exec();
   }
 
-  async markAllAsRead(userId: string): Promise<void> {
+  async markAllAsRead(userId: number): Promise<void> {
     await this.model
       .updateMany(
         { userId, status: { $ne: NotificationStatus.READ } },
@@ -70,7 +77,7 @@ export class NotificationsDbService {
       .exec();
   }
 
-  async deleteOne(id: string, userId: string): Promise<void> {
+  async deleteOne(id: string, userId: number): Promise<void> {
     await this.model.deleteOne({ _id: id, userId }).exec();
   }
 

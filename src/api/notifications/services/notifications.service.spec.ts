@@ -56,7 +56,7 @@ describe('NotificationsService', () => {
   describe('create', () => {
     it('debe guardar la notificación en BD y encolarla para envío', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       const dto: CreateNotificationRequestDTO = {
         type: 'SERVICE_REQUEST',
         title: 'Nueva solicitud',
@@ -98,7 +98,7 @@ describe('NotificationsService', () => {
 
     it('debe encolar con canal in_app por defecto cuando la notificación no tiene canales definidos', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       const dto: CreateNotificationRequestDTO = {
         type: 'PAYMENT',
         title: 'Pago recibido',
@@ -131,7 +131,7 @@ describe('NotificationsService', () => {
   describe('findAll', () => {
     it('debe retornar las notificaciones del usuario paginadas por limit y offset', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       const expected: NotificationDocument[] = [
         { _id: new Types.ObjectId() } as unknown as NotificationDocument,
       ];
@@ -150,7 +150,7 @@ describe('NotificationsService', () => {
   describe('findUnread', () => {
     it('debe retornar únicamente las notificaciones no leídas del usuario', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       const expected: NotificationDocument[] = [
         {
           _id: new Types.ObjectId(),
@@ -172,7 +172,7 @@ describe('NotificationsService', () => {
   describe('getUnreadCount', () => {
     it('debe retornar el conteo de notificaciones no leídas del usuario', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       mockDbCountUnreadByUserId.mockResolvedValue(7);
 
       // Act
@@ -189,7 +189,7 @@ describe('NotificationsService', () => {
     it('debe marcar una notificación como leída y retornar el documento actualizado', async () => {
       // Arrange
       const id = new Types.ObjectId().toString();
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       const updated: NotificationDocument = {
         _id: new Types.ObjectId(id),
         status: NotificationStatus.READ,
@@ -212,7 +212,7 @@ describe('NotificationsService', () => {
     it('debe retornar null cuando la notificación no existe o no pertenece al usuario', async () => {
       // Arrange
       const id = new Types.ObjectId().toString();
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       mockDbUpdateStatus.mockResolvedValue(null);
 
       // Act
@@ -227,7 +227,7 @@ describe('NotificationsService', () => {
   describe('markAllAsRead', () => {
     it('debe marcar todas las notificaciones del usuario como leídas', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       mockDbMarkAllAsRead.mockResolvedValue(undefined);
 
       // Act
@@ -243,7 +243,7 @@ describe('NotificationsService', () => {
     it('debe eliminar una notificación específica del usuario', async () => {
       // Arrange
       const id = new Types.ObjectId().toString();
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       mockDbDeleteOne.mockResolvedValue(undefined);
 
       // Act
@@ -258,8 +258,8 @@ describe('NotificationsService', () => {
   describe('createBulk', () => {
     it('debe crear múltiples notificaciones y encolar cada una para envío', async () => {
       // Arrange
-      const userId1 = new Types.ObjectId().toString();
-      const userId2 = new Types.ObjectId().toString();
+      const userId1 = 42;
+      const userId2 = 43;
       const notifications = [
         {
           type: 'SERVICE_REQUEST',
@@ -267,14 +267,14 @@ describe('NotificationsService', () => {
           body: 'Cuerpo 1',
           channels: ['push'],
           userId: userId1,
-        } as unknown as CreateNotificationRequestDTO & { userId: string },
+        } as unknown as CreateNotificationRequestDTO & { userId: number },
         {
           type: 'PAYMENT',
           title: 'Notif 2',
           body: 'Cuerpo 2',
           channels: ['in_app'],
           userId: userId2,
-        } as unknown as CreateNotificationRequestDTO & { userId: string },
+        } as unknown as CreateNotificationRequestDTO & { userId: number },
       ];
 
       const created: NotificationDocument[] = [
@@ -308,14 +308,14 @@ describe('NotificationsService', () => {
 
     it('debe encolar con in_app por defecto para notificaciones bulk sin canales', async () => {
       // Arrange
-      const userId = new Types.ObjectId().toString();
+      const userId = 42;
       const notifications = [
         {
           type: 'ALERT',
           title: 'Alerta',
           body: 'Mensaje de alerta',
           userId,
-        } as unknown as CreateNotificationRequestDTO & { userId: string },
+        } as unknown as CreateNotificationRequestDTO & { userId: number },
       ];
 
       const created: NotificationDocument[] = [

@@ -36,7 +36,7 @@ MockModel.deleteOne = jest.fn();
 MockModel.findByIdAndUpdate = jest.fn();
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
-const userId = 'user-abc-123';
+const userId = 42;
 const notifId = 'notif-xyz-456';
 
 const baseNotification = {
@@ -141,7 +141,7 @@ describe('NotificationsDbService', () => {
       mockFind.mockResolvedValue([]);
 
       // Act
-      const result = await service.findByUserId('otro-usuario', 10, 0);
+      const result = await service.findByUserId(99, 10, 0);
 
       // Assert
       expect(result).toEqual([]);
@@ -221,7 +221,7 @@ describe('NotificationsDbService', () => {
       mockFindOneAndUpdate.mockResolvedValue(null);
 
       // Act
-      const result = await service.updateStatus(notifId, 'otro-usuario', {
+      const result = await service.updateStatus(notifId, 99, {
         status: NotificationStatus.READ,
       });
 

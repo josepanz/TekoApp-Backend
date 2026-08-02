@@ -18,7 +18,7 @@ export class NotificationsService {
 
   async create(
     dto: CreateNotificationRequestDTO,
-    userId: string,
+    userId: number,
   ): Promise<NotificationDocument> {
     const saved = await this.dbService.create({
       ...dto,
@@ -37,24 +37,24 @@ export class NotificationsService {
   }
 
   async findAll(
-    userId: string,
+    userId: number,
     limit: number,
     offset: number,
   ): Promise<NotificationDocument[]> {
     return this.dbService.findByUserId(userId, limit, offset);
   }
 
-  async findUnread(userId: string): Promise<NotificationDocument[]> {
+  async findUnread(userId: number): Promise<NotificationDocument[]> {
     return this.dbService.findUnreadByUserId(userId);
   }
 
-  async getUnreadCount(userId: string): Promise<number> {
+  async getUnreadCount(userId: number): Promise<number> {
     return this.dbService.countUnreadByUserId(userId);
   }
 
   async markAsRead(
     id: string,
-    userId: string,
+    userId: number,
   ): Promise<NotificationDocument | null> {
     return this.dbService.updateStatus(id, userId, {
       status: NotificationStatus.READ,
@@ -62,16 +62,16 @@ export class NotificationsService {
     });
   }
 
-  async markAllAsRead(userId: string): Promise<void> {
+  async markAllAsRead(userId: number): Promise<void> {
     await this.dbService.markAllAsRead(userId);
   }
 
-  async delete(id: string, userId: string): Promise<void> {
+  async delete(id: string, userId: number): Promise<void> {
     await this.dbService.deleteOne(id, userId);
   }
 
   async createBulk(
-    notifications: (CreateNotificationRequestDTO & { userId: string })[],
+    notifications: (CreateNotificationRequestDTO & { userId: number })[],
   ): Promise<void> {
     const payloads = notifications.map((n) => ({
       ...n,

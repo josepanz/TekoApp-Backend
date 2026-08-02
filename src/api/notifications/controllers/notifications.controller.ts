@@ -42,7 +42,7 @@ export class NotificationsController {
     @Body() dto: CreateNotificationRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.notificationsService.create(dto, String(req.user.id));
+    return this.notificationsService.create(dto, req.user.id);
   }
 
   @Get()
@@ -55,7 +55,7 @@ export class NotificationsController {
     @Query() query: FindAllNotificationsQueryDTO,
   ) {
     return this.notificationsService.findAll(
-      String(req.user.id),
+      req.user.id,
       query.limit,
       query.offset,
     );
@@ -65,7 +65,7 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Listar las notificaciones no leídas' })
   @ApiResponse({ status: 200, type: [NotificationResponseDTO] })
   async findUnread(@Request() req: { user: IUserDataOnJwt }) {
-    return this.notificationsService.findUnread(String(req.user.id));
+    return this.notificationsService.findUnread(req.user.id);
   }
 
   @Get('unread/count')
@@ -74,9 +74,7 @@ export class NotificationsController {
   async getUnreadCount(
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<UnreadCountResponseDTO> {
-    const count = await this.notificationsService.getUnreadCount(
-      String(req.user.id),
-    );
+    const count = await this.notificationsService.getUnreadCount(req.user.id);
     return { count };
   }
 
@@ -87,7 +85,7 @@ export class NotificationsController {
     @Param() param: NotificationIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.notificationsService.markAsRead(param.id, String(req.user.id));
+    return this.notificationsService.markAsRead(param.id, req.user.id);
   }
 
   @Put('read-all')
@@ -97,7 +95,7 @@ export class NotificationsController {
   })
   @ApiResponse({ status: 204 })
   async markAllAsRead(@Request() req: { user: IUserDataOnJwt }) {
-    await this.notificationsService.markAllAsRead(String(req.user.id));
+    await this.notificationsService.markAllAsRead(req.user.id);
   }
 
   @Delete(':id')
@@ -108,6 +106,6 @@ export class NotificationsController {
     @Param() param: NotificationIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    await this.notificationsService.delete(param.id, String(req.user.id));
+    await this.notificationsService.delete(param.id, req.user.id);
   }
 }
