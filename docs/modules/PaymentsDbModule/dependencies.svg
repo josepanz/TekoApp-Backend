@@ -24,83 +24,83 @@
 <title>cluster_PaymentsDbModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="8,-70 8,-268 552,-268 552,-70 8,-70"/>
 </g>
-<g id="clust6" class="cluster">
-<title>cluster_PaymentsDbModule_providers</title>
-<polygon fill="none" stroke="black" points="150,-78 150,-130 544,-130 544,-78 150,-78"/>
+<g id="clust3" class="cluster">
+<title>cluster_PaymentsDbModule_imports</title>
+<polygon fill="none" stroke="black" points="418,-78 418,-130 544,-130 544,-78 418,-78"/>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_PaymentsDbModule_exports</title>
-<polygon fill="none" stroke="black" points="96,-208 96,-260 398,-260 398,-208 96,-208"/>
+<polygon fill="none" stroke="black" points="160,-208 160,-260 462,-260 462,-208 160,-208"/>
 </g>
-<g id="clust3" class="cluster">
-<title>cluster_PaymentsDbModule_imports</title>
-<polygon fill="none" stroke="black" points="16,-78 16,-130 142,-130 142,-78 16,-78"/>
+<g id="clust6" class="cluster">
+<title>cluster_PaymentsDbModule_providers</title>
+<polygon fill="none" stroke="black" points="16,-78 16,-130 410,-130 410,-78 16,-78"/>
 </g>
 <!-- DatabaseModule -->
 <g id="node1" class="node">
 <title>DatabaseModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="134.35,-122 131.35,-126 110.35,-126 107.35,-122 23.65,-122 23.65,-86 134.35,-86 134.35,-122"/>
-<text text-anchor="middle" x="79" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="536.35,-122 533.35,-126 512.35,-126 509.35,-122 425.65,-122 425.65,-86 536.35,-86 536.35,-122"/>
+<text text-anchor="middle" x="481" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
 </g>
 <!-- PaymentsDbModule -->
 <g id="node2" class="node">
 <title>PaymentsDbModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="309.59,-187 306.59,-191 285.59,-191 282.59,-187 178.41,-187 178.41,-151 309.59,-151 309.59,-187"/>
-<text text-anchor="middle" x="244" y="-164.8" font-family="Times,serif" font-size="14.00">PaymentsDbModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="373.59,-187 370.59,-191 349.59,-191 346.59,-187 242.41,-187 242.41,-151 373.59,-151 373.59,-187"/>
+<text text-anchor="middle" x="308" y="-164.8" font-family="Times,serif" font-size="14.00">PaymentsDbModule</text>
 </g>
 <!-- DatabaseModule&#45;&gt;PaymentsDbModule -->
 <g id="edge1" class="edge">
 <title>DatabaseModule&#45;&gt;PaymentsDbModule</title>
-<path fill="none" stroke="black" d="M119.32,-122.11C119.32,-141.34 119.32,-169 119.32,-169 119.32,-169 168.37,-169 168.37,-169"/>
-<polygon fill="black" stroke="black" points="168.37,-172.5 178.37,-169 168.37,-165.5 168.37,-172.5"/>
+<path fill="none" stroke="black" d="M439.79,-122.11C439.79,-141.34 439.79,-169 439.79,-169 439.79,-169 383.89,-169 383.89,-169"/>
+<polygon fill="black" stroke="black" points="383.89,-165.5 373.89,-169 383.89,-172.5 383.89,-165.5"/>
 </g>
 <!-- FeeCalculatorService  -->
 <g id="node3" class="node">
 <title>FeeCalculatorService </title>
-<polygon fill="#fb8072" stroke="black" points="390,-252 250,-252 250,-216 390,-216 390,-252"/>
-<text text-anchor="middle" x="320" y="-229.8" font-family="Times,serif" font-size="14.00">FeeCalculatorService </text>
+<polygon fill="#fb8072" stroke="black" points="454,-252 314,-252 314,-216 454,-216 454,-252"/>
+<text text-anchor="middle" x="384" y="-229.8" font-family="Times,serif" font-size="14.00">FeeCalculatorService </text>
 </g>
 <!-- PaymentsDbModule&#45;&gt;FeeCalculatorService  -->
 <g id="edge2" class="edge">
 <title>PaymentsDbModule&#45;&gt;FeeCalculatorService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M279.77,-187.11C279.77,-187.11 279.77,-205.99 279.77,-205.99"/>
-<polygon fill="black" stroke="black" points="276.27,-205.99 279.77,-215.99 283.27,-205.99 276.27,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M343.77,-187.11C343.77,-187.11 343.77,-205.99 343.77,-205.99"/>
+<polygon fill="black" stroke="black" points="340.27,-205.99 343.77,-215.99 347.27,-205.99 340.27,-205.99"/>
 </g>
 <!-- PaymentDbService  -->
 <g id="node4" class="node">
 <title>PaymentDbService </title>
-<polygon fill="#fb8072" stroke="black" points="231.58,-252 104.42,-252 104.42,-216 231.58,-216 231.58,-252"/>
-<text text-anchor="middle" x="168" y="-229.8" font-family="Times,serif" font-size="14.00">PaymentDbService </text>
+<polygon fill="#fb8072" stroke="black" points="295.58,-252 168.42,-252 168.42,-216 295.58,-216 295.58,-252"/>
+<text text-anchor="middle" x="232" y="-229.8" font-family="Times,serif" font-size="14.00">PaymentDbService </text>
 </g>
 <!-- PaymentsDbModule&#45;&gt;PaymentDbService  -->
 <g id="edge3" class="edge">
 <title>PaymentsDbModule&#45;&gt;PaymentDbService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M205.12,-187.11C205.12,-187.11 205.12,-205.99 205.12,-205.99"/>
-<polygon fill="black" stroke="black" points="201.62,-205.99 205.12,-215.99 208.62,-205.99 201.62,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M269.12,-187.11C269.12,-187.11 269.12,-205.99 269.12,-205.99"/>
+<polygon fill="black" stroke="black" points="265.62,-205.99 269.12,-215.99 272.62,-205.99 265.62,-205.99"/>
 </g>
 <!-- FeeCalculatorService -->
 <g id="node5" class="node">
 <title>FeeCalculatorService</title>
-<ellipse fill="#fdb462" stroke="black" cx="442" cy="-104" rx="94.31" ry="18"/>
-<text text-anchor="middle" x="442" y="-99.8" font-family="Times,serif" font-size="14.00">FeeCalculatorService</text>
+<ellipse fill="#fdb462" stroke="black" cx="308" cy="-104" rx="94.31" ry="18"/>
+<text text-anchor="middle" x="308" y="-99.8" font-family="Times,serif" font-size="14.00">FeeCalculatorService</text>
 </g>
 <!-- FeeCalculatorService&#45;&gt;PaymentsDbModule -->
 <g id="edge4" class="edge">
 <title>FeeCalculatorService&#45;&gt;PaymentsDbModule</title>
-<path fill="none" stroke="black" d="M368.92,-115.62C368.92,-134.32 368.92,-169 368.92,-169 368.92,-169 319.75,-169 319.75,-169"/>
-<polygon fill="black" stroke="black" points="319.75,-165.5 309.75,-169 319.75,-172.5 319.75,-165.5"/>
+<path fill="none" stroke="black" d="M308,-122.11C308,-122.11 308,-140.99 308,-140.99"/>
+<polygon fill="black" stroke="black" points="304.5,-140.99 308,-150.99 311.5,-140.99 304.5,-140.99"/>
 </g>
 <!-- PaymentDbService -->
 <g id="node6" class="node">
 <title>PaymentDbService</title>
-<ellipse fill="#fdb462" stroke="black" cx="244" cy="-104" rx="85.67" ry="18"/>
-<text text-anchor="middle" x="244" y="-99.8" font-family="Times,serif" font-size="14.00">PaymentDbService</text>
+<ellipse fill="#fdb462" stroke="black" cx="110" cy="-104" rx="85.67" ry="18"/>
+<text text-anchor="middle" x="110" y="-99.8" font-family="Times,serif" font-size="14.00">PaymentDbService</text>
 </g>
 <!-- PaymentDbService&#45;&gt;PaymentsDbModule -->
 <g id="edge5" class="edge">
 <title>PaymentDbService&#45;&gt;PaymentsDbModule</title>
-<path fill="none" stroke="black" d="M244,-122.11C244,-122.11 244,-140.99 244,-140.99"/>
-<polygon fill="black" stroke="black" points="240.5,-140.99 244,-150.99 247.5,-140.99 240.5,-140.99"/>
+<path fill="none" stroke="black" d="M181.9,-113.87C181.9,-132.06 181.9,-169 181.9,-169 181.9,-169 232.36,-169 232.36,-169"/>
+<polygon fill="black" stroke="black" points="232.36,-172.5 242.36,-169 232.36,-165.5 232.36,-172.5"/>
 </g>
 </g>
 </svg>

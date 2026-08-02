@@ -187,15 +187,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>intercept(context: ExecutionContext, next: CallHandler)</code>
+<code>intercept(context: <a href="../miscellaneous/functions.html#t" target="_self">ExecutionContext</a>, next: CallHandler)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="22"
-                                    class="link-to-prism">src/core/interceptors/transform.interceptor.ts:22</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="24"
+                                    class="link-to-prism">src/core/interceptors/transform.interceptor.ts:24</a></div>
                         </td>
                     </tr>
 
@@ -218,7 +218,7 @@
                                         <tr>
                                                 <td>context</td>
                                             <td>
-                                                        <code>ExecutionContext</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExecutionContext</a></code>
                                             </td>
 
                                             <td>
@@ -268,6 +268,8 @@
 import { Observable } from &#x27;rxjs&#x27;;
 import { map } from &#x27;rxjs/operators&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 export interface Response&lt;T&gt; {
   success: boolean;
   data: T;
@@ -292,7 +294,7 @@ export class TransformInterceptor&lt;T&gt;
       map((data: T) &#x3D;&gt; ({
         success: response.statusCode &gt;&#x3D; 200 &amp;&amp; response.statusCode &lt; 300,
         data,
-        message: &#x27;Operación exitosa&#x27;,
+        message: t(&#x27;common.SUCCESS&#x27;),
         timestamp: new Date().toISOString(),
         path: request.url,
       })),

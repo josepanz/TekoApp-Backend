@@ -163,6 +163,15 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#changeExpiredPassword" >changeExpiredPassword</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#changePassword" >changePassword</a>
@@ -193,6 +202,23 @@
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#login" >login</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#me" >me</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#nonce" >nonce</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -277,6 +303,87 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="changeExpiredPassword"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>changeExpiredPassword</b></span>
+                        <a href="#changeExpiredPassword"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>changeExpiredPassword(dto: <a href="../classes/ChangeExpiredPasswordDTO.html" target="_self">DTO.ChangeExpiredPasswordDTO</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Put(&#x27;change-expired-password&#x27;)<br />@ApiBasicAuth()<br />@Version(&#x27;1&#x27;)<br />@UseGuards(BasicAuthGuard)<br />@AuthDocs(&#x27;changeExpiredPassword&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:107</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/ChangeExpiredPasswordDTO.html" target="_self" >DTO.ChangeExpiredPasswordDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.PasswordResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="changePassword"></a>
                     <span class="name">
                             <span class="modifier"></span>
@@ -308,8 +415,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="95"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:95</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="96"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:96</a></div>
                         </td>
                     </tr>
 
@@ -389,8 +496,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="83"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:83</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="84"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:84</a></div>
                         </td>
                     </tr>
 
@@ -470,8 +577,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="106"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:106</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="118"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:118</a></div>
                         </td>
                     </tr>
 
@@ -537,7 +644,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>login(dto: <a href="../classes/LoginUserDTO.html" target="_self">DTO.LoginUserDTO</a>, req: Request, res: <a href="../interfaces/Response.html" target="_self">Response</a>)</code>
+                    <code>login(dto: <a href="../classes/LoginUserDTO.html" target="_self">DTO.LoginUserDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">Request</a>, res: <a href="../interfaces/Response.html" target="_self">Response</a>)</code>
                 </td>
             </tr>
 
@@ -551,8 +658,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="51"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:51</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="52"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:52</a></div>
                         </td>
                     </tr>
 
@@ -587,7 +694,7 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>Request</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Request</a></code>
                                             </td>
 
                                             <td>
@@ -626,6 +733,137 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="me"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>me</b></span>
+                        <a href="#me"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>me(user: <a href="../interfaces/IUserDataOnJwt.html" target="_self">IUserDataOnJwt</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;me&#x27;)<br />@UseGuards(JwtAuthGuard)<br />@ApiBearerAuth()<br />@Version(&#x27;1&#x27;)<br />@AuthDocs(&#x27;me&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="138"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:138</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../interfaces/IUserDataOnJwt.html" target="_self" >IUserDataOnJwt</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >DTO.MeResponseDTO</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="nonce"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>nonce</b></span>
+                        <a href="#nonce"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>nonce()</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Post(&#x27;nonce&#x27;)<br />@Version(&#x27;1&#x27;)<br />@ApiBasicAuth()<br />@UseGuards(BasicAuthGuard)<br />@AuthDocs(&#x27;nonce&#x27;)<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="129"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:129</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.NonceResponseDTO&gt;</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="refreshToken"></a>
                     <span class="name">
                             <span class="modifier"></span>
@@ -655,8 +893,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="116"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:116</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="146"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:146</a></div>
                         </td>
                     </tr>
 
@@ -748,8 +986,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="138"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:138</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="168"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:168</a></div>
                         </td>
                     </tr>
 
@@ -829,8 +1067,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="181"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:181</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="211"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:211</a></div>
                         </td>
                     </tr>
 
@@ -922,8 +1160,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="196"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:196</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="226"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:226</a></div>
                         </td>
                     </tr>
 
@@ -1015,8 +1253,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="168"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:168</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="198"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:198</a></div>
                         </td>
                     </tr>
 
@@ -1108,8 +1346,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="156"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:156</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="186"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:186</a></div>
                         </td>
                     </tr>
 
@@ -1201,8 +1439,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="147"
-                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:147</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="177"
+                                    class="link-to-prism">src/api/auth/controllers/auth-api.controller.ts:177</a></div>
                         </td>
                     </tr>
 
@@ -1289,6 +1527,7 @@ import { AuthCookieService } from &#x27;@api/auth/services/auth-cookie.service&#
 import { AuthDocs } from &#x27;@api/auth/docs/auth-api.docs&#x27;;
 import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @ApiTags(&#x27;Auth&#x27;)
 @Controller(&#x27;auth&#x27;)
 export class AuthApiController {
@@ -1352,6 +1591,17 @@ export class AuthApiController {
     return await this.authApiService.updatePassword(dto);
   }
 
+  @Put(&#x27;change-expired-password&#x27;)
+  @ApiBasicAuth()
+  @Version(&#x27;1&#x27;)
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs(&#x27;changeExpiredPassword&#x27;)
+  async changeExpiredPassword(
+    @Body() dto: DTO.ChangeExpiredPasswordDTO,
+  ): Promise&lt;DTO.PasswordResponseDTO&gt; {
+    return await this.authApiService.changeExpiredPassword(dto);
+  }
+
   @Put(&#x27;forgot-password&#x27;)
   @ApiBasicAuth()
   @Version(&#x27;1&#x27;)
@@ -1361,6 +1611,24 @@ export class AuthApiController {
     @Body() dto: DTO.ForgotUserPasswordDTO,
   ): Promise&lt;DTO.PasswordResponseDTO&gt; {
     return await this.authApiService.forgotPassword(dto);
+  }
+
+  @Post(&#x27;nonce&#x27;)
+  @Version(&#x27;1&#x27;)
+  @ApiBasicAuth()
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs(&#x27;nonce&#x27;)
+  async nonce(): Promise&lt;DTO.NonceResponseDTO&gt; {
+    return await this.authApiService.generateNonce();
+  }
+
+  @Get(&#x27;me&#x27;)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Version(&#x27;1&#x27;)
+  @AuthDocs(&#x27;me&#x27;)
+  me(@User() user: IUserDataOnJwt): DTO.MeResponseDTO {
+    return this.authApiService.me(user);
   }
 
   @Post(&#x27;refresh-token&#x27;)
@@ -1374,14 +1642,14 @@ export class AuthApiController {
     const refreshToken &#x3D; req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      throw new UnauthorizedException(&#x27;No se provee el token.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.TOKEN_NOT_PROVIDED&#x27;));
     }
 
     const { accessToken } &#x3D;
       await this.authApiService.refreshAccessToken(refreshToken);
     this.cookieService.setAccessToken(res, accessToken);
 
-    return { message: &#x27;Token actualizado&#x27;, accessToken };
+    return { message: t(&#x27;auth.TOKEN_REFRESHED&#x27;), accessToken };
   }
 
   @Get(&#x27;scope&#x27;)
@@ -1424,7 +1692,7 @@ export class AuthApiController {
     @User() user: Users,
   ): Promise&lt;DTO.PasswordOnlyMessageResponseDTO&gt; {
     await this.authApiService.sendVerificationEmail(dto.email, user);
-    return { message: &#x27;Email de verificación enviado correctamente.&#x27; };
+    return { message: t(&#x27;auth.VERIFICATION_EMAIL_SENT&#x27;) };
   }
 
   @Post(&#x27;email/send-create-password&#x27;)
@@ -1438,7 +1706,7 @@ export class AuthApiController {
   ): Promise&lt;DTO.PasswordOnlyMessageResponseDTO&gt; {
     await this.authApiService.sendPasswordCreationEmail(dto.email, user);
     return {
-      message: &#x27;Email para creación de contraseña enviado correctamente.&#x27;,
+      message: t(&#x27;auth.SET_PASSWORD_EMAIL_SENT&#x27;),
     };
   }
 
@@ -1453,7 +1721,7 @@ export class AuthApiController {
   ): Promise&lt;DTO.PasswordOnlyMessageResponseDTO&gt; {
     await this.authApiService.sendPasswordResetEmail(dto.email, user);
     return {
-      message: &#x27;Email para recuperación de cuenta enviado correctamente.&#x27;,
+      message: t(&#x27;auth.RECOVERY_EMAIL_SENT&#x27;),
     };
   }
 }

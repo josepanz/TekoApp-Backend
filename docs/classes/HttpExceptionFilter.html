@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ExceptionFilter</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExceptionFilter</a></code>
             </p>
 
 
@@ -199,15 +199,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>catch(exception: HttpException, host: ArgumentsHost)</code>
+<code>catch(exception: <a href="../miscellaneous/functions.html#t" target="_self">HttpException</a>, host: <a href="../miscellaneous/functions.html#t" target="_self">ArgumentsHost</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="11"
-                                    class="link-to-prism">src/common/filters/http-exception.filter.ts:11</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="13"
+                                    class="link-to-prism">src/common/filters/http-exception.filter.ts:13</a></div>
                         </td>
                     </tr>
 
@@ -230,7 +230,7 @@
                                         <tr>
                                                 <td>exception</td>
                                             <td>
-                                                        <code>HttpException</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >HttpException</a></code>
                                             </td>
 
                                             <td>
@@ -242,7 +242,7 @@
                                         <tr>
                                                 <td>host</td>
                                             <td>
-                                                        <code>ArgumentsHost</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ArgumentsHost</a></code>
                                             </td>
 
                                             <td>
@@ -283,6 +283,8 @@
 } from &#x27;@nestjs/common&#x27;;
 import { Request, Response } from &#x27;express&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
@@ -292,7 +294,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status &#x3D; exception.getStatus();
     const exceptionResponse &#x3D; exception.getResponse();
 
-    let message &#x3D; &#x27;Error interno del servidor&#x27;;
+    let message &#x3D; t(&#x27;common.INTERNAL_SERVER_ERROR&#x27;);
     let error &#x3D; &#x27;Internal Server Error&#x27;;
 
     if (typeof exceptionResponse &#x3D;&#x3D;&#x3D; &#x27;object&#x27; &amp;&amp; exceptionResponse !&#x3D;&#x3D; null) {

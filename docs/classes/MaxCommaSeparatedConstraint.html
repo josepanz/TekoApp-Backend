@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ValidatorConstraintInterface</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidatorConstraintInterface</a></code>
             </p>
 
 
@@ -202,15 +202,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>defaultMessage(args: ValidationArguments)</code>
+<code>defaultMessage(args: <a href="../miscellaneous/functions.html#t" target="_self">ValidationArguments</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="23"
-                                    class="link-to-prism">src/common/validators/max-comma-separated.validator.ts:23</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="25"
+                                    class="link-to-prism">src/common/validators/max-comma-separated.validator.ts:25</a></div>
                         </td>
                     </tr>
 
@@ -233,7 +233,7 @@
                                         <tr>
                                                 <td>args</td>
                                             <td>
-                                                        <code>ValidationArguments</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationArguments</a></code>
                                             </td>
 
                                             <td>
@@ -246,7 +246,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -269,15 +269,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>validate(value: unknown, args: ValidationArguments)</code>
+<code>validate(value: unknown, args: <a href="../miscellaneous/functions.html#t" target="_self">ValidationArguments</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="11"
-                                    class="link-to-prism">src/common/validators/max-comma-separated.validator.ts:11</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="13"
+                                    class="link-to-prism">src/common/validators/max-comma-separated.validator.ts:13</a></div>
                         </td>
                     </tr>
 
@@ -312,7 +312,7 @@
                                         <tr>
                                                 <td>args</td>
                                             <td>
-                                                        <code>ValidationArguments</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationArguments</a></code>
                                             </td>
 
                                             <td>
@@ -351,6 +351,8 @@
   ValidationArguments,
 } from &#x27;class-validator&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 @ValidatorConstraint({ name: &#x27;maxCommaSeparated&#x27;, async: false })
 export class MaxCommaSeparatedConstraint
   implements ValidatorConstraintInterface
@@ -369,7 +371,10 @@ export class MaxCommaSeparatedConstraint
 
   defaultMessage(args: ValidationArguments) {
     const max &#x3D; args.constraints[0] as number;
-    return &#x60;${args.property} no puede tener más de ${max} códigos separados por coma y no puede estar vacío.&#x60;;
+    return t(&#x27;validation.MAX_COMMA_SEPARATED&#x27;, {
+      property: args.property,
+      max,
+    });
   }
 }
 </code></pre>

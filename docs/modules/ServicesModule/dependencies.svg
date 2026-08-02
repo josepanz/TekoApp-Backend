@@ -26,57 +26,57 @@
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_ServicesModule_exports</title>
-<polygon fill="none" stroke="black" points="180,-208 180,-260 304,-260 304,-208 180,-208"/>
-</g>
-<g id="clust6" class="cluster">
-<title>cluster_ServicesModule_providers</title>
-<polygon fill="none" stroke="black" points="241,-78 241,-130 403,-130 403,-78 241,-78"/>
+<polygon fill="none" stroke="black" points="191,-208 191,-260 315,-260 315,-208 191,-208"/>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_ServicesModule_imports</title>
-<polygon fill="none" stroke="black" points="93,-78 93,-130 233,-130 233,-78 93,-78"/>
+<polygon fill="none" stroke="black" points="263,-78 263,-130 403,-130 403,-78 263,-78"/>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_ServicesModule_providers</title>
+<polygon fill="none" stroke="black" points="93,-78 93,-130 255,-130 255,-78 93,-78"/>
 </g>
 <!-- ServicesDbModule -->
 <g id="node1" class="node">
 <title>ServicesDbModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="225.08,-122 222.08,-126 201.08,-126 198.08,-122 100.92,-122 100.92,-86 225.08,-86 225.08,-122"/>
-<text text-anchor="middle" x="163" y="-99.8" font-family="Times,serif" font-size="14.00">ServicesDbModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="395.08,-122 392.08,-126 371.08,-126 368.08,-122 270.92,-122 270.92,-86 395.08,-86 395.08,-122"/>
+<text text-anchor="middle" x="333" y="-99.8" font-family="Times,serif" font-size="14.00">ServicesDbModule</text>
 </g>
 <!-- ServicesModule -->
 <g id="node2" class="node">
 <title>ServicesModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="295.47,-187 292.47,-191 271.47,-191 268.47,-187 188.53,-187 188.53,-151 295.47,-151 295.47,-187"/>
-<text text-anchor="middle" x="242" y="-164.8" font-family="Times,serif" font-size="14.00">ServicesModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="306.47,-187 303.47,-191 282.47,-191 279.47,-187 199.53,-187 199.53,-151 306.47,-151 306.47,-187"/>
+<text text-anchor="middle" x="253" y="-164.8" font-family="Times,serif" font-size="14.00">ServicesModule</text>
 </g>
 <!-- ServicesDbModule&#45;&gt;ServicesModule -->
 <g id="edge1" class="edge">
 <title>ServicesDbModule&#45;&gt;ServicesModule</title>
-<path fill="none" stroke="black" d="M206.78,-122.11C206.78,-122.11 206.78,-140.99 206.78,-140.99"/>
-<polygon fill="black" stroke="black" points="203.28,-140.99 206.78,-150.99 210.28,-140.99 203.28,-140.99"/>
+<path fill="none" stroke="black" d="M288.72,-122.11C288.72,-122.11 288.72,-140.99 288.72,-140.99"/>
+<polygon fill="black" stroke="black" points="285.22,-140.99 288.72,-150.99 292.22,-140.99 285.22,-140.99"/>
 </g>
 <!-- ServicesService  -->
 <g id="node3" class="node">
 <title>ServicesService </title>
-<polygon fill="#fb8072" stroke="black" points="296.4,-252 187.6,-252 187.6,-216 296.4,-216 296.4,-252"/>
-<text text-anchor="middle" x="242" y="-229.8" font-family="Times,serif" font-size="14.00">ServicesService </text>
+<polygon fill="#fb8072" stroke="black" points="307.4,-252 198.6,-252 198.6,-216 307.4,-216 307.4,-252"/>
+<text text-anchor="middle" x="253" y="-229.8" font-family="Times,serif" font-size="14.00">ServicesService </text>
 </g>
 <!-- ServicesModule&#45;&gt;ServicesService  -->
 <g id="edge2" class="edge">
 <title>ServicesModule&#45;&gt;ServicesService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M242,-187.11C242,-187.11 242,-205.99 242,-205.99"/>
-<polygon fill="black" stroke="black" points="238.5,-205.99 242,-215.99 245.5,-205.99 238.5,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M253,-187.11C253,-187.11 253,-205.99 253,-205.99"/>
+<polygon fill="black" stroke="black" points="249.5,-205.99 253,-215.99 256.5,-205.99 249.5,-205.99"/>
 </g>
 <!-- ServicesService -->
 <g id="node4" class="node">
 <title>ServicesService</title>
-<ellipse fill="#fdb462" stroke="black" cx="322" cy="-104" rx="72.91" ry="18"/>
-<text text-anchor="middle" x="322" y="-99.8" font-family="Times,serif" font-size="14.00">ServicesService</text>
+<ellipse fill="#fdb462" stroke="black" cx="174" cy="-104" rx="72.91" ry="18"/>
+<text text-anchor="middle" x="174" y="-99.8" font-family="Times,serif" font-size="14.00">ServicesService</text>
 </g>
 <!-- ServicesService&#45;&gt;ServicesModule -->
 <g id="edge3" class="edge">
 <title>ServicesService&#45;&gt;ServicesModule</title>
-<path fill="none" stroke="black" d="M272.39,-117.47C272.39,-117.47 272.39,-140.86 272.39,-140.86"/>
-<polygon fill="black" stroke="black" points="268.89,-140.86 272.39,-150.86 275.89,-140.86 268.89,-140.86"/>
+<path fill="none" stroke="black" d="M223.11,-117.47C223.11,-117.47 223.11,-140.86 223.11,-140.86"/>
+<polygon fill="black" stroke="black" points="219.61,-140.86 223.11,-150.86 226.61,-140.86 219.61,-140.86"/>
 </g>
 </g>
 </svg>

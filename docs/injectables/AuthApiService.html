@@ -155,6 +155,10 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#changeExpiredPassword" >changeExpiredPassword</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#createPasswordWithToken" >createPasswordWithToken</a>
                             </li>
                             <li>
@@ -163,7 +167,14 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#generateNonce" >generateNonce</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#handleLogin" >handleLogin</a>
+                            </li>
+                            <li>
+                                <a href="#me" >me</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -303,6 +314,75 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="changeExpiredPassword"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>changeExpiredPassword</b></span>
+                        <a href="#changeExpiredPassword"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>changeExpiredPassword(dto: <a href="../classes/ChangeExpiredPasswordDTO.html" target="_self">DTO.ChangeExpiredPasswordDTO</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:65</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/ChangeExpiredPasswordDTO.html" target="_self" >DTO.ChangeExpiredPasswordDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="createPasswordWithToken"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -358,7 +438,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -390,8 +470,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="65"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:65</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="89"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:89</a></div>
                         </td>
                     </tr>
 
@@ -427,12 +507,51 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type&gt;</a></code>
 
                         </div>
                             <div class="io-description">
                                 
                             </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="generateNonce"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>generateNonce</b></span>
+                        <a href="#generateNonce"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>generateNonce()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="71"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:71</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;DTO.NonceResponseDTO&gt;</a></code>
+
+                        </div>
                 </td>
             </tr>
         </tbody>
@@ -452,7 +571,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>handleLogin(dto: <a href="../classes/LoginUserDTO.html" target="_self">DTO.LoginUserDTO</a>, userAgent?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>handleLogin(dto: <a href="../classes/LoginUserDTO.html" target="_self">DTO.LoginUserDTO</a>, userAgent?: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
@@ -495,7 +614,7 @@
                                         <tr>
                                                 <td>userAgent</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -522,6 +641,73 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="me"></a>
+                    <span class="name">
+                        <span ><b>me</b></span>
+                        <a href="#me"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>me(user: <a href="../interfaces/IUserDataOnJwt.html" target="_self">IUserDataOnJwt</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="75"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:75</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>user</td>
+                                            <td>
+                                                            <code><a href="../interfaces/IUserDataOnJwt.html" target="_self" >IUserDataOnJwt</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >DTO.MeResponseDTO</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="refreshAccessToken"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -533,15 +719,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>refreshAccessToken(refreshToken: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>refreshAccessToken(refreshToken: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="102"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:102</a></div>
                         </td>
                     </tr>
 
@@ -564,7 +750,7 @@
                                         <tr>
                                                 <td>refreshToken</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -577,7 +763,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -609,8 +795,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="84"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:84</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="108"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:108</a></div>
                         </td>
                     </tr>
 
@@ -671,15 +857,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>sendPasswordCreationEmail(to: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
+                    <code>sendPasswordCreationEmail(to: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="134"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:134</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="158"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:158</a></div>
                         </td>
                     </tr>
 
@@ -702,7 +888,7 @@
                                         <tr>
                                                 <td>to</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -752,15 +938,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>sendPasswordResetEmail(to: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
+                    <code>sendPasswordResetEmail(to: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="125"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:125</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="149"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:149</a></div>
                         </td>
                     </tr>
 
@@ -783,7 +969,7 @@
                                         <tr>
                                                 <td>to</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -833,15 +1019,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>sendVerificationEmail(to: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
+                    <code>sendVerificationEmail(to: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, user: <a href="../miscellaneous/variables.html#User" target="_self">Users</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="117"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:117</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="141"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:141</a></div>
                         </td>
                     </tr>
 
@@ -864,7 +1050,7 @@
                                         <tr>
                                                 <td>to</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -958,7 +1144,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -990,8 +1176,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="111"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:111</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="135"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:135</a></div>
                         </td>
                     </tr>
 
@@ -1027,7 +1213,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1059,8 +1245,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:107</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="131"
+                                    class="link-to-prism">src/api/auth/services/auth-api.service.ts:131</a></div>
                         </td>
                     </tr>
 
@@ -1174,6 +1360,30 @@ export class AuthApiService {
     dto: DTO.UpdateUserPasswordDTO,
   ): Promise&lt;{ success: boolean; message: string }&gt; {
     return await this.authService.changePassword(dto);
+  }
+
+  async changeExpiredPassword(
+    dto: DTO.ChangeExpiredPasswordDTO,
+  ): Promise&lt;{ success: boolean; message: string }&gt; {
+    return await this.authService.changeExpiredPassword(dto);
+  }
+
+  async generateNonce(): Promise&lt;DTO.NonceResponseDTO&gt; {
+    return await this.authService.generateNonce();
+  }
+
+  me(user: IUserDataOnJwt): DTO.MeResponseDTO {
+    return {
+      id: user.referenceId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: user.userStatus,
+      profileStatus: user.profileStatus,
+      accessLevelId: user.accessLevelId,
+      roles: user.roles,
+      permissions: user.permissions,
+    };
   }
 
   async forgotPassword(

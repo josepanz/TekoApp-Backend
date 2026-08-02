@@ -206,7 +206,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/modules/auth/services/auth-token.service.ts:19</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="21" class="link-to-prism">src/modules/auth/services/auth-token.service.ts:21</a></div>
                             </td>
                         </tr>
 
@@ -276,15 +276,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>generateAccessTokenFromRefresh(refreshToken: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>generateAccessTokenFromRefresh(refreshToken: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="75"
-                                    class="link-to-prism">src/modules/auth/services/auth-token.service.ts:75</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="77"
+                                    class="link-to-prism">src/modules/auth/services/auth-token.service.ts:77</a></div>
                         </td>
                     </tr>
 
@@ -310,7 +310,7 @@ Valida: firma, expiración y estado del usuario</p>
                                         <tr>
                                                 <td>refreshToken</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -323,7 +323,7 @@ Valida: firma, expiración y estado del usuario</p>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;string&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;string&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -346,15 +346,15 @@ Valida: firma, expiración y estado del usuario</p>
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>generateTokens(payload: literal type)</code>
+<code>generateTokens(payload: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="32"
-                                    class="link-to-prism">src/modules/auth/services/auth-token.service.ts:32</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="34"
+                                    class="link-to-prism">src/modules/auth/services/auth-token.service.ts:34</a></div>
                         </td>
                     </tr>
 
@@ -379,7 +379,7 @@ Valida: firma, expiración y estado del usuario</p>
                                         <tr>
                                                 <td>payload</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -392,7 +392,7 @@ Valida: firma, expiración y estado del usuario</p>
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>literal type</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
 
                         </div>
                             <div class="io-description">
@@ -434,7 +434,7 @@ Valida: firma, expiración y estado del usuario</p>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/modules/auth/services/auth-token.service.ts:19</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="21" class="link-to-prism">src/modules/auth/services/auth-token.service.ts:21</a></div>
                         </td>
                     </tr>
 
@@ -459,7 +459,9 @@ import { Users, UserStatus } from &#x27;@prisma/client&#x27;;
 import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;;
 import { APP_CONFIG, AppConfigType } from &#x27;@core/config/config-loader&#x27;;
 import { CryptoHelper } from &#x27;@common/helpers/crypto-helpers&#x27;;
+import { PasswordExpirationHelper } from &#x27;@modules/auth/helpers&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 /**
  * Servicio especializado en gestión de tokens de autenticación JWT (stateless)
  */
@@ -527,7 +529,7 @@ export class AuthTokenService {
 
     // Validar que sea un refresh token
     if (payload.tokenType !&#x3D;&#x3D; &#x27;refreshToken&#x27;) {
-      throw new UnauthorizedException(&#x27;Token de refresco inválido.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_REFRESH_TOKEN&#x27;));
     }
 
     // Buscar usuario por referenceId (del payload)
@@ -546,14 +548,23 @@ export class AuthTokenService {
 
     // Validar que el usuario existe y está activo
     if (!user) {
-      throw new UnauthorizedException(&#x27;Usuario inexistente.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.USER_DOES_NOT_EXIST&#x27;));
     }
 
     if (user.status !&#x3D;&#x3D; UserStatus.ACTIVE) {
-      throw new UnauthorizedException(
-        &#x27;Usuario inactivo. Por favor, contacta a soporte.&#x27;,
-      );
+      throw new UnauthorizedException(t(&#x27;auth.USER_INACTIVE_CONTACT_SUPPORT&#x27;));
     }
+
+    // Rechazar el refresh si la contraseña de la credencial activa expiró
+    // (mismo criterio que el login).
+    const activeCredential &#x3D;
+      await this.prisma.extended.userCredentials.findFirst({
+        where: { userId: user.id, isActive: true },
+        orderBy: { createdAt: &#x27;desc&#x27; },
+        select: { expiredAt: true },
+      });
+
+    PasswordExpirationHelper.assertNotExpired(activeCredential?.expiredAt);
 
     // Generar nuevo access token
     const newAccessToken &#x3D; CryptoHelper.generateToken(

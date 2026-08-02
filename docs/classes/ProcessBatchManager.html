@@ -225,8 +225,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="99"
-                                    class="link-to-prism">src/common/helpers/process-batch.ts:99</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="98"
+                                    class="link-to-prism">src/common/helpers/process-batch.ts:98</a></div>
                         </td>
                     </tr>
 
@@ -287,15 +287,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>executeWithRetry(operation: () => void, executionOptions?: <a href="../interfaces/StorageExecutionOptions.html" target="_self">StorageExecutionOptions</a>)</code>
+                    <code>executeWithRetry(operation: <a href="../miscellaneous/functions.html#t" target="_self">function</a>, executionOptions?: <a href="../interfaces/StorageExecutionOptions.html" target="_self">StorageExecutionOptions</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="8"
-                                    class="link-to-prism">src/common/helpers/process-batch.ts:8</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="9"
+                                    class="link-to-prism">src/common/helpers/process-batch.ts:9</a></div>
                         </td>
                     </tr>
 
@@ -326,7 +326,7 @@
                                         <tr>
                                                 <td>operation</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/function" target="_blank" >function</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >function</a></code>
                                             </td>
 
                                             <td>
@@ -376,15 +376,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>processInBatches(items: T[], batchSize: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, handler: (item: T) => void)</code>
+                    <code>processInBatches(items: T[], batchSize: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, handler: <a href="../miscellaneous/functions.html#t" target="_self">function</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="61"
-                                    class="link-to-prism">src/common/helpers/process-batch.ts:61</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="60"
+                                    class="link-to-prism">src/common/helpers/process-batch.ts:60</a></div>
                         </td>
                     </tr>
 
@@ -440,7 +440,7 @@
                                         <tr>
                                                 <td>handler</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/function" target="_blank" >function</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >function</a></code>
                                             </td>
 
                                             <td>
@@ -453,7 +453,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;TResult[]&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;TResult[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -485,8 +485,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="79"
-                                    class="link-to-prism">src/common/helpers/process-batch.ts:79</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="78"
+                                    class="link-to-prism">src/common/helpers/process-batch.ts:78</a></div>
                         </td>
                     </tr>
 
@@ -554,8 +554,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="89"
-                                    class="link-to-prism">src/common/helpers/process-batch.ts:89</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="88"
+                                    class="link-to-prism">src/common/helpers/process-batch.ts:88</a></div>
                         </td>
                     </tr>
 
@@ -623,8 +623,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="36"
-                                    class="link-to-prism">src/common/helpers/process-batch.ts:36</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="35"
+                                    class="link-to-prism">src/common/helpers/process-batch.ts:35</a></div>
                         </td>
                     </tr>
 
@@ -686,6 +686,7 @@ import {
   BadRequestException,
 } from &#x27;@nestjs/common&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 export class ProcessBatchManager {
   async executeWithRetry&lt;T&gt;(
     operation: () &#x3D;&gt; Promise&lt;T&gt;,
@@ -710,9 +711,7 @@ export class ProcessBatchManager {
       }
     }
 
-    throw new ServiceUnavailableException(
-      &#x27;Storage service is temporarily unavailable&#x27;,
-    );
+    throw new ServiceUnavailableException(t(&#x27;common.STORAGE_UNAVAILABLE&#x27;));
   }
 
   private shouldRetry(error: unknown): boolean {
@@ -762,7 +761,7 @@ export class ProcessBatchManager {
     const retryAttempts: number &#x3D; value ?? 3;
 
     if (!Number.isInteger(retryAttempts) || retryAttempts &lt; 0) {
-      throw new BadRequestException(&#x27;retryAttempts must be 0 or greater&#x27;);
+      throw new BadRequestException(t(&#x27;common.RETRY_ATTEMPTS_INVALID&#x27;));
     }
 
     return retryAttempts;
@@ -772,7 +771,7 @@ export class ProcessBatchManager {
     const retryDelayMs: number &#x3D; value ?? 1000;
 
     if (!Number.isInteger(retryDelayMs) || retryDelayMs &lt; 0) {
-      throw new BadRequestException(&#x27;retryDelayMs must be 0 or greater&#x27;);
+      throw new BadRequestException(t(&#x27;common.RETRY_DELAY_INVALID&#x27;));
     }
 
     return retryDelayMs;
