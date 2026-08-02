@@ -2152,6 +2152,11 @@
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, &#x27;\n&#x27;) ?? &#x27;&#x27;,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     },
+    webPush: {
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? &#x27;&#x27;,
+      vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? &#x27;&#x27;,
+      vapidSubject: process.env.VAPID_SUBJECT ?? &#x27;&#x27;,
+    },
     stripe: {
       secretKey: process.env.STRIPE_SECRET_KEY,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
@@ -2674,6 +2679,21 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
       type: DTO.MeResponseDTO,
     }),
     ApiUnauthorizedResponse({ description: &#x27;Token inválido o expirado.&#x27; }),
+  ),
+
+  updateMe: applyDecorators(
+    HttpCode(200),
+    ApiOperation({
+      summary: &#x27;Autoedición de perfil del usuario autenticado.&#x27;,
+      description:
+        &#x27;El propio usuario actualiza sus datos básicos (nombre, teléfono, avatar) — nunca email, status ni campos administrativos, eso sigue en PUT /users/:id (requiere permiso de admin).&#x27;,
+    }),
+    ApiOkResponse({
+      description: &#x27;Perfil actualizado con éxito.&#x27;,
+      type: DTO.MeResponseDTO,
+    }),
+    ApiUnauthorizedResponse({ description: &#x27;Token inválido o expirado.&#x27; }),
+    ApiBadRequestResponse({ description: &#x27;Datos inválidos.&#x27; }),
   ),
 
   refreshToken: applyDecorators(
@@ -3310,6 +3330,10 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
   FIREBASE_PROJECT_ID: Joi.string().required(),
   FIREBASE_PRIVATE_KEY: Joi.string().required(),
   FIREBASE_CLIENT_EMAIL: Joi.string().required(),
+
+  VAPID_PUBLIC_KEY: Joi.string().required(),
+  VAPID_PRIVATE_KEY: Joi.string().required(),
+  VAPID_SUBJECT: Joi.string().required(),
 
   STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_WEBHOOK_SECRET: Joi.string().required(),

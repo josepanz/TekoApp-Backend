@@ -110,6 +110,8 @@ model Users {
   paymentMethodEntities PaymentMethodEntity[]
   ratings               Rating[]
   promotionUsages       PromotionUsage[]
+  pushSubscriptions     PushSubscriptions[]
+  fcmTokens             FcmTokens[]
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -593,6 +595,61 @@ model PaymentMethodEntity {
   @@index([userId, isDefault])
   @@index([userId, type])
   @@map("payment_methods")
+}
+
+model PushSubscriptions {
+  id          Int    @id @default(autoincrement())
+  referenceId String @unique @default(uuid()) @map("reference_id")
+  userId      Int    @map("user_id")
+  // Forma estándar de PushSubscription.toJSON() del navegador (Web Push / VAPID).
+  endpoint  String  @unique @db.VarChar(500)
+  p256dh    String  @map("p256dh") @db.VarChar(255)
+  auth      String  @db.VarChar(255)
+  userAgent String? @map("user_agent") @db.VarChar(255)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String    @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+model FcmTokens {
+  id          Int        @id @default(autoincrement())
+  referenceId String     @unique @default(uuid()) @map("reference_id")
+  userId      Int        @map("user_id")
+  token       String     @unique @db.VarChar(500)
+  deviceType  DeviceType @default(WEB) @map("device_type")
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String    @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  checksum        String? @map("checksum")
+  changeSignature String? @map("change_signature")
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("fcm_tokens")
+}
+
+enum DeviceType {
+  WEB
+  ANDROID
+  IOS
 }
 
 model Country {

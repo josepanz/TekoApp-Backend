@@ -97,6 +97,11 @@ export const APP_CONFIG = registerAs('config', () => {
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') ?? '',
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     },
+    webPush: {
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? '',
+      vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? '',
+      vapidSubject: process.env.VAPID_SUBJECT ?? '',
+    },
     stripe: {
       secretKey: process.env.STRIPE_SECRET_KEY,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,

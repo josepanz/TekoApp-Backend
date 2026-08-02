@@ -1,114 +1,123 @@
-# Arquitectura de notificaciones push — decisión y estado (2026-08-02)
+# Arquitectura de notificaciones push — decisión, implementación y estado (actualizado 2026-08-02)
 
-## Estado actual (confirmado leyendo el código, no supuesto)
+## Estado actual
 
-- **No hay SSE** en ningún endpoint del backend.
-- **No hay Web Push real.** El canal `push` en `NotificationsProcessor` (`api/notifications/processors/notifications.processor.ts`)
-  es un `logger.log(...)` que simula "despachando a FCM" — nunca llama a Firebase de verdad.
-- `firebase-admin` está en `package.json` y su config se lee en `app.config.ts`
-  (`firebase.projectId`/`privateKey`/`clientEmail`), pero **`admin.messaging()` no se invoca en
-  ningún archivo del repo** — es infraestructura preparada, nunca conectada.
-- Lo único real hoy es **Socket.io** (`LocationsGateway`, `api/locations/gateway/`) para tracking
-  de ubicación en vivo — no se usa para notificaciones.
-- Las notificaciones hoy son **100% in-app**: se crean vía `POST /notifications`, se guardan en
-  Mongo (`notifications-db`), el cliente las lista con `GET /notifications` — sin push, sin
-  tiempo real, el usuario tiene que tener la pestaña/app abierta y refrescar para verlas.
+**Implementado en esta sesión** (antes solo estaba documentado como backlog — ver historial git
+para la versión anterior de este archivo si hace falta el razonamiento original completo):
 
-## Decisión
+- **SSE real**: `GET /notifications/stream` (`@Sse()`), respaldado por `NotificationsSseService`
+  (un `Subject` compartido + `filter` por `userId`, sin `Map` manual). Cubre "la pestaña/app está
+  abierta ahora mismo" — actualiza la campanita de notificaciones (`TekoApp-Web`,
+  `features/notifications/components/notification-bell.tsx`) en tiempo real sin polling.
+- **Web Push (VAPID) real**: `web-push` (paquete npm) + `WebPushProviderService`
+  (`modules/push-provider/`). Claves en `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT`
+  (nunca hardcodeadas, ver `.env.example`). `GET /notifications/push/vapid-public-key` expone la
+  pública (no es secreta). `POST/DELETE /notifications/push-subscriptions` para que el frontend
+  registre/borre la suscripción del Service Worker (`TekoApp-Web/public/sw.js`).
+- **FCM real**: `firebase-admin` (ya estaba en `package.json`, ahora sí conectado) +
+  `FcmProviderService` (`modules/push-provider/`). `POST/DELETE /notifications/fcm-tokens` para
+  cuando `TekoApp-Frontend-Mobile` empiece a registrar tokens. **Nadie los llama todavía** — no
+  hay cliente Flutter — pero el backend ya está listo y probado (unit tests con credenciales
+  inválidas/faltantes, ver `fcm-provider.service.spec.ts`).
+- **Modelo de datos**: `PushSubscriptions`/`FcmTokens` en Postgres (no Mongo — se decidió relación
+  FK real con `Users`, ver `modules/push-notifications-db/`), migración
+  `20260802230000_add_push_subscriptions_and_fcm_tokens`.
+- **`NotificationsProcessor` real**: los canales `push` (Web Push) y `fcm` (FCM) ahora buscan las
+  suscripciones/tokens activos del `userId`, envían de verdad, y desactivan (`isActive: false`,
+  no hard-delete) la suscripción/token si el proveedor responde "ya no existe" (404/410 en Web
+  Push, `messaging/registration-token-not-registered` en FCM) — nunca reintenta indefinidamente
+  contra un endpoint muerto. El canal `in_app` ahora emite por SSE (antes era un no-op).
 
-**Web Push (VAPID) para `TekoApp-Web` + Firebase Cloud Messaging para `TekoApp-Mobile`**, sobre el
-mismo backend de notificaciones (`api/notifications/`, `modules/notifications-db/`) que ya existe
-— no se reemplaza la infraestructura in-app, se le agrega un canal de entrega real.
+### Por qué SSE Y Web Push (no uno u otro)
 
-### Por qué Web Push (no SSE) para el navegador
+La primera versión de esta decisión (ver historial git) argumentaba Web Push por sobre SSE
+razonando "o uno o el otro". Eso estaba mal planteado: **no son sustitutos, son complementarios**,
+cada uno cubre un caso que el otro no:
 
-- **SSE requiere la pestaña abierta** con una conexión HTTP viva — no llega nada si el usuario
-  cerró el navegador o la pestaña. Web Push sí llega con el navegador cerrado (lo despierta el
-  Service Worker).
-- SSE es más simple de implementar (no hay claves VAPID, no hay Service Worker), pero no cumple el
-  caso de uso real: un profesional necesita enterarse de una solicitud nueva aunque no tenga
-  TekoApp-Web abierto en ese momento.
-- Contra: Web Push exige un Service Worker registrado en el frontend y que el usuario acepte el
-  permiso de notificaciones del navegador (Safari/iOS tiene soporte parcial/tardío — verificar
-  matriz de compatibilidad real antes de asumir cobertura 100%).
+- **SSE cubre "pestaña abierta ahora mismo"**: actualiza la UI al instante (campanita, contador
+  de no leídas) sin que el usuario tenga que refrescar — pero no llega nada si cerró la pestaña.
+- **Web Push cubre "pestaña/navegador cerrado"**: el Service Worker lo despierta el sistema
+  operativo — pero exige permiso explícito del usuario y un opt-in (`/perfil`,
+  `PushSubscriptionToggle`), no es automático como SSE.
+
+Un profesional con `TekoApp-Web` abierto ve la notificación al instante por SSE; si la cerró y dio
+permiso de push, la recibe igual por Web Push. Ninguno de los dos reemplaza al otro.
 
 ### Por qué FCM para mobile (no un servicio propio)
 
-- `firebase-admin` ya está en `package.json` — es completar wiring, no agregar una dependencia
-  nueva.
-- FCM es el estándar de facto para push en apps nativas/Flutter (`firebase_messaging` package),
-  evita mantener infraestructura propia de push (APNs + FCM por separado) — FCM ya abstrae ambos.
+Sin cambios respecto a la decisión original: `firebase-admin` ya estaba en `package.json`, FCM es
+el estándar de facto para push en Flutter (`firebase_messaging`), evita mantener infraestructura
+propia de push (APNs + FCM por separado).
 
-### Por qué un solo backend de notificaciones para los 3 canales (in-app, web push, FCM)
+### Por qué un solo backend de notificaciones para los 3 canales (in-app/SSE, Web Push, FCM)
 
 El modelo de dominio (`NotificationDocument` en Mongo: `userId`, `type`, `title`, `message`,
-`channels[]`, `status`) ya está pensado para multi-canal (`channels: string[]`, con `'in_app'`
-como default) — no hace falta un sistema paralelo, hace falta que `NotificationsProcessor`
-efectivamente despache a los canales que ya declara soportar.
+`channels[]`, `status`) ya estaba pensado para multi-canal — el job de Bull
+(`NotificationsProcessor`) ahora sí despacha de verdad a cada canal declarado, incluyendo
+`title`/`message`/`data` en el payload del job (antes solo viajaban `notificationId`/`userId`/
+`type`/`channels`, insuficiente para armar el payload real de push).
 
-## Lo que falta implementar (backlog, no implementado en esta sesión)
+## Endpoints nuevos (todos JWT-only, mismo guard que el resto de `/notifications`)
 
-### Backend
+| Endpoint | Método | Propósito |
+|----------|--------|-----------|
+| `/notifications/stream` | GET (SSE) | Stream en tiempo real del usuario autenticado |
+| `/notifications/push/vapid-public-key` | GET | Clave pública VAPID (no secreta) |
+| `/notifications/push-subscriptions` | POST | Registrar/actualizar suscripción Web Push |
+| `/notifications/push-subscriptions/:referenceId` | DELETE | Dar de baja una suscripción |
+| `/notifications/fcm-tokens` | POST | Registrar/actualizar token FCM |
+| `/notifications/fcm-tokens/:referenceId` | DELETE | Dar de baja un token |
 
-1. **Modelo de suscripción push** (nueva colección Mongo o tabla Postgres —
-   evaluar cuál: si se consulta siempre por `userId` y no se relaciona con SQL, Mongo es
-   consistente con `notifications-db`; si se prefiere una relación FK real con `Users`, Postgres):
-   - Web Push: `{ userId, endpoint, keys: { p256dh, auth }, createdAt }` (forma estándar de
-     `PushSubscription.toJSON()` del navegador).
-   - FCM: `{ userId, fcmToken, platform: 'ios'|'android', createdAt }`.
-   - Un usuario puede tener múltiples suscripciones (varios dispositivos/navegadores) — no es
-     1:1 con `Users`.
-2. **Endpoints nuevos**:
-   - `POST /notifications/push-subscriptions` (self-service, JWT-only como `PUT /auth/me`) —
-     el frontend web registra la suscripción del Service Worker acá.
-   - `POST /notifications/fcm-tokens` (self-service) — mobile registra su token FCM acá.
-   - `DELETE` de ambos, para cuando el usuario desactiva notificaciones o cierra sesión.
-3. **Claves VAPID**: generar un par (`web-push generate-vapid-keys`), guardar en env vars
-   (`VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` — un `mailto:` de contacto), nunca
-   hardcodeadas. La pública se expone al frontend (no es secreta, el Service Worker la necesita
-   para `pushManager.subscribe()`).
-4. **Dependencia nueva**: paquete `web-push` (Node) para firmar y enviar el payload a cada
-   `endpoint` suscripto.
-5. **`NotificationsProcessor` real**: reemplazar el `logger.log` del canal `push` por:
-   - Buscar las suscripciones Web Push + tokens FCM del `userId` de la notificación.
-   - Enviar vía `web-push.sendNotification(subscription, payload, { vapidDetails })` a cada
-     suscripción web.
-   - Enviar vía `admin.messaging().send({ token, notification, data })` a cada token FCM.
-   - Manejar suscripciones muertas: un envío que devuelve 404/410 significa que el endpoint ya no
-     existe (usuario revocó el permiso, desinstaló la app) — borrar esa suscripción de la DB en
-     vez de reintentar indefinidamente.
+## Nota sobre autenticación de SSE
 
-### Frontend Web
+`EventSource` (API del browser) no puede mandar headers custom, así que no puede mandar
+`Authorization: Bearer`. `TekoApp-Web` no lo necesita — su proxy BFF (`/api/backend/[...path]`)
+reenvía la cookie `accessToken` y el proxy la traduce a `Authorization: Bearer` antes de pegarle al
+backend real, igual que cualquier otro endpoint. Para un cliente que le pegue directo al backend
+(sin BFF — potencialmente `TekoApp-Frontend-Mobile` en el futuro, o pruebas manuales), se agregó un
+fallback en `modules/auth/strategies/jwt.strategy.ts`: acepta el JWT también como query param
+`?access_token=...` (patrón estándar de `passport-jwt` para SSE/websockets), sin tocar el
+comportamiento del header Bearer para el resto de la API.
 
-1. Service Worker (`public/sw.js` o vía `next-pwa`/similar) que escuche el evento `push` y muestre
-   la notificación nativa del navegador (`self.registration.showNotification(...)`).
-2. Flujo de opt-in: un botón/toggle (ej. en `/perfil`, junto a los datos que ya se agregaron en
-   esta sesión) que pida permiso (`Notification.requestPermission()`), y si se acepta, registre la
-   suscripción (`pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: VAPID_PUBLIC_KEY })`)
-   y la mande a `POST /notifications/push-subscriptions`.
-3. Manejar el caso "el usuario nunca dio permiso" o "lo revocó" sin romper el resto de la app — las
-   notificaciones in-app (`GET /notifications`, ya funcionando) siguen siendo el fallback universal.
+## Frontend Web — implementado
 
-### Mobile (Flutter, cuando arranque)
+- `public/sw.js`: Service Worker, maneja `push` (muestra la notificación nativa) y
+  `notificationclick` (enfoca/abre la app — sin deep link a una pantalla de detalle todavía,
+  porque no existe esa pantalla en `TekoApp-Web` hoy).
+- `src/lib/web-push.ts`: conversión base64url → `Uint8Array` para `applicationServerKey`.
+- `src/features/notifications/components/push-subscription-toggle.tsx`: opt-in en `/perfil`
+  (junto a los datos de perfil ya existentes) — pide permiso, registra el Service Worker, suscribe,
+  persiste el `referenceId` en `localStorage` para poder dar de baja después.
+- `src/features/notifications/components/notification-bell.tsx`: campanita en el `Topbar` de los
+  3 layouts (admin/client/pro) — contador de no leídas + últimas notificaciones + "marcar todas
+  como leídas", todo actualizado en vivo vía `useNotificationsStream` (SSE).
+
+## Mobile (Flutter, cuando arranque) — sin cambios respecto al backlog original
 
 1. Paquete `firebase_messaging` + configuración de Firebase (`google-services.json`/
    `GoogleService-Info.plist`).
-2. Al loguear (o al iniciar la app con sesión activa), pedir el token FCM
-   (`FirebaseMessaging.instance.getToken()`) y mandarlo a `POST /notifications/fcm-tokens`.
-3. Manejar notificación recibida con la app en foreground/background/cerrada (los 3 casos tienen
-   callbacks distintos en `firebase_messaging` — revisar su doc oficial al implementar, no asumir
-   que un solo handler cubre los 3).
+2. Al loguear (o al iniciar la app con sesión activa), pedir el token FCM y mandarlo a
+   `POST /notifications/fcm-tokens` (endpoint ya implementado y probado en este backend).
+3. Manejar notificación recibida con la app en foreground/background/cerrada (3 callbacks
+   distintos en `firebase_messaging` — revisar su doc oficial, no asumir que uno solo cubre los 3).
 
-## Checkpoints sugeridos para implementar esto (fuera de esta sesión)
+Ver `TekoApp-Frontend-Mobile/openspec/changes/0005-realtime-and-push.md` — el bloqueo "depende del
+backend" que documentaba esa fase ya no aplica para la parte de push (el backend está listo);
+segue bloqueado solo por la falta de cliente Flutter, no de infraestructura.
 
-1. Backend: modelo de suscripción + endpoints + claves VAPID generadas → verificar con Postman/
-   Swagger que se puede crear/borrar una suscripción fake.
-2. Backend: `NotificationsProcessor` enviando Web Push real → probar con una suscripción real
-   creada desde Chrome DevTools (Application → Service Workers → Push).
-3. Frontend Web: Service Worker + opt-in en `/perfil` → probar de punta a punta: crear un servicio
-   → el profesional recibe la notificación del navegador con la pestaña cerrada.
-4. FCM: wiring del token registration + envío desde `NotificationsProcessor` → probar con un
-   token de un dispositivo/emulador real (no hay forma de probar FCM sin un cliente real).
-5. Recién ahí: arrancar `TekoApp-Frontend-Mobile` sabiendo que el backend ya tiene el canal push
-   probado extremo a extremo, en vez de descubrir problemas de push cuando ya hay UI de mobile
-   construida encima.
+## Verificación pendiente (no se pudo completar en esta sesión)
+
+Postgres quedó inalcanzable en el entorno local durante la verificación final (`Can't reach
+database server at localhost:5432` pese a que el servicio Windows figura "Running" — mismo
+problema de entorno ya reportado antes en este proyecto, requiere reinicio con permisos de
+administrador). Se verificó todo lo que no depende de una DB real y funcionando:
+
+- Backend: 1044/1044 tests unitarios (mocks), lint y build limpios.
+- Frontend: 135/135 tests unitarios (MSW), lint, `check:types` y build limpios.
+- Boot real del backend (`node dist/main.js`) contra Redis real (Docker) — confirma que
+  `FcmProviderService` degrada correctamente con las credenciales placeholder de `.env`
+  (`WARN: No se pudo inicializar Firebase Admin ... FCM deshabilitado`), sin tumbar el arranque.
+
+Lo que falta verificar de punta a punta una vez Postgres esté disponible: login real, la
+campanita SSE actualizándose en vivo al crear una notificación desde otra pestaña/sesión, y el
+toggle de Web Push suscribiendo/enviando contra un service worker real en Chrome.

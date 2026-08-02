@@ -24,13 +24,13 @@
 <title>cluster_CurrenciesModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="69,-70 69,-268 427,-268 427,-70 69,-70"/>
 </g>
-<g id="clust6" class="cluster">
-<title>cluster_CurrenciesModule_providers</title>
-<polygon fill="none" stroke="black" points="239,-78 239,-130 419,-130 419,-78 239,-78"/>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_CurrenciesModule_exports</title>
 <polygon fill="none" stroke="black" points="172,-208 172,-260 310,-260 310,-208 172,-208"/>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_CurrenciesModule_providers</title>
+<polygon fill="none" stroke="black" points="239,-78 239,-130 419,-130 419,-78 239,-78"/>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_CurrenciesModule_imports</title>

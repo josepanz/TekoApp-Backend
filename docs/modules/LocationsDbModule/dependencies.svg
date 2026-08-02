@@ -24,59 +24,59 @@
 <title>cluster_LocationsDbModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="75,-70 75,-268 421,-268 421,-70 75,-70"/>
 </g>
-<g id="clust3" class="cluster">
-<title>cluster_LocationsDbModule_imports</title>
-<polygon fill="none" stroke="black" points="287,-78 287,-130 413,-130 413,-78 287,-78"/>
-</g>
 <g id="clust6" class="cluster">
 <title>cluster_LocationsDbModule_providers</title>
-<polygon fill="none" stroke="black" points="83,-78 83,-130 279,-130 279,-78 83,-78"/>
+<polygon fill="none" stroke="black" points="217,-78 217,-130 413,-130 413,-78 217,-78"/>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_LocationsDbModule_exports</title>
-<polygon fill="none" stroke="black" points="184,-208 184,-260 334,-260 334,-208 184,-208"/>
+<polygon fill="none" stroke="black" points="161,-208 161,-260 311,-260 311,-208 161,-208"/>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_LocationsDbModule_imports</title>
+<polygon fill="none" stroke="black" points="83,-78 83,-130 209,-130 209,-78 83,-78"/>
 </g>
 <!-- DatabaseModule -->
 <g id="node1" class="node">
 <title>DatabaseModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="405.35,-122 402.35,-126 381.35,-126 378.35,-122 294.65,-122 294.65,-86 405.35,-86 405.35,-122"/>
-<text text-anchor="middle" x="350" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="201.35,-122 198.35,-126 177.35,-126 174.35,-122 90.65,-122 90.65,-86 201.35,-86 201.35,-122"/>
+<text text-anchor="middle" x="146" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
 </g>
 <!-- LocationsDbModule -->
 <g id="node2" class="node">
 <title>LocationsDbModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="324.86,-187 321.86,-191 300.86,-191 297.86,-187 193.14,-187 193.14,-151 324.86,-151 324.86,-187"/>
-<text text-anchor="middle" x="259" y="-164.8" font-family="Times,serif" font-size="14.00">LocationsDbModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="301.86,-187 298.86,-191 277.86,-191 274.86,-187 170.14,-187 170.14,-151 301.86,-151 301.86,-187"/>
+<text text-anchor="middle" x="236" y="-164.8" font-family="Times,serif" font-size="14.00">LocationsDbModule</text>
 </g>
 <!-- DatabaseModule&#45;&gt;LocationsDbModule -->
 <g id="edge1" class="edge">
 <title>DatabaseModule&#45;&gt;LocationsDbModule</title>
-<path fill="none" stroke="black" d="M309.75,-122.11C309.75,-122.11 309.75,-140.99 309.75,-140.99"/>
-<polygon fill="black" stroke="black" points="306.25,-140.99 309.75,-150.99 313.25,-140.99 306.25,-140.99"/>
+<path fill="none" stroke="black" d="M185.75,-122.11C185.75,-122.11 185.75,-140.99 185.75,-140.99"/>
+<polygon fill="black" stroke="black" points="182.25,-140.99 185.75,-150.99 189.25,-140.99 182.25,-140.99"/>
 </g>
 <!-- LocationsDbService  -->
 <g id="node3" class="node">
 <title>LocationsDbService </title>
-<polygon fill="#fb8072" stroke="black" points="325.79,-252 192.21,-252 192.21,-216 325.79,-216 325.79,-252"/>
-<text text-anchor="middle" x="259" y="-229.8" font-family="Times,serif" font-size="14.00">LocationsDbService </text>
+<polygon fill="#fb8072" stroke="black" points="302.79,-252 169.21,-252 169.21,-216 302.79,-216 302.79,-252"/>
+<text text-anchor="middle" x="236" y="-229.8" font-family="Times,serif" font-size="14.00">LocationsDbService </text>
 </g>
 <!-- LocationsDbModule&#45;&gt;LocationsDbService  -->
 <g id="edge2" class="edge">
 <title>LocationsDbModule&#45;&gt;LocationsDbService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M259,-187.11C259,-187.11 259,-205.99 259,-205.99"/>
-<polygon fill="black" stroke="black" points="255.5,-205.99 259,-215.99 262.5,-205.99 255.5,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M236,-187.11C236,-187.11 236,-205.99 236,-205.99"/>
+<polygon fill="black" stroke="black" points="232.5,-205.99 236,-215.99 239.5,-205.99 232.5,-205.99"/>
 </g>
 <!-- LocationsDbService -->
 <g id="node4" class="node">
 <title>LocationsDbService</title>
-<ellipse fill="#fdb462" stroke="black" cx="181" cy="-104" rx="89.75" ry="18"/>
-<text text-anchor="middle" x="181" y="-99.8" font-family="Times,serif" font-size="14.00">LocationsDbService</text>
+<ellipse fill="#fdb462" stroke="black" cx="315" cy="-104" rx="89.75" ry="18"/>
+<text text-anchor="middle" x="315" y="-99.8" font-family="Times,serif" font-size="14.00">LocationsDbService</text>
 </g>
 <!-- LocationsDbService&#45;&gt;LocationsDbModule -->
 <g id="edge3" class="edge">
 <title>LocationsDbService&#45;&gt;LocationsDbModule</title>
-<path fill="none" stroke="black" d="M231.97,-119.08C231.97,-119.08 231.97,-140.76 231.97,-140.76"/>
-<polygon fill="black" stroke="black" points="228.47,-140.76 231.97,-150.76 235.47,-140.76 228.47,-140.76"/>
+<path fill="none" stroke="black" d="M263.53,-119.08C263.53,-119.08 263.53,-140.76 263.53,-140.76"/>
+<polygon fill="black" stroke="black" points="260.03,-140.76 263.53,-150.76 267.03,-140.76 260.03,-140.76"/>
 </g>
 </g>
 </svg>

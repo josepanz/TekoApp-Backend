@@ -24,10 +24,6 @@
 <title>cluster_CountriesDbModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="76,-70 76,-268 420,-268 420,-70 76,-70"/>
 </g>
-<g id="clust4" class="cluster">
-<title>cluster_CountriesDbModule_exports</title>
-<polygon fill="none" stroke="black" points="184,-208 184,-260 334,-260 334,-208 184,-208"/>
-</g>
 <g id="clust3" class="cluster">
 <title>cluster_CountriesDbModule_imports</title>
 <polygon fill="none" stroke="black" points="286,-78 286,-130 412,-130 412,-78 286,-78"/>
@@ -35,6 +31,10 @@
 <g id="clust6" class="cluster">
 <title>cluster_CountriesDbModule_providers</title>
 <polygon fill="none" stroke="black" points="84,-78 84,-130 278,-130 278,-78 84,-78"/>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_CountriesDbModule_exports</title>
+<polygon fill="none" stroke="black" points="184,-208 184,-260 334,-260 334,-208 184,-208"/>
 </g>
 <!-- DatabaseModule -->
 <g id="node1" class="node">

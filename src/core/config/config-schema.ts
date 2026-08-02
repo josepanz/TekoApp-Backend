@@ -62,6 +62,10 @@ export const configSchema = Joi.object({
   FIREBASE_PRIVATE_KEY: Joi.string().required(),
   FIREBASE_CLIENT_EMAIL: Joi.string().required(),
 
+  VAPID_PUBLIC_KEY: Joi.string().required(),
+  VAPID_PRIVATE_KEY: Joi.string().required(),
+  VAPID_SUBJECT: Joi.string().required(),
+
   STRIPE_SECRET_KEY: Joi.string().required(),
   STRIPE_WEBHOOK_SECRET: Joi.string().required(),
   PAYMENT_CURRENCY: Joi.string().default('PYG'),

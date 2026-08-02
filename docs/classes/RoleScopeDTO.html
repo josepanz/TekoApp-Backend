@@ -309,6 +309,7 @@ export class UserScopeResponseDTO {
       documentType: &#x27;CI&#x27;,
       documentNumber: &#x27;12345678&#x27;,
       phoneNumber: &#x27;+595981234567&#x27;,
+      avatarUrl: null,
     },
   })
   @IsObject()
@@ -316,6 +317,7 @@ export class UserScopeResponseDTO {
     id: string;
     email: string;
     phoneNumber: string | null;
+    avatarUrl: string | null;
     firstName: string;
     lastName: string;
     status: string;

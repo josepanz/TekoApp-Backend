@@ -221,7 +221,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="109" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:109</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="122" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:122</a></div>
                         </td>
                     </tr>
 
@@ -257,7 +257,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="112" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:112</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="125" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:125</a></div>
                         </td>
                     </tr>
 
@@ -293,7 +293,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="106" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:106</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="119" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:119</a></div>
                         </td>
                     </tr>
 
@@ -329,7 +329,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="115" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:115</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="128" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:128</a></div>
                         </td>
                     </tr>
 
@@ -380,6 +380,19 @@ export class UserResponseDTO {
   @IsString()
   @IsOptional()
   phoneNumber?: string | null;
+
+  @ApiProperty({
+    example:
+      &#x27;https://tekoapp-uploads.s3.amazonaws.com/avatars/abc123.jpg?X-Amz-...&#x27;,
+    required: false,
+    nullable: true,
+    description:
+      &#x27;URL presignada de la foto de perfil, resuelta fresca en el momento de la respuesta (expira &#x27; +
+      &#x27;en 900s) — nunca almacenar/cachear este valor, siempre volver a pedirlo.&#x27;,
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string | null;
 
   @ApiProperty({ example: true })
   isEmployee!: boolean;

@@ -190,6 +190,12 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                <a href="#getVapidPublicKey" >getVapidPublicKey</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#markAllAsRead" >markAllAsRead</a>
@@ -207,7 +213,44 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
+                                <a href="#registerFcmToken" >registerFcmToken</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#registerPushSubscription" >registerPushSubscription</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
                                 <a href="#remove" >remove</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#removeFcmToken" >removeFcmToken</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#removePushSubscription" >removePushSubscription</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                <a href="#stream" >stream</a>
                             </li>
                         </ul>
                     </td>
@@ -259,8 +302,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="41"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:41</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="51"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:51</a></div>
                         </td>
                     </tr>
 
@@ -350,8 +393,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="53"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:53</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="63"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:63</a></div>
                         </td>
                     </tr>
 
@@ -441,8 +484,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="67"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:67</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="77"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:77</a></div>
                         </td>
                     </tr>
 
@@ -520,8 +563,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="74"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:74</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="84"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:84</a></div>
                         </td>
                     </tr>
 
@@ -571,6 +614,54 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="getVapidPublicKey"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>getVapidPublicKey</b></span>
+                        <a href="#getVapidPublicKey"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getVapidPublicKey()</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;push/vapid-public-key&#x27;)<br />@ApiOperation({summary: &#x27;Obtener la clave pública VAPID para pushManager.subscribe()&#x27;})<br />@ApiResponse({status: 200, type: VapidPublicKeyResponseDTO})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="140"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:140</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../classes/VapidPublicKeyResponseDTO.html" target="_self" >VapidPublicKeyResponseDTO</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="markAllAsRead"></a>
                     <span class="name">
                             <span class="modifier"></span>
@@ -600,8 +691,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="97"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:97</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:107</a></div>
                         </td>
                     </tr>
 
@@ -679,8 +770,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="84"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:84</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="94"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:94</a></div>
                         </td>
                     </tr>
 
@@ -704,6 +795,190 @@
                                                 <td>param</td>
                                             <td>
                                                             <code><a href="../classes/NotificationIdParamDTO.html" target="_self" >NotificationIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="registerFcmToken"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>registerFcmToken</b></span>
+                        <a href="#registerFcmToken"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>registerFcmToken(dto: <a href="../classes/CreateFcmTokenRequestDTO.html" target="_self">CreateFcmTokenRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Post(&#x27;fcm-tokens&#x27;)<br />@HttpCode(HttpStatus.CREATED)<br />@ApiOperation({summary: &#x27;Registrar (o actualizar) el token FCM del dispositivo actual&#x27;})<br />@ApiResponse({status: 201, type: FcmTokenResponseDTO})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="184"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:184</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateFcmTokenRequestDTO.html" target="_self" >CreateFcmTokenRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="registerPushSubscription"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>registerPushSubscription</b></span>
+                        <a href="#registerPushSubscription"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>registerPushSubscription(dto: <a href="../classes/CreatePushSubscriptionRequestDTO.html" target="_self">CreatePushSubscriptionRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Post(&#x27;push-subscriptions&#x27;)<br />@HttpCode(HttpStatus.CREATED)<br />@ApiOperation({summary: &#x27;Registrar (o actualizar) la suscripción Web Push del navegador actual&#x27;})<br />@ApiResponse({status: 201, type: PushSubscriptionResponseDTO})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="151"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:151</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreatePushSubscriptionRequestDTO.html" target="_self" >CreatePushSubscriptionRequestDTO</a></code>
                                             </td>
 
                                             <td>
@@ -771,8 +1046,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="105"
-                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:105</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="115"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:115</a></div>
                         </td>
                     </tr>
 
@@ -830,6 +1105,267 @@
             </tr>
         </tbody>
     </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="removeFcmToken"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>removeFcmToken</b></span>
+                        <a href="#removeFcmToken"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>removeFcmToken(param: <a href="../classes/FcmTokenReferenceIdParamDTO.html" target="_self">FcmTokenReferenceIdParamDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Delete(&#x27;fcm-tokens/:referenceId&#x27;)<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@ApiOperation({summary: &#x27;Dar de baja un token FCM&#x27;})<br />@ApiResponse({status: 204})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="199"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:199</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>param</td>
+                                            <td>
+                                                            <code><a href="../classes/FcmTokenReferenceIdParamDTO.html" target="_self" >FcmTokenReferenceIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="removePushSubscription"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>removePushSubscription</b></span>
+                        <a href="#removePushSubscription"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>removePushSubscription(param: <a href="../classes/PushSubscriptionReferenceIdParamDTO.html" target="_self">PushSubscriptionReferenceIdParamDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Delete(&#x27;push-subscriptions/:referenceId&#x27;)<br />@HttpCode(HttpStatus.NO_CONTENT)<br />@ApiOperation({summary: &#x27;Dar de baja una suscripción Web Push&#x27;})<br />@ApiResponse({status: 204})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="166"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:166</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>param</td>
+                                            <td>
+                                                            <code><a href="../classes/PushSubscriptionReferenceIdParamDTO.html" target="_self" >PushSubscriptionReferenceIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="stream"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                        <span ><b>stream</b></span>
+                        <a href="#stream"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>stream(req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Sse(&#x27;stream&#x27;)<br />@ApiOperation({summary: &#x27;Stream en tiempo real de notificaciones (SSE) para el usuario autenticado — solo cubre &quot;app abierta ahora mismo&quot;, complementario a Web Push/FCM&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="129"
+                                    class="link-to-prism">src/api/notifications/controllers/notifications.controller.ts:129</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Observable&lt;MessageEvent&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </section>    </div>
 
 
@@ -845,9 +1381,12 @@
   Request,
   Query,
   Put,
+  Sse,
   HttpCode,
   HttpStatus,
+  MessageEvent,
 } from &#x27;@nestjs/common&#x27;;
+import { Observable } from &#x27;rxjs&#x27;;
 import {
   ApiTags,
   ApiOperation,
@@ -860,8 +1399,15 @@ import { NotificationsService } from &#x27;../services/notifications.service&#x2
 import { CreateNotificationRequestDTO } from &#x27;../dtos/request/create-notification-request.dto&#x27;;
 import { FindAllNotificationsQueryDTO } from &#x27;../dtos/request/find-all-notifications-query.dto&#x27;;
 import { NotificationIdParamDTO } from &#x27;../dtos/request/notification-id-param.dto&#x27;;
+import { CreatePushSubscriptionRequestDTO } from &#x27;../dtos/request/create-push-subscription.request.dto&#x27;;
+import { PushSubscriptionReferenceIdParamDTO } from &#x27;../dtos/request/push-subscription-reference-id-param.dto&#x27;;
+import { CreateFcmTokenRequestDTO } from &#x27;../dtos/request/create-fcm-token.request.dto&#x27;;
+import { FcmTokenReferenceIdParamDTO } from &#x27;../dtos/request/fcm-token-reference-id-param.dto&#x27;;
 import { UnreadCountResponseDTO } from &#x27;../dtos/response/unread-count-response.dto&#x27;;
 import { NotificationResponseDTO } from &#x27;../dtos/response/notification-response.dto&#x27;;
+import { VapidPublicKeyResponseDTO } from &#x27;../dtos/response/vapid-public-key-response.dto&#x27;;
+import { PushSubscriptionResponseDTO } from &#x27;../dtos/response/push-subscription-response.dto&#x27;;
+import { FcmTokenResponseDTO } from &#x27;../dtos/response/fcm-token-response.dto&#x27;;
 
 @ApiTags(&#x27;Notificaciones&#x27;)
 @Controller(&#x27;notifications&#x27;)
@@ -943,6 +1489,93 @@ export class NotificationsController {
     @Request() req: { user: IUserDataOnJwt },
   ) {
     await this.notificationsService.delete(param.id, req.user.id);
+  }
+
+  // ─── Tiempo real (SSE) ────────────────────────────────────────────────────
+
+  @Sse(&#x27;stream&#x27;)
+  @ApiOperation({
+    summary:
+      &#x27;Stream en tiempo real de notificaciones (SSE) para el usuario autenticado — solo cubre &quot;app abierta ahora mismo&quot;, complementario a Web Push/FCM&#x27;,
+  })
+  stream(@Request() req: { user: IUserDataOnJwt }): Observable&lt;MessageEvent&gt; {
+    return this.notificationsService.streamForUser(req.user.id);
+  }
+
+  // ─── Web Push (VAPID) ─────────────────────────────────────────────────────
+
+  @Get(&#x27;push/vapid-public-key&#x27;)
+  @ApiOperation({
+    summary: &#x27;Obtener la clave pública VAPID para pushManager.subscribe()&#x27;,
+  })
+  @ApiResponse({ status: 200, type: VapidPublicKeyResponseDTO })
+  getVapidPublicKey(): VapidPublicKeyResponseDTO {
+    return { publicKey: this.notificationsService.getVapidPublicKey() };
+  }
+
+  @Post(&#x27;push-subscriptions&#x27;)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary:
+      &#x27;Registrar (o actualizar) la suscripción Web Push del navegador actual&#x27;,
+  })
+  @ApiResponse({ status: 201, type: PushSubscriptionResponseDTO })
+  async registerPushSubscription(
+    @Body() dto: CreatePushSubscriptionRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    return this.notificationsService.registerPushSubscription(
+      dto,
+      req.user.id,
+      req.user.email,
+    );
+  }
+
+  @Delete(&#x27;push-subscriptions/:referenceId&#x27;)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: &#x27;Dar de baja una suscripción Web Push&#x27; })
+  @ApiResponse({ status: 204 })
+  async removePushSubscription(
+    @Param() param: PushSubscriptionReferenceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    await this.notificationsService.removePushSubscription(
+      param.referenceId,
+      req.user.id,
+    );
+  }
+
+  // ─── FCM (mobile) ─────────────────────────────────────────────────────────
+
+  @Post(&#x27;fcm-tokens&#x27;)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: &#x27;Registrar (o actualizar) el token FCM del dispositivo actual&#x27;,
+  })
+  @ApiResponse({ status: 201, type: FcmTokenResponseDTO })
+  async registerFcmToken(
+    @Body() dto: CreateFcmTokenRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    return this.notificationsService.registerFcmToken(
+      dto,
+      req.user.id,
+      req.user.email,
+    );
+  }
+
+  @Delete(&#x27;fcm-tokens/:referenceId&#x27;)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: &#x27;Dar de baja un token FCM&#x27; })
+  @ApiResponse({ status: 204 })
+  async removeFcmToken(
+    @Param() param: FcmTokenReferenceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    await this.notificationsService.removeFcmToken(
+      param.referenceId,
+      req.user.id,
+    );
   }
 }
 </code></pre>

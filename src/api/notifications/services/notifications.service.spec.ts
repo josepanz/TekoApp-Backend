@@ -1,11 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getQueueToken } from '@nestjs/bull';
 import { Types } from 'mongoose';
+import { DeviceType } from '@prisma/client';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationsDbService } from '@modules/notifications-db/services/notifications-db.service';
+import { PushSubscriptionsDbService } from '@modules/push-notifications-db/services/push-subscriptions-db.service';
+import { FcmTokensDbService } from '@modules/push-notifications-db/services/fcm-tokens-db.service';
+import { WebPushProviderService } from '@modules/push-provider/services/web-push-provider.service';
+import { NotificationsSseService } from '@api/notifications/services/notifications-sse.service';
 import { NotificationStatus } from '@modules/notifications-db/enums/notification-status.enum';
 import { NotificationDocument } from '@modules/notifications-db/schemas/notification.schema';
 import { CreateNotificationRequestDTO } from '@api/notifications/dtos/request/create-notification-request.dto';
+import { CreatePushSubscriptionRequestDTO } from '@api/notifications/dtos/request/create-push-subscription.request.dto';
+import { CreateFcmTokenRequestDTO } from '@api/notifications/dtos/request/create-fcm-token.request.dto';
 
 // --- Mocks nivel módulo ---
 const mockDbCreate = jest.fn();
@@ -17,6 +24,12 @@ const mockDbUpdateStatus = jest.fn();
 const mockDbMarkAllAsRead = jest.fn();
 const mockDbDeleteOne = jest.fn();
 const mockQueueAdd = jest.fn();
+const mockUpsertPushSubscription = jest.fn();
+const mockDeletePushSubscriptionByReferenceId = jest.fn();
+const mockUpsertFcmToken = jest.fn();
+const mockDeleteFcmTokenByReferenceId = jest.fn();
+const mockGetPublicKey = jest.fn();
+const mockSseSubscribe = jest.fn();
 
 const NOTIFICATIONS_QUEUE = 'notifications';
 
@@ -39,6 +52,28 @@ describe('NotificationsService', () => {
             markAllAsRead: mockDbMarkAllAsRead,
             deleteOne: mockDbDeleteOne,
           },
+        },
+        {
+          provide: PushSubscriptionsDbService,
+          useValue: {
+            upsertByEndpoint: mockUpsertPushSubscription,
+            deleteByReferenceId: mockDeletePushSubscriptionByReferenceId,
+          },
+        },
+        {
+          provide: FcmTokensDbService,
+          useValue: {
+            upsertByToken: mockUpsertFcmToken,
+            deleteByReferenceId: mockDeleteFcmTokenByReferenceId,
+          },
+        },
+        {
+          provide: WebPushProviderService,
+          useValue: { getPublicKey: mockGetPublicKey },
+        },
+        {
+          provide: NotificationsSseService,
+          useValue: { subscribe: mockSseSubscribe },
         },
         {
           provide: getQueueToken(NOTIFICATIONS_QUEUE),
@@ -337,6 +372,128 @@ describe('NotificationsService', () => {
         'send-notification',
         expect.objectContaining({ channels: ['in_app'] }),
       );
+    });
+  });
+
+  // ==================== streamForUser (SSE) ====================
+  describe('streamForUser', () => {
+    it('debe delegar la suscripción SSE al NotificationsSseService', () => {
+      // Arrange
+      const userId = 42;
+      const expectedObservable = { subscribe: jest.fn() };
+      mockSseSubscribe.mockReturnValue(expectedObservable);
+
+      // Act
+      const result = service.streamForUser(userId);
+
+      // Assert
+      expect(mockSseSubscribe).toHaveBeenCalledWith(userId);
+      expect(result).toBe(expectedObservable);
+    });
+  });
+
+  // ==================== getVapidPublicKey ====================
+  describe('getVapidPublicKey', () => {
+    it('debe retornar la clave pública VAPID del provider', () => {
+      // Arrange
+      mockGetPublicKey.mockReturnValue('public-key');
+
+      // Act & Assert
+      expect(service.getVapidPublicKey()).toBe('public-key');
+    });
+  });
+
+  // ==================== registerPushSubscription ====================
+  describe('registerPushSubscription', () => {
+    it('debe registrar la suscripción Web Push con los datos del usuario', async () => {
+      // Arrange
+      const userId = 42;
+      const dto: CreatePushSubscriptionRequestDTO = {
+        endpoint: 'https://fcm.googleapis.com/fcm/send/abc123',
+        keys: { p256dh: 'p256dh-key', auth: 'auth-key' },
+        userAgent: 'Mozilla/5.0',
+      };
+      const expected = { referenceId: 'ref-1' };
+      mockUpsertPushSubscription.mockResolvedValue(expected);
+
+      // Act
+      const result = await service.registerPushSubscription(
+        dto,
+        userId,
+        'user@test.com',
+      );
+
+      // Assert
+      expect(mockUpsertPushSubscription).toHaveBeenCalledWith({
+        userId,
+        endpoint: dto.endpoint,
+        p256dh: dto.keys.p256dh,
+        auth: dto.keys.auth,
+        userAgent: dto.userAgent,
+        createdBy: 'user@test.com',
+      });
+      expect(result).toBe(expected);
+    });
+  });
+
+  // ==================== removePushSubscription ====================
+  describe('removePushSubscription', () => {
+    it('debe eliminar la suscripción del usuario dado su referenceId', async () => {
+      // Arrange
+      mockDeletePushSubscriptionByReferenceId.mockResolvedValue(undefined);
+
+      // Act
+      await service.removePushSubscription('ref-1', 42);
+
+      // Assert
+      expect(mockDeletePushSubscriptionByReferenceId).toHaveBeenCalledWith(
+        'ref-1',
+        42,
+      );
+    });
+  });
+
+  // ==================== registerFcmToken ====================
+  describe('registerFcmToken', () => {
+    it('debe registrar el token FCM con los datos del usuario', async () => {
+      // Arrange
+      const userId = 42;
+      const dto: CreateFcmTokenRequestDTO = {
+        token: 'fcm-token-abc',
+        deviceType: DeviceType.ANDROID,
+      };
+      const expected = { referenceId: 'ref-1' };
+      mockUpsertFcmToken.mockResolvedValue(expected);
+
+      // Act
+      const result = await service.registerFcmToken(
+        dto,
+        userId,
+        'user@test.com',
+      );
+
+      // Assert
+      expect(mockUpsertFcmToken).toHaveBeenCalledWith({
+        userId,
+        token: dto.token,
+        deviceType: dto.deviceType,
+        createdBy: 'user@test.com',
+      });
+      expect(result).toBe(expected);
+    });
+  });
+
+  // ==================== removeFcmToken ====================
+  describe('removeFcmToken', () => {
+    it('debe eliminar el token del usuario dado su referenceId', async () => {
+      // Arrange
+      mockDeleteFcmTokenByReferenceId.mockResolvedValue(undefined);
+
+      // Act
+      await service.removeFcmToken('ref-1', 42);
+
+      // Assert
+      expect(mockDeleteFcmTokenByReferenceId).toHaveBeenCalledWith('ref-1', 42);
     });
   });
 });

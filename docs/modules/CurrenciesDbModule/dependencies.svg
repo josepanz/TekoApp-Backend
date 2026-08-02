@@ -24,59 +24,59 @@
 <title>cluster_CurrenciesDbModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="71,-70 71,-268 425,-268 425,-70 71,-70"/>
 </g>
-<g id="clust3" class="cluster">
-<title>cluster_CurrenciesDbModule_imports</title>
-<polygon fill="none" stroke="black" points="291,-78 291,-130 417,-130 417,-78 291,-78"/>
-</g>
 <g id="clust4" class="cluster">
 <title>cluster_CurrenciesDbModule_exports</title>
-<polygon fill="none" stroke="black" points="182,-208 182,-260 338,-260 338,-208 182,-208"/>
+<polygon fill="none" stroke="black" points="158,-208 158,-260 314,-260 314,-208 158,-208"/>
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_CurrenciesDbModule_providers</title>
-<polygon fill="none" stroke="black" points="79,-78 79,-130 283,-130 283,-78 79,-78"/>
+<polygon fill="none" stroke="black" points="213,-78 213,-130 417,-130 417,-78 213,-78"/>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_CurrenciesDbModule_imports</title>
+<polygon fill="none" stroke="black" points="79,-78 79,-130 205,-130 205,-78 79,-78"/>
 </g>
 <!-- DatabaseModule -->
 <g id="node1" class="node">
 <title>DatabaseModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="409.35,-122 406.35,-126 385.35,-126 382.35,-122 298.65,-122 298.65,-86 409.35,-86 409.35,-122"/>
-<text text-anchor="middle" x="354" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="197.35,-122 194.35,-126 173.35,-126 170.35,-122 86.65,-122 86.65,-86 197.35,-86 197.35,-122"/>
+<text text-anchor="middle" x="142" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
 </g>
 <!-- CurrenciesDbModule -->
 <g id="node2" class="node">
 <title>CurrenciesDbModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="328.79,-187 325.79,-191 304.79,-191 301.79,-187 191.21,-187 191.21,-151 328.79,-151 328.79,-187"/>
-<text text-anchor="middle" x="260" y="-164.8" font-family="Times,serif" font-size="14.00">CurrenciesDbModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="304.79,-187 301.79,-191 280.79,-191 277.79,-187 167.21,-187 167.21,-151 304.79,-151 304.79,-187"/>
+<text text-anchor="middle" x="236" y="-164.8" font-family="Times,serif" font-size="14.00">CurrenciesDbModule</text>
 </g>
 <!-- DatabaseModule&#45;&gt;CurrenciesDbModule -->
 <g id="edge1" class="edge">
 <title>DatabaseModule&#45;&gt;CurrenciesDbModule</title>
-<path fill="none" stroke="black" d="M313.61,-122.11C313.61,-122.11 313.61,-140.99 313.61,-140.99"/>
-<polygon fill="black" stroke="black" points="310.11,-140.99 313.61,-150.99 317.11,-140.99 310.11,-140.99"/>
+<path fill="none" stroke="black" d="M182.39,-122.11C182.39,-122.11 182.39,-140.99 182.39,-140.99"/>
+<polygon fill="black" stroke="black" points="178.89,-140.99 182.39,-150.99 185.89,-140.99 178.89,-140.99"/>
 </g>
 <!-- CurrenciesDbService  -->
 <g id="node3" class="node">
 <title>CurrenciesDbService </title>
-<polygon fill="#fb8072" stroke="black" points="329.72,-252 190.28,-252 190.28,-216 329.72,-216 329.72,-252"/>
-<text text-anchor="middle" x="260" y="-229.8" font-family="Times,serif" font-size="14.00">CurrenciesDbService </text>
+<polygon fill="#fb8072" stroke="black" points="305.72,-252 166.28,-252 166.28,-216 305.72,-216 305.72,-252"/>
+<text text-anchor="middle" x="236" y="-229.8" font-family="Times,serif" font-size="14.00">CurrenciesDbService </text>
 </g>
 <!-- CurrenciesDbModule&#45;&gt;CurrenciesDbService  -->
 <g id="edge2" class="edge">
 <title>CurrenciesDbModule&#45;&gt;CurrenciesDbService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M260,-187.11C260,-187.11 260,-205.99 260,-205.99"/>
-<polygon fill="black" stroke="black" points="256.5,-205.99 260,-215.99 263.5,-205.99 256.5,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M236,-187.11C236,-187.11 236,-205.99 236,-205.99"/>
+<polygon fill="black" stroke="black" points="232.5,-205.99 236,-215.99 239.5,-205.99 232.5,-205.99"/>
 </g>
 <!-- CurrenciesDbService -->
 <g id="node4" class="node">
 <title>CurrenciesDbService</title>
-<ellipse fill="#fdb462" stroke="black" cx="181" cy="-104" rx="93.74" ry="18"/>
-<text text-anchor="middle" x="181" y="-99.8" font-family="Times,serif" font-size="14.00">CurrenciesDbService</text>
+<ellipse fill="#fdb462" stroke="black" cx="315" cy="-104" rx="93.74" ry="18"/>
+<text text-anchor="middle" x="315" y="-99.8" font-family="Times,serif" font-size="14.00">CurrenciesDbService</text>
 </g>
 <!-- CurrenciesDbService&#45;&gt;CurrenciesDbModule -->
 <g id="edge3" class="edge">
 <title>CurrenciesDbService&#45;&gt;CurrenciesDbModule</title>
-<path fill="none" stroke="black" d="M232.99,-119.08C232.99,-119.08 232.99,-140.76 232.99,-140.76"/>
-<polygon fill="black" stroke="black" points="229.49,-140.76 232.99,-150.76 236.49,-140.76 229.49,-140.76"/>
+<path fill="none" stroke="black" d="M263.01,-119.08C263.01,-119.08 263.01,-140.76 263.01,-140.76"/>
+<polygon fill="black" stroke="black" points="259.51,-140.76 263.01,-150.76 266.51,-140.76 259.51,-140.76"/>
 </g>
 </g>
 </svg>
