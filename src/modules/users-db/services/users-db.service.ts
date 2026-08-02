@@ -19,6 +19,7 @@ import { UserRolesDBService } from './user-roles-db.service';
 import { RoleDTO, PermissionDTO } from '../interfaces/users-db.interface';
 import { UserWithDetail, userDetailInclude } from '../types/users-db.type';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UsersDBService {
   private readonly logger = new Logger(UsersDBService.name);
@@ -56,7 +57,7 @@ export class UsersDBService {
 
     if (existing) {
       throw new BadRequestException(
-        `El usuario con el email ${data.email} ya existe.`,
+        t('users.EMAIL_ALREADY_EXISTS', { email: data.email }),
       );
     }
 
@@ -187,8 +188,7 @@ export class UsersDBService {
 
   async findUserById(id: number): Promise<Users> {
     const user = await this.findById(id);
-    if (!user)
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.ID_NOT_FOUND', { id }));
     return user;
   }
 
@@ -201,8 +201,7 @@ export class UsersDBService {
 
   async findUserByIdWithDetail(id: number): Promise<UserWithDetail> {
     const user = await this.findByIdWithDetail(id);
-    if (!user)
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.ID_NOT_FOUND', { id }));
     return user;
   }
 
@@ -214,7 +213,7 @@ export class UsersDBService {
 
   async findUserByReferenceId(referenceId: string): Promise<Users> {
     const user = await this.findByReferenceId(referenceId);
-    if (!user) throw new NotFoundException(`Usuario no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.NOT_FOUND'));
     return user;
   }
 
@@ -231,7 +230,7 @@ export class UsersDBService {
     referenceId: string,
   ): Promise<UserWithDetail> {
     const user = await this.findByReferenceIdWithDetail(referenceId);
-    if (!user) throw new NotFoundException(`Usuario no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.NOT_FOUND'));
     return user;
   }
 

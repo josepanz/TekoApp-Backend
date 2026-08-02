@@ -1,8 +1,8 @@
 import { UnauthorizedException } from '@nestjs/common';
+import { t } from '@common/i18n/i18n.helper';
 import {
   MILLISECONDS_PER_DAY,
   PASSWORD_EXPIRED_CODE,
-  PASSWORD_EXPIRED_MESSAGE,
 } from '@modules/auth/constants';
 
 /**
@@ -27,7 +27,7 @@ export class PasswordExpirationHelper {
     if (this.isExpired(expiredAt)) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: PASSWORD_EXPIRED_MESSAGE,
+        message: t('auth.PASSWORD_EXPIRED'),
         error: 'Unauthorized',
         code: PASSWORD_EXPIRED_CODE,
       });

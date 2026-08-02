@@ -15,6 +15,7 @@ import {
   PaymentMethodEntity,
 } from '@prisma/client';
 
+import { t } from '@common/i18n/i18n.helper';
 // Include que trae el referenceId (UUID público) del servicio para exponerlo en las respuestas
 // de pagos sin filtrar la PK interna (Int).
 const serviceRefInclude = {
@@ -213,11 +214,11 @@ export class PaymentDbService {
       const payment = locked[0];
 
       if (!payment) {
-        throw new NotFoundException('Pago no encontrado');
+        throw new NotFoundException(t('payments.NOT_FOUND'));
       }
       if (payment.status !== PaymentStatus.COMPLETED) {
         throw new BadRequestException(
-          'Solo se pueden reembolsar pagos completados',
+          t('payments.ONLY_COMPLETED_CAN_BE_REFUNDED'),
         );
       }
 
@@ -233,9 +234,7 @@ export class PaymentDbService {
       const availableToRefund = totalAmountNum - currentlyRefunded;
 
       if (refundAmount > availableToRefund) {
-        throw new BadRequestException(
-          'El monto del reembolso excede el monto disponible',
-        );
+        throw new BadRequestException(t('payments.REFUND_EXCEEDS_AVAILABLE'));
       }
 
       const newTotalRefunded = currentlyRefunded + refundAmount;

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UserRolesDBService {
   constructor(private readonly prisma: PrismaDatasource) {}
@@ -21,15 +22,11 @@ export class UserRolesDBService {
     tx?: Prisma.TransactionClient,
   ): Promise<void> {
     if (roleIds.length === 0) {
-      throw new BadRequestException(
-        'Debe asignarse al menos un rol al usuario.',
-      );
+      throw new BadRequestException(t('users.AT_LEAST_ONE_ROLE_REQUIRED'));
     }
 
     if (roleIds.length > 1) {
-      throw new BadRequestException(
-        'Solo se permite asignar un rol por usuario.',
-      );
+      throw new BadRequestException(t('users.ONLY_ONE_ROLE_ALLOWED'));
     }
 
     const client = tx ?? this.prisma.extended;

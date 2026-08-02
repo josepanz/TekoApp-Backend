@@ -1,0 +1,7 @@
+{
+  "CATEGORY_DOES_NOT_EXIST": "The category does not exist",
+  "NOT_FOUND": "Professional not found",
+  "UNAUTHORIZED_UPDATE": "You do not have permission to modify this professional",
+  "USER_ALREADY_PROFESSIONAL": "The user is already a professional",
+  "USER_NOT_FOUND": "User not found"
+}

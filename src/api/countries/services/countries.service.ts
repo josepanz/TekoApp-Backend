@@ -6,6 +6,7 @@ import {
   GetCountriesListResponseDTO,
 } from '../dtos/response';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class CountriesService {
   constructor(private readonly countriesDb: CountriesDbService) {}
@@ -25,7 +26,7 @@ export class CountriesService {
   async findOne(id: number): Promise<CountryResponseDTO> {
     const country = await this.countriesDb.findById(id);
     if (!country) {
-      throw new NotFoundException('País no encontrado');
+      throw new NotFoundException(t('countries.NOT_FOUND'));
     }
     return country;
   }

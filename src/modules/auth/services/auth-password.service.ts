@@ -15,8 +15,8 @@ import {
   PasswordExpirationHelper,
   PasswordPolicyHelper,
 } from '@modules/auth/helpers';
-import { passwordReuseMessage } from '@modules/auth/constants';
 import { ILoginPayload } from '@modules/auth/interfaces';
+import { t } from '@common/i18n/i18n.helper';
 
 @Injectable()
 export class AuthPasswordService {
@@ -37,7 +37,7 @@ export class AuthPasswordService {
       const decryptedBuffer = CryptoHelper.decrypt(encryptedPassword, 'sha256');
       return decryptedBuffer.toString('utf-8');
     } catch {
-      throw new UnauthorizedException('Error al procesar las credenciales.');
+      throw new UnauthorizedException(t('auth.CREDENTIALS_PROCESSING_ERROR'));
     }
   }
 
@@ -75,7 +75,7 @@ export class AuthPasswordService {
     try {
       parsed = JSON.parse(raw);
     } catch {
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     const payload = parsed as Partial<ILoginPayload>;
@@ -84,7 +84,7 @@ export class AuthPasswordService {
       typeof payload.password !== 'string' ||
       typeof payload.nonce !== 'string'
     ) {
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     return { password: payload.password, nonce: payload.nonce };
@@ -156,7 +156,7 @@ export class AuthPasswordService {
     );
 
     if (isReused) {
-      throw new BadRequestException(passwordReuseMessage(limit));
+      throw new BadRequestException(t('auth.PASSWORD_REUSED', { limit }));
     }
   }
 
@@ -220,7 +220,7 @@ export class AuthPasswordService {
     );
 
     if (!passwordValid) {
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     PasswordPolicyHelper.assertComplexity(newPassword);

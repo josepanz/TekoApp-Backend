@@ -27,6 +27,7 @@ import { ProcessBatchManager } from '@common/helpers/process-batch';
 import { StorageHelper } from '../helpers/storage.helper';
 import { DeleteFileTarget, PresignedUrlTarget } from '../types/storage.types';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class StorageService {
   private readonly manager: AsyncManager;
@@ -47,7 +48,7 @@ export class StorageService {
     files: StorageUploadInput[],
   ): Promise<StorageUploadResult[]> {
     if (!files.length) {
-      throw new BadRequestException('At least one file is required');
+      throw new BadRequestException(t('storage.AT_LEAST_ONE_FILE_REQUIRED'));
     }
 
     const uploadPromises = files.map(async (fileInput) => {
@@ -146,7 +147,7 @@ export class StorageService {
     options?: StoragePresignedUrlOptions,
   ): Promise<StoragePresignedUrlResult[]> {
     if (!files.length) {
-      throw new BadRequestException('At least one key is required');
+      throw new BadRequestException(t('storage.AT_LEAST_ONE_KEY_REQUIRED'));
     }
 
     const expiresInSeconds = StorageHelper.resolvePresignedUrlExpiresIn(
@@ -223,7 +224,7 @@ export class StorageService {
     executionOptions?: StorageExecutionOptions,
   ): Promise<StorageUploadResult[]> {
     if (!files.length) {
-      throw new BadRequestException('At least one file is required');
+      throw new BadRequestException(t('storage.AT_LEAST_ONE_FILE_REQUIRED'));
     }
 
     const process = new ProcessBatchManager();
@@ -246,7 +247,7 @@ export class StorageService {
     executionOptions?: StorageExecutionOptions,
   ): Promise<void> {
     if (!files.length) {
-      throw new BadRequestException('At least one key is required');
+      throw new BadRequestException(t('storage.AT_LEAST_ONE_KEY_REQUIRED'));
     }
     const process = new ProcessBatchManager();
 
@@ -283,7 +284,7 @@ export class StorageService {
     options?: StoragePresignedUrlOptions,
   ): Promise<StoragePresignedUrlResult[]> {
     if (!files.length) {
-      throw new BadRequestException('At least one key is required');
+      throw new BadRequestException(t('storage.AT_LEAST_ONE_KEY_REQUIRED'));
     }
     const process = new ProcessBatchManager();
 
@@ -351,10 +352,9 @@ export class StorageService {
         executionOptions,
       );
     } catch (error) {
-      throw new ServiceUnavailableException(
-        'Storage service is temporarily unavailable',
-        { cause: error },
-      );
+      throw new ServiceUnavailableException(t('storage.SERVICE_UNAVAILABLE'), {
+        cause: error,
+      });
     }
 
     return {

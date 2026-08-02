@@ -26,6 +26,7 @@ import {
   mapServiceRequestsToResponse,
 } from '../helpers/services-response.helper';
 
+import { t } from '@common/i18n/i18n.helper';
 const CANCELLABLE = new Set<ServiceStatus>([
   ServiceStatus.PENDING,
   ServiceStatus.ACCEPTED,
@@ -48,7 +49,7 @@ export class ServicesService {
     referenceId: string,
   ): Promise<ServiceEntity> {
     const service = await this.db.findServiceByReferenceId(referenceId);
-    if (!service) throw new NotFoundException('Servicio no encontrado');
+    if (!service) throw new NotFoundException(t('services.NOT_FOUND'));
     return service;
   }
 
@@ -57,7 +58,8 @@ export class ServicesService {
     userId: number,
   ): Promise<ServiceDetailResponseDTO> {
     const category = await this.db.findCategoryById(dto.categoryId);
-    if (!category) throw new NotFoundException('Categoría no encontrada');
+    if (!category)
+      throw new NotFoundException(t('services.CATEGORY_NOT_FOUND'));
 
     const created = await this.db.createService({
       userId,
@@ -159,20 +161,14 @@ export class ServicesService {
           ? await this.db.findProfessionalById(service.professionalId)
           : null;
       if (!professional || professional.userId !== userId) {
-        throw new ForbiddenException(
-          'No tienes permisos para modificar este servicio',
-        );
+        throw new ForbiddenException(t('services.UNAUTHORIZED_UPDATE'));
       }
     } else if (service.userId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este servicio',
-      );
+      throw new ForbiddenException(t('services.UNAUTHORIZED_UPDATE'));
     }
 
     if (!CANCELLABLE.has(service.status)) {
-      throw new BadRequestException(
-        'No se puede modificar un servicio en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_UPDATE_IN_STATUS'));
     }
 
     const updatedCount = await this.db.updateServiceConditional(
@@ -181,9 +177,7 @@ export class ServicesService {
       dto,
     );
     if (updatedCount === 0) {
-      throw new ConflictException(
-        'El servicio cambió de estado antes de poder actualizarlo',
-      );
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_UPDATE'));
     }
     return this.getServiceById(id);
   }
@@ -196,9 +190,7 @@ export class ServicesService {
     const service = await this.getServiceEntityByRef(id);
 
     if (!CANCELLABLE.has(service.status)) {
-      throw new BadRequestException(
-        'No se puede cancelar un servicio en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_CANCEL_IN_STATUS'));
     }
 
     const isProfessionalOwner = service.professionalId
@@ -208,9 +200,7 @@ export class ServicesService {
       : false;
 
     if (service.userId !== userId && !isProfessionalOwner) {
-      throw new ForbiddenException(
-        'No tienes permisos para cancelar este servicio',
-      );
+      throw new ForbiddenException(t('services.UNAUTHORIZED_CANCEL'));
     }
 
     const updatedCount = await this.db.updateServiceConditional(
@@ -223,9 +213,7 @@ export class ServicesService {
       },
     );
     if (updatedCount === 0) {
-      throw new ConflictException(
-        'El servicio cambió de estado antes de poder cancelarlo',
-      );
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_CANCEL'));
     }
     return this.getServiceById(id);
   }
@@ -236,16 +224,14 @@ export class ServicesService {
   ): Promise<ServiceDetailResponseDTO> {
     const service = await this.getServiceEntityByRef(id);
     if (service.status !== ServiceStatus.PENDING) {
-      throw new BadRequestException(
-        'El servicio no puede ser aceptado en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_BE_ACCEPTED_IN_STATUS'));
     }
     // `userId` es el id de `Users` (JWT) — se resuelve al `Professionals.id` correspondiente
     // antes de usarlo, igual que ya hacen `getMyServices`/`getDashboardStats` en este mismo
     // service. Antes se pasaba `req.user.id` directo como si ya fuera `Professionals.id`.
     const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional)
-      throw new ForbiddenException('Usuario no es un profesional');
+      throw new ForbiddenException(t('services.USER_NOT_PROFESSIONAL'));
 
     const updatedCount = await this.db.updateServiceConditional(
       service.id,
@@ -253,9 +239,7 @@ export class ServicesService {
       { status: ServiceStatus.ACCEPTED, professionalId: professional.id },
     );
     if (updatedCount === 0) {
-      throw new ConflictException(
-        'El servicio ya no está pendiente — alguien más lo aceptó primero',
-      );
+      throw new ConflictException(t('services.NO_LONGER_PENDING'));
     }
     return this.getServiceById(id);
   }
@@ -268,13 +252,11 @@ export class ServicesService {
     const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional || service.professionalId !== professional.id) {
       throw new ForbiddenException(
-        'Solo el profesional asignado puede iniciar el servicio',
+        t('services.ONLY_ASSIGNED_PROFESSIONAL_CAN_START'),
       );
     }
     if (service.status !== ServiceStatus.ACCEPTED) {
-      throw new BadRequestException(
-        'El servicio no puede ser iniciado en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_BE_STARTED_IN_STATUS'));
     }
 
     const updatedCount = await this.db.updateServiceConditional(
@@ -283,9 +265,7 @@ export class ServicesService {
       { status: ServiceStatus.IN_PROGRESS, startedAt: new Date() },
     );
     if (updatedCount === 0) {
-      throw new ConflictException(
-        'El servicio cambió de estado antes de poder iniciarlo',
-      );
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_START'));
     }
     return this.getServiceById(id);
   }
@@ -298,12 +278,12 @@ export class ServicesService {
     const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional || service.professionalId !== professional.id) {
       throw new ForbiddenException(
-        'Solo el profesional asignado puede completar el servicio',
+        t('services.ONLY_ASSIGNED_PROFESSIONAL_CAN_COMPLETE'),
       );
     }
     if (service.status !== ServiceStatus.IN_PROGRESS) {
       throw new BadRequestException(
-        'El servicio no puede ser completado en este estado',
+        t('services.CANNOT_BE_COMPLETED_IN_STATUS'),
       );
     }
 
@@ -327,9 +307,7 @@ export class ServicesService {
       data,
     );
     if (updatedCount === 0) {
-      throw new ConflictException(
-        'El servicio cambió de estado antes de poder completarlo',
-      );
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_COMPLETE'));
     }
     return this.getServiceById(id);
   }
@@ -341,23 +319,19 @@ export class ServicesService {
   ): Promise<ServiceRequestDetailResponseDTO> {
     const service = await this.getServiceEntityByRef(serviceId);
     if (service.status !== ServiceStatus.PENDING) {
-      throw new BadRequestException(
-        'Solo se pueden crear solicitudes para servicios pendientes',
-      );
+      throw new BadRequestException(t('services.ONLY_PENDING_ACCEPT_REQUESTS'));
     }
 
     const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional)
-      throw new ForbiddenException('Usuario no es un profesional');
+      throw new ForbiddenException(t('services.USER_NOT_PROFESSIONAL'));
 
     const existing = await this.db.findDuplicateRequest(
       service.id,
       professional.id,
     );
     if (existing)
-      throw new BadRequestException(
-        'Ya has enviado una solicitud para este servicio',
-      );
+      throw new BadRequestException(t('services.REQUEST_ALREADY_SENT'));
 
     const created = await this.db.createServiceRequest({
       ...dto,
@@ -385,7 +359,7 @@ export class ServicesService {
     const service = await this.getServiceEntityByRef(serviceId);
     if (service.userId !== userId) {
       throw new ForbiddenException(
-        'Solo el cliente puede responder a las solicitudes',
+        t('services.ONLY_CLIENT_CAN_ANSWER_REQUESTS'),
       );
     }
 
@@ -393,7 +367,7 @@ export class ServicesService {
       requestId,
       service.id,
     );
-    if (!request) throw new NotFoundException('Solicitud no encontrada');
+    if (!request) throw new NotFoundException(t('services.REQUEST_NOT_FOUND'));
 
     if (dto.status === RequestStatus.ACCEPTED) {
       const updatedCount = await this.db.acceptRequestTransaction(
@@ -402,12 +376,11 @@ export class ServicesService {
         request.professionalId,
       );
       if (updatedCount === 0) {
-        throw new ConflictException(
-          'El servicio ya no está disponible para aceptar solicitudes',
-        );
+        throw new ConflictException(t('services.NO_LONGER_ACCEPTING_REQUESTS'));
       }
       const accepted = await this.db.findServiceRequestById(request.id);
-      if (!accepted) throw new NotFoundException('Solicitud no encontrada');
+      if (!accepted)
+        throw new NotFoundException(t('services.REQUEST_NOT_FOUND'));
       return mapServiceRequestToResponse(accepted);
     }
 
@@ -445,7 +418,7 @@ export class ServicesService {
 
   async getDashboardStats(userId: number): Promise<ServiceStatsResponseDTO> {
     const user = await this.db.findUserById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user) throw new NotFoundException(t('services.USER_NOT_FOUND'));
 
     const professional = await this.db.findProfessionalByUserId(userId);
     const baseWhere: Prisma.ServicesWhereInput = professional

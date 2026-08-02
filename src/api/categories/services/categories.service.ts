@@ -10,6 +10,7 @@ import { UpdateCategoryDto } from '../dtos/request/update-category.dto';
 import { CategoryStatsResponseDTO } from '../dtos/response';
 import { Category, CategoryStatus, Prisma } from '@prisma/client';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class CategoriesService {
   constructor(private readonly categoriesDb: CategoriesDbService) {}
@@ -28,7 +29,7 @@ export class CategoriesService {
   async create(dto: CreateCategoryDto): Promise<Category> {
     const existing = await this.categoriesDb.findUnique({ name: dto.name });
     if (existing) {
-      throw new ConflictException('Ya existe una categoría con este nombre');
+      throw new ConflictException(t('categories.NAME_ALREADY_EXISTS'));
     }
 
     const slug = dto.slug ? this.slugify(dto.slug) : this.slugify(dto.name);
@@ -38,12 +39,10 @@ export class CategoriesService {
         id: dto.parentCategoryId,
       });
       if (!parent) {
-        throw new NotFoundException('Categoría padre no encontrada');
+        throw new NotFoundException(t('categories.PARENT_NOT_FOUND'));
       }
       if (parent.parentCategoryId) {
-        throw new BadRequestException(
-          'No se pueden crear subcategorías de tercer nivel',
-        );
+        throw new BadRequestException(t('categories.THIRD_LEVEL_NOT_ALLOWED'));
       }
     }
 
@@ -80,7 +79,7 @@ export class CategoriesService {
   async findOne(id: number): Promise<Category> {
     const category = await this.categoriesDb.findUnique({ id });
     if (!category) {
-      throw new NotFoundException('Categoría no encontrada');
+      throw new NotFoundException(t('categories.NOT_FOUND'));
     }
     return category;
   }
@@ -92,9 +91,7 @@ export class CategoriesService {
       isVisible: true,
     });
     if (!category) {
-      throw new NotFoundException(
-        'Categoría no encontrada por el slug provisto',
-      );
+      throw new NotFoundException(t('categories.NOT_FOUND_BY_SLUG'));
     }
     return category;
   }
@@ -132,7 +129,7 @@ export class CategoriesService {
     if (dto.name && dto.name !== category.name) {
       const existing = await this.categoriesDb.findUnique({ name: dto.name });
       if (existing && existing.id !== id) {
-        throw new ConflictException('Ya existe otra categoría con este nombre');
+        throw new ConflictException(t('categories.NAME_ALREADY_TAKEN'));
       }
     }
 
@@ -141,19 +138,17 @@ export class CategoriesService {
       dto.parentCategoryId !== category.parentCategoryId
     ) {
       if (dto.parentCategoryId === id) {
-        throw new BadRequestException(
-          'Una categoría no puede ser padre de sí misma',
-        );
+        throw new BadRequestException(t('categories.CANNOT_BE_ITS_OWN_PARENT'));
       }
       const parent = await this.categoriesDb.findUnique({
         id: dto.parentCategoryId,
       });
       if (!parent) {
-        throw new NotFoundException('Categoría padre no encontrada');
+        throw new NotFoundException(t('categories.PARENT_NOT_FOUND'));
       }
       if (parent.parentCategoryId) {
         throw new BadRequestException(
-          'No se pueden anidar subcategorías en múltiples subniveles',
+          t('categories.CANNOT_NEST_MULTIPLE_SUBLEVELS'),
         );
       }
     }
@@ -170,7 +165,7 @@ export class CategoriesService {
   async remove(id: number): Promise<void> {
     const category = await this.categoriesDb.findUnique({ id });
     if (!category) {
-      throw new NotFoundException('Categoría no encontrada');
+      throw new NotFoundException(t('categories.NOT_FOUND'));
     }
 
     // Casteo seguro de relaciones cargadas desde el db service
@@ -181,20 +176,20 @@ export class CategoriesService {
 
     if (relations.professionals?.length > 0) {
       throw new BadRequestException(
-        'No se puede eliminar una categoría que contiene profesionales activos asociados',
+        t('categories.CANNOT_DELETE_WITH_ACTIVE_PROFESSIONALS'),
       );
     }
 
     if (relations.services?.length > 0) {
       throw new BadRequestException(
-        'No se puede eliminar una categoría que tiene servicios vinculados',
+        t('categories.CANNOT_DELETE_WITH_LINKED_SERVICES'),
       );
     }
 
     const subCount = await this.categoriesDb.countSubcategories(id);
     if (subCount > 0) {
       throw new BadRequestException(
-        'No es posible remover una categoría que posee subcategorías hijas',
+        t('categories.CANNOT_DELETE_WITH_CHILDREN'),
       );
     }
 

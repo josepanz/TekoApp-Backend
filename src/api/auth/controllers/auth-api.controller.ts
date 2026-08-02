@@ -35,6 +35,7 @@ import { AuthCookieService } from '@api/auth/services/auth-cookie.service';
 import { AuthDocs } from '@api/auth/docs/auth-api.docs';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
+import { t } from '@common/i18n/i18n.helper';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthApiController {
@@ -149,14 +150,14 @@ export class AuthApiController {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      throw new UnauthorizedException('No se provee el token.');
+      throw new UnauthorizedException(t('auth.TOKEN_NOT_PROVIDED'));
     }
 
     const { accessToken } =
       await this.authApiService.refreshAccessToken(refreshToken);
     this.cookieService.setAccessToken(res, accessToken);
 
-    return { message: 'Token actualizado', accessToken };
+    return { message: t('auth.TOKEN_REFRESHED'), accessToken };
   }
 
   @Get('scope')
@@ -199,7 +200,7 @@ export class AuthApiController {
     @User() user: Users,
   ): Promise<DTO.PasswordOnlyMessageResponseDTO> {
     await this.authApiService.sendVerificationEmail(dto.email, user);
-    return { message: 'Email de verificación enviado correctamente.' };
+    return { message: t('auth.VERIFICATION_EMAIL_SENT') };
   }
 
   @Post('email/send-create-password')
@@ -213,7 +214,7 @@ export class AuthApiController {
   ): Promise<DTO.PasswordOnlyMessageResponseDTO> {
     await this.authApiService.sendPasswordCreationEmail(dto.email, user);
     return {
-      message: 'Email para creación de contraseña enviado correctamente.',
+      message: t('auth.SET_PASSWORD_EMAIL_SENT'),
     };
   }
 
@@ -228,7 +229,7 @@ export class AuthApiController {
   ): Promise<DTO.PasswordOnlyMessageResponseDTO> {
     await this.authApiService.sendPasswordResetEmail(dto.email, user);
     return {
-      message: 'Email para recuperación de cuenta enviado correctamente.',
+      message: t('auth.RECOVERY_EMAIL_SENT'),
     };
   }
 }

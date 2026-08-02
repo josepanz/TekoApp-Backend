@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
+import { t } from '@common/i18n/i18n.helper';
 import {
-  PASSWORD_COMPLEXITY_MESSAGE,
   PASSWORD_DIGIT_REGEX,
   PASSWORD_LOWERCASE_REGEX,
   PASSWORD_MIN_LENGTH,
@@ -28,12 +28,14 @@ export class PasswordPolicyHelper {
   }
 
   /**
-   * Lanza `BadRequestException` con un mensaje claro en español si la
-   * contraseña no cumple la política de complejidad.
+   * Lanza `BadRequestException` con un mensaje claro, en el idioma negociado
+   * para el request, si la contraseña no cumple la política de complejidad.
    */
   static assertComplexity(plainPassword: string): void {
     if (!this.isComplexEnough(plainPassword)) {
-      throw new BadRequestException(PASSWORD_COMPLEXITY_MESSAGE);
+      throw new BadRequestException(
+        t('auth.PASSWORD_COMPLEXITY', { minLength: PASSWORD_MIN_LENGTH }),
+      );
     }
   }
 }

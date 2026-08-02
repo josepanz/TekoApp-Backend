@@ -1,0 +1,13 @@
+{
+  "CANNOT_BE_ITS_OWN_PARENT": "Una categoría no puede ser padre de sí misma",
+  "CANNOT_DELETE_WITH_ACTIVE_PROFESSIONALS": "No se puede eliminar una categoría que contiene profesionales activos asociados",
+  "CANNOT_DELETE_WITH_CHILDREN": "No es posible remover una categoría que posee subcategorías hijas",
+  "CANNOT_DELETE_WITH_LINKED_SERVICES": "No se puede eliminar una categoría que tiene servicios vinculados",
+  "CANNOT_NEST_MULTIPLE_SUBLEVELS": "No se pueden anidar subcategorías en múltiples subniveles",
+  "NAME_ALREADY_EXISTS": "Ya existe una categoría con este nombre",
+  "NAME_ALREADY_TAKEN": "Ya existe otra categoría con este nombre",
+  "NOT_FOUND": "Categoría no encontrada",
+  "NOT_FOUND_BY_SLUG": "Categoría no encontrada por el slug provisto",
+  "PARENT_NOT_FOUND": "Categoría padre no encontrada",
+  "THIRD_LEVEL_NOT_ALLOWED": "No se pueden crear subcategorías de tercer nivel"
+}

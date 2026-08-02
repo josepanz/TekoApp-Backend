@@ -20,6 +20,7 @@ import {
   mapRatingsToResponse,
 } from '../helpers/ratings-response.helper';
 
+import { t } from '@common/i18n/i18n.helper';
 const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
@@ -35,13 +36,13 @@ export class RatingsService {
   ): Promise<number | undefined> {
     if (!serviceRef) return undefined;
     const service = await this.db.findServiceByReferenceId(serviceRef);
-    if (!service) throw new NotFoundException('Servicio no encontrado');
+    if (!service) throw new NotFoundException(t('ratings.SERVICE_NOT_FOUND'));
     return service.id;
   }
 
   private async getRatingEntityByRef(referenceId: string) {
     const rating = await this.db.findByReferenceId(referenceId);
-    if (!rating) throw new NotFoundException('Calificación no encontrada');
+    if (!rating) throw new NotFoundException(t('ratings.NOT_FOUND'));
     return rating;
   }
 
@@ -70,8 +71,7 @@ export class RatingsService {
       serviceId,
       dto.type,
     );
-    if (existing)
-      throw new BadRequestException('Ya has calificado este servicio');
+    if (existing) throw new BadRequestException(t('ratings.ALREADY_RATED'));
 
     const created = await this.db.create({
       userId,
@@ -102,12 +102,12 @@ export class RatingsService {
     const professional = await this.db.findProfessionalByUserId(raterUserId);
     if (!professional) {
       throw new ForbiddenException(
-        'Solo un profesional puede calificar a un cliente',
+        t('ratings.ONLY_PROFESSIONAL_CAN_RATE_CLIENT'),
       );
     }
 
     const client = await this.db.findUserByReferenceId(dto.clientId);
-    if (!client) throw new NotFoundException('Cliente no encontrado');
+    if (!client) throw new NotFoundException(t('ratings.CLIENT_NOT_FOUND'));
 
     const serviceId = await this.resolveServiceId(dto.serviceRequestId);
 
@@ -117,8 +117,7 @@ export class RatingsService {
       serviceId,
       RatingType.PROFESSIONAL_TO_CLIENT,
     );
-    if (existing)
-      throw new BadRequestException('Ya has calificado este servicio');
+    if (existing) throw new BadRequestException(t('ratings.ALREADY_RATED'));
 
     const created = await this.db.create({
       userId: client.id,
@@ -174,7 +173,7 @@ export class RatingsService {
     serviceRef: string,
   ): Promise<RatingDetailResponseDTO[]> {
     const service = await this.db.findServiceByReferenceId(serviceRef);
-    if (!service) throw new NotFoundException('Servicio no encontrado');
+    if (!service) throw new NotFoundException(t('ratings.SERVICE_NOT_FOUND'));
     return mapRatingsToResponse(await this.db.findByServiceId(service.id));
   }
 
@@ -200,13 +199,11 @@ export class RatingsService {
   ): Promise<RatingDetailResponseDTO> {
     const rating = await this.getRatingEntityByRef(id);
     if (rating.userId !== userId) {
-      throw new ForbiddenException('No puedes editar esta calificación');
+      throw new ForbiddenException(t('ratings.UNAUTHORIZED_EDIT'));
     }
     const age = Date.now() - rating.createdAt.getTime();
     if (age > EDIT_WINDOW_MS) {
-      throw new BadRequestException(
-        'No se puede editar la calificación después de 24 horas',
-      );
+      throw new BadRequestException(t('ratings.CANNOT_EDIT_AFTER_24H'));
     }
     const updated = await this.db.update(
       rating.id,
@@ -218,11 +215,11 @@ export class RatingsService {
   async remove(id: string, userId: number): Promise<void> {
     const rating = await this.getRatingEntityByRef(id);
     if (rating.userId !== userId) {
-      throw new ForbiddenException('No puedes eliminar esta calificación');
+      throw new ForbiddenException(t('ratings.UNAUTHORIZED_DELETE'));
     }
     const age = Date.now() - rating.createdAt.getTime();
     if (age > EDIT_WINDOW_MS) {
-      throw new BadRequestException('No se puede eliminar esta calificación');
+      throw new BadRequestException(t('ratings.CANNOT_DELETE'));
     }
     await this.db.deactivate(rating.id);
   }
@@ -234,9 +231,7 @@ export class RatingsService {
   ): Promise<RatingDetailResponseDTO> {
     const rating = await this.getRatingEntityByRef(id);
     if (rating.userId === userId) {
-      throw new BadRequestException(
-        'No puedes reportar tu propia calificación',
-      );
+      throw new BadRequestException(t('ratings.CANNOT_REPORT_OWN'));
     }
     return mapRatingToResponse(await this.db.report(rating.id, reason));
   }

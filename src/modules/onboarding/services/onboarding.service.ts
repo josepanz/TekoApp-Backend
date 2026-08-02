@@ -7,6 +7,7 @@ import { EmailService } from '@modules/email/services/email.service';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { PrismaErrorCodes } from '@common/enum/prisma-error-codes.enum';
 
+import { t } from '@common/i18n/i18n.helper';
 /**
  * Servicio de Onboarding - Lógica de Negocio
  * Maneja el registro público de nuevos usuarios
@@ -67,7 +68,7 @@ export class OnboardingService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === (PrismaErrorCodes.UniqueConstraintFailed as string)
       ) {
-        throw new ConflictException('Usuario ya existe.');
+        throw new ConflictException(t('onboarding.USER_ALREADY_EXISTS'));
       }
       throw error;
     }

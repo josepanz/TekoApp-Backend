@@ -20,6 +20,7 @@ import { UserRolesDBService } from '@modules/users-db/services/user-roles-db.ser
 import { UserHelper } from '../helpers/user.helper';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UsersApiService {
   constructor(
@@ -139,7 +140,7 @@ export class UsersApiService {
       dto,
       operatorUser.email,
     );
-    return { message: 'Usuario actualizado correctamente' };
+    return { message: t('users.UPDATED') };
   }
 
   async update(

@@ -34,6 +34,7 @@ import {
   mapPaymentMethodToResponse,
 } from '../helpers/payments-response.helper';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class PaymentApiService {
   constructor(
@@ -49,7 +50,7 @@ export class PaymentApiService {
    */
   private async getPaymentEntityByRef(referenceId: string) {
     const payment = await this.dbService.findPaymentByReferenceId(referenceId);
-    if (!payment) throw new NotFoundException('Pago no encontrado');
+    if (!payment) throw new NotFoundException(t('payments.NOT_FOUND'));
     return payment;
   }
 
@@ -60,14 +61,14 @@ export class PaymentApiService {
     const service = await this.dbService.findServiceByReferenceId(
       dto.serviceId,
     );
-    if (!service) throw new NotFoundException('Servicio no encontrado');
+    if (!service) throw new NotFoundException(t('payments.SERVICE_NOT_FOUND'));
 
     const existingPayment = await this.dbService.findExistingPayment(
       userId,
       service.id,
     );
     if (existingPayment) {
-      throw new BadRequestException('Ya existe un pago para este servicio');
+      throw new BadRequestException(t('payments.ALREADY_EXISTS_FOR_SERVICE'));
     }
 
     const fee = await this.feeCalculator.calculateProviderFee(
@@ -123,9 +124,7 @@ export class PaymentApiService {
   ): Promise<PaymentDetailResponseDTO> {
     const payment = await this.getPaymentEntityByRef(id);
     if (payment.status !== PaymentStatus.PENDING) {
-      throw new BadRequestException(
-        'Solo se pueden actualizar pagos pendientes',
-      );
+      throw new BadRequestException(t('payments.ONLY_PENDING_CAN_BE_UPDATED'));
     }
     const updated = await this.dbService.updatePayment(
       payment.id,
@@ -140,12 +139,10 @@ export class PaymentApiService {
   ): Promise<PaymentDetailResponseDTO> {
     const payment = await this.getPaymentEntityByRef(id);
     if (payment.userId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para cancelar este pago',
-      );
+      throw new ForbiddenException(t('payments.UNAUTHORIZED_CANCEL'));
     }
     if (payment.status !== PaymentStatus.PENDING) {
-      throw new BadRequestException('Este pago no puede ser cancelado');
+      throw new BadRequestException(t('payments.CANNOT_BE_CANCELLED'));
     }
 
     // updateMany + count en vez de update() incondicional: evita que dos escrituras
@@ -157,9 +154,7 @@ export class PaymentApiService {
       { status: PaymentStatus.CANCELLED },
     );
     if (updatedCount === 0) {
-      throw new ConflictException(
-        'El pago cambió de estado antes de poder cancelarlo',
-      );
+      throw new ConflictException(t('payments.STATUS_CHANGED_BEFORE_CANCEL'));
     }
     return this.getPaymentById(id);
   }
@@ -203,7 +198,7 @@ export class PaymentApiService {
       id,
       userId,
     );
-    if (!method) throw new NotFoundException('Método de pago no encontrado');
+    if (!method) throw new NotFoundException(t('payments.METHOD_NOT_FOUND'));
 
     if (dto.isDefault) {
       await this.dbService.clearDefaultPaymentMethods(userId);
@@ -220,13 +215,11 @@ export class PaymentApiService {
       id,
       userId,
     );
-    if (!method) throw new NotFoundException('Método de pago no encontrado');
+    if (!method) throw new NotFoundException(t('payments.METHOD_NOT_FOUND'));
 
     const total = await this.dbService.countActivePaymentMethods(userId);
     if (total <= 1) {
-      throw new BadRequestException(
-        'No se puede eliminar el único método de pago',
-      );
+      throw new BadRequestException(t('payments.CANNOT_DELETE_ONLY_METHOD'));
     }
 
     await this.dbService.updatePaymentMethod(method.id, { isActive: false });
@@ -244,7 +237,7 @@ export class PaymentApiService {
         break;
       // Añadir PayPal, MercadoPago, etc.
       default:
-        throw new BadRequestException('Proveedor de pagos no soportado');
+        throw new BadRequestException(t('payments.PROVIDER_NOT_SUPPORTED'));
     }
   }
 

@@ -1,0 +1,7 @@
+{
+  "PROFESSIONAL_NOT_FOUND": "Profesional no encontrado en los registros maestros",
+  "PROFESSIONAL_WITHOUT_COORDINATES": "El profesional solicitado no posee coordenadas activas de posicionamiento",
+  "SUBSCRIBED": "Suscrito a actualizaciones de ubicación",
+  "UNSUBSCRIBED": "Desuscrito de actualizaciones de ubicación",
+  "WEBSOCKET_CONNECTED": "Conectado al servidor de TekoApp"
+}

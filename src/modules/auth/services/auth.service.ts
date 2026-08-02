@@ -13,6 +13,7 @@ import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserCredentialsWithUser } from '@/modules/auth/types';
 import { PasswordExpirationHelper } from '@modules/auth/helpers';
 
+import { t } from '@common/i18n/i18n.helper';
 /**
  * Servicio principal de autenticación - Lógica de Negocio
  * Usa helpers especializados para mantener el código organizado
@@ -75,7 +76,7 @@ export class AuthService {
     // se rechaza con el mismo mensaje genérico para no filtrar la causa.
     const nonceValid = await this.nonceService.consume(nonce);
     if (!nonceValid) {
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     // Validar contraseña (texto plano ya extraído del payload)
@@ -86,7 +87,7 @@ export class AuthService {
 
     if (!isPasswordValid) {
       await this.authPasswordService.handleFailedAttempt(userCredentials);
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     // Rechazar el login si la contraseña de la credencial activa expiró
@@ -122,7 +123,7 @@ export class AuthService {
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado.');
+      throw new NotFoundException(t('auth.USER_NOT_FOUND'));
     }
 
     await this.authPasswordService.createOrUpdateEncryptedPassword(
@@ -132,7 +133,7 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Contraseña creada correctamente.',
+      message: t('auth.PASSWORD_CREATED'),
     };
   }
 
@@ -147,7 +148,7 @@ export class AuthService {
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado.');
+      throw new NotFoundException(t('auth.USER_NOT_FOUND'));
     }
 
     const userCredentials = await this.userRepository.findCredentialsByEmail(
@@ -155,9 +156,7 @@ export class AuthService {
     );
 
     if (!userCredentials) {
-      throw new NotFoundException(
-        'No se encontraron credenciales para el usuario, favor crear contraseña.',
-      );
+      throw new NotFoundException(t('auth.CREDENTIALS_NOT_FOUND'));
     }
 
     await this.authPasswordService.changeEncryptedPassword(
@@ -168,7 +167,7 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Contraseña actualizada correctamente.',
+      message: t('auth.PASSWORD_UPDATED'),
     };
   }
 
@@ -217,13 +216,13 @@ export class AuthService {
     );
 
     if (newPassword !== confirmPassword) {
-      throw new UnauthorizedException('Las contraseñas no coinciden.');
+      throw new UnauthorizedException(t('auth.PASSWORDS_DO_NOT_MATCH'));
     }
 
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado.');
+      throw new NotFoundException(t('auth.USER_NOT_FOUND'));
     }
 
     const userCredentials = await this.userRepository.findCredentialsByEmail(
@@ -231,16 +230,14 @@ export class AuthService {
     );
 
     if (!userCredentials) {
-      throw new NotFoundException(
-        'No se encontraron credenciales para el usuario, favor crear contraseña.',
-      );
+      throw new NotFoundException(t('auth.CREDENTIALS_NOT_FOUND'));
     }
 
     await this.authPasswordService.createOrUpdatePassword(user.id, newPassword);
 
     return {
       success: true,
-      message: 'Contraseña actualizada correctamente.',
+      message: t('auth.PASSWORD_UPDATED'),
     };
   }
 
@@ -317,11 +314,11 @@ export class AuthService {
   private validateUserStatus(status: UserStatus): void {
     switch (status) {
       case UserStatus.BLOCKED:
-        throw new UnauthorizedException('El usuario está bloqueado.');
+        throw new UnauthorizedException(t('auth.USER_BLOCKED'));
       case UserStatus.INACTIVE:
-        throw new UnauthorizedException('El usuario no está activo.');
+        throw new UnauthorizedException(t('auth.USER_NOT_ACTIVE'));
       case UserStatus.DELETED:
-        throw new UnauthorizedException('El usuario está eliminado.');
+        throw new UnauthorizedException(t('auth.USER_DELETED'));
       case UserStatus.PENDING_VERIFICATION:
         this.logger.warn('El usuario no ha verificado su cuenta.');
         return;
@@ -343,7 +340,7 @@ export class AuthService {
       this.logger.log(
         'No se encontraron datos para los parámetros proporcionados.',
       );
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
     const isPasswordValid = this.authPasswordService.validateEncryptedPassword(
       password,
@@ -352,7 +349,7 @@ export class AuthService {
 
     if (!isPasswordValid) {
       await this.authPasswordService.handleFailedAttempt(userCredential);
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     return userCredential;

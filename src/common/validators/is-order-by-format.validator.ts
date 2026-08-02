@@ -3,6 +3,8 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
+import { t } from '@common/i18n/i18n.helper';
+
 export type SortDirection = 'desc' | 'asc';
 
 @ValidatorConstraint({ name: 'isOrderByFormat', async: false })
@@ -14,6 +16,6 @@ export class IsOrderByFormat implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return `orderBy must be in the format 'field:asc' or 'field:desc'`;
+    return t('validation.ORDER_BY_FORMAT');
   }
 }

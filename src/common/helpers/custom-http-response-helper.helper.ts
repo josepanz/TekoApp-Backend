@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { AxiosError, AxiosResponse } from 'axios';
 
+import { t } from '@common/i18n/i18n.helper';
 export class CustomHttpResponseHelper {
   private static logger = new Logger(CustomHttpResponseHelper.name);
 
@@ -25,32 +26,28 @@ export class CustomHttpResponseHelper {
         this.logger.warn(
           `No se encontraron datos para los parámetros proporcionados: ${status} - ${statusText}`,
         );
-        throw new NotFoundException(
-          'No se encontraron datos para los parámetros proporcionados.',
-        );
+        throw new NotFoundException(t('common.NO_DATA_FOR_PARAMETERS'));
 
       case HttpStatus.BAD_REQUEST:
         this.logger.warn(
           `Solicitud mal formada, verifique los datos y/o parámetros enviados: ${status} - ${statusText}`,
         );
-        throw new BadRequestException(
-          'Solicitud mal formada, verifique los datos y/o parámetros enviados.',
-        );
+        throw new BadRequestException(t('common.MALFORMED_REQUEST'));
 
       case HttpStatus.UNAUTHORIZED:
         this.logger.warn(`Credenciales inválidas: ${status} - ${statusText}`);
-        throw new UnauthorizedException('Credenciales inválidas.');
+        throw new UnauthorizedException(t('common.INVALID_CREDENTIALS'));
 
       case HttpStatus.FORBIDDEN:
         this.logger.warn(`Usuario bloqueado: ${status} - ${statusText}`);
-        throw new ForbiddenException('Usuario bloqueado.');
+        throw new ForbiddenException(t('common.FORBIDDEN_USER_BLOCKED'));
 
       case HttpStatus.INTERNAL_SERVER_ERROR:
         this.logger.warn(
           `Error interno del servidor al procesar la solicitud: ${status} - ${statusText}`,
         );
         throw new InternalServerErrorException(
-          'Error interno del servidor al procesar la solicitud.',
+          t('common.UPSTREAM_INTERNAL_ERROR'),
         );
 
       default:
@@ -58,7 +55,7 @@ export class CustomHttpResponseHelper {
           `Error inesperado en la respuesta HTTP: ${status} - ${statusText}`,
         );
         throw new HttpException(
-          `Error inesperado en la respuesta: ${statusText}`,
+          t('common.UNEXPECTED_RESPONSE', { statusText }),
           status,
         );
     }
@@ -75,26 +72,22 @@ export class CustomHttpResponseHelper {
 
     if (error.code === 'ECONNABORTED') {
       this.logger.error('Timeout al conectar con el servidor externo.');
-      throw new GatewayTimeoutException(
-        'El servidor externo no respondió a tiempo.',
-      );
+      throw new GatewayTimeoutException(t('common.EXTERNAL_TIMEOUT'));
     }
 
     if (error.code === 'ECONNREFUSED') {
       this.logger.error('Conexión rechazada por el servidor externo.');
       throw new ServiceUnavailableException(
-        'Conexión rechazada por el servidor externo.',
+        t('common.EXTERNAL_CONNECTION_REFUSED'),
       );
     }
 
     if (error.code === 'ENOTFOUND') {
       this.logger.error('Servidor externo no encontrado.');
-      throw new BadGatewayException('Servidor externo no encontrado.');
+      throw new BadGatewayException(t('common.BAD_GATEWAY'));
     }
 
     this.logger.error(`Error desconocido de Axios: ${error.message}`);
-    throw new InternalServerErrorException(
-      'Error desconocido al procesar la solicitud.',
-    );
+    throw new InternalServerErrorException(t('common.UNKNOWN_REQUEST_ERROR'));
   }
 }

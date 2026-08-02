@@ -15,6 +15,7 @@ import { ConfigType } from '@nestjs/config';
 import { Users } from '@prisma/client';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class EmailService {
   private transporter: Transporter;
@@ -71,7 +72,7 @@ export class EmailService {
         error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(`Error al enviar el correo a ${to}: ${errorMessage}`);
       throw new InternalServerErrorException(
-        'Error al enviar el correo de creación de contraseña.',
+        t('email.SET_PASSWORD_SEND_ERROR'),
       );
     }
   }
@@ -106,7 +107,7 @@ export class EmailService {
       case EmailTypeEnum.VERIFICATION: {
         if (!user) {
           this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
-          throw new NotFoundException('Usuario no encontrado o inactivo.');
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
         }
 
         const tempToken = CryptoHelper.generateToken(
@@ -134,7 +135,7 @@ export class EmailService {
       case EmailTypeEnum.FORGOT_PASSWORD: {
         if (!user) {
           this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
-          throw new NotFoundException('Usuario no encontrado o inactivo.');
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
         }
 
         const tempToken = CryptoHelper.generateToken(
@@ -163,7 +164,7 @@ export class EmailService {
       case EmailTypeEnum.CREATE_PASSWORD: {
         if (!user) {
           this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
-          throw new NotFoundException('Usuario no encontrado o inactivo.');
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
         }
 
         const tempToken = CryptoHelper.generateToken(
@@ -191,7 +192,7 @@ export class EmailService {
 
       default: {
         this.logger.warn(`Tipo de email no reconocido`);
-        throw new InternalServerErrorException('Tipo de email no reconocido.');
+        throw new InternalServerErrorException(t('email.UNKNOWN_EMAIL_TYPE'));
       }
     }
   }
