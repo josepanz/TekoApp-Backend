@@ -1,3 +1,8 @@
+## 1.0.0-develop.13 (2026-08-03)
+
+* docs: regenerate compodoc ([1d13fa1](https://github.com/josepanz/TekoApp-Backend/commit/1d13fa1))
+* docs: regenerate compodoc (#18) ([ede3dae](https://github.com/josepanz/TekoApp-Backend/commit/ede3dae)), closes [#18](https://github.com/josepanz/TekoApp-Backend/issues/18)
+
 ## 1.0.0-develop.12 (2026-08-03)
 
 * feat(auth): fase B - historico, expiracion, complejidad, hash de secretKey y nonce en login ([5ef8e49](https://github.com/josepanz/TekoApp-Backend/commit/5ef8e49)), closes [CredentialsRepository#rotatePassword](https://github.com/CredentialsRepository/issues/rotatePassword) [AuthTokenService#generateAccessTokenFromRefresh](https://github.com/AuthTokenService/issues/generateAccessTokenFromRefresh) [CredentialsRepository#findRecentByUserId](https://github.com/CredentialsRepository/issues/findRecentByUserId)
