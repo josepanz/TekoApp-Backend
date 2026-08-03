@@ -3462,7 +3462,7 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
     ApiResponse({
       status: 200,
       description: &#x27;Lista de calificaciones obtenida exitosamente&#x27;,
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   )</code>
                     </td>
@@ -3496,7 +3496,7 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
     ApiResponse({
       status: 200,
       description: &#x27;Calificaciones del profesional obtenidas exitosamente&#x27;,
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   )</code>
                     </td>
@@ -3532,7 +3532,7 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
     ApiResponse({
       status: 200,
       description: &#x27;Calificaciones de la solicitud obtenidas exitosamente&#x27;,
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   )</code>
                     </td>
@@ -3566,7 +3566,7 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
     ApiResponse({
       status: 200,
       description: &#x27;Calificaciones del usuario obtenidas exitosamente&#x27;,
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   )</code>
                     </td>
@@ -3673,7 +3673,7 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
     ApiResponse({
       status: 200,
       description: &#x27;Calificaciones de clientes obtenidas exitosamente&#x27;,
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   )</code>
                     </td>
@@ -3707,7 +3707,7 @@ de correr en una DB de desarrollo local; NUNCA correr contra un ambiente compart
     ApiResponse({
       status: 200,
       description: &#x27;Calificaciones recientes obtenidas exitosamente&#x27;,
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   )</code>
                     </td>
@@ -6048,11 +6048,12 @@ escribir mal las cadenas de texto (magic strings).</p>
     HttpCode(200),
     ApiOperation({
       summary: &#x27;Obtener un rol por ID&#x27;,
-      description: &#x27;Obtiene los detalles de un rol específico por su ID.&#x27;,
+      description:
+        &#x27;Obtiene los detalles de un rol específico por su ID, incluyendo los permisos asignados.&#x27;,
     }),
     ApiOkResponse({
       description: &#x27;Rol obtenido exitosamente.&#x27;,
-      type: ResponseDTO.RoleResponseDTO,
+      type: ResponseDTO.RoleWithPermissionsResponseDTO,
     }),
     ApiNotFoundResponse({
       description: &#x27;Rol no encontrado.&#x27;,
