@@ -98,6 +98,31 @@
 
 
 
+<h2>1.0.0-develop.12 (2026-08-03)</h2>
+<ul>
+<li>feat(auth): fase B - historico, expiracion, complejidad, hash de secretKey y nonce en login (<a href="https://github.com/josepanz/TekoApp-Backend/commit/5ef8e49">5ef8e49</a>), closes <a href="https://github.com/CredentialsRepository/issues/rotatePassword">CredentialsRepository#rotatePassword</a> <a href="https://github.com/AuthTokenService/issues/generateAccessTokenFromRefresh">AuthTokenService#generateAccessTokenFromRefresh</a> <a href="https://github.com/CredentialsRepository/issues/findRecentByUserId">CredentialsRepository#findRecentByUserId</a></li>
+<li>feat(config): validacion Joi.valid en NODE_ENV/SEQ_ENABLED y pepper de auditoria por env (<a href="https://github.com/josepanz/TekoApp-Backend/commit/c6f48b5">c6f48b5</a>)</li>
+<li>feat(db/refactor/security): refactor and security hardening (#15) (<a href="https://github.com/josepanz/TekoApp-Backend/commit/2bdcd62">2bdcd62</a>), closes <a href="https://github.com/josepanz/TekoApp-Backend/issues/15">#15</a> <a href="https://github.com/payment-db.service.ts/issues/executeRefund">payment-db.service.ts#executeRefund</a> <a href="https://github.com/payment-db.service.ts/issues/getPaymentTrends">payment-db.service.ts#getPaymentTrends</a></li>
+<li>feat(i18n): completar esqueleto Country/Currency/Language (Fase C) (<a href="https://github.com/josepanz/TekoApp-Backend/commit/bf4778f">bf4778f</a>)</li>
+<li>feat(i18n): traduccion completa es/en de la API con nestjs-i18n (<a href="https://github.com/josepanz/TekoApp-Backend/commit/1022dbb">1022dbb</a>)</li>
+<li>feat(notifications): implementar SSE + Web Push (VAPID) + FCM reales (<a href="https://github.com/josepanz/TekoApp-Backend/commit/38b4d9a">38b4d9a</a>)</li>
+<li>feat(users): avatarUrl + autoedicion de perfil (PUT /auth/me) (<a href="https://github.com/josepanz/TekoApp-Backend/commit/ef947ee">ef947ee</a>)</li>
+<li>fix(auth): conectar el cliente Redis de nonces al iniciar, no en el primer comando (<a href="https://github.com/josepanz/TekoApp-Backend/commit/66a5fc4">66a5fc4</a>)</li>
+<li>fix: get /services/:id no traía professional.user, crasheaba el detail view del frontend (<a href="https://github.com/josepanz/TekoApp-Backend/commit/52b50fc">52b50fc</a>)</li>
+<li>fix(infra): agregar proxy-body-size y timeouts al ingress nginx en los 3 ambientes (<a href="https://github.com/josepanz/TekoApp-Backend/commit/589389c">589389c</a>)</li>
+<li>fix(infra): usar Etc/GMT+3 en vez de America/Asuncion para la zona horaria (<a href="https://github.com/josepanz/TekoApp-Backend/commit/c761478">c761478</a>), closes <a href="https://github.com/health.controller.ts/issues/toZonedTime">health.controller.ts#toZonedTime</a></li>
+<li>fix(locations): parametrizar query de geolocalizacion contra inyeccion SQL (<a href="https://github.com/josepanz/TekoApp-Backend/commit/83b67db">83b67db</a>)</li>
+<li>fix: notifications devuelve documentos Mongoose crudos y ratings mal anotado en Swagger (<a href="https://github.com/josepanz/TekoApp-Backend/commit/9a7f23b">9a7f23b</a>)</li>
+<li>fix(notifications): campo userId de Mongo como Number, no ObjectId (<a href="https://github.com/josepanz/TekoApp-Backend/commit/6d2ad71">6d2ad71</a>)</li>
+<li>fix(notifications): usar el id numerico del JWT en vez de String() para el ObjectId de Mongo (<a href="https://github.com/josepanz/TekoApp-Backend/commit/0354fb7">0354fb7</a>)</li>
+<li>fix(users): eliminar codigo legacy de merchant-context y fixear endpoints rotos (<a href="https://github.com/josepanz/TekoApp-Backend/commit/4613de2">4613de2</a>)</li>
+<li>fix(users): guardar la KEY de S3 del avatar, no la URL presignada (<a href="https://github.com/josepanz/TekoApp-Backend/commit/2306d99">2306d99</a>)</li>
+<li>docs: decision de arquitectura para notificaciones push (Web Push + FCM) (<a href="https://github.com/josepanz/TekoApp-Backend/commit/f28cfd6">f28cfd6</a>)</li>
+<li>docs: regenerar Compodoc (estaba desactualizado desde junio) (<a href="https://github.com/josepanz/TekoApp-Backend/commit/41643c2">41643c2</a>)</li>
+<li>chore(claude): instalar graphify y reglas de auditoria comparativa con portal-comercios (<a href="https://github.com/josepanz/TekoApp-Backend/commit/7c44bcd">7c44bcd</a>)</li>
+<li>chore(claude): portar comandos /commit y /cherry-pick desde portal-comercios-backend (<a href="https://github.com/josepanz/TekoApp-Backend/commit/909a239">909a239</a>)</li>
+<li>refactor(db): patron id secuencial+referenceId en los 6 modelos que usaban UUID como PK (<a href="https://github.com/josepanz/TekoApp-Backend/commit/0df8e5c">0df8e5c</a>), closes <a href="https://github.com/payment-db.service.ts/issues/executeRefund">payment-db.service.ts#executeRefund</a> <a href="https://github.com/payment-db.service.ts/issues/getPaymentTrends">payment-db.service.ts#getPaymentTrends</a></li>
+</ul>
 <h2>1.0.0-develop.11 (2026-07-20)</h2>
 <ul>
 <li>docs: remove temp CI diagnostics, update context.md and session log (<a href="https://github.com/josepanz/TekoApp-Backend/commit/9eb81d9">9eb81d9</a>)</li>

@@ -24,13 +24,13 @@
 <title>cluster_PushProviderModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="22.5,-70 22.5,-268 473.5,-268 473.5,-70 22.5,-70"/>
 </g>
-<g id="clust4" class="cluster">
-<title>cluster_PushProviderModule_exports</title>
-<polygon fill="none" stroke="black" points="63.5,-208 63.5,-260 395.5,-260 395.5,-208 63.5,-208"/>
-</g>
 <g id="clust6" class="cluster">
 <title>cluster_PushProviderModule_providers</title>
 <polygon fill="none" stroke="black" points="30.5,-78 30.5,-130 465.5,-130 465.5,-78 30.5,-78"/>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_PushProviderModule_exports</title>
+<polygon fill="none" stroke="black" points="63.5,-208 63.5,-260 395.5,-260 395.5,-208 63.5,-208"/>
 </g>
 <!-- FcmProviderService  -->
 <g id="node1" class="node">

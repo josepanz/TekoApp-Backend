@@ -345,8 +345,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="195"
-                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:195</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="197"
+                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:197</a></div>
                         </td>
                     </tr>
 
@@ -438,8 +438,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="83"
-                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:83</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="85"
+                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:85</a></div>
                         </td>
                     </tr>
 
@@ -612,8 +612,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="51"
-                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:51</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -718,7 +718,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ResponseDTO.RoleResponseDTO&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ResponseDTO.RoleWithPermissionsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -750,8 +750,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="125"
-                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:125</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="127"
+                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:127</a></div>
                         </td>
                     </tr>
 
@@ -819,8 +819,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="66"
-                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:66</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="68"
+                                    class="link-to-prism">src/api/roles-permission/services/roles-permission-api.service.ts:68</a></div>
                         </td>
                     </tr>
 
@@ -979,10 +979,12 @@ export class RolesApiService {
     return this.mapper.roleToResponse(role);
   }
 
-  async getRoleById(id: number): Promise&lt;ResponseDTO.RoleResponseDTO&gt; {
+  async getRoleById(
+    id: number,
+  ): Promise&lt;ResponseDTO.RoleWithPermissionsResponseDTO&gt; {
     this.logger.log(&#x60;Obteniendo rol con ID: ${id}&#x60;);
-    const role &#x3D; await this.rolesDBService.getRoleById(id);
-    return this.mapper.roleToResponse(role);
+    const role &#x3D; await this.rolesDBService.getRoleWithPermissions(id);
+    return this.mapper.roleWithPermissionsToResponse(role);
   }
 
   async getAllRoles(
