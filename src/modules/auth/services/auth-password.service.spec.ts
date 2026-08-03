@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { UserProfileStatus, UserStatus } from '@prisma/client';
 
 import { AuthPasswordService } from './auth-password.service';
@@ -7,15 +7,33 @@ import { CryptoHelper } from '@common/helpers/crypto-helpers';
 import { CredentialsRepository } from '@modules/auth/repositories';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserCredentialsWithUser } from '@modules/auth/types';
+import { APP_CONFIG } from '@core/config/config-loader';
+
+// Contraseña de prueba que SÍ cumple la política de complejidad real
+// (PasswordPolicyHelper no está mockeado, corre su regex de verdad).
+const VALID_PASSWORD = 'NewPass1!';
+
+// Límite de histórico de contraseñas usado en los tests (coincide con el mock de config).
+const HISTORY_LIMIT = 5;
 
 // ─── Mocks de dependencias ────────────────────────────────────────────────────
 
 const mockUpdateAttempts = jest.fn();
 const mockFindByUserId = jest.fn();
+const mockFindRecentByUserId = jest.fn();
 const mockCreate = jest.fn();
 const mockUpdate = jest.fn();
+const mockRotatePassword = jest.fn();
 
 const mockUpdateStatus = jest.fn();
+
+// Config mockeada: expiración indefinida (0) e histórico de 5 por defecto.
+const mockConfig = {
+  authentication: {
+    passwordExpirationDays: 0,
+    passwordHistoryLimit: HISTORY_LIMIT,
+  },
+};
 
 // ─── Mock de CryptoHelper (estático) ─────────────────────────────────────────
 
@@ -57,12 +75,10 @@ function buildCredentials(
       documentNumber: null,
       documentTypeId: 1,
       profileStatus: UserProfileStatus.COMPLETE,
-      access_level: 0,
       accessLevelId: null,
       lastLogin: null,
       acceptedTermsAt: null,
       unverifiedEmail: null,
-      legacyUserId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: 'system',
@@ -91,8 +107,10 @@ describe('AuthPasswordService', () => {
           useValue: {
             updateAttempts: mockUpdateAttempts,
             findByUserId: mockFindByUserId,
+            findRecentByUserId: mockFindRecentByUserId,
             create: mockCreate,
             update: mockUpdate,
+            rotatePassword: mockRotatePassword,
           },
         },
         {
@@ -101,10 +119,21 @@ describe('AuthPasswordService', () => {
             updateStatus: mockUpdateStatus,
           },
         },
+        {
+          provide: APP_CONFIG.KEY,
+          useValue: mockConfig,
+        },
       ],
     }).compile();
 
     service = module.get<AuthPasswordService>(AuthPasswordService);
+  });
+
+  beforeEach(() => {
+    // Por defecto no hay historial: el chequeo de reuso no bloquea.
+    mockFindRecentByUserId.mockResolvedValue([]);
+    mockConfig.authentication.passwordExpirationDays = 0;
+    mockConfig.authentication.passwordHistoryLimit = HISTORY_LIMIT;
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -295,41 +324,27 @@ describe('AuthPasswordService', () => {
   // ──────────────────────────────────────────────────────────────────────────
 
   describe('createOrUpdatePassword', () => {
-    it('debe actualizar las credenciales existentes cuando ya existen para el usuario', async () => {
+    it('debe rotar la contraseña (insertar histórico) cuando la nueva cumple la complejidad', async () => {
       // Arrange
       (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hash');
-      mockFindByUserId.mockResolvedValue({ id: 5, passwordHash: 'old_hash' });
-      mockUpdate.mockResolvedValue(undefined);
+      mockRotatePassword.mockResolvedValue(undefined);
 
       // Act
-      await service.createOrUpdatePassword(10, 'new_pass');
+      await service.createOrUpdatePassword(10, VALID_PASSWORD);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(5, {
-        passwordHash: 'new_hash',
-        attempts: 0,
-        isActive: true,
-      });
-      expect(mockCreate).not.toHaveBeenCalled();
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'new_hash', null);
     });
 
-    it('debe crear nuevas credenciales cuando el usuario no tiene contraseña previa', async () => {
+    it('debe lanzar BadRequestException y no rotar cuando la contraseña no cumple la complejidad', async () => {
       // Arrange
-      (CryptoHelper.hashValue as jest.Mock).mockReturnValue('hash_nueva');
-      mockFindByUserId.mockResolvedValue(null);
-      mockCreate.mockResolvedValue(undefined);
+      const weakPassword = 'abc';
 
-      // Act
-      await service.createOrUpdatePassword(10, 'pass');
-
-      // Assert
-      expect(mockCreate).toHaveBeenCalledWith({
-        userId: 10,
-        passwordHash: 'hash_nueva',
-        attempts: 0,
-        isActive: true,
-      });
-      expect(mockUpdate).not.toHaveBeenCalled();
+      // Act & Assert
+      await expect(
+        service.createOrUpdatePassword(10, weakPassword),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockRotatePassword).not.toHaveBeenCalled();
     });
   });
 
@@ -341,11 +356,10 @@ describe('AuthPasswordService', () => {
     it('debe desencriptar y delegar en createOrUpdatePassword', async () => {
       // Arrange
       (CryptoHelper.decrypt as jest.Mock).mockReturnValue(
-        Buffer.from('plain_pass'),
+        Buffer.from(VALID_PASSWORD),
       );
       (CryptoHelper.hashValue as jest.Mock).mockReturnValue('hashed');
-      mockFindByUserId.mockResolvedValue(null);
-      mockCreate.mockResolvedValue(undefined);
+      mockRotatePassword.mockResolvedValue(undefined);
 
       // Act
       await service.createOrUpdateEncryptedPassword(10, 'encrypted_pass');
@@ -356,7 +370,50 @@ describe('AuthPasswordService', () => {
         'encrypted_pass',
         'sha256',
       );
-      expect(mockCreate).toHaveBeenCalled();
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'hashed', null);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // decryptLoginPayload
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('decryptLoginPayload', () => {
+    it('debe retornar password y nonce cuando el JSON desencriptado es válido', () => {
+      // Arrange
+      (CryptoHelper.decrypt as jest.Mock).mockReturnValue(
+        Buffer.from(JSON.stringify({ password: 'secret', nonce: 'abc123' })),
+      );
+
+      // Act
+      const result = service.decryptLoginPayload('enc');
+
+      // Assert
+      expect(result).toEqual({ password: 'secret', nonce: 'abc123' });
+    });
+
+    it('debe lanzar UnauthorizedException cuando el contenido no es JSON', () => {
+      // Arrange
+      (CryptoHelper.decrypt as jest.Mock).mockReturnValue(
+        Buffer.from('no-es-json'),
+      );
+
+      // Act & Assert
+      expect(() => service.decryptLoginPayload('enc')).toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('debe lanzar UnauthorizedException cuando falta el nonce en el JSON', () => {
+      // Arrange
+      (CryptoHelper.decrypt as jest.Mock).mockReturnValue(
+        Buffer.from(JSON.stringify({ password: 'secret' })),
+      );
+
+      // Act & Assert
+      expect(() => service.decryptLoginPayload('enc')).toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -365,21 +422,22 @@ describe('AuthPasswordService', () => {
   // ──────────────────────────────────────────────────────────────────────────
 
   describe('changePassword', () => {
-    it('debe actualizar el hash cuando la contraseña anterior es válida', async () => {
+    it('debe rotar la contraseña cuando la anterior es válida y la nueva cumple complejidad', async () => {
       // Arrange
-      const credentials = buildCredentials({ id: 1, passwordHash: 'old_hash' });
+      const credentials = buildCredentials({
+        id: 1,
+        userId: 10,
+        passwordHash: 'old_hash',
+      });
       (CryptoHelper.compareHashes as jest.Mock).mockReturnValue(true);
       (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hash');
-      mockUpdate.mockResolvedValue(undefined);
+      mockRotatePassword.mockResolvedValue(undefined);
 
       // Act
-      await service.changePassword(credentials, 'old_pass', 'new_pass');
+      await service.changePassword(credentials, 'old_pass', VALID_PASSWORD);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(1, {
-        passwordHash: 'new_hash',
-        attempts: 0,
-      });
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'new_hash', null);
     });
 
     it('debe lanzar UnauthorizedException cuando la contraseña anterior es incorrecta', async () => {
@@ -389,9 +447,21 @@ describe('AuthPasswordService', () => {
 
       // Act & Assert
       await expect(
-        service.changePassword(credentials, 'wrong_old', 'new_pass'),
+        service.changePassword(credentials, 'wrong_old', VALID_PASSWORD),
       ).rejects.toThrow(UnauthorizedException);
-      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(mockRotatePassword).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar BadRequestException cuando la nueva contraseña no cumple complejidad', async () => {
+      // Arrange
+      const credentials = buildCredentials({ passwordHash: 'old_hash' });
+      (CryptoHelper.compareHashes as jest.Mock).mockReturnValue(true);
+
+      // Act & Assert
+      await expect(
+        service.changePassword(credentials, 'old_pass', 'weak'),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockRotatePassword).not.toHaveBeenCalled();
     });
   });
 
@@ -402,13 +472,17 @@ describe('AuthPasswordService', () => {
   describe('changeEncryptedPassword', () => {
     it('debe desencriptar ambas contraseñas y delegar el cambio', async () => {
       // Arrange
-      const credentials = buildCredentials({ id: 1, passwordHash: 'old_hash' });
+      const credentials = buildCredentials({
+        id: 1,
+        userId: 10,
+        passwordHash: 'old_hash',
+      });
       (CryptoHelper.decrypt as jest.Mock)
         .mockReturnValueOnce(Buffer.from('old_plain'))
-        .mockReturnValueOnce(Buffer.from('new_plain'));
+        .mockReturnValueOnce(Buffer.from(VALID_PASSWORD));
       (CryptoHelper.compareHashes as jest.Mock).mockReturnValue(true);
       (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hashed');
-      mockUpdate.mockResolvedValue(undefined);
+      mockRotatePassword.mockResolvedValue(undefined);
 
       // Act
       await service.changeEncryptedPassword(credentials, 'enc_old', 'enc_new');
@@ -416,10 +490,7 @@ describe('AuthPasswordService', () => {
       // Assert
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(CryptoHelper.decrypt).toHaveBeenCalledTimes(2);
-      expect(mockUpdate).toHaveBeenCalledWith(1, {
-        passwordHash: 'new_hashed',
-        attempts: 0,
-      });
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'new_hashed', null);
     });
 
     it('debe propagar UnauthorizedException si la contraseña anterior desencriptada no coincide', async () => {
@@ -427,13 +498,104 @@ describe('AuthPasswordService', () => {
       const credentials = buildCredentials({ passwordHash: 'hash' });
       (CryptoHelper.decrypt as jest.Mock)
         .mockReturnValueOnce(Buffer.from('old_plain'))
-        .mockReturnValueOnce(Buffer.from('new_plain'));
+        .mockReturnValueOnce(Buffer.from(VALID_PASSWORD));
       (CryptoHelper.compareHashes as jest.Mock).mockReturnValue(false);
 
       // Act & Assert
       await expect(
         service.changeEncryptedPassword(credentials, 'enc_old', 'enc_new'),
       ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Prevención de reuso de contraseñas (histórico)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('prevención de reuso de contraseñas', () => {
+    it('debe lanzar BadRequestException y no rotar cuando la nueva coincide con alguna del histórico', async () => {
+      // Arrange
+      mockFindRecentByUserId.mockResolvedValue([
+        { passwordHash: 'hash_historico_1' },
+        { passwordHash: 'hash_historico_2' },
+      ]);
+      // Coincide con alguna del histórico.
+      (CryptoHelper.compareHashes as jest.Mock).mockReturnValue(true);
+
+      // Act & Assert
+      await expect(
+        service.createOrUpdatePassword(10, VALID_PASSWORD),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockFindRecentByUserId).toHaveBeenCalledWith(10, HISTORY_LIMIT);
+      expect(mockRotatePassword).not.toHaveBeenCalled();
+    });
+
+    it('debe rotar cuando la nueva no coincide con ninguna del histórico', async () => {
+      // Arrange
+      mockFindRecentByUserId.mockResolvedValue([
+        { passwordHash: 'hash_historico_1' },
+      ]);
+      (CryptoHelper.compareHashes as jest.Mock).mockReturnValue(false);
+      (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hash');
+      mockRotatePassword.mockResolvedValue(undefined);
+
+      // Act
+      await service.createOrUpdatePassword(10, VALID_PASSWORD);
+
+      // Assert
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'new_hash', null);
+    });
+
+    it('no debe bloquear en el flujo de primera contraseña (sin historial previo)', async () => {
+      // Arrange
+      mockFindRecentByUserId.mockResolvedValue([]);
+      (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hash');
+      mockRotatePassword.mockResolvedValue(undefined);
+
+      // Act
+      await service.createOrUpdatePassword(10, VALID_PASSWORD);
+
+      // Assert
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'new_hash', null);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Expiración configurable
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('expiración configurable de contraseña', () => {
+    it('debe rotar con expiredAt=null cuando PASSWORD_EXPIRATION_DAYS es 0 (indefinida)', async () => {
+      // Arrange
+      mockConfig.authentication.passwordExpirationDays = 0;
+      (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hash');
+      mockRotatePassword.mockResolvedValue(undefined);
+
+      // Act
+      await service.createOrUpdatePassword(10, VALID_PASSWORD);
+
+      // Assert
+      expect(mockRotatePassword).toHaveBeenCalledWith(10, 'new_hash', null);
+    });
+
+    it('debe rotar con expiredAt calculado cuando PASSWORD_EXPIRATION_DAYS es > 0', async () => {
+      // Arrange
+      mockConfig.authentication.passwordExpirationDays = 30;
+      (CryptoHelper.hashValue as jest.Mock).mockReturnValue('new_hash');
+      mockRotatePassword.mockResolvedValue(undefined);
+      const before = Date.now();
+
+      // Act
+      await service.createOrUpdatePassword(10, VALID_PASSWORD);
+
+      // Assert
+      const [userIdArg, hashArg, expiredAtArg] = mockRotatePassword.mock
+        .calls[0] as [number, string, Date | null];
+      expect(userIdArg).toBe(10);
+      expect(hashArg).toBe('new_hash');
+      expect(expiredAtArg).toBeInstanceOf(Date);
+      const expectedMin = before + 30 * 24 * 60 * 60 * 1000;
+      expect(expiredAtArg.getTime()).toBeGreaterThanOrEqual(expectedMin);
     });
   });
 });

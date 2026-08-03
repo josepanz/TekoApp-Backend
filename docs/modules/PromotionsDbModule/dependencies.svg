@@ -24,59 +24,59 @@
 <title>cluster_PromotionsDbModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="69,-70 69,-268 427,-268 427,-70 69,-70"/>
 </g>
+<g id="clust6" class="cluster">
+<title>cluster_PromotionsDbModule_providers</title>
+<polygon fill="none" stroke="black" points="211,-78 211,-130 419,-130 419,-78 211,-78"/>
+</g>
 <g id="clust4" class="cluster">
 <title>cluster_PromotionsDbModule_exports</title>
-<polygon fill="none" stroke="black" points="180,-208 180,-260 340,-260 340,-208 180,-208"/>
+<polygon fill="none" stroke="black" points="156,-208 156,-260 316,-260 316,-208 156,-208"/>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_PromotionsDbModule_imports</title>
-<polygon fill="none" stroke="black" points="293,-78 293,-130 419,-130 419,-78 293,-78"/>
-</g>
-<g id="clust6" class="cluster">
-<title>cluster_PromotionsDbModule_providers</title>
-<polygon fill="none" stroke="black" points="77,-78 77,-130 285,-130 285,-78 77,-78"/>
+<polygon fill="none" stroke="black" points="77,-78 77,-130 203,-130 203,-78 77,-78"/>
 </g>
 <!-- DatabaseModule -->
 <g id="node1" class="node">
 <title>DatabaseModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="411.35,-122 408.35,-126 387.35,-126 384.35,-122 300.65,-122 300.65,-86 411.35,-86 411.35,-122"/>
-<text text-anchor="middle" x="356" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="195.35,-122 192.35,-126 171.35,-126 168.35,-122 84.65,-122 84.65,-86 195.35,-86 195.35,-122"/>
+<text text-anchor="middle" x="140" y="-99.8" font-family="Times,serif" font-size="14.00">DatabaseModule</text>
 </g>
 <!-- PromotionsDbModule -->
 <g id="node2" class="node">
 <title>PromotionsDbModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="330.72,-187 327.72,-191 306.72,-191 303.72,-187 189.28,-187 189.28,-151 330.72,-151 330.72,-187"/>
-<text text-anchor="middle" x="260" y="-164.8" font-family="Times,serif" font-size="14.00">PromotionsDbModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="306.72,-187 303.72,-191 282.72,-191 279.72,-187 165.28,-187 165.28,-151 306.72,-151 306.72,-187"/>
+<text text-anchor="middle" x="236" y="-164.8" font-family="Times,serif" font-size="14.00">PromotionsDbModule</text>
 </g>
 <!-- DatabaseModule&#45;&gt;PromotionsDbModule -->
 <g id="edge1" class="edge">
 <title>DatabaseModule&#45;&gt;PromotionsDbModule</title>
-<path fill="none" stroke="black" d="M315.59,-122.11C315.59,-122.11 315.59,-140.99 315.59,-140.99"/>
-<polygon fill="black" stroke="black" points="312.09,-140.99 315.59,-150.99 319.09,-140.99 312.09,-140.99"/>
+<path fill="none" stroke="black" d="M180.41,-122.11C180.41,-122.11 180.41,-140.99 180.41,-140.99"/>
+<polygon fill="black" stroke="black" points="176.91,-140.99 180.41,-150.99 183.91,-140.99 176.91,-140.99"/>
 </g>
 <!-- PromotionsDbService  -->
 <g id="node3" class="node">
 <title>PromotionsDbService </title>
-<polygon fill="#fb8072" stroke="black" points="331.64,-252 188.36,-252 188.36,-216 331.64,-216 331.64,-252"/>
-<text text-anchor="middle" x="260" y="-229.8" font-family="Times,serif" font-size="14.00">PromotionsDbService </text>
+<polygon fill="#fb8072" stroke="black" points="307.64,-252 164.36,-252 164.36,-216 307.64,-216 307.64,-252"/>
+<text text-anchor="middle" x="236" y="-229.8" font-family="Times,serif" font-size="14.00">PromotionsDbService </text>
 </g>
 <!-- PromotionsDbModule&#45;&gt;PromotionsDbService  -->
 <g id="edge2" class="edge">
 <title>PromotionsDbModule&#45;&gt;PromotionsDbService </title>
-<path fill="none" stroke="black" stroke-dasharray="5,2" d="M260,-187.11C260,-187.11 260,-205.99 260,-205.99"/>
-<polygon fill="black" stroke="black" points="256.5,-205.99 260,-215.99 263.5,-205.99 256.5,-205.99"/>
+<path fill="none" stroke="black" stroke-dasharray="5,2" d="M236,-187.11C236,-187.11 236,-205.99 236,-205.99"/>
+<polygon fill="black" stroke="black" points="232.5,-205.99 236,-215.99 239.5,-205.99 232.5,-205.99"/>
 </g>
 <!-- PromotionsDbService -->
 <g id="node4" class="node">
 <title>PromotionsDbService</title>
-<ellipse fill="#fdb462" stroke="black" cx="181" cy="-104" rx="96.15" ry="18"/>
-<text text-anchor="middle" x="181" y="-99.8" font-family="Times,serif" font-size="14.00">PromotionsDbService</text>
+<ellipse fill="#fdb462" stroke="black" cx="315" cy="-104" rx="96.15" ry="18"/>
+<text text-anchor="middle" x="315" y="-99.8" font-family="Times,serif" font-size="14.00">PromotionsDbService</text>
 </g>
 <!-- PromotionsDbService&#45;&gt;PromotionsDbModule -->
 <g id="edge3" class="edge">
 <title>PromotionsDbService&#45;&gt;PromotionsDbModule</title>
-<path fill="none" stroke="black" d="M233.36,-119.4C233.36,-119.4 233.36,-140.94 233.36,-140.94"/>
-<polygon fill="black" stroke="black" points="229.86,-140.94 233.36,-150.94 236.86,-140.94 229.86,-140.94"/>
+<path fill="none" stroke="black" d="M262.64,-119.4C262.64,-119.4 262.64,-140.94 262.64,-140.94"/>
+<polygon fill="black" stroke="black" points="259.14,-140.94 262.64,-150.94 266.14,-140.94 259.14,-140.94"/>
 </g>
 </g>
 </svg>

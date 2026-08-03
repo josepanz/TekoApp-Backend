@@ -204,7 +204,7 @@ Maneja el registro público de nuevos usuarios</p>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/modules/onboarding/services/onboarding.service.ts:16</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/modules/onboarding/services/onboarding.service.ts:17</a></div>
                             </td>
                         </tr>
 
@@ -286,15 +286,15 @@ Maneja el registro público de nuevos usuarios</p>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>registerUser(data: literal type)</code>
+                    <code>registerUser(data: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="27"
-                                    class="link-to-prism">src/modules/onboarding/services/onboarding.service.ts:27</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="28"
+                                    class="link-to-prism">src/modules/onboarding/services/onboarding.service.ts:28</a></div>
                         </td>
                     </tr>
 
@@ -319,7 +319,7 @@ Maneja el registro público de nuevos usuarios</p>
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -374,7 +374,7 @@ Maneja el registro público de nuevos usuarios</p>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/modules/onboarding/services/onboarding.service.ts:16</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/modules/onboarding/services/onboarding.service.ts:17</a></div>
                         </td>
                     </tr>
 
@@ -396,6 +396,7 @@ import { EmailService } from &#x27;@modules/email/services/email.service&#x27;;
 import { EmailTypeEnum } from &#x27;@modules/email/enum/email-type.enum&#x27;;
 import { PrismaErrorCodes } from &#x27;@common/enum/prisma-error-codes.enum&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 /**
  * Servicio de Onboarding - Lógica de Negocio
  * Maneja el registro público de nuevos usuarios
@@ -435,7 +436,6 @@ export class OnboardingService {
         isLdap: false,
         acceptedTermsAt: data.acceptedTerms ? new Date() : null,
         documentTypeId: 1,
-        access_level: 0,
       });
 
       // 2. Crear credenciales (reutilizar lógica de passwords)
@@ -457,7 +457,7 @@ export class OnboardingService {
         error instanceof Prisma.PrismaClientKnownRequestError &amp;&amp;
         error.code &#x3D;&#x3D;&#x3D; (PrismaErrorCodes.UniqueConstraintFailed as string)
       ) {
-        throw new ConflictException(&#x27;Usuario ya existe.&#x27;);
+        throw new ConflictException(t(&#x27;onboarding.USER_ALREADY_EXISTS&#x27;));
       }
       throw error;
     }

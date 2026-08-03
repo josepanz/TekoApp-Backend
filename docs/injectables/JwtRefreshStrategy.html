@@ -142,10 +142,10 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>PassportStrategy(
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PassportStrategy(
   Strategy,
   &#x27;jwt-refresh&#x27;,
-)</code>
+)</a></code>
             </p>
 
 
@@ -189,7 +189,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/modules/auth/strategies/jwt-refresh.strategy.ts:16</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/modules/auth/strategies/jwt-refresh.strategy.ts:17</a></div>
                             </td>
                         </tr>
 
@@ -266,8 +266,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="34"
-                                    class="link-to-prism">src/modules/auth/strategies/jwt-refresh.strategy.ts:34</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="35"
+                                    class="link-to-prism">src/modules/auth/strategies/jwt-refresh.strategy.ts:35</a></div>
                         </td>
                     </tr>
 
@@ -330,6 +330,7 @@ import { IJwtPayload } from &#x27;@api/auth/interfaces&#x27;;
 import { APP_CONFIG, AppConfigType } from &#x27;@core/config/config-loader&#x27;;
 import { UserWithSecurities } from &#x27;@modules/auth/types/user.types&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
@@ -356,7 +357,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     const user &#x3D; await this.usersService.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new UnauthorizedException(&#x27;Usuario no encontrado o inactivo.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.USER_NOT_FOUND_OR_INACTIVE&#x27;));
     }
 
     return user;

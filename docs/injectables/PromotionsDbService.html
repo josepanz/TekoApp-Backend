@@ -285,8 +285,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="110"
-                                    class="link-to-prism">src/modules/promotions-db/services/promotions-db.service.ts:110</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="133"
+                                    class="link-to-prism">src/modules/promotions-db/services/promotions-db.service.ts:133</a></div>
                         </td>
                     </tr>
 
@@ -317,21 +317,33 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>applyTransaction(data: literal type)</code>
+                    <code>applyTransaction(data: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/modules/promotions-db/services/promotions-db.service.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="93"
+                                    class="link-to-prism">src/modules/promotions-db/services/promotions-db.service.ts:93</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Aplica la promoción de forma atómica: el <code>UPDATE ... WHERE (max_usage = -1 OR current_usage &lt; max_usage)</code> es la guarda contra la carrera — sin esto, dos aplicaciones concurrentes
+pueden leer el mismo <code>currentUsage</code> antes de que ninguna escriba (vía <code>validatePromotion</code>) y
+ambas pasar la validación, excediendo <code>maxUsage</code>. El UPDATE toma el lock de fila al escribir,
+así que el WHERE se re-evalúa contra el valor más reciente incluso bajo concurrencia — no
+hace falta un <code>SELECT FOR UPDATE</code> separado. Devuelve <code>false</code> si ya no había cupo (el caller
+no debe crear el registro de uso ni cobrar el descuento en ese caso).</p>
+<p>Gap conocido, no resuelto acá: el límite POR USUARIO (<code>maxUsagePerUser</code>) se sigue validando
+con una lectura previa no atómica (<code>countUsageByUser</code> en el service) — dos aplicaciones
+concurrentes del mismo usuario podrían igual exceder su propio límite individual. Resolverlo
+de forma general requeriría una constraint/lock adicional; el límite GLOBAL (el caso que
+reportó la auditoría) es el que se corrige acá.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -348,7 +360,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -361,7 +373,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+                            <b>Returns : </b>    <code>Promise&lt;boolean&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -386,15 +398,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>countPromotions(where?: Prisma.PromotionWhereInput)</code>
+                    <code>countPromotions(where?: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PromotionWhereInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="106"
-                                    class="link-to-prism">src/modules/promotions-db/services/promotions-db.service.ts:106</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="129"
+                                    class="link-to-prism">src/modules/promotions-db/services/promotions-db.service.ts:129</a></div>
                         </td>
                     </tr>
 
@@ -417,7 +429,7 @@
                                         <tr>
                                                 <td>where</td>
                                             <td>
-                                                        <code>Prisma.PromotionWhereInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PromotionWhereInput</a></code>
                                             </td>
 
                                             <td>
@@ -455,7 +467,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>countUsageByUser(promotionId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>countUsageByUser(promotionId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -486,7 +498,7 @@
                                         <tr>
                                                 <td>promotionId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -536,7 +548,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>create(data: Prisma.PromotionUncheckedCreateInput)</code>
+                    <code>create(data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PromotionUncheckedCreateInput</a>)</code>
                 </td>
             </tr>
 
@@ -567,7 +579,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.PromotionUncheckedCreateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PromotionUncheckedCreateInput</a></code>
                                             </td>
 
                                             <td>
@@ -605,7 +617,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deactivate(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>deactivate(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
@@ -636,7 +648,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -752,7 +764,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findByCode(code: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findByCode(code: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
@@ -783,7 +795,7 @@
                                         <tr>
                                                 <td>code</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -821,7 +833,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findById(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
@@ -852,7 +864,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -890,7 +902,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, data: Prisma.PromotionUpdateInput)</code>
+                    <code>update(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PromotionUpdateInput</a>)</code>
                 </td>
             </tr>
 
@@ -921,7 +933,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -933,7 +945,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.PromotionUpdateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PromotionUpdateInput</a></code>
                                             </td>
 
                                             <td>
@@ -1039,6 +1051,21 @@ export class PromotionsDbService {
     });
   }
 
+  /**
+   * Aplica la promoción de forma atómica: el &#x60;UPDATE ... WHERE (max_usage &#x3D; -1 OR current_usage
+   * &lt; max_usage)&#x60; es la guarda contra la carrera — sin esto, dos aplicaciones concurrentes
+   * pueden leer el mismo &#x60;currentUsage&#x60; antes de que ninguna escriba (vía &#x60;validatePromotion&#x60;) y
+   * ambas pasar la validación, excediendo &#x60;maxUsage&#x60;. El UPDATE toma el lock de fila al escribir,
+   * así que el WHERE se re-evalúa contra el valor más reciente incluso bajo concurrencia — no
+   * hace falta un &#x60;SELECT FOR UPDATE&#x60; separado. Devuelve &#x60;false&#x60; si ya no había cupo (el caller
+   * no debe crear el registro de uso ni cobrar el descuento en ese caso).
+   *
+   * Gap conocido, no resuelto acá: el límite POR USUARIO (&#x60;maxUsagePerUser&#x60;) se sigue validando
+   * con una lectura previa no atómica (&#x60;countUsageByUser&#x60; en el service) — dos aplicaciones
+   * concurrentes del mismo usuario podrían igual exceder su propio límite individual. Resolverlo
+   * de forma general requeriría una constraint/lock adicional; el límite GLOBAL (el caso que
+   * reportó la auditoría) es el que se corrige acá.
+   */
   async applyTransaction(data: {
     promotionId: string;
     userId: number;
@@ -1047,9 +1074,20 @@ export class PromotionsDbService {
     discountAmount: number;
     finalAmount: number;
     metadata?: Record&lt;string, unknown&gt;;
-  }): Promise&lt;void&gt; {
-    await this.prisma.extended.$transaction([
-      this.prisma.extended.promotionUsage.create({
+  }): Promise&lt;boolean&gt; {
+    return this.prisma.extended.$transaction(async (tx) &#x3D;&gt; {
+      const incremented &#x3D; await tx.$queryRaw&lt;{ id: string }[]&gt;&#x60;
+        UPDATE promotions
+        SET current_usage &#x3D; current_usage + 1
+        WHERE id &#x3D; ${data.promotionId}::uuid
+          AND (max_usage &#x3D; -1 OR current_usage &lt; max_usage)
+        RETURNING id
+      &#x60;;
+      if (incremented.length &#x3D;&#x3D;&#x3D; 0) {
+        return false;
+      }
+
+      await tx.promotionUsage.create({
         data: {
           promotionId: data.promotionId,
           userId: data.userId,
@@ -1059,12 +1097,9 @@ export class PromotionsDbService {
           finalAmount: data.finalAmount,
           metadata: data.metadata,
         },
-      }),
-      this.prisma.extended.promotion.update({
-        where: { id: data.promotionId },
-        data: { currentUsage: { increment: 1 } },
-      }),
-    ]);
+      });
+      return true;
+    });
   }
 
   async countPromotions(where?: Prisma.PromotionWhereInput) {

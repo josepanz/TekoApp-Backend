@@ -203,7 +203,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/api/locations/services/locations.service.ts:12</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/api/locations/services/locations.service.ts:13</a></div>
                             </td>
                         </tr>
 
@@ -278,8 +278,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="90"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:90</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="89"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:89</a></div>
                         </td>
                     </tr>
 
@@ -347,8 +347,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="35"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:35</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="34"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:34</a></div>
                         </td>
                     </tr>
 
@@ -416,8 +416,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="68"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:68</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="67"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:67</a></div>
                         </td>
                     </tr>
 
@@ -455,8 +455,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="47"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:47</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="46"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:46</a></div>
                         </td>
                     </tr>
 
@@ -524,8 +524,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="77"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:77</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="76"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:76</a></div>
                         </td>
                     </tr>
 
@@ -593,8 +593,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="106"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:106</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:105</a></div>
                         </td>
                     </tr>
 
@@ -662,8 +662,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="18"
-                                    class="link-to-prism">src/api/locations/services/locations.service.ts:18</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="19"
+                                    class="link-to-prism">src/api/locations/services/locations.service.ts:19</a></div>
                         </td>
                     </tr>
 
@@ -737,6 +737,7 @@ import { GetProfessionalsAreaQueryDTO } from &#x27;../dtos/request/get-professio
 import { CalculateDistanceQueryDTO } from &#x27;../dtos/request/calculate-distance-query.dto&#x27;;
 import { Professionals } from &#x27;@prisma/client&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class LocationsService {
   constructor(
@@ -750,9 +751,7 @@ export class LocationsService {
   ): Promise&lt;Professionals&gt; {
     const professional &#x3D; await this.locationsDb.findById(professionalId);
     if (!professional) {
-      throw new NotFoundException(
-        &#x27;Profesional no encontrado en los registros maestros&#x27;,
-      );
+      throw new NotFoundException(t(&#x27;locations.PROFESSIONAL_NOT_FOUND&#x27;));
     }
     return this.locationsDb.updateLocation(
       professionalId,
@@ -783,7 +782,7 @@ export class LocationsService {
       !professional.currentLongitude
     ) {
       throw new NotFoundException(
-        &#x27;El profesional solicitado no posee coordenadas activas de posicionamiento&#x27;,
+        t(&#x27;locations.PROFESSIONAL_WITHOUT_COORDINATES&#x27;),
       );
     }
 

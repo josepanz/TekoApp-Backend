@@ -1,4 +1,5 @@
 export * from './create-rating.request.dto';
+export * from './create-professional-to-client-rating.request.dto';
 export * from './update-rating.request.dto';
 export * from './report-rating.request.dto';
 export * from './rating-id.param.dto';

@@ -1,0 +1,6 @@
+{
+  "HTML_ENGINE_REQUIRES_TEMPLATE": "The HTML engine requires the \"templateHtml\" property.",
+  "NATIVE_ENGINE_REQUIRES_DEFINITION": "The Native engine requires the \"nativeDefinition\" property.",
+  "PDF_ENGINE_NOT_RECOGNIZED": "PDF engine \"{engine}\" not recognized.",
+  "UNSUPPORTED_FORMAT": "Unsupported format: {format}"
+}

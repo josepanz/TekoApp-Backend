@@ -204,8 +204,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="10"
-                                    class="link-to-prism">src/modules/report/services/report.service.ts:10</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="11"
+                                    class="link-to-prism">src/modules/report/services/report.service.ts:11</a></div>
                         </td>
                     </tr>
 
@@ -286,8 +286,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="31"
-                                    class="link-to-prism">src/modules/report/services/report.service.ts:31</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="32"
+                                    class="link-to-prism">src/modules/report/services/report.service.ts:32</a></div>
                         </td>
                     </tr>
 
@@ -358,6 +358,7 @@ import { ExcelGenerator } from &#x27;../infrastructure/excel-generator.hint&#x27
 import { PdfHtmlGenerator } from &#x27;../infrastructure/pdf-html-generator.hint&#x27;;
 import { PdfNativeGenerator } from &#x27;../infrastructure/pdf-native-generator.hint&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class ReportService implements IReportService {
   public async generate(
@@ -376,7 +377,7 @@ export class ReportService implements IReportService {
 
       default:
         throw new BadRequestException(
-          &#x60;Formato no soportado: ${options.format as string}&#x60;,
+          t(&#x27;report.UNSUPPORTED_FORMAT&#x27;, { format: options.format }),
         );
     }
   }
@@ -390,7 +391,7 @@ export class ReportService implements IReportService {
     if (engine &#x3D;&#x3D;&#x3D; &#x27;html&#x27;) {
       if (!options.templateHtml) {
         throw new BadRequestException(
-          &#x27;El motor HTML requiere la propiedad &quot;templateHtml&quot;.&#x27;,
+          t(&#x27;report.HTML_ENGINE_REQUIRES_TEMPLATE&#x27;),
         );
       }
       return await PdfHtmlGenerator.generate(payload, options.templateHtml);
@@ -399,14 +400,14 @@ export class ReportService implements IReportService {
     if (engine &#x3D;&#x3D;&#x3D; &#x27;native&#x27;) {
       if (!options.nativeDefinition) {
         throw new BadRequestException(
-          &#x27;El motor Nativo requiere la propiedad &quot;nativeDefinition&quot;.&#x27;,
+          t(&#x27;report.NATIVE_ENGINE_REQUIRES_DEFINITION&#x27;),
         );
       }
       return await PdfNativeGenerator.generate(options.nativeDefinition);
     }
 
     throw new BadRequestException(
-      &#x60;Motor PDF &quot;${engine as string}&quot; no reconocido.&#x60;,
+      t(&#x27;report.PDF_ENGINE_NOT_RECOGNIZED&#x27;, { engine: engine }),
     );
   }
 }

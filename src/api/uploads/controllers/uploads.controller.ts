@@ -40,6 +40,7 @@ import {
   UploadMerchantDocsDocs,
 } from '../docs/uploads.docs';
 
+import { t } from '@common/i18n/i18n.helper';
 @ApiTags('Uploads')
 @ApiBearerAuth()
 @Controller('uploads')
@@ -54,7 +55,7 @@ export class UploadsController {
   async uploadImage(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<FileInfoResponseDTO> {
-    if (!file) throw new BadRequestException('No se ha subido ningún archivo');
+    if (!file) throw new BadRequestException(t('uploads.NO_FILE_UPLOADED'));
     return this.uploadsService.uploadImage(file);
   }
 
@@ -65,7 +66,7 @@ export class UploadsController {
   async uploadDocument(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<FileInfoResponseDTO> {
-    if (!file) throw new BadRequestException('No se ha subido ningún archivo');
+    if (!file) throw new BadRequestException(t('uploads.NO_FILE_UPLOADED'));
     return this.uploadsService.uploadDocument(file);
   }
 
@@ -76,7 +77,7 @@ export class UploadsController {
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<FileInfoResponseDTO> {
-    if (!file) throw new BadRequestException('No se ha subido ningún archivo');
+    if (!file) throw new BadRequestException(t('uploads.NO_FILE_UPLOADED'));
     return this.uploadsService.uploadAvatar(file);
   }
 
@@ -110,7 +111,7 @@ export class UploadsController {
     description: 'Clave S3 del archivo',
   })
   async getPresignedUrl(@Query('key') key: string): Promise<{ url: string }> {
-    if (!key) throw new BadRequestException('El parámetro key es requerido');
+    if (!key) throw new BadRequestException(t('uploads.KEY_PARAM_REQUIRED'));
     const url = await this.uploadsService.getPresignedUrl(key);
     return { url };
   }
@@ -131,6 +132,6 @@ export class UploadsController {
     @Param() param: UploadFileParamDTO,
   ): Promise<{ message: string }> {
     await this.uploadsService.deleteFile(param.filename);
-    return { message: 'Archivo eliminado exitosamente' };
+    return { message: t('uploads.FILE_DELETED') };
   }
 }

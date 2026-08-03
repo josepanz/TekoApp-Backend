@@ -161,6 +161,14 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#getMyProfessionalProfile" >getMyProfessionalProfile</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getNearbyProfessionals" >getNearbyProfessionals</a>
                             </li>
@@ -171,6 +179,14 @@
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#getProfessionalById" >getProfessionalById</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
+                                <a href="#getProfessionalByReference" >getProfessionalByReference</a>
                             </li>
                             <li>
                                     <span class="modifier"></span>
@@ -254,6 +270,13 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier">Async</span>
+                                <a href="#updateProfessionalByReference" >updateProfessionalByReference</a>
+                            </li>
+                            <li>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier"></span>
+                                    <span class="modifier">Async</span>
                                 <a href="#verifyProfessional" >verifyProfessional</a>
                             </li>
                         </ul>
@@ -273,6 +296,86 @@
     <h3 id="methods">
         Methods
     </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getMyProfessionalProfile"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>getMyProfessionalProfile</b></span>
+                        <a href="#getMyProfessionalProfile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getMyProfessionalProfile(req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;me&#x27;)<br />@ApiOperation({summary: &#x27;Obtener el perfil profesional propio del usuario autenticado&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br />@ApiResponse({status: 404, description: &#x27;El usuario autenticado no tiene perfil profesional&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:107</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
     <table class="table table-sm table-bordered">
         <tbody>
             <tr>
@@ -305,8 +408,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="73"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:73</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:74</a></div>
                         </td>
                     </tr>
 
@@ -385,8 +488,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="101"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:101</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="144"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:144</a></div>
                         </td>
                     </tr>
 
@@ -410,6 +513,86 @@
                                                 <td>param</td>
                                             <td>
                                                             <code><a href="../classes/ProfessionalIdParamDTO.html" target="_self" >ProfessionalIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getProfessionalByReference"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>getProfessionalByReference</b></span>
+                        <a href="#getProfessionalByReference"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getProfessionalByReference(param: <a href="../classes/ProfessionalReferenceIdParamDTO.html" target="_self">ProfessionalReferenceIdParamDTO</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Get(&#x27;reference/:referenceId&#x27;)<br />@ApiOperation({summary: &#x27;Obtener un profesional por su referenceId&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br />@ApiResponse({status: 404, description: &#x27;Profesional no encontrado&#x27;})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="117"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:117</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>param</td>
+                                            <td>
+                                                            <code><a href="../classes/ProfessionalReferenceIdParamDTO.html" target="_self" >ProfessionalReferenceIdParamDTO</a></code>
                                             </td>
 
                                             <td>
@@ -464,8 +647,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="161"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:161</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="204"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:204</a></div>
                         </td>
                     </tr>
 
@@ -555,8 +738,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="64"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:64</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:65</a></div>
                         </td>
                     </tr>
 
@@ -634,8 +817,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="151"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:151</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="194"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:194</a></div>
                         </td>
                     </tr>
 
@@ -725,8 +908,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="171"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:171</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="214"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:214</a></div>
                         </td>
                     </tr>
 
@@ -804,8 +987,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="91"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:91</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="92"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:92</a></div>
                         </td>
                     </tr>
 
@@ -869,7 +1052,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>registerProfessional(dto: <a href="../classes/CreateProfessionalRequestDTO.html" target="_self">CreateProfessionalRequestDTO</a>, req: literal type)</code>
+                    <code>registerProfessional(dto: <a href="../classes/CreateProfessionalRequestDTO.html" target="_self">CreateProfessionalRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
@@ -883,8 +1066,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="54"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:54</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="55"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:55</a></div>
                         </td>
                     </tr>
 
@@ -919,7 +1102,7 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -974,8 +1157,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="82"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:82</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="83"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:83</a></div>
                         </td>
                     </tr>
 
@@ -1039,7 +1222,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>suspendProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/SuspendProfessionalRequestDTO.html" target="_self">SuspendProfessionalRequestDTO</a>, req: literal type)</code>
+                    <code>suspendProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/SuspendProfessionalRequestDTO.html" target="_self">SuspendProfessionalRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
@@ -1053,8 +1236,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="195"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:195</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="238"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:238</a></div>
                         </td>
                     </tr>
 
@@ -1101,7 +1284,7 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1142,7 +1325,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateAvailability(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateAvailabilityRequestDTO.html" target="_self">UpdateAvailabilityRequestDTO</a>, req: literal type)</code>
+                    <code>updateAvailability(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateAvailabilityRequestDTO.html" target="_self">UpdateAvailabilityRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
@@ -1156,8 +1339,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="125"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:125</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="168"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:168</a></div>
                         </td>
                     </tr>
 
@@ -1204,7 +1387,7 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1245,7 +1428,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateLocation(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalLocationRequestDTO.html" target="_self">UpdateProfessionalLocationRequestDTO</a>, req: literal type)</code>
+                    <code>updateLocation(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalLocationRequestDTO.html" target="_self">UpdateProfessionalLocationRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
@@ -1259,8 +1442,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="140"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:140</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="183"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:183</a></div>
                         </td>
                     </tr>
 
@@ -1307,7 +1490,7 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1348,7 +1531,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalRequestDTO.html" target="_self">UpdateProfessionalRequestDTO</a>, req: literal type)</code>
+                    <code>updateProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalRequestDTO.html" target="_self">UpdateProfessionalRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
@@ -1362,8 +1545,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="110"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:110</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:153</a></div>
                         </td>
                     </tr>
 
@@ -1410,7 +1593,110 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="updateProfessionalByReference"></a>
+                    <span class="name">
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier"></span>
+                            <span class="modifier">Async</span>
+                        <span ><b>updateProfessionalByReference</b></span>
+                        <a href="#updateProfessionalByReference"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updateProfessionalByReference(param: <a href="../classes/ProfessionalReferenceIdParamDTO.html" target="_self">ProfessionalReferenceIdParamDTO</a>, dto: <a href="../classes/UpdateProfessionalRequestDTO.html" target="_self">UpdateProfessionalRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-4">
+                    <b>Decorators : </b>
+                    <br />
+                    <code>@Put(&#x27;reference/:referenceId&#x27;)<br />@ApiOperation({summary: &#x27;Actualizar perfil de profesional por referenceId&#x27;})<br />@ApiResponse({status: 200, type: ProfessionalDetailResponseDTO})<br /></code>
+                </td>
+            </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="128"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:128</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>param</td>
+                                            <td>
+                                                            <code><a href="../classes/ProfessionalReferenceIdParamDTO.html" target="_self" >ProfessionalReferenceIdParamDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateProfessionalRequestDTO.html" target="_self" >UpdateProfessionalRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>req</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1451,7 +1737,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>verifyProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/VerifyProfessionalRequestDTO.html" target="_self">VerifyProfessionalRequestDTO</a>, req: literal type)</code>
+                    <code>verifyProfessional(param: <a href="../classes/ProfessionalIdParamDTO.html" target="_self">ProfessionalIdParamDTO</a>, dto: <a href="../classes/VerifyProfessionalRequestDTO.html" target="_self">VerifyProfessionalRequestDTO</a>, req: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
@@ -1465,8 +1751,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="180"
-                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:180</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="223"
+                                    class="link-to-prism">src/api/professionals/controllers/professionals.controller.ts:223</a></div>
                         </td>
                     </tr>
 
@@ -1513,7 +1799,7 @@
                                         <tr>
                                                 <td>req</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1562,6 +1848,7 @@ import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.i
 import { ProfessionalsService } from &#x27;../services/professionals.service&#x27;;
 import {
   ProfessionalIdParamDTO,
+  ProfessionalReferenceIdParamDTO,
   GetProfessionalsListQueryDTO,
   GetNearbyProfessionalsQueryDTO,
   SearchBySkillsQueryDTO,
@@ -1634,6 +1921,48 @@ export class ProfessionalsController {
     @Query() query: GetTopRatedQueryDTO,
   ): Promise&lt;ProfessionalDetailResponseDTO[]&gt; {
     return this.professionalsService.getTopRatedProfessionals(query);
+  }
+
+  @Get(&#x27;me&#x27;)
+  @ApiOperation({
+    summary: &#x27;Obtener el perfil profesional propio del usuario autenticado&#x27;,
+  })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
+  @ApiResponse({
+    status: 404,
+    description: &#x27;El usuario autenticado no tiene perfil profesional&#x27;,
+  })
+  async getMyProfessionalProfile(
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    return this.professionalsService.getMyProfessionalProfile(req.user.id);
+  }
+
+  @Get(&#x27;reference/:referenceId&#x27;)
+  @ApiOperation({ summary: &#x27;Obtener un profesional por su referenceId&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
+  @ApiResponse({ status: 404, description: &#x27;Profesional no encontrado&#x27; })
+  async getProfessionalByReference(
+    @Param() param: ProfessionalReferenceIdParamDTO,
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    return this.professionalsService.getProfessionalByReference(
+      param.referenceId,
+    );
+  }
+
+  @Put(&#x27;reference/:referenceId&#x27;)
+  @ApiOperation({ summary: &#x27;Actualizar perfil de profesional por referenceId&#x27; })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
+  async updateProfessionalByReference(
+    @Param() param: ProfessionalReferenceIdParamDTO,
+    @Body() dto: UpdateProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    return this.professionalsService.updateProfessionalByReference(
+      param.referenceId,
+      dto,
+      req.user.id,
+    );
   }
 
   @Get(&#x27;:id&#x27;)

@@ -1,0 +1,5 @@
+{
+  "SET_PASSWORD_SEND_ERROR": "Error while sending the password creation email.",
+  "UNKNOWN_EMAIL_TYPE": "Unrecognized email type.",
+  "USER_NOT_FOUND_OR_INACTIVE": "User not found or inactive."
+}

@@ -1,41 +1,86 @@
-## <small>1.0.2 (2026-07-20)</small>
+## 1.0.0-develop.13 (2026-08-03)
 
-* docs: remove temp CI diagnostics, update context.md and session log ([9fe1c5c](https://github.com/josepanz/TekoApp-Backend/commit/9fe1c5c))
+* docs: regenerate compodoc ([1d13fa1](https://github.com/josepanz/TekoApp-Backend/commit/1d13fa1))
+* docs: regenerate compodoc (#18) ([ede3dae](https://github.com/josepanz/TekoApp-Backend/commit/ede3dae)), closes [#18](https://github.com/josepanz/TekoApp-Backend/issues/18)
 
-## <small>1.0.1 (2026-07-20)</small>
+## 1.0.0-develop.12 (2026-08-03)
 
-* ci: fetch tags explicitly for semantic-release, ignore .engram, log session 12 ([e062f58](https://github.com/josepanz/TekoApp-Backend/commit/e062f58))
-* chore: jest improve ([2fbdcdd](https://github.com/josepanz/TekoApp-Backend/commit/2fbdcdd))
+* feat(auth): fase B - historico, expiracion, complejidad, hash de secretKey y nonce en login ([5ef8e49](https://github.com/josepanz/TekoApp-Backend/commit/5ef8e49)), closes [CredentialsRepository#rotatePassword](https://github.com/CredentialsRepository/issues/rotatePassword) [AuthTokenService#generateAccessTokenFromRefresh](https://github.com/AuthTokenService/issues/generateAccessTokenFromRefresh) [CredentialsRepository#findRecentByUserId](https://github.com/CredentialsRepository/issues/findRecentByUserId)
+* feat(config): validacion Joi.valid en NODE_ENV/SEQ_ENABLED y pepper de auditoria por env ([c6f48b5](https://github.com/josepanz/TekoApp-Backend/commit/c6f48b5))
+* feat(db/refactor/security): refactor and security hardening (#15) ([2bdcd62](https://github.com/josepanz/TekoApp-Backend/commit/2bdcd62)), closes [#15](https://github.com/josepanz/TekoApp-Backend/issues/15) [payment-db.service.ts#executeRefund](https://github.com/payment-db.service.ts/issues/executeRefund) [payment-db.service.ts#getPaymentTrends](https://github.com/payment-db.service.ts/issues/getPaymentTrends)
+* feat(i18n): completar esqueleto Country/Currency/Language (Fase C) ([bf4778f](https://github.com/josepanz/TekoApp-Backend/commit/bf4778f))
+* feat(i18n): traduccion completa es/en de la API con nestjs-i18n ([1022dbb](https://github.com/josepanz/TekoApp-Backend/commit/1022dbb))
+* feat(notifications): implementar SSE + Web Push (VAPID) + FCM reales ([38b4d9a](https://github.com/josepanz/TekoApp-Backend/commit/38b4d9a))
+* feat(users): avatarUrl + autoedicion de perfil (PUT /auth/me) ([ef947ee](https://github.com/josepanz/TekoApp-Backend/commit/ef947ee))
+* fix(auth): conectar el cliente Redis de nonces al iniciar, no en el primer comando ([66a5fc4](https://github.com/josepanz/TekoApp-Backend/commit/66a5fc4))
+* fix: get /services/:id no traía professional.user, crasheaba el detail view del frontend ([52b50fc](https://github.com/josepanz/TekoApp-Backend/commit/52b50fc))
+* fix(infra): agregar proxy-body-size y timeouts al ingress nginx en los 3 ambientes ([589389c](https://github.com/josepanz/TekoApp-Backend/commit/589389c))
+* fix(infra): usar Etc/GMT+3 en vez de America/Asuncion para la zona horaria ([c761478](https://github.com/josepanz/TekoApp-Backend/commit/c761478)), closes [health.controller.ts#toZonedTime](https://github.com/health.controller.ts/issues/toZonedTime)
+* fix(locations): parametrizar query de geolocalizacion contra inyeccion SQL ([83b67db](https://github.com/josepanz/TekoApp-Backend/commit/83b67db))
+* fix: notifications devuelve documentos Mongoose crudos y ratings mal anotado en Swagger ([9a7f23b](https://github.com/josepanz/TekoApp-Backend/commit/9a7f23b))
+* fix(notifications): campo userId de Mongo como Number, no ObjectId ([6d2ad71](https://github.com/josepanz/TekoApp-Backend/commit/6d2ad71))
+* fix(notifications): usar el id numerico del JWT en vez de String() para el ObjectId de Mongo ([0354fb7](https://github.com/josepanz/TekoApp-Backend/commit/0354fb7))
+* fix(users): eliminar codigo legacy de merchant-context y fixear endpoints rotos ([4613de2](https://github.com/josepanz/TekoApp-Backend/commit/4613de2))
+* fix(users): guardar la KEY de S3 del avatar, no la URL presignada ([2306d99](https://github.com/josepanz/TekoApp-Backend/commit/2306d99))
+* docs: decision de arquitectura para notificaciones push (Web Push + FCM) ([f28cfd6](https://github.com/josepanz/TekoApp-Backend/commit/f28cfd6))
+* docs: regenerar Compodoc (estaba desactualizado desde junio) ([41643c2](https://github.com/josepanz/TekoApp-Backend/commit/41643c2))
+* chore(claude): instalar graphify y reglas de auditoria comparativa con portal-comercios ([7c44bcd](https://github.com/josepanz/TekoApp-Backend/commit/7c44bcd))
+* chore(claude): portar comandos /commit y /cherry-pick desde portal-comercios-backend ([909a239](https://github.com/josepanz/TekoApp-Backend/commit/909a239))
+* refactor(db): patron id secuencial+referenceId en los 6 modelos que usaban UUID como PK ([0df8e5c](https://github.com/josepanz/TekoApp-Backend/commit/0df8e5c)), closes [payment-db.service.ts#executeRefund](https://github.com/payment-db.service.ts/issues/executeRefund) [payment-db.service.ts#getPaymentTrends](https://github.com/payment-db.service.ts/issues/getPaymentTrends)
 
-## 1.0.0 (2026-06-11)
+## 1.0.0-develop.11 (2026-07-20)
 
-* feat: chmod .sh files ([e64360a](https://github.com/josepanz/TekoApp-Backend/commit/e64360a))
-* feat: initial architecture and module setup with ci/cd configuration (#14) ([ba494e9](https://github.com/josepanz/TekoApp-Backend/commit/ba494e9)), closes [#14](https://github.com/josepanz/TekoApp-Backend/issues/14) [#7](https://github.com/josepanz/TekoApp-Backend/issues/7) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* feat: initial arquitecture and modules (#3) ([18869c7](https://github.com/josepanz/TekoApp-Backend/commit/18869c7)), closes [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* Initial commit ([add3760](https://github.com/josepanz/TekoApp-Backend/commit/add3760))
-* Update README.md ([31c509b](https://github.com/josepanz/TekoApp-Backend/commit/31c509b))
-* Update README.md ([c1d61b8](https://github.com/josepanz/TekoApp-Backend/commit/c1d61b8))
-* Update README.md ([1af2460](https://github.com/josepanz/TekoApp-Backend/commit/1af2460))
+* docs: remove temp CI diagnostics, update context.md and session log ([9eb81d9](https://github.com/josepanz/TekoApp-Backend/commit/9eb81d9))
 
-## 1.0.0-qa.1 (2026-06-11)
+## 1.0.0-develop.10 (2026-07-20)
 
-* feat: dto reestructure and fee calculator ([c51e2c2](https://github.com/josepanz/TekoApp-Backend/commit/c51e2c2))
-* feat: enhance ci/cd configuration and improve deployment pipelines 2 (#13) ([04d6d93](https://github.com/josepanz/TekoApp-Backend/commit/04d6d93)), closes [#13](https://github.com/josepanz/TekoApp-Backend/issues/13) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* feat: enhance ci/cd configuration and improve deployment workflows2 (#12) ([bad7db6](https://github.com/josepanz/TekoApp-Backend/commit/bad7db6)), closes [#12](https://github.com/josepanz/TekoApp-Backend/issues/12) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* feat: enhance ci/cd configuration and initial architecture setup (#11) ([23386d4](https://github.com/josepanz/TekoApp-Backend/commit/23386d4)), closes [#11](https://github.com/josepanz/TekoApp-Backend/issues/11) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* feat: fix build startup and eslint any cleanup ([a5fd275](https://github.com/josepanz/TekoApp-Backend/commit/a5fd275))
-* feat: improve readme and files ([95d4d11](https://github.com/josepanz/TekoApp-Backend/commit/95d4d11))
-* feat: improve redis and some errors ([3db998b](https://github.com/josepanz/TekoApp-Backend/commit/3db998b))
+* ci: enable semantic-release debug logging (temp) ([07aa6d7](https://github.com/josepanz/TekoApp-Backend/commit/07aa6d7))
+* ci: fetch tags explicitly for semantic-release, ignore .engram, log session 12 ([5715d41](https://github.com/josepanz/TekoApp-Backend/commit/5715d41))
+* ci: temp diagnostics for semantic-release tag detection ([3c1d22f](https://github.com/josepanz/TekoApp-Backend/commit/3c1d22f))
+* chore: jest improve ([7a1d551](https://github.com/josepanz/TekoApp-Backend/commit/7a1d551))
+
+## 1.0.0-develop.9 (2026-06-11)
+
+* feat: improve pipeline 2 ([e577647](https://github.com/josepanz/TekoApp-Backend/commit/e577647))
+
+## 1.0.0-develop.6 (2026-06-11)
+
+* feat: improve deploy qa pipeline ([617ce52](https://github.com/josepanz/TekoApp-Backend/commit/617ce52))
+
+## 1.0.0-develop.5 (2026-06-10)
+
+* Merge branch 'qa' into develop ([8c12f1c](https://github.com/josepanz/TekoApp-Backend/commit/8c12f1c))
 * feat: improve, ci-cd and github config (#10) ([36dd1cb](https://github.com/josepanz/TekoApp-Backend/commit/36dd1cb)), closes [#10](https://github.com/josepanz/TekoApp-Backend/issues/10) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* feat: improves, all tests, no pendings ([09abdfe](https://github.com/josepanz/TekoApp-Backend/commit/09abdfe))
-* feat: initial arquitecture and modules ([3f65553](https://github.com/josepanz/TekoApp-Backend/commit/3f65553))
+
+## 1.0.0-develop.4 (2026-06-10)
+
+* feat: add input for deployment environment in pipeline ([21963d3](https://github.com/josepanz/TekoApp-Backend/commit/21963d3))
+
+## 1.0.0-develop.3 (2026-06-10)
+
+* Merge branch 'qa' into develop ([94c4138](https://github.com/josepanz/TekoApp-Backend/commit/94c4138))
 * feat: initial arquitecture and modules  (#2) ([974835c](https://github.com/josepanz/TekoApp-Backend/commit/974835c)), closes [#2](https://github.com/josepanz/TekoApp-Backend/issues/2)
-* feat: initial arquitecture and modules (#1) ([a3ddc24](https://github.com/josepanz/TekoApp-Backend/commit/a3ddc24)), closes [#1](https://github.com/josepanz/TekoApp-Backend/issues/1)
 * feat: initial deploy with github ci/cd (#7) ([dbe21e2](https://github.com/josepanz/TekoApp-Backend/commit/dbe21e2)), closes [#7](https://github.com/josepanz/TekoApp-Backend/issues/7) [#4](https://github.com/josepanz/TekoApp-Backend/issues/4) [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
-* feat: professionals api and modules db reestructure ([31cfaba](https://github.com/josepanz/TekoApp-Backend/commit/31cfaba))
-* feat: refactor 1 ([9039ec5](https://github.com/josepanz/TekoApp-Backend/commit/9039ec5))
-* feat: test, migration db module ([3736299](https://github.com/josepanz/TekoApp-Backend/commit/3736299))
-* Initial commit ([add3760](https://github.com/josepanz/TekoApp-Backend/commit/add3760))
-* Update README.md ([31c509b](https://github.com/josepanz/TekoApp-Backend/commit/31c509b))
-* Update README.md ([c1d61b8](https://github.com/josepanz/TekoApp-Backend/commit/c1d61b8))
-* Update README.md ([1af2460](https://github.com/josepanz/TekoApp-Backend/commit/1af2460))
+
+## 1.0.0-develop.2 (2026-06-10)
+
+* feat: improve, ci-cd and github config (#8) ([04db574](https://github.com/josepanz/TekoApp-Backend/commit/04db574)), closes [#8](https://github.com/josepanz/TekoApp-Backend/issues/8)
+* feat: improve, ci-cd and github config (#9) ([7191fd8](https://github.com/josepanz/TekoApp-Backend/commit/7191fd8)), closes [#9](https://github.com/josepanz/TekoApp-Backend/issues/9)
+
+# 1.0.0-develop.1 (2026-06-10)
+
+
+### Features
+
+* dto reestructure and fee calculator ([c51e2c2](https://github.com/josepanz/TekoApp-Backend/commit/c51e2c2da100f3151a81b93dad5537af2ee3ccba))
+* fix build startup and eslint any cleanup ([a5fd275](https://github.com/josepanz/TekoApp-Backend/commit/a5fd2754b59ed566a4bf2d5da12411fe47e1ec4f))
+* github ci/cd configuration ([#4](https://github.com/josepanz/TekoApp-Backend/issues/4)) ([404bf43](https://github.com/josepanz/TekoApp-Backend/commit/404bf43f91741a3293bfb94025707f7ff3e93cb0)), closes [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+* github ci/cd configuration 2 ([#5](https://github.com/josepanz/TekoApp-Backend/issues/5)) ([3cc40ba](https://github.com/josepanz/TekoApp-Backend/commit/3cc40ba85f29f334c65e300eac0f28f478423d61)), closes [#3](https://github.com/josepanz/TekoApp-Backend/issues/3)
+* improve readme and files ([95d4d11](https://github.com/josepanz/TekoApp-Backend/commit/95d4d11740a2d6a1a29ebbd9a0429f85c2b05d63))
+* improve redis and some errors ([3db998b](https://github.com/josepanz/TekoApp-Backend/commit/3db998b0fae776b5a4e9a3ec508f45aa12ba52cb))
+* improves, all tests, no pendings ([09abdfe](https://github.com/josepanz/TekoApp-Backend/commit/09abdfe58a90c214ae7ebe2d011ab228d282c514))
+* initial arquitecture and modules ([3f65553](https://github.com/josepanz/TekoApp-Backend/commit/3f655531ddbba99cef21bac695147588b3c9b193))
+* initial arquitecture and modules ([#1](https://github.com/josepanz/TekoApp-Backend/issues/1)) ([a3ddc24](https://github.com/josepanz/TekoApp-Backend/commit/a3ddc240e4833a40d4e2bee8da4bfbdc06d00b43))
+* professionals api and modules db reestructure ([31cfaba](https://github.com/josepanz/TekoApp-Backend/commit/31cfabad8c8fa1905a308120d289cfde582ec909))
+* refactor 1 ([9039ec5](https://github.com/josepanz/TekoApp-Backend/commit/9039ec5dd8a80e4878763dd5909de7162725a9f6))
+* test, migration db module ([3736299](https://github.com/josepanz/TekoApp-Backend/commit/37362995491fa9c6ef4286947ce33651a2bf4583))

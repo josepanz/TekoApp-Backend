@@ -9,6 +9,7 @@ import { AuthService } from '@modules/auth/services/auth.service';
 import { EmailService } from '@modules/email/services/email.service';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import * as DTO from '@api/auth/dtos';
 
 // ─── Mock functions (module-scope standalone, evita @typescript-eslint/unbound-method) ───
@@ -16,6 +17,8 @@ import * as DTO from '@api/auth/dtos';
 const mockLogin = jest.fn();
 const mockCreatePassword = jest.fn();
 const mockChangePassword = jest.fn();
+const mockChangeExpiredPassword = jest.fn();
+const mockGenerateNonce = jest.fn();
 const mockResetPassword = jest.fn();
 const mockAuthRefreshAccessToken = jest.fn();
 const mockGetUserScope = jest.fn();
@@ -23,6 +26,7 @@ const mockVerifyUser = jest.fn();
 const mockCheckVerificationStatus = jest.fn();
 
 const mockFindUserById = jest.fn();
+const mockUpdateUser = jest.fn();
 
 const mockLoginAndVerifyLegacyUser = jest.fn();
 
@@ -31,6 +35,7 @@ const mockVerifyTempToken = jest.fn();
 const mockVerifyForgotPasswordToken = jest.fn();
 
 const mockSendEmailByType = jest.fn();
+const mockGetPresignedUrl = jest.fn();
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -47,7 +52,6 @@ const mockUser = {
   isEmployee: false,
   documentNumber: '12345678',
   documentTypeId: 1,
-  legacyUserId: null,
   isLdap: false,
   lastLogin: null,
   createdAt: new Date('2024-01-01'),
@@ -82,7 +86,10 @@ describe('AuthApiService', () => {
         AuthApiService,
         {
           provide: UsersDBService,
-          useValue: { findUserById: mockFindUserById },
+          useValue: {
+            findUserById: mockFindUserById,
+            updateUser: mockUpdateUser,
+          },
         },
         {
           provide: AuthService,
@@ -90,6 +97,8 @@ describe('AuthApiService', () => {
             login: mockLogin,
             createPassword: mockCreatePassword,
             changePassword: mockChangePassword,
+            changeExpiredPassword: mockChangeExpiredPassword,
+            generateNonce: mockGenerateNonce,
             resetPassword: mockResetPassword,
             refreshAccessToken: mockAuthRefreshAccessToken,
             getUserScope: mockGetUserScope,
@@ -108,6 +117,10 @@ describe('AuthApiService', () => {
             verifyTempToken: mockVerifyTempToken,
             verifyForgotPasswordToken: mockVerifyForgotPasswordToken,
           },
+        },
+        {
+          provide: UploadsService,
+          useValue: { getPresignedUrl: mockGetPresignedUrl },
         },
       ],
     }).compile();
@@ -261,6 +274,113 @@ describe('AuthApiService', () => {
     });
   });
 
+  // ─── changeExpiredPassword ────────────────────────────────────────────────
+
+  describe('changeExpiredPassword', () => {
+    it('delega el cambio de contraseña expirada al AuthService y retorna el resultado', async () => {
+      const payload: DTO.ChangeExpiredPasswordDTO = {
+        email: 'usuario@test.com',
+        encryptedOldPassword: 'oldPass',
+        encryptedNewPassword: 'newPass',
+      };
+      mockChangeExpiredPassword.mockResolvedValue({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+      });
+
+      const result = await service.changeExpiredPassword(payload);
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+      });
+      expect(mockChangeExpiredPassword).toHaveBeenCalledWith(payload);
+    });
+  });
+
+  // ─── generateNonce ────────────────────────────────────────────────────────
+
+  describe('generateNonce', () => {
+    it('retorna el nonce emitido por el AuthService', async () => {
+      mockGenerateNonce.mockResolvedValue({ nonce: 'nonce-abc' });
+
+      const result = await service.generateNonce();
+
+      expect(result).toEqual({ nonce: 'nonce-abc' });
+      expect(mockGenerateNonce).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ─── me ───────────────────────────────────────────────────────────────────
+
+  describe('me', () => {
+    it('mapea el usuario del JWT al perfil público sin exponer el id interno', () => {
+      const result = service.me(mockJwtUser);
+
+      expect(result).toEqual({
+        id: mockJwtUser.referenceId,
+        email: mockJwtUser.email,
+        firstName: mockJwtUser.firstName,
+        lastName: mockJwtUser.lastName,
+        status: mockJwtUser.userStatus,
+        profileStatus: mockJwtUser.profileStatus,
+        accessLevelId: mockJwtUser.accessLevelId,
+        roles: mockJwtUser.roles,
+        permissions: mockJwtUser.permissions,
+      });
+    });
+  });
+
+  // ─── updateMe ─────────────────────────────────────────────────────────────
+
+  describe('updateMe', () => {
+    it('debe actualizar los datos propios del usuario y devolver el perfil con la URL del avatar resuelta fresca', async () => {
+      // Arrange
+      const dto: DTO.UpdateMeRequestDTO = {
+        firstName: 'Juana',
+        avatarKey: 'a1b2c3.jpg',
+      };
+      const updatedUser = {
+        ...mockUser,
+        firstName: 'Juana',
+        avatarKey: 'a1b2c3.jpg',
+      };
+      mockUpdateUser.mockResolvedValue(updatedUser);
+      mockGetPresignedUrl.mockResolvedValue(
+        'https://s3.amazonaws.com/tekoapp/a1b2c3.jpg?X-Amz-Signature=...',
+      );
+
+      // Act
+      const result = await service.updateMe(mockJwtUser, dto);
+
+      // Assert
+      expect(mockUpdateUser).toHaveBeenCalledWith(
+        mockJwtUser.id,
+        {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          phoneNumber: dto.phoneNumber,
+          avatarKey: dto.avatarKey,
+        },
+        mockJwtUser.email,
+      );
+      expect(mockGetPresignedUrl).toHaveBeenCalledWith('a1b2c3.jpg');
+      expect(result).toEqual({
+        id: updatedUser.referenceId,
+        email: updatedUser.email,
+        firstName: 'Juana',
+        lastName: updatedUser.lastName,
+        avatarUrl:
+          'https://s3.amazonaws.com/tekoapp/a1b2c3.jpg?X-Amz-Signature=...',
+        status: updatedUser.status,
+        profileStatus: updatedUser.profileStatus,
+        accessLevelId: updatedUser.accessLevelId,
+        roles: mockJwtUser.roles,
+        permissions: mockJwtUser.permissions,
+      });
+    });
+  });
+
   // ─── forgotPassword ───────────────────────────────────────────────────────
 
   describe('forgotPassword', () => {
@@ -335,6 +455,7 @@ describe('AuthApiService', () => {
         id: mockUser.referenceId,
         email: mockUser.email,
         phoneNumber: mockUser.phoneNumber,
+        avatarUrl: null,
         firstName: mockUser.firstName,
         lastName: mockUser.lastName,
         status: mockUser.status,

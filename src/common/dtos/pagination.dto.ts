@@ -3,6 +3,7 @@ import { IsOrderByFormat } from '@common/validators';
 import { IsEndDateAfterStartDate } from '@common/validators/date-range.validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, TransformFnParams, Type } from 'class-transformer';
+import { i18nValidationMessage } from 'nestjs-i18n';
 import {
   IsDate,
   IsNotEmpty,
@@ -60,7 +61,7 @@ export class PaginationQueryDTO {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1, { message: 'La pagina no puede ser menor a 0' })
+  @Min(1, { message: i18nValidationMessage('validation.PAGE_MIN') })
   page?: number;
 
   @ApiPropertyOptional({
@@ -71,7 +72,7 @@ export class PaginationQueryDTO {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1, { message: 'El tamaño de pagina no puede ser menor a 0' })
+  @Min(1, { message: i18nValidationMessage('validation.PAGE_SIZE_MIN') })
   pageSize?: number;
 
   @ApiPropertyOptional({
@@ -103,14 +104,18 @@ export class PaginationQueryDTO {
     example: '1,2,3',
   })
   @IsString({
-    message: 'El código de sucursal debe ser una cadena de texto',
+    message: i18nValidationMessage('validation.BRANCH_CODE_MUST_BE_STRING'),
   })
   @Transform(({ value }: TransformFnParams): unknown =>
     typeof value === 'string' ? value.trim() : value,
   )
   @IsOptional()
-  @IsNotEmpty({ message: 'El código de sucursal no puede venir vacio.' })
-  @IsMaxCommaSeparated(10, { message: 'Demasiadas sucursales, máximmo 10' })
+  @IsNotEmpty({
+    message: i18nValidationMessage('validation.BRANCH_CODE_NOT_EMPTY'),
+  })
+  @IsMaxCommaSeparated(10, {
+    message: i18nValidationMessage('validation.BRANCHES_TOO_MANY'),
+  })
   branches?: string;
 }
 

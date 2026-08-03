@@ -226,7 +226,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/common/helpers/custom-http-response-helper.helper.ts:17</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="18" class="link-to-prism">src/common/helpers/custom-http-response-helper.helper.ts:18</a></div>
                         </td>
                     </tr>
 
@@ -262,8 +262,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="70"
-                                    class="link-to-prism">src/common/helpers/custom-http-response-helper.helper.ts:70</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="67"
+                                    class="link-to-prism">src/common/helpers/custom-http-response-helper.helper.ts:67</a></div>
                         </td>
                     </tr>
 
@@ -333,8 +333,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="19"
-                                    class="link-to-prism">src/common/helpers/custom-http-response-helper.helper.ts:19</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="20"
+                                    class="link-to-prism">src/common/helpers/custom-http-response-helper.helper.ts:20</a></div>
                         </td>
                     </tr>
 
@@ -405,6 +405,7 @@
 } from &#x27;@nestjs/common&#x27;;
 import { AxiosError, AxiosResponse } from &#x27;axios&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 export class CustomHttpResponseHelper {
   private static logger &#x3D; new Logger(CustomHttpResponseHelper.name);
 
@@ -417,32 +418,28 @@ export class CustomHttpResponseHelper {
         this.logger.warn(
           &#x60;No se encontraron datos para los parámetros proporcionados: ${status} - ${statusText}&#x60;,
         );
-        throw new NotFoundException(
-          &#x27;No se encontraron datos para los parámetros proporcionados.&#x27;,
-        );
+        throw new NotFoundException(t(&#x27;common.NO_DATA_FOR_PARAMETERS&#x27;));
 
       case HttpStatus.BAD_REQUEST:
         this.logger.warn(
           &#x60;Solicitud mal formada, verifique los datos y/o parámetros enviados: ${status} - ${statusText}&#x60;,
         );
-        throw new BadRequestException(
-          &#x27;Solicitud mal formada, verifique los datos y/o parámetros enviados.&#x27;,
-        );
+        throw new BadRequestException(t(&#x27;common.MALFORMED_REQUEST&#x27;));
 
       case HttpStatus.UNAUTHORIZED:
         this.logger.warn(&#x60;Credenciales inválidas: ${status} - ${statusText}&#x60;);
-        throw new UnauthorizedException(&#x27;Credenciales inválidas.&#x27;);
+        throw new UnauthorizedException(t(&#x27;common.INVALID_CREDENTIALS&#x27;));
 
       case HttpStatus.FORBIDDEN:
         this.logger.warn(&#x60;Usuario bloqueado: ${status} - ${statusText}&#x60;);
-        throw new ForbiddenException(&#x27;Usuario bloqueado.&#x27;);
+        throw new ForbiddenException(t(&#x27;common.FORBIDDEN_USER_BLOCKED&#x27;));
 
       case HttpStatus.INTERNAL_SERVER_ERROR:
         this.logger.warn(
           &#x60;Error interno del servidor al procesar la solicitud: ${status} - ${statusText}&#x60;,
         );
         throw new InternalServerErrorException(
-          &#x27;Error interno del servidor al procesar la solicitud.&#x27;,
+          t(&#x27;common.UPSTREAM_INTERNAL_ERROR&#x27;),
         );
 
       default:
@@ -450,7 +447,7 @@ export class CustomHttpResponseHelper {
           &#x60;Error inesperado en la respuesta HTTP: ${status} - ${statusText}&#x60;,
         );
         throw new HttpException(
-          &#x60;Error inesperado en la respuesta: ${statusText}&#x60;,
+          t(&#x27;common.UNEXPECTED_RESPONSE&#x27;, { statusText }),
           status,
         );
     }
@@ -467,27 +464,23 @@ export class CustomHttpResponseHelper {
 
     if (error.code &#x3D;&#x3D;&#x3D; &#x27;ECONNABORTED&#x27;) {
       this.logger.error(&#x27;Timeout al conectar con el servidor externo.&#x27;);
-      throw new GatewayTimeoutException(
-        &#x27;El servidor externo no respondió a tiempo.&#x27;,
-      );
+      throw new GatewayTimeoutException(t(&#x27;common.EXTERNAL_TIMEOUT&#x27;));
     }
 
     if (error.code &#x3D;&#x3D;&#x3D; &#x27;ECONNREFUSED&#x27;) {
       this.logger.error(&#x27;Conexión rechazada por el servidor externo.&#x27;);
       throw new ServiceUnavailableException(
-        &#x27;Conexión rechazada por el servidor externo.&#x27;,
+        t(&#x27;common.EXTERNAL_CONNECTION_REFUSED&#x27;),
       );
     }
 
     if (error.code &#x3D;&#x3D;&#x3D; &#x27;ENOTFOUND&#x27;) {
       this.logger.error(&#x27;Servidor externo no encontrado.&#x27;);
-      throw new BadGatewayException(&#x27;Servidor externo no encontrado.&#x27;);
+      throw new BadGatewayException(t(&#x27;common.BAD_GATEWAY&#x27;));
     }
 
     this.logger.error(&#x60;Error desconocido de Axios: ${error.message}&#x60;);
-    throw new InternalServerErrorException(
-      &#x27;Error desconocido al procesar la solicitud.&#x27;,
-    );
+    throw new InternalServerErrorException(t(&#x27;common.UNKNOWN_REQUEST_ERROR&#x27;));
   }
 }
 </code></pre>

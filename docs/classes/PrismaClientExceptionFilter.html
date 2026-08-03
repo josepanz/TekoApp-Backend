@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ExceptionFilter</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExceptionFilter</a></code>
             </p>
 
 
@@ -231,7 +231,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="14" class="link-to-prism">src/common/filters/prisma-client-exception.filter.ts:14</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="16" class="link-to-prism">src/common/filters/prisma-client-exception.filter.ts:16</a></div>
                         </td>
                     </tr>
 
@@ -258,15 +258,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>catch(exception: Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientValidationError, host: ArgumentsHost)</code>
+<code>catch(exception: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientValidationError</a>, host: <a href="../miscellaneous/functions.html#t" target="_self">ArgumentsHost</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="16"
-                                    class="link-to-prism">src/common/filters/prisma-client-exception.filter.ts:16</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="18"
+                                    class="link-to-prism">src/common/filters/prisma-client-exception.filter.ts:18</a></div>
                         </td>
                     </tr>
 
@@ -289,7 +289,7 @@
                                         <tr>
                                                 <td>exception</td>
                                             <td>
-                                                        <code>Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientValidationError</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientValidationError</a></code>
                                             </td>
 
                                             <td>
@@ -301,7 +301,7 @@
                                         <tr>
                                                 <td>host</td>
                                             <td>
-                                                        <code>ArgumentsHost</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ArgumentsHost</a></code>
                                             </td>
 
                                             <td>
@@ -339,15 +339,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>extractOriginContext(stack?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>extractOriginContext(stack?: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="109"
-                                    class="link-to-prism">src/common/filters/prisma-client-exception.filter.ts:109</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="116"
+                                    class="link-to-prism">src/common/filters/prisma-client-exception.filter.ts:116</a></div>
                         </td>
                     </tr>
 
@@ -370,7 +370,7 @@
                                         <tr>
                                                 <td>stack</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -383,7 +383,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                         </div>
                             <div class="io-description">
@@ -413,6 +413,8 @@
 import { Prisma } from &#x27;@prisma/client&#x27;;
 import { Response } from &#x27;express&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 // CRÍTICO: Se deben agregar ambos tipos en el decorador para que NestJS los intercepte
 @Catch(Prisma.PrismaClientKnownRequestError, Prisma.PrismaClientValidationError)
 export class PrismaClientExceptionFilter implements ExceptionFilter {
@@ -440,43 +442,48 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
         case &#x27;P2002&#x27;:
           return response.status(HttpStatus.CONFLICT).json({
             statusCode: HttpStatus.CONFLICT,
-            message: &#x60;El registro ya existe. Campo duplicado: ${(exception?.meta?.target ?? &#x27;&#x27;) as string}&#x60;,
+            message: t(&#x27;common.DB_DUPLICATE_RECORD&#x27;, {
+              target: exception?.meta?.target ?? &#x27;&#x27;,
+            }),
             error: &#x27;Conflict&#x27;,
           });
 
         case &#x27;P2003&#x27;:
           return response.status(HttpStatus.BAD_REQUEST).json({
             statusCode: HttpStatus.BAD_REQUEST,
-            message: &#x60;Error de relación. La llave foránea provista no es válida: ${(exception?.meta?.field_name ?? &#x27;&#x27;) as string}&#x60;,
+            message: t(&#x27;common.DB_INVALID_FOREIGN_KEY&#x27;, {
+              fieldName: exception?.meta?.field_name ?? &#x27;&#x27;,
+            }),
             error: &#x27;Bad Request&#x27;,
           });
 
         case &#x27;P2021&#x27;:
           return response.status(HttpStatus.SERVICE_UNAVAILABLE).json({
             statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-            message: &#x27;La tabla no existe en la DB.&#x27;,
+            message: t(&#x27;common.DB_TABLE_MISSING&#x27;),
             error: &#x27;Service Unavailable&#x27;,
           });
 
         case &#x27;P2024&#x27;:
           return response.status(HttpStatus.SERVICE_UNAVAILABLE).json({
             statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-            message:
-              &#x27;La base de datos está experimentando una alta latencia. Intente más tarde.&#x27;,
+            message: t(&#x27;common.DB_HIGH_LATENCY&#x27;),
             error: &#x27;Internal Server Error&#x27;,
           });
 
         case &#x27;P2025&#x27;:
           return response.status(HttpStatus.NOT_FOUND).json({
             statusCode: HttpStatus.NOT_FOUND,
-            message: &#x27;El registro solicitado no existe o fue eliminado.&#x27;,
+            message: t(&#x27;common.DB_RECORD_NOT_FOUND&#x27;),
             error: &#x27;Not Found&#x27;,
           });
 
         default:
           return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: &#x60;Error interno de persistencia. Código de referencia: ${exception.code}&#x60;,
+            message: t(&#x27;common.DB_PERSISTENCE_ERROR&#x27;, {
+              code: exception.code,
+            }),
             error: &#x27;Internal Server Error&#x27;,
           });
       }
@@ -505,7 +512,7 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
       return response.status(HttpStatus.BAD_REQUEST).json({
         statusCode: HttpStatus.BAD_REQUEST,
         error: &#x27;Bad Request&#x27;,
-        message: &#x27;Error en los parámetros de consulta.&#x27;,
+        message: t(&#x27;common.DB_INVALID_QUERY_PARAMS&#x27;),
         timestamp: new Date().toISOString(),
       });
     }

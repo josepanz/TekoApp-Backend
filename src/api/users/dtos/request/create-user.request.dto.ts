@@ -72,13 +72,14 @@ export class CreateUserRequestDTO {
   phoneNumber?: string;
 
   @ApiProperty({
-    example: 'legacy-123',
+    example: 'a1b2c3d4-e5f6.jpg',
     required: false,
-    description: 'ID del usuario en el sistema legacy.',
+    description:
+      'Key de S3 de la foto de perfil (campo `key` de POST /uploads/avatar), no una URL.',
   })
   @IsString()
   @IsOptional()
-  legacyUserId?: string;
+  avatarKey?: string;
 
   @ApiProperty({
     example: 1,

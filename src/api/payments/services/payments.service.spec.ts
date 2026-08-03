@@ -2,6 +2,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -21,17 +22,19 @@ import type { UpdatePaymentMethodDto } from '../dtos/request/update-payment-meth
 // ============================================================
 
 // PaymentDbService
+const mockFindServiceByReferenceId = jest.fn();
 const mockFindExistingPayment = jest.fn();
 const mockCreatePaymentWithTransaction = jest.fn();
 const mockFindAllPayments = jest.fn();
-const mockFindPaymentById = jest.fn();
+const mockFindPaymentByReferenceId = jest.fn();
 const mockUpdatePayment = jest.fn();
+const mockUpdatePaymentConditional = jest.fn();
 const mockExecuteRefund = jest.fn();
 const mockFindTransactionByExternalId = jest.fn();
 const mockUpdateTransactionAndPaymentStatus = jest.fn();
 const mockCreatePaymentMethod = jest.fn();
 const mockFindAllPaymentMethods = jest.fn();
-const mockFindPaymentMethodById = jest.fn();
+const mockFindPaymentMethodByReferenceId = jest.fn();
 const mockCountActivePaymentMethods = jest.fn();
 const mockUpdatePaymentMethod = jest.fn();
 const mockClearDefaultPaymentMethods = jest.fn();
@@ -46,17 +49,24 @@ const mockCalculatePlatformFee = jest.fn();
 // Fixtures reutilizables
 // ============================================================
 
-const BASE_PAYMENT_ID = 'pay-uuid-0001';
+// PK interna (Int) vs UUID público (referenceId, lo que viaja en la wire API).
+const BASE_PAYMENT_REF = 'pay-uuid-0001';
+const BASE_PAYMENT_PK = 1;
 const BASE_USER_ID = 42;
 const BASE_PROFESSIONAL_ID = '77';
-const BASE_SERVICE_REQUEST_ID = 'sreq-uuid-0001';
+const BASE_SERVICE_REF = 'svc-uuid-0001';
+const BASE_SERVICE_PK = 30;
+const BASE_PM_REF = 'pm-uuid-0001';
+const BASE_PM_PK = 5;
 
 function buildPayment(overrides: Record<string, unknown> = {}) {
   return {
-    id: BASE_PAYMENT_ID,
+    id: BASE_PAYMENT_PK,
+    referenceId: BASE_PAYMENT_REF,
     userId: BASE_USER_ID,
     professionalId: Number(BASE_PROFESSIONAL_ID),
-    serviceRequestId: BASE_SERVICE_REQUEST_ID,
+    serviceId: BASE_SERVICE_PK,
+    service: { referenceId: BASE_SERVICE_REF },
     amount: 100,
     fee: 3,
     tax: 10.3,
@@ -77,7 +87,7 @@ function buildCreatePaymentDto(
 ): CreatePaymentDto {
   return {
     professionalId: BASE_PROFESSIONAL_ID,
-    serviceRequestId: BASE_SERVICE_REQUEST_ID,
+    serviceId: BASE_SERVICE_REF,
     amount: 100,
     paymentMethod: PaymentMethod.CREDIT_CARD,
     paymentProvider: PaymentProvider.STRIPE,
@@ -110,18 +120,20 @@ describe('PaymentApiService', () => {
         {
           provide: PaymentDbService,
           useValue: {
+            findServiceByReferenceId: mockFindServiceByReferenceId,
             findExistingPayment: mockFindExistingPayment,
             createPaymentWithTransaction: mockCreatePaymentWithTransaction,
             findAllPayments: mockFindAllPayments,
-            findPaymentById: mockFindPaymentById,
+            findPaymentByReferenceId: mockFindPaymentByReferenceId,
             updatePayment: mockUpdatePayment,
+            updatePaymentConditional: mockUpdatePaymentConditional,
             executeRefund: mockExecuteRefund,
             findTransactionByExternalId: mockFindTransactionByExternalId,
             updateTransactionAndPaymentStatus:
               mockUpdateTransactionAndPaymentStatus,
             createPaymentMethod: mockCreatePaymentMethod,
             findAllPaymentMethods: mockFindAllPaymentMethods,
-            findPaymentMethodById: mockFindPaymentMethodById,
+            findPaymentMethodByReferenceId: mockFindPaymentMethodByReferenceId,
             countActivePaymentMethods: mockCountActivePaymentMethods,
             updatePaymentMethod: mockUpdatePaymentMethod,
             clearDefaultPaymentMethods: mockClearDefaultPaymentMethods,
@@ -151,9 +163,10 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('createPayment', () => {
-    it('debe llamar a feeCalculator.calculateProviderFee con el monto y el proveedor', async () => {
+    it('debe resolver el servicio por su UUID y calcular el fee del proveedor', async () => {
       // Arrange
       const dto = buildCreatePaymentDto();
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(3);
       mockCalculatePlatformFee.mockResolvedValue(10.3);
@@ -163,6 +176,9 @@ describe('PaymentApiService', () => {
       await service.createPayment(BASE_USER_ID, dto);
 
       // Assert
+      expect(mockFindServiceByReferenceId).toHaveBeenCalledWith(
+        BASE_SERVICE_REF,
+      );
       expect(mockCalculateProviderFee).toHaveBeenCalledWith(
         dto.amount,
         dto.paymentProvider,
@@ -172,6 +188,7 @@ describe('PaymentApiService', () => {
     it('debe llamar a feeCalculator.calculatePlatformFee con amount + providerFee', async () => {
       // Arrange
       const dto = buildCreatePaymentDto({ amount: 100 });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(3);
       mockCalculatePlatformFee.mockResolvedValue(10.3);
@@ -184,9 +201,21 @@ describe('PaymentApiService', () => {
       expect(mockCalculatePlatformFee).toHaveBeenCalledWith(103); // 100 + 3
     });
 
-    it('debe lanzar BadRequestException si ya existe un pago para la misma solicitud', async () => {
+    it('debe lanzar NotFoundException si el servicio (UUID) no existe', async () => {
       // Arrange
       const dto = buildCreatePaymentDto();
+      mockFindServiceByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.createPayment(BASE_USER_ID, dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('debe lanzar BadRequestException si ya existe un pago para el mismo servicio', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto();
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
       mockFindExistingPayment.mockResolvedValue(buildPayment());
 
       // Act & Assert
@@ -195,7 +224,7 @@ describe('PaymentApiService', () => {
       );
     });
 
-    it('debe crear el pago con fee, tax y totalAmount calculados correctamente', async () => {
+    it('debe crear el pago con la PK interna del servicio, fee, tax y totalAmount calculados', async () => {
       // Arrange
       const dto = buildCreatePaymentDto({ amount: 100 });
       const fee = 3;
@@ -207,6 +236,7 @@ describe('PaymentApiService', () => {
         totalAmount: expectedTotal,
       });
 
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(fee);
       mockCalculatePlatformFee.mockResolvedValue(tax);
@@ -223,16 +253,19 @@ describe('PaymentApiService', () => {
           totalAmount: expectedTotal,
           status: PaymentStatus.PENDING,
           userId: BASE_USER_ID,
-          serviceRequestId: dto.serviceRequestId,
+          serviceId: BASE_SERVICE_PK,
         }),
         expect.any(String), // uuid generado dinámicamente
       );
       expect(result.totalAmount).toBe(expectedTotal);
+      expect(result.id).toBe(BASE_PAYMENT_REF);
+      expect(result.serviceId).toBe(BASE_SERVICE_REF);
     });
 
     it('debe usar PaymentStatus.PENDING como estado inicial al crear el pago', async () => {
       // Arrange
       const dto = buildCreatePaymentDto();
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(0);
       mockCalculatePlatformFee.mockResolvedValue(0);
@@ -254,22 +287,25 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('getPaymentById', () => {
-    it('debe retornar el pago cuando existe', async () => {
+    it('debe resolver el pago por su referenceId y exponerlo bajo la clave id', async () => {
       // Arrange
       const payment = buildPayment();
-      mockFindPaymentById.mockResolvedValue(payment);
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
 
       // Act
-      const result = await service.getPaymentById(BASE_PAYMENT_ID);
+      const result = await service.getPaymentById(BASE_PAYMENT_REF);
 
       // Assert
-      expect(result).toEqual(payment);
-      expect(mockFindPaymentById).toHaveBeenCalledWith(BASE_PAYMENT_ID);
+      expect(result.id).toBe(BASE_PAYMENT_REF);
+      expect(result.serviceId).toBe(BASE_SERVICE_REF);
+      expect(mockFindPaymentByReferenceId).toHaveBeenCalledWith(
+        BASE_PAYMENT_REF,
+      );
     });
 
     it('debe lanzar NotFoundException cuando el pago no existe', async () => {
       // Arrange
-      mockFindPaymentById.mockResolvedValue(null);
+      mockFindPaymentByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.getPaymentById('id-inexistente')).rejects.toThrow(
@@ -289,11 +325,11 @@ describe('PaymentApiService', () => {
         userId: 99,
         status: PaymentStatus.PENDING,
       });
-      mockFindPaymentById.mockResolvedValue(payment);
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
 
       // Act & Assert
       await expect(
-        service.cancelPayment(BASE_PAYMENT_ID, BASE_USER_ID), // BASE_USER_ID = 42, owner = 99
+        service.cancelPayment(BASE_PAYMENT_REF, BASE_USER_ID), // BASE_USER_ID = 42, owner = 99
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -303,15 +339,15 @@ describe('PaymentApiService', () => {
         userId: BASE_USER_ID,
         status: PaymentStatus.COMPLETED,
       });
-      mockFindPaymentById.mockResolvedValue(payment);
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
 
       // Act & Assert
       await expect(
-        service.cancelPayment(BASE_PAYMENT_ID, BASE_USER_ID),
+        service.cancelPayment(BASE_PAYMENT_REF, BASE_USER_ID),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('debe cancelar el pago correctamente cuando las validaciones pasan', async () => {
+    it('debe cancelar el pago (usando la PK interna) cuando las validaciones pasan', async () => {
       // Arrange
       const payment = buildPayment({
         userId: BASE_USER_ID,
@@ -321,17 +357,39 @@ describe('PaymentApiService', () => {
         userId: BASE_USER_ID,
         status: PaymentStatus.CANCELLED,
       });
-      mockFindPaymentById.mockResolvedValue(payment);
-      mockUpdatePayment.mockResolvedValue(cancelledPayment);
+      mockFindPaymentByReferenceId
+        .mockResolvedValueOnce(payment)
+        .mockResolvedValueOnce(cancelledPayment);
+      mockUpdatePaymentConditional.mockResolvedValue(1);
 
       // Act
-      const result = await service.cancelPayment(BASE_PAYMENT_ID, BASE_USER_ID);
+      const result = await service.cancelPayment(
+        BASE_PAYMENT_REF,
+        BASE_USER_ID,
+      );
 
       // Assert
-      expect(mockUpdatePayment).toHaveBeenCalledWith(BASE_PAYMENT_ID, {
-        status: PaymentStatus.CANCELLED,
-      });
+      expect(mockUpdatePaymentConditional).toHaveBeenCalledWith(
+        BASE_PAYMENT_PK,
+        [PaymentStatus.PENDING],
+        { status: PaymentStatus.CANCELLED },
+      );
       expect(result.status).toBe(PaymentStatus.CANCELLED);
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la validación y la escritura (carrera con otro proceso)', async () => {
+      // Arrange
+      const payment = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.PENDING,
+      });
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
+      mockUpdatePaymentConditional.mockResolvedValue(0); // otro proceso ya cambió el estado
+
+      // Act & Assert
+      await expect(
+        service.cancelPayment(BASE_PAYMENT_REF, BASE_USER_ID),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
@@ -340,100 +398,59 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('refundPayment', () => {
-    it('debe lanzar BadRequestException si el pago no está en estado COMPLETED', async () => {
+    // La validación de estado/monto disponible ahora vive dentro de
+    // PaymentDbService#executeRefund (bajo lock de fila, ver payment-db.service.spec.ts) — acá
+    // solo se prueba que el service orquestador haga el 404 rápido y delegue correctamente.
+
+    it('debe lanzar NotFoundException si el pago no existe', async () => {
       // Arrange
-      const payment = buildPayment({ status: PaymentStatus.PENDING });
-      mockFindPaymentById.mockResolvedValue(payment);
+      mockFindPaymentByReferenceId.mockResolvedValue(null);
       const dto = buildRefundDto({ amount: 50 });
 
       // Act & Assert
-      await expect(service.refundPayment(BASE_PAYMENT_ID, dto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.refundPayment(BASE_PAYMENT_REF, dto),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockExecuteRefund).not.toHaveBeenCalled();
     });
 
-    it('debe lanzar BadRequestException si el monto de reembolso excede el monto disponible', async () => {
+    it('debe delegar el reembolso a executeRefund con la PK interna, monto y motivo', async () => {
       // Arrange
-      const payment = buildPayment({
-        status: PaymentStatus.COMPLETED,
-        totalAmount: 100,
-        refundDetails: null,
-      });
-      mockFindPaymentById.mockResolvedValue(payment);
-      const dto = buildRefundDto({ amount: 150 }); // excede totalAmount=100
-
-      // Act & Assert
-      await expect(service.refundPayment(BASE_PAYMENT_ID, dto)).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-
-    it('debe ejecutar el reembolso parcial correctamente cuando el monto es válido', async () => {
-      // Arrange
-      const payment = buildPayment({
-        status: PaymentStatus.COMPLETED,
-        totalAmount: 100,
-        refundDetails: null,
-      });
-      mockFindPaymentById.mockResolvedValue(payment);
-      mockExecuteRefund.mockResolvedValue(
-        buildPayment({ status: PaymentStatus.PARTIAL_REFUNDED }),
-      );
+      const completed = buildPayment({ status: PaymentStatus.COMPLETED });
+      const partial = buildPayment({ status: PaymentStatus.PARTIAL_REFUNDED });
+      mockFindPaymentByReferenceId
+        .mockResolvedValueOnce(completed) // 404 check
+        .mockResolvedValueOnce(partial); // re-fetch tras el reembolso
+      mockExecuteRefund.mockResolvedValue(partial);
       const dto = buildRefundDto({ amount: 50 });
 
       // Act
-      await service.refundPayment(BASE_PAYMENT_ID, dto);
+      const result = await service.refundPayment(BASE_PAYMENT_REF, dto);
 
       // Assert
       expect(mockExecuteRefund).toHaveBeenCalledWith(
-        BASE_PAYMENT_ID,
-        50, // amount
-        dto.reason, // reason
-        false, // isFullRefund (50 < 100)
-        50, // newTotalRefunded
-      );
-    });
-
-    it('debe ejecutar el reembolso total y marcar isFullRefund en true', async () => {
-      // Arrange
-      const payment = buildPayment({
-        status: PaymentStatus.COMPLETED,
-        totalAmount: 100,
-        refundDetails: null,
-      });
-      mockFindPaymentById.mockResolvedValue(payment);
-      mockExecuteRefund.mockResolvedValue(
-        buildPayment({ status: PaymentStatus.REFUNDED }),
-      );
-      const dto = buildRefundDto({ amount: 100 });
-
-      // Act
-      await service.refundPayment(BASE_PAYMENT_ID, dto);
-
-      // Assert
-      expect(mockExecuteRefund).toHaveBeenCalledWith(
-        BASE_PAYMENT_ID,
-        100,
+        BASE_PAYMENT_PK,
+        50,
         dto.reason,
-        true, // isFullRefund
-        100,
       );
+      expect(result.status).toBe(PaymentStatus.PARTIAL_REFUNDED);
     });
 
-    it('debe considerar el monto previamente reembolsado al calcular el disponible', async () => {
+    it('debe propagar el BadRequestException que lance executeRefund (ej. monto excede disponible)', async () => {
       // Arrange
-      const payment = buildPayment({
-        status: PaymentStatus.COMPLETED,
-        totalAmount: 100,
-        refundDetails: { refundedAmount: 60 }, // ya se reembolsaron 60
-      });
-      mockFindPaymentById.mockResolvedValue(payment);
-      const dto = buildRefundDto({ amount: 50 }); // disponible = 40, 50 > 40 → error
+      const payment = buildPayment({ status: PaymentStatus.COMPLETED });
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
+      mockExecuteRefund.mockRejectedValue(
+        new BadRequestException(
+          'El monto del reembolso excede el monto disponible',
+        ),
+      );
+      const dto = buildRefundDto({ amount: 999 });
 
       // Act & Assert
-      await expect(service.refundPayment(BASE_PAYMENT_ID, dto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.refundPayment(BASE_PAYMENT_REF, dto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -442,7 +459,7 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('createPaymentMethod', () => {
-    it('debe delegar la creación al dbService con los datos del DTO', async () => {
+    it('debe delegar la creación al dbService y exponer el referenceId como id', async () => {
       // Arrange
       const dto: CreatePaymentMethodRequestDTO = {
         name: 'Mi tarjeta VISA',
@@ -453,7 +470,8 @@ describe('PaymentApiService', () => {
         externalId: 'pm_stripe_001',
       } as unknown as CreatePaymentMethodRequestDTO;
       const createdMethod = {
-        id: 'pm-uuid-0001',
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
         userId: BASE_USER_ID,
         ...dto,
       };
@@ -464,7 +482,7 @@ describe('PaymentApiService', () => {
 
       // Assert
       expect(mockCreatePaymentMethod).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(createdMethod);
+      expect(result.id).toBe(BASE_PM_REF);
     });
   });
 
@@ -475,7 +493,7 @@ describe('PaymentApiService', () => {
   describe('updatePaymentMethod', () => {
     it('debe lanzar NotFoundException si el método de pago no existe', async () => {
       // Arrange
-      mockFindPaymentMethodById.mockResolvedValue(null);
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(null);
       const dto: UpdatePaymentMethodDto = {
         name: 'Nuevo nombre',
       };
@@ -488,8 +506,12 @@ describe('PaymentApiService', () => {
 
     it('debe limpiar los métodos por defecto antes de actualizar si isDefault es true', async () => {
       // Arrange
-      const method = { id: 'pm-uuid-0001', userId: BASE_USER_ID };
-      mockFindPaymentMethodById.mockResolvedValue(method);
+      const method = {
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+      };
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
       mockClearDefaultPaymentMethods.mockResolvedValue(undefined);
       mockUpdatePaymentMethod.mockResolvedValue({ ...method, isDefault: true });
       const dto: UpdatePaymentMethodDto = {
@@ -497,16 +519,24 @@ describe('PaymentApiService', () => {
       };
 
       // Act
-      await service.updatePaymentMethod('pm-uuid-0001', BASE_USER_ID, dto);
+      await service.updatePaymentMethod(BASE_PM_REF, BASE_USER_ID, dto);
 
       // Assert
       expect(mockClearDefaultPaymentMethods).toHaveBeenCalledWith(BASE_USER_ID);
+      expect(mockUpdatePaymentMethod).toHaveBeenCalledWith(
+        BASE_PM_PK,
+        expect.objectContaining({ isDefault: true }),
+      );
     });
 
     it('no debe limpiar los métodos por defecto si isDefault es false', async () => {
       // Arrange
-      const method = { id: 'pm-uuid-0001', userId: BASE_USER_ID };
-      mockFindPaymentMethodById.mockResolvedValue(method);
+      const method = {
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+      };
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
       mockUpdatePaymentMethod.mockResolvedValue({
         ...method,
         name: 'Actualizado',
@@ -516,7 +546,7 @@ describe('PaymentApiService', () => {
       };
 
       // Act
-      await service.updatePaymentMethod('pm-uuid-0001', BASE_USER_ID, dto);
+      await service.updatePaymentMethod(BASE_PM_REF, BASE_USER_ID, dto);
 
       // Assert
       expect(mockClearDefaultPaymentMethods).not.toHaveBeenCalled();
@@ -530,7 +560,7 @@ describe('PaymentApiService', () => {
   describe('deletePaymentMethod', () => {
     it('debe lanzar NotFoundException si el método de pago no existe', async () => {
       // Arrange
-      mockFindPaymentMethodById.mockResolvedValue(null);
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
       await expect(
@@ -540,28 +570,36 @@ describe('PaymentApiService', () => {
 
     it('debe lanzar BadRequestException si es el único método activo', async () => {
       // Arrange
-      const method = { id: 'pm-uuid-0001', userId: BASE_USER_ID };
-      mockFindPaymentMethodById.mockResolvedValue(method);
+      const method = {
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+      };
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
       mockCountActivePaymentMethods.mockResolvedValue(1);
 
       // Act & Assert
       await expect(
-        service.deletePaymentMethod('pm-uuid-0001', BASE_USER_ID),
+        service.deletePaymentMethod(BASE_PM_REF, BASE_USER_ID),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('debe desactivar el método cuando existen otros métodos activos', async () => {
+    it('debe desactivar el método (por su PK interna) cuando existen otros métodos activos', async () => {
       // Arrange
-      const method = { id: 'pm-uuid-0001', userId: BASE_USER_ID };
-      mockFindPaymentMethodById.mockResolvedValue(method);
+      const method = {
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+      };
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
       mockCountActivePaymentMethods.mockResolvedValue(3);
       mockUpdatePaymentMethod.mockResolvedValue({ ...method, isActive: false });
 
       // Act
-      await service.deletePaymentMethod('pm-uuid-0001', BASE_USER_ID);
+      await service.deletePaymentMethod(BASE_PM_REF, BASE_USER_ID);
 
       // Assert
-      expect(mockUpdatePaymentMethod).toHaveBeenCalledWith('pm-uuid-0001', {
+      expect(mockUpdatePaymentMethod).toHaveBeenCalledWith(BASE_PM_PK, {
         isActive: false,
       });
     });

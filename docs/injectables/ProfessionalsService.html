@@ -155,11 +155,19 @@
                         <ul class="index-list">
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#getMyProfessionalProfile" >getMyProfessionalProfile</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#getNearbyProfessionals" >getNearbyProfessionals</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#getProfessionalById" >getProfessionalById</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#getProfessionalByReference" >getProfessionalByReference</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -207,6 +215,10 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#updateProfessionalByReference" >updateProfessionalByReference</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#verifyProfessional" >verifyProfessional</a>
                             </li>
                         </ul>
@@ -232,7 +244,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="26" class="link-to-prism">src/api/professionals/services/professionals.service.ts:26</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="27" class="link-to-prism">src/api/professionals/services/professionals.service.ts:27</a></div>
                             </td>
                         </tr>
 
@@ -279,6 +291,75 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="getMyProfessionalProfile"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getMyProfessionalProfile</b></span>
+                        <a href="#getMyProfessionalProfile"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getMyProfessionalProfile(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="79"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:79</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="getNearbyProfessionals"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -297,8 +378,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="59"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:59</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="60"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:60</a></div>
                         </td>
                     </tr>
 
@@ -366,8 +447,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="71"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:71</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="72"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:72</a></div>
                         </td>
                     </tr>
 
@@ -417,6 +498,75 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="getProfessionalByReference"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>getProfessionalByReference</b></span>
+                        <a href="#getProfessionalByReference"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getProfessionalByReference(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="86"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:86</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="getProfessionalReviews"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -435,8 +585,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="139"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:139</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="163"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:163</a></div>
                         </td>
                     </tr>
 
@@ -516,8 +666,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="40"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:40</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:41</a></div>
                         </td>
                     </tr>
 
@@ -585,8 +735,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="127"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:127</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="151"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:151</a></div>
                         </td>
                     </tr>
 
@@ -666,8 +816,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="150"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:150</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="174"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:174</a></div>
                         </td>
                     </tr>
 
@@ -735,8 +885,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="167"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:167</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="191"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:191</a></div>
                         </td>
                     </tr>
 
@@ -804,8 +954,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="29"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:29</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="30"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:30</a></div>
                         </td>
                     </tr>
 
@@ -885,8 +1035,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="156"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:156</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="180"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:180</a></div>
                         </td>
                     </tr>
 
@@ -947,15 +1097,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>suspendProfessional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, reason: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, adminId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>suspendProfessional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, reason: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, adminId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="192"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:192</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="216"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:216</a></div>
                         </td>
                     </tr>
 
@@ -990,7 +1140,7 @@
                                         <tr>
                                                 <td>reason</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1047,8 +1197,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="93"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:93</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="121"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:121</a></div>
                         </td>
                     </tr>
 
@@ -1140,8 +1290,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="108"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:108</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="134"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:134</a></div>
                         </td>
                     </tr>
 
@@ -1233,8 +1383,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="94"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:94</a></div>
                         </td>
                     </tr>
 
@@ -1308,6 +1458,99 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="updateProfessionalByReference"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>updateProfessionalByReference</b></span>
+                        <a href="#updateProfessionalByReference"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updateProfessionalByReference(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, dto: <a href="../classes/UpdateProfessionalRequestDTO.html" target="_self">UpdateProfessionalRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="107"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:107</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/UpdateProfessionalRequestDTO.html" target="_self" >UpdateProfessionalRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ProfessionalDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="verifyProfessional"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -1326,8 +1569,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="177"
-                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:177</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="201"
+                                    class="link-to-prism">src/api/professionals/services/professionals.service.ts:201</a></div>
                         </td>
                     </tr>
 
@@ -1427,6 +1670,7 @@ import {
   ProfessionalStatsResponseDTO,
 } from &#x27;../dtos/response&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class ProfessionalsService {
   constructor(private readonly professionalsDb: ProfessionalsDbService) {}
@@ -1480,6 +1724,21 @@ export class ProfessionalsService {
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
+  async getMyProfessionalProfile(
+    userId: number,
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    const result &#x3D; await this.professionalsDb.findByUserId(userId);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  async getProfessionalByReference(
+    referenceId: string,
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    const result &#x3D;
+      await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
   async updateProfessional(
     id: number,
     dto: UpdateProfessionalRequestDTO,
@@ -1487,11 +1746,23 @@ export class ProfessionalsService {
   ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     const professional &#x3D; await this.professionalsDb.findById(id);
     if (professional.userId !&#x3D;&#x3D; userId) {
-      throw new ForbiddenException(
-        &#x27;No tienes permisos para modificar este profesional&#x27;,
-      );
+      throw new ForbiddenException(t(&#x27;professionals.UNAUTHORIZED_UPDATE&#x27;));
     }
     const result &#x3D; await this.professionalsDb.update(id, dto);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  async updateProfessionalByReference(
+    referenceId: string,
+    dto: UpdateProfessionalRequestDTO,
+    userId: number,
+  ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
+    const professional &#x3D;
+      await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    if (professional.userId !&#x3D;&#x3D; userId) {
+      throw new ForbiddenException(t(&#x27;professionals.UNAUTHORIZED_UPDATE&#x27;));
+    }
+    const result &#x3D; await this.professionalsDb.update(professional.id, dto);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -1502,9 +1773,7 @@ export class ProfessionalsService {
   ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     const professional &#x3D; await this.professionalsDb.findById(id);
     if (professional.userId !&#x3D;&#x3D; userId) {
-      throw new ForbiddenException(
-        &#x27;No tienes permisos para modificar este profesional&#x27;,
-      );
+      throw new ForbiddenException(t(&#x27;professionals.UNAUTHORIZED_UPDATE&#x27;));
     }
     const result &#x3D; await this.professionalsDb.update(id, { isAvailable });
     return result as unknown as ProfessionalDetailResponseDTO;
@@ -1517,9 +1786,7 @@ export class ProfessionalsService {
   ): Promise&lt;ProfessionalDetailResponseDTO&gt; {
     const professional &#x3D; await this.professionalsDb.findById(id);
     if (professional.userId !&#x3D;&#x3D; userId) {
-      throw new ForbiddenException(
-        &#x27;No tienes permisos para modificar este profesional&#x27;,
-      );
+      throw new ForbiddenException(t(&#x27;professionals.UNAUTHORIZED_UPDATE&#x27;));
     }
     const result &#x3D; await this.professionalsDb.update(id, {
       currentLatitude: dto.latitude,

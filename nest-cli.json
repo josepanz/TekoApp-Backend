@@ -5,7 +5,10 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": false,
-    "assets": [{ "include": "docs", "outDir": "dist" }],
+    "assets": [
+      { "include": "docs", "outDir": "dist" },
+      { "include": "i18n/**/*.json", "outDir": "dist" }
+    ],
     "watchAssets": true
   }
 }

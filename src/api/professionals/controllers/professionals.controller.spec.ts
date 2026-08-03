@@ -23,7 +23,10 @@ const mockGetNearbyProfessionals = jest.fn();
 const mockSearchBySkills = jest.fn();
 const mockGetTopRatedProfessionals = jest.fn();
 const mockGetProfessionalById = jest.fn();
+const mockGetProfessionalByReference = jest.fn();
+const mockGetMyProfessionalProfile = jest.fn();
 const mockUpdateProfessional = jest.fn();
+const mockUpdateProfessionalByReference = jest.fn();
 const mockUpdateAvailability = jest.fn();
 const mockUpdateLocation = jest.fn();
 const mockGetProfessionalServices = jest.fn();
@@ -35,6 +38,9 @@ const mockSuspendProfessional = jest.fn();
 const mockUser = { id: 1 } as unknown as IUserDataOnJwt;
 const mockReq = { user: mockUser };
 const mockParam = { id: 10 };
+const mockReferenceParam = {
+  referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+};
 
 describe('ProfessionalsController', () => {
   let controller: ProfessionalsController;
@@ -52,7 +58,10 @@ describe('ProfessionalsController', () => {
             searchBySkills: mockSearchBySkills,
             getTopRatedProfessionals: mockGetTopRatedProfessionals,
             getProfessionalById: mockGetProfessionalById,
+            getProfessionalByReference: mockGetProfessionalByReference,
+            getMyProfessionalProfile: mockGetMyProfessionalProfile,
             updateProfessional: mockUpdateProfessional,
+            updateProfessionalByReference: mockUpdateProfessionalByReference,
             updateAvailability: mockUpdateAvailability,
             updateLocation: mockUpdateLocation,
             getProfessionalServices: mockGetProfessionalServices,
@@ -197,6 +206,67 @@ describe('ProfessionalsController', () => {
     });
   });
 
+  describe('getMyProfessionalProfile', () => {
+    it('debe retornar el perfil profesional del usuario autenticado', async () => {
+      // Arrange
+      const expected = { id: 10, userId: 1, name: 'Carlos' };
+      mockGetMyProfessionalProfile.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.getMyProfessionalProfile(mockReq);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockGetMyProfessionalProfile).toHaveBeenCalledWith(1);
+    });
+
+    it('debe propagar NotFoundException si el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockGetMyProfessionalProfile.mockRejectedValue(
+        new NotFoundException('Profesional no encontrado'),
+      );
+
+      // Act & Assert
+      await expect(
+        controller.getMyProfessionalProfile(mockReq),
+      ).rejects.toThrow('Profesional no encontrado');
+    });
+  });
+
+  describe('getProfessionalByReference', () => {
+    it('debe retornar el detalle del profesional por su referenceId', async () => {
+      // Arrange
+      const expected = {
+        id: 10,
+        referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        name: 'Carlos',
+      };
+      mockGetProfessionalByReference.mockResolvedValue(expected);
+
+      // Act
+      const result =
+        await controller.getProfessionalByReference(mockReferenceParam);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockGetProfessionalByReference).toHaveBeenCalledWith(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+    });
+
+    it('debe propagar NotFoundException si el profesional no existe', async () => {
+      // Arrange
+      mockGetProfessionalByReference.mockRejectedValue(
+        new NotFoundException('Profesional no encontrado'),
+      );
+
+      // Act & Assert
+      await expect(
+        controller.getProfessionalByReference(mockReferenceParam),
+      ).rejects.toThrow('Profesional no encontrado');
+    });
+  });
+
   describe('updateProfessional', () => {
     it('debe actualizar el perfil del profesional pasando su ID y el userId del token', async () => {
       // Arrange
@@ -216,6 +286,36 @@ describe('ProfessionalsController', () => {
       // Assert
       expect(result).toEqual(expected);
       expect(mockUpdateProfessional).toHaveBeenCalledWith(10, dto, 1);
+    });
+  });
+
+  describe('updateProfessionalByReference', () => {
+    it('debe actualizar el perfil del profesional pasando su referenceId y el userId del token', async () => {
+      // Arrange
+      const dto = {
+        bio: 'Actualizado',
+      } as unknown as UpdateProfessionalRequestDTO;
+      const expected = {
+        id: 10,
+        referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        bio: 'Actualizado',
+      };
+      mockUpdateProfessionalByReference.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.updateProfessionalByReference(
+        mockReferenceParam,
+        dto,
+        mockReq,
+      );
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockUpdateProfessionalByReference).toHaveBeenCalledWith(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        dto,
+        1,
+      );
     });
   });
 

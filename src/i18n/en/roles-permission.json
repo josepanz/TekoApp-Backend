@@ -1,0 +1,18 @@
+{
+  "CANNOT_DELETE_ASSIGNED_PERMISSION": "The permission cannot be deleted because it is assigned to roles or users. Deactivate it instead.",
+  "CANNOT_DELETE_ROLE_WITH_USERS": "The role cannot be deleted because it has users assigned. Deactivate it instead.",
+  "DIRECT_PERMISSION_ASSIGNED": "Direct permission assigned successfully",
+  "INVALID_PERMISSION_NAME_FORMAT": "The permission name must follow the \"resource:action\" format (e.g. customers:read)",
+  "PERMISSIONS_NOT_FOUND_OR_INACTIVE": "The following permission ids do not exist or are inactive: {missingIds}",
+  "PERMISSION_ALREADY_EXISTS": "The permission \"{name}\" already exists.",
+  "PERMISSION_ID_NOT_FOUND": "Permission with ID {id} not found.",
+  "PERMISSION_NOT_FOUND": "Permission \"{name}\" not found.",
+  "ROLES_NOT_FOUND_OR_INACTIVE": "The following roles do not exist or are inactive: {invalidRoles}",
+  "ROLE_ACTIVE_IN_USER_PROFILE": "Role active in the user profile",
+  "ROLE_ALREADY_EXISTS": "The role \"{name}\" already exists.",
+  "ROLE_ID_NOT_FOUND": "Role with ID {id} not found.",
+  "USER_ID_NOT_EXISTS": "The user with ID {userId} does not exist",
+  "USER_ID_NOT_FOUND": "User with ID {userId} not found.",
+  "USER_WITHOUT_PERMISSION": "The user does not have the permission with ID {permissionId} assigned.",
+  "USER_WITHOUT_ROLE": "The user does not have the role with ID {roleId} assigned."
+}

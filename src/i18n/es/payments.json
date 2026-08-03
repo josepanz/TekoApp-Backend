@@ -1,0 +1,14 @@
+{
+  "ALREADY_EXISTS_FOR_SERVICE": "Ya existe un pago para este servicio",
+  "CANNOT_BE_CANCELLED": "Este pago no puede ser cancelado",
+  "CANNOT_DELETE_ONLY_METHOD": "No se puede eliminar el único método de pago",
+  "METHOD_NOT_FOUND": "Método de pago no encontrado",
+  "NOT_FOUND": "Pago no encontrado",
+  "ONLY_COMPLETED_CAN_BE_REFUNDED": "Solo se pueden reembolsar pagos completados",
+  "ONLY_PENDING_CAN_BE_UPDATED": "Solo se pueden actualizar pagos pendientes",
+  "PROVIDER_NOT_SUPPORTED": "Proveedor de pagos no soportado",
+  "REFUND_EXCEEDS_AVAILABLE": "El monto del reembolso excede el monto disponible",
+  "SERVICE_NOT_FOUND": "Servicio no encontrado",
+  "STATUS_CHANGED_BEFORE_CANCEL": "El pago cambió de estado antes de poder cancelarlo",
+  "UNAUTHORIZED_CANCEL": "No tienes permisos para cancelar este pago"
+}

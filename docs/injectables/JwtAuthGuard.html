@@ -142,7 +142,7 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>AuthGuard(&#x27;jwt&#x27;)</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >AuthGuard(&#x27;jwt&#x27;)</a></code>
             </p>
 
 
@@ -200,8 +200,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="8"
-                                    class="link-to-prism">src/modules/auth/guards/jwt-auth.guard.ts:8</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="9"
+                                    class="link-to-prism">src/modules/auth/guards/jwt-auth.guard.ts:9</a></div>
                         </td>
                     </tr>
 
@@ -288,6 +288,7 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, UnauthorizedException } from &#x27;@nestjs/common&#x27;;
 import { AuthGuard } from &#x27;@nestjs/passport&#x27;;
 import { TokenExpiredError } from &#x27;jsonwebtoken&#x27;;
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 import { UserWithSecurities } from &#x27;../types/user.types&#x27;;
 
 @Injectable()
@@ -301,7 +302,7 @@ export class JwtAuthGuard extends AuthGuard(&#x27;jwt&#x27;) {
     if (info instanceof TokenExpiredError) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: &#x27;Access token expired&#x27;,
+        message: t(&#x27;auth.ACCESS_TOKEN_EXPIRED&#x27;),
         error: &#x27;Unauthorized&#x27;,
         code: &#x27;TOKEN_EXPIRED&#x27;,
       });
@@ -311,7 +312,7 @@ export class JwtAuthGuard extends AuthGuard(&#x27;jwt&#x27;) {
     if (err || !user) {
       throw new UnauthorizedException({
         statusCode: 401,
-        message: &#x27;Invalid access token&#x27;,
+        message: t(&#x27;auth.INVALID_ACCESS_TOKEN&#x27;),
         error: &#x27;Unauthorized&#x27;,
         code: &#x27;INVALID_TOKEN&#x27;,
       });

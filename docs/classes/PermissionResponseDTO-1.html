@@ -208,7 +208,7 @@
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>    <code>string | null</code>
+                        <i>Type : </i>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string | null</a></code>
 
                     </td>
                 </tr>
@@ -223,7 +223,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="93" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:93</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="106" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:106</a></div>
                         </td>
                     </tr>
 
@@ -244,7 +244,7 @@
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                        <i>Type : </i>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                     </td>
                 </tr>
@@ -259,7 +259,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="90" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:90</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="103" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:103</a></div>
                         </td>
                     </tr>
 
@@ -295,7 +295,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="81" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:81</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="94" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:94</a></div>
                         </td>
                     </tr>
 
@@ -316,7 +316,7 @@
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                        <i>Type : </i>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                     </td>
                 </tr>
@@ -331,7 +331,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="84" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:84</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="97" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:97</a></div>
                         </td>
                     </tr>
 
@@ -382,6 +382,19 @@ export class UserResponseDTO {
   @IsString()
   @IsOptional()
   phoneNumber?: string | null;
+
+  @ApiProperty({
+    example:
+      &#x27;https://tekoapp-uploads.s3.amazonaws.com/avatars/abc123.jpg?X-Amz-...&#x27;,
+    required: false,
+    nullable: true,
+    description:
+      &#x27;URL presignada de la foto de perfil, resuelta fresca en el momento de la respuesta (expira &#x27; +
+      &#x27;en 900s) — nunca almacenar/cachear este valor, siempre volver a pedirlo.&#x27;,
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string | null;
 
   @ApiProperty({ example: true })
   isEmployee!: boolean;

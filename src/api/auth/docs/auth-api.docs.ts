@@ -49,6 +49,23 @@ export const AuthApiDocs = {
     }),
   ),
 
+  changeExpiredPassword: applyDecorators(
+    HttpCode(200),
+    ApiOperation({
+      summary: 'Cambio de contraseña expirada (pre-login).',
+      description:
+        'Permite cambiar la contraseña cuando ya expiró y el usuario no puede loguearse. Valida la contraseña vieja contra la credencial activa más reciente, aplica complejidad a la nueva y rota manteniendo el histórico.',
+    }),
+    ApiOkResponse({
+      description: 'Contraseña actualizada correctamente.',
+      type: DTO.PasswordResponseDTO,
+    }),
+    ApiUnauthorizedResponse({ description: 'Credenciales inválidas.' }),
+    ApiBadRequestResponse({
+      description: 'La nueva contraseña no cumple la política de complejidad.',
+    }),
+  ),
+
   forgotPassword: applyDecorators(
     HttpCode(200),
     ApiOperation({
@@ -57,6 +74,48 @@ export const AuthApiDocs = {
       description:
         'Olvide mi contraseña. Cambio de credenciales y password del usuario.',
     }),
+  ),
+
+  nonce: applyDecorators(
+    HttpCode(201),
+    ApiOperation({
+      summary: 'Genera un nonce anti-replay para el login.',
+      description:
+        'Devuelve un nonce de uso único con TTL corto que el frontend debe incluir dentro del payload cifrado del login ({ password, nonce }).',
+    }),
+    ApiOkResponse({
+      description: 'Nonce generado correctamente.',
+      type: DTO.NonceResponseDTO,
+    }),
+  ),
+
+  me: applyDecorators(
+    HttpCode(200),
+    ApiOperation({
+      summary: 'Perfil del usuario autenticado.',
+      description:
+        'Devuelve el perfil del usuario logueado (identificador público referenceId, nunca el id interno), roles y permisos.',
+    }),
+    ApiOkResponse({
+      description: 'Perfil obtenido con éxito.',
+      type: DTO.MeResponseDTO,
+    }),
+    ApiUnauthorizedResponse({ description: 'Token inválido o expirado.' }),
+  ),
+
+  updateMe: applyDecorators(
+    HttpCode(200),
+    ApiOperation({
+      summary: 'Autoedición de perfil del usuario autenticado.',
+      description:
+        'El propio usuario actualiza sus datos básicos (nombre, teléfono, avatar) — nunca email, status ni campos administrativos, eso sigue en PUT /users/:id (requiere permiso de admin).',
+    }),
+    ApiOkResponse({
+      description: 'Perfil actualizado con éxito.',
+      type: DTO.MeResponseDTO,
+    }),
+    ApiUnauthorizedResponse({ description: 'Token inválido o expirado.' }),
+    ApiBadRequestResponse({ description: 'Datos inválidos.' }),
   ),
 
   refreshToken: applyDecorators(
