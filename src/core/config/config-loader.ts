@@ -34,6 +34,13 @@ export const APP_CONFIG = registerAs('config', () => {
       refreshTokenExpires: process.env.REFRESH_TOKEN_EXPIRES ?? '7d',
       shortRefreshTokenExpires:
         process.env.REFRESH_TOKEN_SHORT_EXPIRES ?? '12h',
+      // 0 (o sin setear) = expiración indefinida.
+      passwordExpirationDays: process.env.PASSWORD_EXPIRATION_DAYS
+        ? parseInt(process.env.PASSWORD_EXPIRATION_DAYS)
+        : 0,
+      passwordHistoryLimit: process.env.PASSWORD_HISTORY_LIMIT
+        ? parseInt(process.env.PASSWORD_HISTORY_LIMIT)
+        : 5,
     },
     email: {
       host: process.env.EMAIL_HOST,
@@ -45,6 +52,7 @@ export const APP_CONFIG = registerAs('config', () => {
     database: {
       connectionString: process.env.DATABASE_CONNECTION_STRING,
       url: process.env.DATABASE_URL,
+      auditSecretPepper: process.env.AUDIT_SECRET_PEPPER,
       // Configuración unificada para MongoDB
       mongodbUri: process.env.MONGODB_URI,
       mongodbMaxPoolSize: process.env.MONGODB_MAX_POOL_SIZE
@@ -88,6 +96,11 @@ export const APP_CONFIG = registerAs('config', () => {
       projectId: process.env.FIREBASE_PROJECT_ID,
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') ?? '',
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    },
+    webPush: {
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? '',
+      vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? '',
+      vapidSubject: process.env.VAPID_SUBJECT ?? '',
     },
     stripe: {
       secretKey: process.env.STRIPE_SECRET_KEY,

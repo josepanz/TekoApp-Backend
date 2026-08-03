@@ -159,6 +159,10 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
+                                <a href="#createProfessionalToClientRating" >createProfessionalToClientRating</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
                                 <a href="#findAll" >findAll</a>
                             </li>
                             <li>
@@ -190,6 +194,11 @@
                                 <a href="#getAverageRating" >getAverageRating</a>
                             </li>
                             <li>
+                                    <span class="modifier">Private</span>
+                                    <span class="modifier">Async</span>
+                                <a href="#getRatingEntityByRef" >getRatingEntityByRef</a>
+                            </li>
+                            <li>
                                     <span class="modifier">Async</span>
                                 <a href="#getRecentRatings" >getRecentRatings</a>
                             </li>
@@ -208,6 +217,11 @@
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#reportRating" >reportRating</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Private</span>
+                                    <span class="modifier">Async</span>
+                                <a href="#resolveServiceId" >resolveServiceId</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -236,7 +250,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="20" class="link-to-prism">src/api/ratings/services/ratings.service.ts:20</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="27" class="link-to-prism">src/api/ratings/services/ratings.service.ts:27</a></div>
                             </td>
                         </tr>
 
@@ -301,8 +315,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="23"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:23</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="49"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:49</a></div>
                         </td>
                     </tr>
 
@@ -350,7 +364,88 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="createProfessionalToClientRating"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>createProfessionalToClientRating</b></span>
+                        <a href="#createProfessionalToClientRating"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>createProfessionalToClientRating(raterUserId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/CreateProfessionalToClientRatingRequestDTO.html" target="_self">CreateProfessionalToClientRatingRequestDTO</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="98"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:98</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>raterUserId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateProfessionalToClientRatingRequestDTO.html" target="_self" >CreateProfessionalToClientRatingRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -382,8 +477,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="64"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:64</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="138"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:138</a></div>
                         </td>
                     </tr>
 
@@ -392,7 +487,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -421,8 +516,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="78"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:78</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="150"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:150</a></div>
                         </td>
                     </tr>
 
@@ -458,7 +553,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -483,15 +578,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findByServiceRequest(serviceRequestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findByServiceRequest(serviceRef: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="90"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:90</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="172"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:172</a></div>
                         </td>
                     </tr>
 
@@ -512,9 +607,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>serviceRequestId</td>
+                                                <td>serviceRef</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -527,7 +622,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -559,8 +654,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="74"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:74</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="146"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:146</a></div>
                         </td>
                     </tr>
 
@@ -596,7 +691,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -628,8 +723,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="82"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:82</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="158"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:158</a></div>
                         </td>
                     </tr>
 
@@ -665,7 +760,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -690,15 +785,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOne(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOne(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="68"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:68</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="142"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:142</a></div>
                         </td>
                     </tr>
 
@@ -721,7 +816,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -734,7 +829,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -766,8 +861,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="86"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:86</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="166"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:166</a></div>
                         </td>
                     </tr>
 
@@ -803,7 +898,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -835,8 +930,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="149"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:149</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="239"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:239</a></div>
                         </td>
                     </tr>
 
@@ -886,6 +981,76 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="getRatingEntityByRef"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>getRatingEntityByRef</b></span>
+                        <a href="#getRatingEntityByRef"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>getRatingEntityByRef(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="43"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:43</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="getRecentRatings"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -904,8 +1069,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="221"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:221</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="311"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:311</a></div>
                         </td>
                     </tr>
 
@@ -945,7 +1110,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -977,8 +1142,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="209"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:209</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="299"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:299</a></div>
                         </td>
                     </tr>
 
@@ -1043,15 +1208,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUserRatingStats(userId: number | string)</code>
+                    <code>getUserRatingStats(userId: <a href="../miscellaneous/functions.html#t" target="_self">number | string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="94"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:94</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="180"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:180</a></div>
                         </td>
                     </tr>
 
@@ -1074,7 +1239,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                        <code>number | string</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >number | string</a></code>
                                             </td>
 
                                             <td>
@@ -1112,15 +1277,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>remove(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>remove(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="127"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:127</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="215"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:215</a></div>
                         </td>
                     </tr>
 
@@ -1143,7 +1308,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1193,15 +1358,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>reportRating(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, reason: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>reportRating(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, reason: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="139"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:139</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="227"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:227</a></div>
                         </td>
                     </tr>
 
@@ -1224,7 +1389,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1248,7 +1413,7 @@
                                         <tr>
                                                 <td>reason</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1261,7 +1426,80 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="resolveServiceId"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>resolveServiceId</b></span>
+                        <a href="#resolveServiceId"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>resolveServiceId(serviceRef: <a href="../miscellaneous/functions.html#t" target="_self">string | undefined</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="34"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:34</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Resuelve el UUID público de un servicio (recibido en el DTO) a su PK interna (Int). Devuelve
+undefined si no se envió ningún UUID; lanza NotFound si el UUID no corresponde a un servicio.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>serviceRef</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string | undefined</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number | undefined&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -1286,15 +1524,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UpdateRatingRequestDTO.html" target="_self">UpdateRatingRequestDTO | Partial&lt;Prisma.RatingUpdateInput&gt;</a>)</code>
+                    <code>update(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UpdateRatingRequestDTO.html" target="_self">UpdateRatingRequestDTO | Partial&lt;Prisma.RatingUpdateInput&gt;</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="109"
-                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:109</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="195"
+                                    class="link-to-prism">src/api/ratings/services/ratings.service.ts:195</a></div>
                         </td>
                     </tr>
 
@@ -1317,7 +1555,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1354,7 +1592,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>unknown</code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;RatingDetailResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1376,36 +1614,66 @@
   BadRequestException,
   ForbiddenException,
 } from &#x27;@nestjs/common&#x27;;
-import { Prisma } from &#x27;@prisma/client&#x27;;
+import { Prisma, RatingType } from &#x27;@prisma/client&#x27;;
 import { RatingsDbService } from &#x27;@modules/ratings-db/services/ratings-db.service&#x27;;
 import { CreateRatingRequestDTO } from &#x27;../dtos/request/create-rating.request.dto&#x27;;
+import { CreateProfessionalToClientRatingRequestDTO } from &#x27;../dtos/request/create-professional-to-client-rating.request.dto&#x27;;
 import { UpdateRatingRequestDTO } from &#x27;../dtos/request/update-rating.request.dto&#x27;;
 import {
   ProfessionalRatingStatsResponseDTO,
   UserRatingStatsResponseDTO,
   TopRatedProfessionalResponseDTO,
+  RatingDetailResponseDTO,
 } from &#x27;../dtos/response&#x27;;
+import {
+  mapRatingToResponse,
+  mapRatingsToResponse,
+} from &#x27;../helpers/ratings-response.helper&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 const EDIT_WINDOW_MS &#x3D; 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class RatingsService {
   constructor(private readonly db: RatingsDbService) {}
 
-  async create(userId: number, dto: CreateRatingRequestDTO) {
+  /**
+   * Resuelve el UUID público de un servicio (recibido en el DTO) a su PK interna (Int). Devuelve
+   * undefined si no se envió ningún UUID; lanza NotFound si el UUID no corresponde a un servicio.
+   */
+  private async resolveServiceId(
+    serviceRef: string | undefined,
+  ): Promise&lt;number | undefined&gt; {
+    if (!serviceRef) return undefined;
+    const service &#x3D; await this.db.findServiceByReferenceId(serviceRef);
+    if (!service) throw new NotFoundException(t(&#x27;ratings.SERVICE_NOT_FOUND&#x27;));
+    return service.id;
+  }
+
+  private async getRatingEntityByRef(referenceId: string) {
+    const rating &#x3D; await this.db.findByReferenceId(referenceId);
+    if (!rating) throw new NotFoundException(t(&#x27;ratings.NOT_FOUND&#x27;));
+    return rating;
+  }
+
+  async create(
+    userId: number,
+    dto: CreateRatingRequestDTO,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
     const professionalId &#x3D;
       typeof dto.professionalId &#x3D;&#x3D;&#x3D; &#x27;string&#x27;
         ? ((await this.db.findProfessionalByUserRef(dto.professionalId))?.id ??
           0)
         : Number(dto.professionalId);
 
-    const serviceId &#x3D;
+    const serviceRef &#x3D;
       ((dto as unknown as Record&lt;string, unknown&gt;).serviceId as
         | string
         | undefined) ??
       ((dto as unknown as Record&lt;string, unknown&gt;).serviceRequestId as
         | string
         | undefined);
+    const serviceId &#x3D; await this.resolveServiceId(serviceRef);
 
     const existing &#x3D; await this.db.findDuplicate(
       userId,
@@ -1413,10 +1681,9 @@ export class RatingsService {
       serviceId,
       dto.type,
     );
-    if (existing)
-      throw new BadRequestException(&#x27;Ya has calificado este servicio&#x27;);
+    if (existing) throw new BadRequestException(t(&#x27;ratings.ALREADY_RATED&#x27;));
 
-    return this.db.create({
+    const created &#x3D; await this.db.create({
       userId,
       professionalId,
       serviceId,
@@ -1426,41 +1693,98 @@ export class RatingsService {
         ((dto as unknown as Record&lt;string, unknown&gt;).comment as string) ??
         ((dto as unknown as Record&lt;string, unknown&gt;).review as string),
       criteria: dto.criteria
-        ? (dto.criteria as unknown as import(&#x27;@prisma/client&#x27;).Prisma.InputJsonValue)
+        ? (dto.criteria as unknown as Prisma.InputJsonValue)
         : undefined,
       isAnonymous: dto.isAnonymous ?? false,
       createdBy: String(userId),
     });
+    return mapRatingToResponse(created);
   }
 
-  async findAll() {
-    return this.db.findAll();
+  // Contraparte de &#x60;create()&#x60; para el sentido inverso: acá el profesional autenticado (rater)
+  // califica a un cliente (ratee). El modelo &#x60;Rating&#x60; siempre guarda &#x60;userId&#x60;/&#x60;professionalId&#x60;
+  // sin importar la dirección — para &#x60;PROFESSIONAL_TO_CLIENT&#x60;, &#x60;userId&#x60; es el cliente calificado
+  // y &#x60;professionalId&#x60; es el perfil profesional del que calificó, no al revés.
+  async createProfessionalToClientRating(
+    raterUserId: number,
+    dto: CreateProfessionalToClientRatingRequestDTO,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
+    const professional &#x3D; await this.db.findProfessionalByUserId(raterUserId);
+    if (!professional) {
+      throw new ForbiddenException(
+        t(&#x27;ratings.ONLY_PROFESSIONAL_CAN_RATE_CLIENT&#x27;),
+      );
+    }
+
+    const client &#x3D; await this.db.findUserByReferenceId(dto.clientId);
+    if (!client) throw new NotFoundException(t(&#x27;ratings.CLIENT_NOT_FOUND&#x27;));
+
+    const serviceId &#x3D; await this.resolveServiceId(dto.serviceRequestId);
+
+    const existing &#x3D; await this.db.findDuplicate(
+      client.id,
+      professional.id,
+      serviceId,
+      RatingType.PROFESSIONAL_TO_CLIENT,
+    );
+    if (existing) throw new BadRequestException(t(&#x27;ratings.ALREADY_RATED&#x27;));
+
+    const created &#x3D; await this.db.create({
+      userId: client.id,
+      professionalId: professional.id,
+      serviceId,
+      type: RatingType.PROFESSIONAL_TO_CLIENT,
+      rating: dto.rating,
+      review: dto.comment,
+      criteria: dto.criteria
+        ? (dto.criteria as unknown as Prisma.InputJsonValue)
+        : undefined,
+      isAnonymous: dto.isAnonymous ?? false,
+      createdBy: String(raterUserId),
+    });
+    return mapRatingToResponse(created);
   }
 
-  async findOne(id: string) {
-    const rating &#x3D; await this.db.findById(id);
-    if (!rating) throw new NotFoundException(&#x27;Calificación no encontrada&#x27;);
-    return rating;
+  async findAll(): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return mapRatingsToResponse(await this.db.findAll());
   }
 
-  async findByUser(userId: number) {
-    return this.db.findByUser(userId);
+  async findOne(id: string): Promise&lt;RatingDetailResponseDTO&gt; {
+    return mapRatingToResponse(await this.getRatingEntityByRef(id));
   }
 
-  async findByProfessional(professionalId: number) {
-    return this.db.findByProfessional(professionalId);
+  async findByUser(userId: number): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return mapRatingsToResponse(await this.db.findByUser(userId));
   }
 
-  async findClientRatings(professionalId: number) {
-    return this.db.findClientRatings(professionalId);
+  async findByProfessional(
+    professionalId: number,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return mapRatingsToResponse(
+      await this.db.findByProfessional(professionalId),
+    );
   }
 
-  async findProfessionalRatings(userId: number) {
-    return this.db.findProfessionalRatings(userId);
+  async findClientRatings(
+    professionalId: number,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return mapRatingsToResponse(
+      await this.db.findClientRatings(professionalId),
+    );
   }
 
-  async findByServiceRequest(serviceRequestId: string) {
-    return this.db.findByServiceId(serviceRequestId);
+  async findProfessionalRatings(
+    userId: number,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return mapRatingsToResponse(await this.db.findProfessionalRatings(userId));
+  }
+
+  async findByServiceRequest(
+    serviceRef: string,
+  ): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    const service &#x3D; await this.db.findServiceByReferenceId(serviceRef);
+    if (!service) throw new NotFoundException(t(&#x27;ratings.SERVICE_NOT_FOUND&#x27;));
+    return mapRatingsToResponse(await this.db.findByServiceId(service.id));
   }
 
   async getUserRatingStats(
@@ -1482,40 +1806,44 @@ export class RatingsService {
     id: string,
     userId: number,
     dto: UpdateRatingRequestDTO | Partial&lt;Prisma.RatingUpdateInput&gt;,
-  ) {
-    const rating &#x3D; await this.findOne(id);
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
+    const rating &#x3D; await this.getRatingEntityByRef(id);
     if (rating.userId !&#x3D;&#x3D; userId) {
-      throw new ForbiddenException(&#x27;No puedes editar esta calificación&#x27;);
+      throw new ForbiddenException(t(&#x27;ratings.UNAUTHORIZED_EDIT&#x27;));
     }
     const age &#x3D; Date.now() - rating.createdAt.getTime();
     if (age &gt; EDIT_WINDOW_MS) {
-      throw new BadRequestException(
-        &#x27;No se puede editar la calificación después de 24 horas&#x27;,
-      );
+      throw new BadRequestException(t(&#x27;ratings.CANNOT_EDIT_AFTER_24H&#x27;));
     }
-    return this.db.update(id, dto as Prisma.RatingUpdateInput);
+    const updated &#x3D; await this.db.update(
+      rating.id,
+      dto as Prisma.RatingUpdateInput,
+    );
+    return mapRatingToResponse(updated);
   }
 
   async remove(id: string, userId: number): Promise&lt;void&gt; {
-    const rating &#x3D; await this.findOne(id);
+    const rating &#x3D; await this.getRatingEntityByRef(id);
     if (rating.userId !&#x3D;&#x3D; userId) {
-      throw new ForbiddenException(&#x27;No puedes eliminar esta calificación&#x27;);
+      throw new ForbiddenException(t(&#x27;ratings.UNAUTHORIZED_DELETE&#x27;));
     }
     const age &#x3D; Date.now() - rating.createdAt.getTime();
     if (age &gt; EDIT_WINDOW_MS) {
-      throw new BadRequestException(&#x27;No se puede eliminar esta calificación&#x27;);
+      throw new BadRequestException(t(&#x27;ratings.CANNOT_DELETE&#x27;));
     }
-    await this.db.deactivate(id);
+    await this.db.deactivate(rating.id);
   }
 
-  async reportRating(id: string, userId: number, reason: string) {
-    const rating &#x3D; await this.findOne(id);
+  async reportRating(
+    id: string,
+    userId: number,
+    reason: string,
+  ): Promise&lt;RatingDetailResponseDTO&gt; {
+    const rating &#x3D; await this.getRatingEntityByRef(id);
     if (rating.userId &#x3D;&#x3D;&#x3D; userId) {
-      throw new BadRequestException(
-        &#x27;No puedes reportar tu propia calificación&#x27;,
-      );
+      throw new BadRequestException(t(&#x27;ratings.CANNOT_REPORT_OWN&#x27;));
     }
-    return this.db.report(id, reason);
+    return mapRatingToResponse(await this.db.report(rating.id, reason));
   }
 
   async getAverageRating(
@@ -1590,8 +1918,8 @@ export class RatingsService {
     }));
   }
 
-  async getRecentRatings(limit &#x3D; 20) {
-    return this.db.findRecent(limit);
+  async getRecentRatings(limit &#x3D; 20): Promise&lt;RatingDetailResponseDTO[]&gt; {
+    return mapRatingsToResponse(await this.db.findRecent(limit));
   }
 }
 </code></pre>

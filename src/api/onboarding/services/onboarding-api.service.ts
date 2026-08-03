@@ -4,6 +4,7 @@ import { CryptoHelper } from '@common/helpers/crypto-helpers';
 import * as DTO from '@/api/onboarding/dtos';
 import { OnboardingService } from '@modules/onboarding/services/onboarding.service';
 
+import { t } from '@common/i18n/i18n.helper';
 /**
  * Servicio de API de Onboarding - Capa BFF
  *
@@ -36,7 +37,7 @@ export class OnboardingApiService {
 
     // Validar que las contraseñas coincidan
     if (decryptedPassword !== decryptedConfirmPassword) {
-      throw new BadRequestException('Las contraseñas no coinciden.');
+      throw new BadRequestException(t('onboarding.PASSWORDS_DO_NOT_MATCH'));
     }
 
     // Registrar usuario con la contraseña desencriptada

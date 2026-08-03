@@ -232,7 +232,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="133" class="link-to-prism">src/common/dtos/pagination.dto.ts:133</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="138" class="link-to-prism">src/common/dtos/pagination.dto.ts:138</a></div>
                         </td>
                     </tr>
 
@@ -271,7 +271,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="142" class="link-to-prism">src/common/dtos/pagination.dto.ts:142</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="147" class="link-to-prism">src/common/dtos/pagination.dto.ts:147</a></div>
                         </td>
                     </tr>
 
@@ -309,7 +309,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="124" class="link-to-prism">src/common/dtos/pagination.dto.ts:124</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="129" class="link-to-prism">src/common/dtos/pagination.dto.ts:129</a></div>
                         </td>
                     </tr>
 
@@ -347,7 +347,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="150" class="link-to-prism">src/common/dtos/pagination.dto.ts:150</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="155" class="link-to-prism">src/common/dtos/pagination.dto.ts:155</a></div>
                         </td>
                     </tr>
 
@@ -371,6 +371,7 @@ import { IsOrderByFormat } from &#x27;@common/validators&#x27;;
 import { IsEndDateAfterStartDate } from &#x27;@common/validators/date-range.validator&#x27;;
 import { ApiProperty, ApiPropertyOptional } from &#x27;@nestjs/swagger&#x27;;
 import { Transform, TransformFnParams, Type } from &#x27;class-transformer&#x27;;
+import { i18nValidationMessage } from &#x27;nestjs-i18n&#x27;;
 import {
   IsDate,
   IsNotEmpty,
@@ -428,7 +429,7 @@ export class PaginationQueryDTO {
   @IsOptional()
   @Type(() &#x3D;&gt; Number)
   @IsNumber()
-  @Min(1, { message: &#x27;La pagina no puede ser menor a 0&#x27; })
+  @Min(1, { message: i18nValidationMessage(&#x27;validation.PAGE_MIN&#x27;) })
   page?: number;
 
   @ApiPropertyOptional({
@@ -439,7 +440,7 @@ export class PaginationQueryDTO {
   @IsOptional()
   @Type(() &#x3D;&gt; Number)
   @IsNumber()
-  @Min(1, { message: &#x27;El tamaño de pagina no puede ser menor a 0&#x27; })
+  @Min(1, { message: i18nValidationMessage(&#x27;validation.PAGE_SIZE_MIN&#x27;) })
   pageSize?: number;
 
   @ApiPropertyOptional({
@@ -471,14 +472,18 @@ export class PaginationQueryDTO {
     example: &#x27;1,2,3&#x27;,
   })
   @IsString({
-    message: &#x27;El código de sucursal debe ser una cadena de texto&#x27;,
+    message: i18nValidationMessage(&#x27;validation.BRANCH_CODE_MUST_BE_STRING&#x27;),
   })
   @Transform(({ value }: TransformFnParams): unknown &#x3D;&gt;
     typeof value &#x3D;&#x3D;&#x3D; &#x27;string&#x27; ? value.trim() : value,
   )
   @IsOptional()
-  @IsNotEmpty({ message: &#x27;El código de sucursal no puede venir vacio.&#x27; })
-  @IsMaxCommaSeparated(10, { message: &#x27;Demasiadas sucursales, máximmo 10&#x27; })
+  @IsNotEmpty({
+    message: i18nValidationMessage(&#x27;validation.BRANCH_CODE_NOT_EMPTY&#x27;),
+  })
+  @IsMaxCommaSeparated(10, {
+    message: i18nValidationMessage(&#x27;validation.BRANCHES_TOO_MANY&#x27;),
+  })
   branches?: string;
 }
 

@@ -9,6 +9,7 @@ import { Permissions, Prisma } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { GetPermissionListQueryDTO } from '@api/roles-permission/dtos/request';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class PermissionsDBService {
   private readonly logger = new Logger(PermissionsDBService.name);
@@ -145,13 +146,15 @@ export class PermissionsDBService {
   }): Promise<Permissions> {
     if (!this.isValidPermissionFormat(data.name)) {
       throw new BadRequestException(
-        'El nombre del permiso debe seguir el formato "resource:action" (ej: customers:read)',
+        t('roles-permission.INVALID_PERMISSION_NAME_FORMAT'),
       );
     }
 
     const exists = await this.existsByName(data.name);
     if (exists)
-      throw new ConflictException(`El permiso "${data.name}" ya existe.`);
+      throw new ConflictException(
+        t('roles-permission.PERMISSION_ALREADY_EXISTS', { name: data.name }),
+      );
 
     return await this.create(data);
   }
@@ -159,14 +162,18 @@ export class PermissionsDBService {
   async getPermissionById(id: number): Promise<Permissions> {
     const permission = await this.findById(id);
     if (!permission)
-      throw new NotFoundException(`Permiso con ID ${id} no encontrado.`);
+      throw new NotFoundException(
+        t('roles-permission.PERMISSION_ID_NOT_FOUND', { id }),
+      );
     return permission;
   }
 
   async getPermissionByName(name: string): Promise<Permissions> {
     const permission = await this.findByName(name);
     if (!permission)
-      throw new NotFoundException(`Permiso "${name}" no encontrado.`);
+      throw new NotFoundException(
+        t('roles-permission.PERMISSION_NOT_FOUND', { name }),
+      );
     return permission;
   }
 
@@ -195,12 +202,14 @@ export class PermissionsDBService {
     if (data.name) {
       if (!this.isValidPermissionFormat(data.name)) {
         throw new BadRequestException(
-          'El nombre del permiso debe seguir el formato "resource:action" (ej: customers:read)',
+          t('roles-permission.INVALID_PERMISSION_NAME_FORMAT'),
         );
       }
       const exists = await this.existsByName(data.name, id);
       if (exists)
-        throw new ConflictException(`El permiso "${data.name}" ya existe.`);
+        throw new ConflictException(
+          t('roles-permission.PERMISSION_ALREADY_EXISTS', { name: data.name }),
+        );
     }
 
     return await this.update(id, data);
@@ -216,7 +225,7 @@ export class PermissionsDBService {
     const inUse = await this.isInUse(id);
     if (inUse) {
       throw new BadRequestException(
-        'No se puede eliminar el permiso porque está asignado a roles o usuarios. Desactívalo en su lugar.',
+        t('roles-permission.CANNOT_DELETE_ASSIGNED_PERMISSION'),
       );
     }
 
@@ -231,7 +240,9 @@ export class PermissionsDBService {
         (id) => !permissions.map((p) => p.id).includes(id),
       );
       throw new NotFoundException(
-        `Los siguientes id's de permisos no existen o están inactivos: ${missingIds.join(', ')}`,
+        t('roles-permission.PERMISSIONS_NOT_FOUND_OR_INACTIVE', {
+          missingIds: missingIds.join(', '),
+        }),
       );
     }
 

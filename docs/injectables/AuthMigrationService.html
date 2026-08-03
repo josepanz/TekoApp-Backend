@@ -198,7 +198,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/api/auth/services/auth-migration.service.ts:7</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="8" class="link-to-prism">src/api/auth/services/auth-migration.service.ts:8</a></div>
                             </td>
                         </tr>
 
@@ -224,15 +224,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>verifyForgotPasswordToken(token: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+<code>verifyForgotPasswordToken(token: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="30"
-                                    class="link-to-prism">src/api/auth/services/auth-migration.service.ts:30</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="31"
+                                    class="link-to-prism">src/api/auth/services/auth-migration.service.ts:31</a></div>
                         </td>
                     </tr>
 
@@ -255,7 +255,7 @@
                                         <tr>
                                                 <td>token</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -268,7 +268,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                         </div>
                             <div class="io-description">
@@ -291,15 +291,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>verifyTempToken(token: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, expectedEmail: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+<code>verifyTempToken(token: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, expectedEmail: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="11"
-                                    class="link-to-prism">src/api/auth/services/auth-migration.service.ts:11</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="12"
+                                    class="link-to-prism">src/api/auth/services/auth-migration.service.ts:12</a></div>
                         </td>
                     </tr>
 
@@ -322,7 +322,7 @@
                                         <tr>
                                                 <td>token</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -334,7 +334,7 @@
                                         <tr>
                                                 <td>expectedEmail</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -389,7 +389,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/api/auth/services/auth-migration.service.ts:7</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="8" class="link-to-prism">src/api/auth/services/auth-migration.service.ts:8</a></div>
                         </td>
                     </tr>
 
@@ -406,6 +406,7 @@
 
 import { CryptoHelper } from &#x27;@common/helpers/crypto-helpers&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class AuthMigrationService {
   private readonly logger &#x3D; new Logger(AuthMigrationService.name);
@@ -424,10 +425,10 @@ export class AuthMigrationService {
         payload.tokenType !&#x3D;&#x3D; &#x27;tempToken&#x27; ||
         payload.email !&#x3D;&#x3D; expectedEmail
       ) {
-        throw new UnauthorizedException(&#x27;Token inválido o expirado.&#x27;);
+        throw new UnauthorizedException(t(&#x27;auth.INVALID_OR_EXPIRED_TOKEN&#x27;));
       }
     } catch {
-      throw new UnauthorizedException(&#x27;Token inválido o expirado.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_OR_EXPIRED_TOKEN&#x27;));
     }
   }
 
@@ -444,12 +445,12 @@ export class AuthMigrationService {
         payload.tokenType !&#x3D;&#x3D; &#x27;tempToken&#x27; ||
         payload.action !&#x3D;&#x3D; &#x27;forgotPassword&#x27;
       ) {
-        throw new UnauthorizedException(&#x27;Token inválido o expirado.&#x27;);
+        throw new UnauthorizedException(t(&#x27;auth.INVALID_OR_EXPIRED_TOKEN&#x27;));
       }
 
       return payload.email;
     } catch {
-      throw new UnauthorizedException(&#x27;Token inválido o expirado.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_OR_EXPIRED_TOKEN&#x27;));
     }
   }
 }

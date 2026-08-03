@@ -199,7 +199,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/modules/auth/guards/basic-auth.guard.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="17" class="link-to-prism">src/modules/auth/guards/basic-auth.guard.ts:17</a></div>
                             </td>
                         </tr>
 
@@ -257,15 +257,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>canActivate(context: ExecutionContext)</code>
+                    <code>canActivate(context: <a href="../miscellaneous/functions.html#t" target="_self">ExecutionContext</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="19"
-                                    class="link-to-prism">src/modules/auth/guards/basic-auth.guard.ts:19</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="21"
+                                    class="link-to-prism">src/modules/auth/guards/basic-auth.guard.ts:21</a></div>
                         </td>
                     </tr>
 
@@ -288,7 +288,7 @@
                                         <tr>
                                                 <td>context</td>
                                             <td>
-                                                        <code>ExecutionContext</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExecutionContext</a></code>
                                             </td>
 
                                             <td>
@@ -327,7 +327,9 @@
 import { Request as ExpressRequest } from &#x27;express&#x27;;
 import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;;
 import { ApiClientCredential } from &#x27;@prisma/client&#x27;;
+import { CryptoHelper } from &#x27;@common/helpers/crypto-helpers&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class BasicAuthGuard implements CanActivate {
   private readonly logger &#x3D; new Logger(BasicAuthGuard.name);
@@ -343,7 +345,7 @@ export class BasicAuthGuard implements CanActivate {
     const authHeader &#x3D; request.headers[&#x27;authorization&#x27;];
 
     if (!authHeader || !authHeader.startsWith(&#x27;Basic &#x27;)) {
-      throw new UnauthorizedException(&#x27;Se requiere Basic Authentication.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.BASIC_AUTH_REQUIRED&#x27;));
     }
 
     const encodedCredentials &#x3D; authHeader.substring(6);
@@ -357,14 +359,12 @@ export class BasicAuthGuard implements CanActivate {
       this.logger.error(
         &#x60;Error de decodificación Base64 en Basic Auth. ${error}&#x60;,
       );
-      throw new UnauthorizedException(&#x27;Formato de credenciales inválido.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_CREDENTIALS_FORMAT&#x27;));
     }
 
     const credentials &#x3D; decodedString.split(&#x27;:&#x27;);
     if (credentials.length !&#x3D;&#x3D; 2) {
-      throw new UnauthorizedException(
-        &#x27;Formato de credenciales Basic Auth incorrecto (debe ser client_id:client_secret).&#x27;,
-      );
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_BASIC_AUTH_FORMAT&#x27;));
     }
 
     const [clientId, clientSecret] &#x3D; credentials;
@@ -381,25 +381,27 @@ export class BasicAuthGuard implements CanActivate {
         error instanceof Error ? error.stack : String(error),
       );
       throw new ForbiddenException(
-        &#x27;Error de servicio al validar credenciales.&#x27;,
+        t(&#x27;auth.CREDENTIALS_VALIDATION_SERVICE_ERROR&#x27;),
       );
     }
 
     if (!apiClientCredential) {
-      throw new UnauthorizedException(&#x27;Client ID incorrecto.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_CLIENT_ID&#x27;));
     }
 
     if (!apiClientCredential.isActive) {
       this.logger.warn(&#x60;Acceso denegado: Cliente ${clientId} inactivo.&#x60;);
-      throw new ForbiddenException(
-        &#x60;El acceso para este cliente ha sido revocado.&#x60;,
-      );
+      throw new ForbiddenException(t(&#x27;auth.CLIENT_ACCESS_REVOKED&#x27;));
     }
 
-    const isPasswordValid &#x3D; clientSecret &#x3D;&#x3D;&#x3D; apiClientCredential.secretKey;
+    // El secreto se guarda hasheado (bcrypt); comparación segura, no &#x60;&#x3D;&#x3D;&#x3D;&#x60;.
+    const isPasswordValid &#x3D; CryptoHelper.compareHashes(
+      clientSecret,
+      apiClientCredential.secretKey,
+    );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException(&#x27;Secreto incorrecto.&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_CLIENT_SECRET&#x27;));
     }
 
     request.apiClient &#x3D; {

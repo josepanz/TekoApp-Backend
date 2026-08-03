@@ -41,47 +41,6 @@ export const PERMISSIONS = {
     UNASSIGN_USER: 'user.permission.unassignment:delete',
     UNASSIGN_ROLE: 'role.permission.unassignment:delete',
   },
-  // Permisos de Comercio (Merchant)
-  MERCHANT: {
-    CREATE: 'merchant:create',
-    READ: 'merchant:read',
-    UPDATE: 'merchant:update',
-    DELETE: 'merchant:delete',
-    MANAGEMENT: 'merchant:management',
-    WITH_SPI: 'merchant.spi:read',
-    WITH_GIROS: 'merchant.giros:read',
-  },
-  // Permisos de Sucursal (Branch)
-  BRANCH: {
-    CREATE: 'branch:create',
-    READ: 'branch:read',
-    UPDATE: 'branch:update',
-    DELETE: 'branch:delete',
-  },
-  // Permisos de agrupación de comercios
-  GROUPING: {
-    CREATE: 'merchant.grouping:create',
-    READ: 'merchant.grouping:read',
-    UPDATE: 'merchant.grouping:update',
-    DELETE: 'merchant.grouping:delete',
-  },
-  // Permisos de asociación de comercios/grupos/sucursales a usuarios
-  ACCESS_ASSOCIATION: {
-    CREATE: 'user.merchant.access.association:create',
-    READ: 'user.merchant.access.association:read',
-    UPDATE: 'user.merchant.access.association:update',
-    DELETE: 'user.merchant.access.association:delete',
-  },
-  // Permisos de Movimientos
-  MOVEMENTS: {
-    READ: 'movement:read',
-  },
-  CUSTOMERS: {
-    CREATE: 'customers:create',
-    READ: 'customers:read',
-    UPDATE: 'customers:update',
-    DELETE: 'customers:delete',
-  },
 } as const;
 
 // Tipo utilitario para usar en guards o decoradores

@@ -213,7 +213,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="120" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:120</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="133" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:133</a></div>
                         </td>
                     </tr>
 
@@ -249,7 +249,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="123" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:123</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="136" class="link-to-prism">src/api/users/dtos/response/user.response.dto.ts:136</a></div>
                         </td>
                     </tr>
 
@@ -300,6 +300,19 @@ export class UserResponseDTO {
   @IsString()
   @IsOptional()
   phoneNumber?: string | null;
+
+  @ApiProperty({
+    example:
+      &#x27;https://tekoapp-uploads.s3.amazonaws.com/avatars/abc123.jpg?X-Amz-...&#x27;,
+    required: false,
+    nullable: true,
+    description:
+      &#x27;URL presignada de la foto de perfil, resuelta fresca en el momento de la respuesta (expira &#x27; +
+      &#x27;en 900s) — nunca almacenar/cachear este valor, siempre volver a pedirlo.&#x27;,
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string | null;
 
   @ApiProperty({ example: true })
   isEmployee!: boolean;

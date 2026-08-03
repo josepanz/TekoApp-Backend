@@ -1,4 +1,5 @@
 export * from './professional-id.param.dto';
+export * from './professional-reference-id.param.dto';
 export * from './get-professionals-list.query.dto';
 export * from './get-nearby-professionals.query.dto';
 export * from './search-by-skills.query.dto';

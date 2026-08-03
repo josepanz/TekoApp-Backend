@@ -4,6 +4,8 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
+import { t } from '@common/i18n/i18n.helper';
+
 @ValidatorConstraint({ name: 'maxCommaSeparated', async: false })
 export class MaxCommaSeparatedConstraint
   implements ValidatorConstraintInterface
@@ -22,6 +24,9 @@ export class MaxCommaSeparatedConstraint
 
   defaultMessage(args: ValidationArguments) {
     const max = args.constraints[0] as number;
-    return `${args.property} no puede tener más de ${max} códigos separados por coma y no puede estar vacío.`;
+    return t('validation.MAX_COMMA_SEPARATED', {
+      property: args.property,
+      max,
+    });
   }
 }

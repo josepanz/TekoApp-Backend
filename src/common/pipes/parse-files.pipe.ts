@@ -1,5 +1,6 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class ParseFilesPipe implements PipeTransform {
   /**
@@ -10,7 +11,7 @@ export class ParseFilesPipe implements PipeTransform {
   transform(files: Record<string, Express.Multer.File[]>) {
     // 1. Verificar si se subió algo
     if (!files || Object.keys(files).length === 0) {
-      throw new BadRequestException('No se han proporcionado archivos');
+      throw new BadRequestException(t('common.FILES_NOT_PROVIDED'));
     }
 
     // 2. Verificar campos obligatorios (si se definieron)
@@ -18,7 +19,7 @@ export class ParseFilesPipe implements PipeTransform {
       for (const field of this.options.requiredFields) {
         if (!files[field] || files[field].length === 0) {
           throw new BadRequestException(
-            `El campo de archivo '${field}' es obligatorio`,
+            t('common.FILE_FIELD_REQUIRED', { field }),
           );
         }
       }

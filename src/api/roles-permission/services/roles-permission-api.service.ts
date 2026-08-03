@@ -11,6 +11,7 @@ import { RolesPermissionsMapper } from '@api/roles-permission/helpers';
 
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class RolesApiService {
   private readonly logger = new Logger(RolesApiService.name);
@@ -38,13 +39,15 @@ export class RolesApiService {
       description: dto.description,
       createdBy,
     });
-    return this.mapper.permissionToResponse(role);
+    return this.mapper.roleToResponse(role);
   }
 
-  async getRoleById(id: number): Promise<ResponseDTO.RoleResponseDTO> {
+  async getRoleById(
+    id: number,
+  ): Promise<ResponseDTO.RoleWithPermissionsResponseDTO> {
     this.logger.log(`Obteniendo rol con ID: ${id}`);
-    const role = await this.rolesDBService.getRoleById(id);
-    return this.mapper.permissionToResponse(role);
+    const role = await this.rolesDBService.getRoleWithPermissions(id);
+    return this.mapper.roleWithPermissionsToResponse(role);
   }
 
   async getAllRoles(
@@ -55,7 +58,7 @@ export class RolesApiService {
     const stats = await this.rolesDBService.getRolesStats();
 
     return {
-      roles: roles.map((role) => this.mapper.permissionToResponse(role)),
+      roles: roles.map((role) => this.mapper.roleToResponse(role)),
       total: stats.total,
       active: stats.active,
       inactive: stats.inactive,
@@ -74,7 +77,7 @@ export class RolesApiService {
       isActive: dto.isActive,
       lastChangedBy: updatedBy,
     });
-    return this.mapper.permissionToResponse(role);
+    return this.mapper.roleToResponse(role);
   }
 
   // ==================== USER ROLES ====================
@@ -87,7 +90,9 @@ export class RolesApiService {
     this.logger.log(`Asignando roles al usuario con ID: ${userId}`);
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`El usuario con ID ${userId} no existe`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_EXISTS', { userId }),
+      );
 
     const roleIds = [...new Set(dto.roles.map((r) => r.id))];
 
@@ -109,7 +114,7 @@ export class RolesApiService {
         name: ur.role.name,
         displayName: ur.role?.displayName ?? '',
         assigned: true,
-        message: 'Rol activo en el perfil del usuario',
+        message: t('roles-permission.ROLE_ACTIVE_IN_USER_PROFILE'),
       })),
       totalProcessed: roleIds.length,
       successfulAssignments: updatedUserRoles.length,
@@ -125,7 +130,9 @@ export class RolesApiService {
     this.logger.log(`Obteniendo roles del usuario con ID: ${userId}`);
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`El usuario con ID ${userId} no existe`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_EXISTS', { userId }),
+      );
 
     const userRoles = await this.userRolesDBService.getUserRoles(userId);
     const directPermissions =
@@ -206,7 +213,9 @@ export class RolesApiService {
 
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`El usuario con ID ${userId} no existe`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_EXISTS', { userId }),
+      );
 
     return {
       success: true,
@@ -218,7 +227,7 @@ export class RolesApiService {
         name: p.name,
         displayName: p?.displayName ?? '',
         assigned: true,
-        message: 'Permiso directo asignado correctamente',
+        message: t('roles-permission.DIRECT_PERMISSION_ASSIGNED'),
       })),
       totalProcessed: permissionIds.length,
       successfulAssignments: permissionIds.length,

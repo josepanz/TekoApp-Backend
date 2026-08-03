@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { ServiceStatus, RequestStatus } from '@prisma/client';
 import { ServicesService } from './services.service';
@@ -12,8 +13,8 @@ const mockFindCategoryById = jest.fn();
 const mockCreateService = jest.fn();
 const mockFindManyWithCount = jest.fn();
 const mockFindNearby = jest.fn();
-const mockFindServiceById = jest.fn();
-const mockUpdateService = jest.fn();
+const mockFindServiceByReferenceId = jest.fn();
+const mockUpdateServiceConditional = jest.fn();
 const mockFindMyServices = jest.fn();
 const mockFindProfessionalById = jest.fn();
 const mockFindProfessionalByUserId = jest.fn();
@@ -23,13 +24,18 @@ const mockAggregateEarnings = jest.fn();
 const mockFindDuplicateRequest = jest.fn();
 const mockCreateServiceRequest = jest.fn();
 const mockFindServiceRequests = jest.fn();
-const mockFindServiceRequest = jest.fn();
+const mockFindServiceRequestByReferenceId = jest.fn();
 const mockFindServiceRequestById = jest.fn();
 const mockUpdateServiceRequest = jest.fn();
 const mockAcceptRequestTransaction = jest.fn();
 
+// PK interna (Int) = 100; UUID público (referenceId) = 'svc-001' (el valor que viaja en la URL).
+const SERVICE_REF = 'svc-001';
+const SERVICE_PK = 100;
+
 const mockService = {
-  id: 'svc-001',
+  id: SERVICE_PK,
+  referenceId: SERVICE_REF,
   userId: 1,
   professionalId: null,
   title: 'Reparación de cañería',
@@ -55,8 +61,8 @@ describe('ServicesService', () => {
             createService: mockCreateService,
             findManyWithCount: mockFindManyWithCount,
             findNearby: mockFindNearby,
-            findServiceById: mockFindServiceById,
-            updateService: mockUpdateService,
+            findServiceByReferenceId: mockFindServiceByReferenceId,
+            updateServiceConditional: mockUpdateServiceConditional,
             findMyServices: mockFindMyServices,
             findProfessionalById: mockFindProfessionalById,
             findProfessionalByUserId: mockFindProfessionalByUserId,
@@ -66,7 +72,8 @@ describe('ServicesService', () => {
             findDuplicateRequest: mockFindDuplicateRequest,
             createServiceRequest: mockCreateServiceRequest,
             findServiceRequests: mockFindServiceRequests,
-            findServiceRequest: mockFindServiceRequest,
+            findServiceRequestByReferenceId:
+              mockFindServiceRequestByReferenceId,
             findServiceRequestById: mockFindServiceRequestById,
             updateServiceRequest: mockUpdateServiceRequest,
             acceptRequestTransaction: mockAcceptRequestTransaction,
@@ -81,7 +88,7 @@ describe('ServicesService', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('createService', () => {
-    it('debe crear el servicio cuando la categoría existe', async () => {
+    it('debe crear el servicio y exponer el referenceId como id cuando la categoría existe', async () => {
       // Arrange
       const dto = {
         categoryId: 2,
@@ -98,7 +105,7 @@ describe('ServicesService', () => {
       // Assert
       expect(mockFindCategoryById).toHaveBeenCalledWith(2);
       expect(mockCreateService).toHaveBeenCalled();
-      expect(result).toEqual(mockService);
+      expect(result.id).toBe(SERVICE_REF);
     });
 
     it('debe lanzar NotFoundException cuando la categoría no existe', async () => {
@@ -124,6 +131,7 @@ describe('ServicesService', () => {
 
       // Assert
       expect(result.data).toHaveLength(1);
+      expect(result.data[0].id).toBe(SERVICE_REF);
       expect(result.pagination.total).toBe(1);
       expect(result.pagination.page).toBe(1);
       expect(result.pagination.pageSize).toBe(10);
@@ -171,21 +179,21 @@ describe('ServicesService', () => {
   });
 
   describe('getServiceById', () => {
-    it('debe retornar el servicio cuando el ID existe', async () => {
+    it('debe resolver el servicio por su referenceId y exponerlo bajo la clave id', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue(mockService);
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
 
       // Act
-      const result = await service.getServiceById('svc-001');
+      const result = await service.getServiceById(SERVICE_REF);
 
       // Assert
-      expect(result).toEqual(mockService);
-      expect(mockFindServiceById).toHaveBeenCalledWith('svc-001');
+      expect(result.id).toBe(SERVICE_REF);
+      expect(mockFindServiceByReferenceId).toHaveBeenCalledWith(SERVICE_REF);
     });
 
     it('debe lanzar NotFoundException cuando el servicio no existe', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue(null);
+      mockFindServiceByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.getServiceById('no-existe')).rejects.toThrow(
@@ -195,38 +203,39 @@ describe('ServicesService', () => {
   });
 
   describe('updateService', () => {
-    it('debe actualizar el servicio cuando el userId es el dueño y el estado es modificable', async () => {
+    it('debe actualizar el servicio (usando la PK interna) cuando el userId es el dueño y el estado es modificable', async () => {
       // Arrange
       const svcPending = {
         ...mockService,
         status: ServiceStatus.PENDING,
         userId: 1,
       };
-      mockFindServiceById.mockResolvedValue(svcPending);
-      mockUpdateService.mockResolvedValue({
-        ...svcPending,
-        title: 'Nuevo título',
-      });
+      mockFindServiceByReferenceId.mockResolvedValue(svcPending);
+      mockUpdateServiceConditional.mockResolvedValue(1);
       const dto = { title: 'Nuevo título' } as never;
 
       // Act
-      const result = await service.updateService('svc-001', dto, 1);
+      const result = await service.updateService(SERVICE_REF, dto, 1);
 
       // Assert
-      expect(mockUpdateService).toHaveBeenCalledWith('svc-001', dto);
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.PENDING, ServiceStatus.ACCEPTED],
+        dto,
+      );
       expect(result).toBeDefined();
     });
 
     it('debe lanzar ForbiddenException cuando el userId no es el dueño', async () => {
       // Arrange
       const svc = { ...mockService, userId: 99, professionalId: null };
-      mockFindServiceById.mockResolvedValue(svc);
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
 
       // Act & Assert
-      await expect(service.updateService('svc-001', {}, 1)).rejects.toThrow(
+      await expect(service.updateService(SERVICE_REF, {}, 1)).rejects.toThrow(
         ForbiddenException,
       );
-      expect(mockUpdateService).not.toHaveBeenCalled();
+      expect(mockUpdateServiceConditional).not.toHaveBeenCalled();
     });
 
     it('debe lanzar BadRequestException cuando el estado no es modificable (COMPLETED)', async () => {
@@ -236,11 +245,27 @@ describe('ServicesService', () => {
         status: ServiceStatus.COMPLETED,
         userId: 1,
       };
-      mockFindServiceById.mockResolvedValue(svcCompleted);
+      mockFindServiceByReferenceId.mockResolvedValue(svcCompleted);
 
       // Act & Assert
-      await expect(service.updateService('svc-001', {}, 1)).rejects.toThrow(
+      await expect(service.updateService(SERVICE_REF, {}, 1)).rejects.toThrow(
         BadRequestException,
+      );
+    });
+
+    it('debe lanzar ConflictException cuando el estado cambió antes de poder actualizarlo', async () => {
+      // Arrange
+      const svcPending = {
+        ...mockService,
+        status: ServiceStatus.PENDING,
+        userId: 1,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svcPending);
+      mockUpdateServiceConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.updateService(SERVICE_REF, {}, 1)).rejects.toThrow(
+        ConflictException,
       );
     });
   });
@@ -254,18 +279,16 @@ describe('ServicesService', () => {
         userId: 1,
         professionalId: null,
       };
-      mockFindServiceById.mockResolvedValue(svc);
-      mockUpdateService.mockResolvedValue({
-        ...svc,
-        status: ServiceStatus.CANCELLED,
-      });
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockUpdateServiceConditional.mockResolvedValue(1);
 
       // Act
-      await service.cancelService('svc-001', 'Ya no lo necesito', 1);
+      await service.cancelService(SERVICE_REF, 'Ya no lo necesito', 1);
 
       // Assert
-      expect(mockUpdateService).toHaveBeenCalledWith(
-        'svc-001',
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.PENDING, ServiceStatus.ACCEPTED],
         expect.objectContaining({ status: ServiceStatus.CANCELLED }),
       );
     });
@@ -273,11 +296,11 @@ describe('ServicesService', () => {
     it('debe lanzar BadRequestException cuando el servicio ya está completado', async () => {
       // Arrange
       const svcCompleted = { ...mockService, status: ServiceStatus.COMPLETED };
-      mockFindServiceById.mockResolvedValue(svcCompleted);
+      mockFindServiceByReferenceId.mockResolvedValue(svcCompleted);
 
       // Act & Assert
       await expect(
-        service.cancelService('svc-001', 'razón', 1),
+        service.cancelService(SERVICE_REF, 'razón', 1),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -289,34 +312,49 @@ describe('ServicesService', () => {
         userId: 99,
         professionalId: 5,
       };
-      mockFindServiceById.mockResolvedValue(svc);
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
       mockFindProfessionalById.mockResolvedValue({ id: 5, userId: 88 });
 
       // Act & Assert
       await expect(
-        service.cancelService('svc-001', 'razón', 1),
+        service.cancelService(SERVICE_REF, 'razón', 1),
       ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('debe lanzar ConflictException cuando el estado cambió antes de poder cancelarlo', async () => {
+      // Arrange
+      const svc = {
+        ...mockService,
+        status: ServiceStatus.PENDING,
+        userId: 1,
+        professionalId: null,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockUpdateServiceConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(
+        service.cancelService(SERVICE_REF, 'razón', 1),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
   describe('acceptService', () => {
-    it('debe aceptar el servicio y asignar al profesional', async () => {
+    it('debe aceptar el servicio y asignar al profesional resuelto desde el userId', async () => {
       // Arrange
       const svcPending = { ...mockService, status: ServiceStatus.PENDING };
-      mockFindServiceById.mockResolvedValue(svcPending);
-      mockFindProfessionalById.mockResolvedValue(mockProfessional);
-      mockUpdateService.mockResolvedValue({
-        ...svcPending,
-        status: ServiceStatus.ACCEPTED,
-        professionalId: 5,
-      });
+      mockFindServiceByReferenceId.mockResolvedValue(svcPending);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(1);
 
       // Act
-      const result = await service.acceptService('svc-001', 5);
+      const result = await service.acceptService(SERVICE_REF, 10);
 
       // Assert
-      expect(mockUpdateService).toHaveBeenCalledWith(
-        'svc-001',
+      expect(mockFindProfessionalByUserId).toHaveBeenCalledWith(10);
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.PENDING],
         expect.objectContaining({
           status: ServiceStatus.ACCEPTED,
           professionalId: 5,
@@ -327,25 +365,38 @@ describe('ServicesService', () => {
 
     it('debe lanzar BadRequestException cuando el servicio no está en estado PENDING', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue({
+      mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
         status: ServiceStatus.ACCEPTED,
       });
 
       // Act & Assert
-      await expect(service.acceptService('svc-001', 5)).rejects.toThrow(
+      await expect(service.acceptService(SERVICE_REF, 10)).rejects.toThrow(
         BadRequestException,
       );
     });
 
-    it('debe lanzar ForbiddenException cuando el profesional no existe en el sistema', async () => {
+    it('debe lanzar ForbiddenException cuando el usuario no tiene perfil profesional', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue(mockService);
-      mockFindProfessionalById.mockResolvedValue(null);
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.acceptService('svc-001', 999)).rejects.toThrow(
+      await expect(service.acceptService(SERVICE_REF, 999)).rejects.toThrow(
         ForbiddenException,
+      );
+    });
+
+    it('debe lanzar ConflictException cuando otro profesional ya aceptó el servicio primero', async () => {
+      // Arrange
+      const svcPending = { ...mockService, status: ServiceStatus.PENDING };
+      mockFindServiceByReferenceId.mockResolvedValue(svcPending);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.acceptService(SERVICE_REF, 10)).rejects.toThrow(
+        ConflictException,
       );
     });
   });
@@ -358,19 +409,35 @@ describe('ServicesService', () => {
         status: ServiceStatus.ACCEPTED,
         professionalId: 5,
       };
-      mockFindServiceById.mockResolvedValue(svcAccepted);
-      mockUpdateService.mockResolvedValue({
-        ...svcAccepted,
-        status: ServiceStatus.IN_PROGRESS,
-      });
+      mockFindServiceByReferenceId.mockResolvedValue(svcAccepted);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(1);
 
       // Act
-      await service.startService('svc-001', 5);
+      await service.startService(SERVICE_REF, 10);
 
       // Assert
-      expect(mockUpdateService).toHaveBeenCalledWith(
-        'svc-001',
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.ACCEPTED],
         expect.objectContaining({ status: ServiceStatus.IN_PROGRESS }),
+      );
+    });
+
+    it('debe lanzar ConflictException cuando el estado cambió antes de poder iniciarlo', async () => {
+      // Arrange
+      const svcAccepted = {
+        ...mockService,
+        status: ServiceStatus.ACCEPTED,
+        professionalId: 5,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svcAccepted);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.startService(SERVICE_REF, 10)).rejects.toThrow(
+        ConflictException,
       );
     });
 
@@ -381,10 +448,11 @@ describe('ServicesService', () => {
         status: ServiceStatus.ACCEPTED,
         professionalId: 5,
       };
-      mockFindServiceById.mockResolvedValue(svc);
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 77, userId: 99 });
 
       // Act & Assert
-      await expect(service.startService('svc-001', 99)).rejects.toThrow(
+      await expect(service.startService(SERVICE_REF, 99)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -396,10 +464,11 @@ describe('ServicesService', () => {
         status: ServiceStatus.PENDING,
         professionalId: 5,
       };
-      mockFindServiceById.mockResolvedValue(svc);
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
 
       // Act & Assert
-      await expect(service.startService('svc-001', 5)).rejects.toThrow(
+      await expect(service.startService(SERVICE_REF, 10)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -413,127 +482,171 @@ describe('ServicesService', () => {
         status: ServiceStatus.IN_PROGRESS,
         professionalId: 5,
       };
-      mockFindServiceById.mockResolvedValue(svcInProgress);
-      mockUpdateService.mockResolvedValue({
-        ...svcInProgress,
-        status: ServiceStatus.COMPLETED,
-      });
+      mockFindServiceByReferenceId.mockResolvedValue(svcInProgress);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(1);
 
       // Act
-      await service.completeService('svc-001', 5);
+      await service.completeService(SERVICE_REF, 10);
 
       // Assert
-      expect(mockUpdateService).toHaveBeenCalledWith(
-        'svc-001',
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.IN_PROGRESS],
         expect.objectContaining({ status: ServiceStatus.COMPLETED }),
+      );
+    });
+
+    it('debe lanzar ConflictException cuando el estado cambió antes de poder completarlo', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        status: ServiceStatus.IN_PROGRESS,
+        professionalId: 5,
+      });
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.completeService(SERVICE_REF, 10)).rejects.toThrow(
+        ConflictException,
       );
     });
 
     it('debe lanzar ForbiddenException cuando otro profesional intenta completar el servicio', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue({
+      mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
         status: ServiceStatus.IN_PROGRESS,
         professionalId: 5,
       });
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 77, userId: 99 });
 
       // Act & Assert
-      await expect(service.completeService('svc-001', 99)).rejects.toThrow(
+      await expect(service.completeService(SERVICE_REF, 99)).rejects.toThrow(
         ForbiddenException,
       );
     });
 
     it('debe lanzar BadRequestException cuando el servicio no está IN_PROGRESS', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue({
+      mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
         status: ServiceStatus.ACCEPTED,
         professionalId: 5,
       });
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
 
       // Act & Assert
-      await expect(service.completeService('svc-001', 5)).rejects.toThrow(
+      await expect(service.completeService(SERVICE_REF, 10)).rejects.toThrow(
         BadRequestException,
       );
     });
   });
 
   describe('createServiceRequest', () => {
-    it('debe crear la solicitud de servicio cuando el profesional no ha enviado una antes', async () => {
+    it('debe crear la solicitud de servicio (usando la PK interna del servicio) cuando el profesional no ha enviado una antes', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue(mockService);
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
       mockFindDuplicateRequest.mockResolvedValue(null);
-      mockCreateServiceRequest.mockResolvedValue({ id: 'req-001' });
+      mockCreateServiceRequest.mockResolvedValue({
+        id: 200,
+        referenceId: 'req-001',
+        serviceId: SERVICE_PK,
+        professionalId: 5,
+        service: { referenceId: SERVICE_REF },
+      });
       const dto = { proposedPrice: 50000, message: 'Puedo hacerlo' } as never;
 
       // Act
-      const result = await service.createServiceRequest('svc-001', dto, 5);
+      const result = await service.createServiceRequest(SERVICE_REF, dto, 10);
 
       // Assert
       expect(mockCreateServiceRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ serviceId: 'svc-001', professionalId: 5 }),
+        expect.objectContaining({ serviceId: SERVICE_PK, professionalId: 5 }),
       );
-      expect(result).toBeDefined();
+      expect(result.id).toBe('req-001');
+      expect(result.serviceId).toBe(SERVICE_REF);
     });
 
     it('debe lanzar BadRequestException cuando el servicio no está en estado PENDING', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue({
+      mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
         status: ServiceStatus.ACCEPTED,
       });
 
       // Act & Assert
       await expect(
-        service.createServiceRequest('svc-001', {}, 5),
+        service.createServiceRequest(SERVICE_REF, {}, 10),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('debe lanzar ForbiddenException cuando el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.createServiceRequest(SERVICE_REF, {}, 999),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('debe lanzar BadRequestException cuando el profesional ya envió una solicitud', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue(mockService);
-      mockFindDuplicateRequest.mockResolvedValue({ id: 'req-existente' });
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockFindDuplicateRequest.mockResolvedValue({ id: 999 });
 
       // Act & Assert
       await expect(
-        service.createServiceRequest('svc-001', {}, 5),
+        service.createServiceRequest(SERVICE_REF, {}, 10),
       ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('getServiceRequests', () => {
-    it('debe retornar las solicitudes de un servicio', async () => {
+    it('debe retornar las solicitudes de un servicio resuelto por referenceId', async () => {
       // Arrange
       const mockRequest = {
-        id: 'req-001',
-        serviceId: 'svc-001',
+        id: 200,
+        referenceId: 'req-001',
+        serviceId: SERVICE_PK,
         professionalId: 5,
+        service: { referenceId: SERVICE_REF },
       };
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
       mockFindServiceRequests.mockResolvedValue([mockRequest]);
 
       // Act
-      const result = await service.getServiceRequests('svc-001');
+      const result = await service.getServiceRequests(SERVICE_REF);
 
       // Assert
       expect(result.data).toHaveLength(1);
-      expect(mockFindServiceRequests).toHaveBeenCalledWith('svc-001');
+      expect(result.data[0].id).toBe('req-001');
+      expect(result.data[0].serviceId).toBe(SERVICE_REF);
+      expect(mockFindServiceRequests).toHaveBeenCalledWith(SERVICE_PK);
     });
   });
 
   describe('respondToServiceRequest', () => {
     const mockRequest = {
-      id: 'req-001',
-      serviceId: 'svc-001',
+      id: 200,
+      referenceId: 'req-001',
+      serviceId: SERVICE_PK,
       professionalId: 5,
       status: RequestStatus.PENDING,
+      service: { referenceId: SERVICE_REF },
     };
 
-    it('debe aceptar la solicitud y usar transacción', async () => {
+    it('debe aceptar la solicitud usando la transacción con las PK internas', async () => {
       // Arrange
       const svc = { ...mockService, userId: 1 };
-      mockFindServiceById.mockResolvedValue(svc);
-      mockFindServiceRequest.mockResolvedValue(mockRequest);
-      mockAcceptRequestTransaction.mockResolvedValue(undefined);
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindServiceRequestByReferenceId.mockResolvedValue(mockRequest);
+      mockAcceptRequestTransaction.mockResolvedValue(1);
       mockFindServiceRequestById.mockResolvedValue({
         ...mockRequest,
         status: RequestStatus.ACCEPTED,
@@ -542,26 +655,44 @@ describe('ServicesService', () => {
 
       // Act
       const result = await service.respondToServiceRequest(
-        'svc-001',
+        SERVICE_REF,
         'req-001',
         dto,
         1,
       );
 
       // Assert
-      expect(mockAcceptRequestTransaction).toHaveBeenCalledWith(
+      expect(mockFindServiceRequestByReferenceId).toHaveBeenCalledWith(
         'req-001',
-        'svc-001',
+        SERVICE_PK,
+      );
+      expect(mockAcceptRequestTransaction).toHaveBeenCalledWith(
+        200,
+        SERVICE_PK,
         5,
       );
-      expect(result).toBeDefined();
+      expect(result.id).toBe('req-001');
+    });
+
+    it('debe lanzar ConflictException cuando el servicio ya no está disponible para aceptar la solicitud', async () => {
+      // Arrange
+      const svc = { ...mockService, userId: 1 };
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindServiceRequestByReferenceId.mockResolvedValue(mockRequest);
+      mockAcceptRequestTransaction.mockResolvedValue(0);
+      const dto = { status: RequestStatus.ACCEPTED } as never;
+
+      // Act & Assert
+      await expect(
+        service.respondToServiceRequest(SERVICE_REF, 'req-001', dto, 1),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('debe rechazar la solicitud directamente (sin transacción)', async () => {
       // Arrange
       const svc = { ...mockService, userId: 1 };
-      mockFindServiceById.mockResolvedValue(svc);
-      mockFindServiceRequest.mockResolvedValue(mockRequest);
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindServiceRequestByReferenceId.mockResolvedValue(mockRequest);
       mockUpdateServiceRequest.mockResolvedValue({
         ...mockRequest,
         status: RequestStatus.REJECTED,
@@ -569,34 +700,40 @@ describe('ServicesService', () => {
       const dto = { status: RequestStatus.REJECTED } as never;
 
       // Act
-      await service.respondToServiceRequest('svc-001', 'req-001', dto, 1);
+      await service.respondToServiceRequest(SERVICE_REF, 'req-001', dto, 1);
 
       // Assert
       expect(mockUpdateServiceRequest).toHaveBeenCalledWith(
-        'req-001',
+        200,
         expect.objectContaining({ status: RequestStatus.REJECTED }),
       );
     });
 
     it('debe lanzar ForbiddenException cuando quien responde no es el dueño del servicio', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue({ ...mockService, userId: 99 });
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        userId: 99,
+      });
 
       // Act & Assert
       await expect(
-        service.respondToServiceRequest('svc-001', 'req-001', {} as never, 1),
+        service.respondToServiceRequest(SERVICE_REF, 'req-001', {} as never, 1),
       ).rejects.toThrow(ForbiddenException);
     });
 
     it('debe lanzar NotFoundException cuando la solicitud no existe', async () => {
       // Arrange
-      mockFindServiceById.mockResolvedValue({ ...mockService, userId: 1 });
-      mockFindServiceRequest.mockResolvedValue(null);
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        userId: 1,
+      });
+      mockFindServiceRequestByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
       await expect(
         service.respondToServiceRequest(
-          'svc-001',
+          SERVICE_REF,
           'req-no-existe',
           {} as never,
           1,

@@ -198,7 +198,7 @@
             </tr>
                 <tr>
                     <td class="col-md-4">
-                        <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                        <i>Type : </i>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                     </td>
                 </tr>
@@ -207,13 +207,13 @@
                         <b>Decorators : </b>
                         <br />
                         <code>
-                            @IsNotEmpty()<br />@IsString()<br />@MinLength(10, {message: &#x27;El motivo de la reversión debe ser más descriptivo.&#x27;})<br />
+                            @IsNotEmpty()<br />@IsString()<br />@MinLength(10, {message: undefined})<br />
                         </code>
                     </td>
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/api/payments/dtos/request/reverse-payment.dto.ts:10</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="11" class="link-to-prism">src/api/payments/dtos/request/reverse-payment.dto.ts:11</a></div>
                         </td>
                     </tr>
 
@@ -233,12 +233,13 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { IsNotEmpty, IsString, MinLength } from &#x27;class-validator&#x27;;
+import { i18nValidationMessage } from &#x27;nestjs-i18n&#x27;;
 
 export class ReversePaymentDto {
   @IsNotEmpty()
   @IsString()
   @MinLength(10, {
-    message: &#x27;El motivo de la reversión debe ser más descriptivo.&#x27;,
+    message: i18nValidationMessage(&#x27;validation.REVERSAL_REASON_TOO_SHORT&#x27;),
   })
   reason: string;
 }

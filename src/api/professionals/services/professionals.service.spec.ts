@@ -7,6 +7,8 @@ const mockCreate = jest.fn();
 const mockFindMany = jest.fn();
 const mockFindNearby = jest.fn();
 const mockFindById = jest.fn();
+const mockFindByUserId = jest.fn();
+const mockFindProfessionalByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
 const mockFindServices = jest.fn();
 const mockFindReviews = jest.fn();
@@ -16,6 +18,7 @@ const mockGetTopRated = jest.fn();
 
 const mockProfessional = {
   id: 1,
+  referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   userId: 10,
   categoryId: 2,
   isAvailable: true,
@@ -37,6 +40,8 @@ describe('ProfessionalsService', () => {
             findMany: mockFindMany,
             findNearby: mockFindNearby,
             findById: mockFindById,
+            findByUserId: mockFindByUserId,
+            findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             update: mockUpdate,
             findServices: mockFindServices,
             findReviews: mockFindReviews,
@@ -132,6 +137,81 @@ describe('ProfessionalsService', () => {
 
       // Assert
       expect(mockFindById).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockProfessional);
+    });
+  });
+
+  describe('getProfessionalByReference', () => {
+    it('debe retornar el profesional cuando el referenceId existe', async () => {
+      // Arrange
+      mockFindProfessionalByReferenceId.mockResolvedValue(mockProfessional);
+
+      // Act
+      const result = await service.getProfessionalByReference(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+
+      // Assert
+      expect(mockFindProfessionalByReferenceId).toHaveBeenCalledWith(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+      expect(result).toEqual(mockProfessional);
+    });
+  });
+
+  describe('updateProfessionalByReference', () => {
+    it('debe actualizar el profesional cuando el userId coincide con el dueño del perfil', async () => {
+      // Arrange
+      const dto = { bio: 'Nueva bio' } as never;
+      const updatedProfessional = { ...mockProfessional, bio: 'Nueva bio' };
+      mockFindProfessionalByReferenceId.mockResolvedValue(mockProfessional);
+      mockUpdate.mockResolvedValue(updatedProfessional);
+
+      // Act
+      const result = await service.updateProfessionalByReference(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        dto,
+        10,
+      );
+
+      // Assert
+      expect(mockFindProfessionalByReferenceId).toHaveBeenCalledWith(
+        'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      );
+      expect(mockUpdate).toHaveBeenCalledWith(1, dto);
+      expect(result).toEqual(updatedProfessional);
+    });
+
+    it('debe lanzar ForbiddenException cuando el userId no coincide con el dueño del perfil', async () => {
+      // Arrange
+      const dto = { bio: 'Bio intento' } as never;
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        ...mockProfessional,
+        userId: 99,
+      });
+
+      // Act & Assert
+      await expect(
+        service.updateProfessionalByReference(
+          'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+          dto,
+          10,
+        ),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getMyProfessionalProfile', () => {
+    it('debe retornar el perfil profesional del usuario autenticado', async () => {
+      // Arrange
+      mockFindByUserId.mockResolvedValue(mockProfessional);
+
+      // Act
+      const result = await service.getMyProfessionalProfile(10);
+
+      // Assert
+      expect(mockFindByUserId).toHaveBeenCalledWith(10);
       expect(result).toEqual(mockProfessional);
     });
   });

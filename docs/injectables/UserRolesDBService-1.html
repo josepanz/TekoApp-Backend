@@ -188,7 +188,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="7" class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:7</a></div>
                             </td>
                         </tr>
 
@@ -253,8 +253,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="66"
-                                    class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:66</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="63"
+                                    class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:63</a></div>
                         </td>
                     </tr>
 
@@ -263,7 +263,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;literal type[]&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type[]&gt;</a></code>
 
                         </div>
                 </td>
@@ -292,8 +292,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="9"
-                                    class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:9</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="10"
+                                    class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:10</a></div>
                         </td>
                     </tr>
 
@@ -354,15 +354,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>replaceUserRoles(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, roleIds: number[], changedBy: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, tx?: Prisma.TransactionClient)</code>
+                    <code>replaceUserRoles(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, roleIds: number[], changedBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, tx?: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.TransactionClient</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="17"
-                                    class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:17</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="18"
+                                    class="link-to-prism">src/modules/users-db/services/user-roles-db.service.ts:18</a></div>
                         </td>
                     </tr>
 
@@ -409,7 +409,7 @@
                                         <tr>
                                                 <td>changedBy</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -421,7 +421,7 @@
                                         <tr>
                                                 <td>tx</td>
                                             <td>
-                                                        <code>Prisma.TransactionClient</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.TransactionClient</a></code>
                                             </td>
 
                                             <td>
@@ -454,6 +454,7 @@
 import { Prisma } from &#x27;@prisma/client&#x27;;
 import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class UserRolesDBService {
   constructor(private readonly prisma: PrismaDatasource) {}
@@ -473,15 +474,11 @@ export class UserRolesDBService {
     tx?: Prisma.TransactionClient,
   ): Promise&lt;void&gt; {
     if (roleIds.length &#x3D;&#x3D;&#x3D; 0) {
-      throw new BadRequestException(
-        &#x27;Debe asignarse al menos un rol al usuario.&#x27;,
-      );
+      throw new BadRequestException(t(&#x27;users.AT_LEAST_ONE_ROLE_REQUIRED&#x27;));
     }
 
     if (roleIds.length &gt; 1) {
-      throw new BadRequestException(
-        &#x27;Solo se permite asignar un rol por usuario.&#x27;,
-      );
+      throw new BadRequestException(t(&#x27;users.ONLY_ONE_ROLE_ALLOWED&#x27;));
     }
 
     const client &#x3D; tx ?? this.prisma.extended;

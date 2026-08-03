@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
+import { t } from '@common/i18n/i18n.helper';
 const PERMISSIONS_KEY = 'permissions';
 
 @Injectable()
@@ -28,7 +29,7 @@ export class PermissionsGuard implements CanActivate {
       .getRequest<{ user: IUserDataOnJwt }>();
 
     if (!user || !user.permissions || !Array.isArray(user.permissions)) {
-      throw new ForbiddenException(`Usuario sin permisos asignados.`);
+      throw new ForbiddenException(t('auth.NO_PERMISSIONS_ASSIGNED'));
     }
 
     const hasPermission = requiredPermissions.some((permission) =>
@@ -37,7 +38,9 @@ export class PermissionsGuard implements CanActivate {
 
     if (!hasPermission) {
       throw new ForbiddenException(
-        `Usuario no tiene los permisos necesarios: ${requiredPermissions.toString()}.`,
+        t('auth.MISSING_REQUIRED_PERMISSIONS', {
+          requiredPermissions: requiredPermissions.toString(),
+        }),
       );
     }
 

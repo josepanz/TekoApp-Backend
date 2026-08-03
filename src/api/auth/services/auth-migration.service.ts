@@ -2,6 +2,7 @@ import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 
 import { CryptoHelper } from '@common/helpers/crypto-helpers';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class AuthMigrationService {
   private readonly logger = new Logger(AuthMigrationService.name);
@@ -20,10 +21,10 @@ export class AuthMigrationService {
         payload.tokenType !== 'tempToken' ||
         payload.email !== expectedEmail
       ) {
-        throw new UnauthorizedException('Token inválido o expirado.');
+        throw new UnauthorizedException(t('auth.INVALID_OR_EXPIRED_TOKEN'));
       }
     } catch {
-      throw new UnauthorizedException('Token inválido o expirado.');
+      throw new UnauthorizedException(t('auth.INVALID_OR_EXPIRED_TOKEN'));
     }
   }
 
@@ -40,12 +41,12 @@ export class AuthMigrationService {
         payload.tokenType !== 'tempToken' ||
         payload.action !== 'forgotPassword'
       ) {
-        throw new UnauthorizedException('Token inválido o expirado.');
+        throw new UnauthorizedException(t('auth.INVALID_OR_EXPIRED_TOKEN'));
       }
 
       return payload.email;
     } catch {
-      throw new UnauthorizedException('Token inválido o expirado.');
+      throw new UnauthorizedException(t('auth.INVALID_OR_EXPIRED_TOKEN'));
     }
   }
 }

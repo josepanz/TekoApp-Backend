@@ -256,7 +256,7 @@ describe('PromotionsService', () => {
       // Arrange
       mockFindByCode.mockResolvedValue(promocionActiva);
       mockCountUsageByUser.mockResolvedValue(0);
-      mockApplyTransaction.mockResolvedValue(undefined);
+      mockApplyTransaction.mockResolvedValue(true);
 
       // Act
       const resultado = await service.applyPromotion(dtoBase);
@@ -280,6 +280,23 @@ describe('PromotionsService', () => {
       expect(resultado.discountAmount).toBe(0);
       expect(resultado.finalAmount).toBe(dtoBase.serviceAmount);
       expect(mockApplyTransaction).not.toHaveBeenCalled();
+    });
+
+    it('debe retornar success:false cuando el cupo se agota justo antes del increment atómico (carrera)', async () => {
+      // Arrange — la validación previa pasó (leyó currentUsage desactualizado), pero el
+      // increment atómico en la DB detecta que ya no hay cupo.
+      mockFindByCode.mockResolvedValue(promocionActiva);
+      mockCountUsageByUser.mockResolvedValue(0);
+      mockApplyTransaction.mockResolvedValue(false);
+
+      // Act
+      const resultado = await service.applyPromotion(dtoBase);
+
+      // Assert
+      expect(resultado.success).toBe(false);
+      expect(resultado.discountAmount).toBe(0);
+      expect(resultado.finalAmount).toBe(dtoBase.serviceAmount);
+      expect(resultado.message).toContain('límite');
     });
   });
 

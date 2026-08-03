@@ -3,9 +3,11 @@ import { UserStatus } from '@prisma/client';
 import { UsersApiService } from './users-api.service';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserRolesDBService } from '@modules/users-db/services/user-roles-db.service';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import { UserHelper } from '../helpers/user.helper';
 
 const mockFindAllUsers = jest.fn();
+const mockGetPresignedUrl = jest.fn();
 const mockFindUserByIdWithDetail = jest.fn();
 const mockFindUserByReferenceIdWithDetail = jest.fn();
 const mockUpdateUserWithContext = jest.fn();
@@ -44,14 +46,6 @@ const mockUserDetailResponse = {
   phoneNumber: '0981000000',
 };
 
-const mockMerchantCtx = {
-  merchantCode: 'MC001',
-  ruc: '80012345-6',
-  level: 'BRANCH' as never,
-  groupingId: null as never,
-  branchCode: 'BR001',
-};
-
 const mockJwtUser = { referenceId: 'op-ref-001', email: 'operador@test.com' };
 
 describe('UsersApiService', () => {
@@ -81,6 +75,10 @@ describe('UsersApiService', () => {
             getAllAvailableRoles: mockGetAllAvailableRoles,
           },
         },
+        {
+          provide: UploadsService,
+          useValue: { getPresignedUrl: mockGetPresignedUrl },
+        },
       ],
     }).compile();
 
@@ -103,11 +101,7 @@ describe('UsersApiService', () => {
       mockFindAllUsers.mockResolvedValue({ data: [mockUserBase], total: 1 });
 
       // Act
-      const result = await service.findAll(
-        dto,
-        mockMerchantCtx,
-        mockJwtUser as never,
-      );
+      const result = await service.findAll(dto, mockJwtUser as never);
 
       // Assert
       expect(result.data).toHaveLength(1);
@@ -123,7 +117,7 @@ describe('UsersApiService', () => {
       mockFindAllUsers.mockResolvedValue({ data: [], total: 0 });
 
       // Act
-      await service.findAll(dto, mockMerchantCtx, mockJwtUser as never);
+      await service.findAll(dto, mockJwtUser as never);
 
       // Assert
       expect(mockFindAllUsers).toHaveBeenCalledWith(
@@ -142,7 +136,7 @@ describe('UsersApiService', () => {
       mockFindAllUsers.mockResolvedValue({ data: [], total: 0 });
 
       // Act
-      await service.findAll(dto, mockMerchantCtx, mockJwtUser as never);
+      await service.findAll(dto, mockJwtUser as never);
 
       // Assert
       expect(mockFindAllUsers).toHaveBeenCalledWith(

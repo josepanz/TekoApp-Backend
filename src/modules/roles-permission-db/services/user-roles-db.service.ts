@@ -9,6 +9,7 @@ import { UserRoles } from '@prisma/client';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { RolesDBService } from './roles-db.service';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UserRolesDBService {
   private readonly logger = new Logger(UserRolesDBService.name);
@@ -118,7 +119,7 @@ export class UserRolesDBService {
     const user = await this.usersDBService.findById(data.userId);
     if (!user)
       throw new NotFoundException(
-        `Usuario con ID ${data.userId} no encontrado.`,
+        t('roles-permission.USER_ID_NOT_FOUND', { userId: data.userId }),
       );
 
     if (data.roleIds.length > 0) {
@@ -130,7 +131,9 @@ export class UserRolesDBService {
       );
       if (invalidRoles.length > 0) {
         throw new NotFoundException(
-          `Los siguientes roles no existen o están inactivos: ${invalidRoles.join(', ')}`,
+          t('roles-permission.ROLES_NOT_FOUND_OR_INACTIVE', {
+            invalidRoles: invalidRoles.join(', '),
+          }),
         );
       }
     }
@@ -141,7 +144,9 @@ export class UserRolesDBService {
   async getUserRoles(userId: number) {
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado.`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_FOUND', { userId }),
+      );
     return await this.getRolesByUserId(userId);
   }
 
@@ -166,12 +171,14 @@ export class UserRolesDBService {
   ): Promise<void> {
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado.`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_FOUND', { userId }),
+      );
 
     const hasRole = await this.userHasRole(userId, roleId);
     if (!hasRole) {
       throw new BadRequestException(
-        `El usuario no tiene asignado el rol con ID ${roleId}.`,
+        t('roles-permission.USER_WITHOUT_ROLE', { roleId }),
       );
     }
 

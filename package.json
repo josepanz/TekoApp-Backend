@@ -1,6 +1,6 @@
 {
   "name": "tekoapp-backend",
-  "version": "1.0.0-qa.3",
+  "version": "1.0.0-develop.13",
   "description": "Backend para TekoApp - Plataforma de Servicios Profesionales",
   "author": "José Panza",
   "private": true,
@@ -27,6 +27,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky || true",
     "seed": "ts-node prisma/seed.ts",
+    "seed:dummy": "ts-node prisma/seed-dummy.ts",
     "docs:generate": "npx compodoc -p tsconfig.json -d docs",
     "docs:json": "npx compodoc -p tsconfig.json -d docs -e json",
     "update:readme": "node scripts/update-readme.js",
@@ -85,6 +86,7 @@
     "mongoose": "^8.0.0",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^5.1.5",
+    "nestjs-i18n": "^10.8.5",
     "nestjs-pino": "^4.4.0",
     "node-geocoder": "^4.2.0",
     "nodemailer": "^7.0.6",
@@ -103,6 +105,7 @@
     "socket.io": "^4.7.0",
     "stripe": "^14.0.0",
     "uuid": "^11.1.0",
+    "web-push": "^3.6.7",
     "write-file-atomic": "^7.0.0"
   },
   "devDependencies": {
@@ -137,6 +140,7 @@
     "@types/pdfmake": "^0.3.3",
     "@types/sharp": "^0.32.0",
     "@types/supertest": "^2.0.12",
+    "@types/web-push": "^3.6.4",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.42.0",

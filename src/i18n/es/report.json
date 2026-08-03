@@ -1,0 +1,6 @@
+{
+  "HTML_ENGINE_REQUIRES_TEMPLATE": "El motor HTML requiere la propiedad \"templateHtml\".",
+  "NATIVE_ENGINE_REQUIRES_DEFINITION": "El motor Nativo requiere la propiedad \"nativeDefinition\".",
+  "PDF_ENGINE_NOT_RECOGNIZED": "Motor PDF \"{engine}\" no reconocido.",
+  "UNSUPPORTED_FORMAT": "Formato no soportado: {format}"
+}

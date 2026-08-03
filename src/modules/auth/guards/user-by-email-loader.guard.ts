@@ -9,6 +9,7 @@ import { Request as ExpressRequest } from 'express';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { Users } from '@prisma/client';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UserByEmailLoaderGuard implements CanActivate {
   constructor(private readonly usersService: UsersDBService) {}
@@ -21,9 +22,7 @@ export class UserByEmailLoaderGuard implements CanActivate {
     const query = request.query as Record<string, unknown> | undefined;
 
     if (!body?.email && !query?.email) {
-      throw new BadRequestException(
-        'La solicitud debe contener un campo "email" en el cuerpo o en los parametros.',
-      );
+      throw new BadRequestException(t('auth.EMAIL_FIELD_REQUIRED'));
     }
 
     const email: string = (body?.email ?? query?.email) as string;
@@ -33,7 +32,7 @@ export class UserByEmailLoaderGuard implements CanActivate {
 
     if (!fullUser) {
       throw new NotFoundException(
-        'Usuario no encontrado o inactivo para el email proporcionado.',
+        t('auth.USER_NOT_FOUND_OR_INACTIVE_FOR_EMAIL'),
       );
     }
 

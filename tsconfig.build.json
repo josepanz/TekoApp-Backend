@@ -6,6 +6,7 @@
     "dist",
     "**/*spec.ts",
     "prisma/seed.ts",
+    "prisma/seed-dummy.ts",
     "docs",
     "console",
     "**/*.spec.ts",

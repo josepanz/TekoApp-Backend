@@ -10,7 +10,9 @@ import { Users, UserStatus } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { APP_CONFIG, AppConfigType } from '@core/config/config-loader';
 import { CryptoHelper } from '@common/helpers/crypto-helpers';
+import { PasswordExpirationHelper } from '@modules/auth/helpers';
 
+import { t } from '@common/i18n/i18n.helper';
 /**
  * Servicio especializado en gestión de tokens de autenticación JWT (stateless)
  */
@@ -78,7 +80,7 @@ export class AuthTokenService {
 
     // Validar que sea un refresh token
     if (payload.tokenType !== 'refreshToken') {
-      throw new UnauthorizedException('Token de refresco inválido.');
+      throw new UnauthorizedException(t('auth.INVALID_REFRESH_TOKEN'));
     }
 
     // Buscar usuario por referenceId (del payload)
@@ -97,14 +99,23 @@ export class AuthTokenService {
 
     // Validar que el usuario existe y está activo
     if (!user) {
-      throw new UnauthorizedException('Usuario inexistente.');
+      throw new UnauthorizedException(t('auth.USER_DOES_NOT_EXIST'));
     }
 
     if (user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(
-        'Usuario inactivo. Por favor, contacta a soporte.',
-      );
+      throw new UnauthorizedException(t('auth.USER_INACTIVE_CONTACT_SUPPORT'));
     }
+
+    // Rechazar el refresh si la contraseña de la credencial activa expiró
+    // (mismo criterio que el login).
+    const activeCredential =
+      await this.prisma.extended.userCredentials.findFirst({
+        where: { userId: user.id, isActive: true },
+        orderBy: { createdAt: 'desc' },
+        select: { expiredAt: true },
+      });
+
+    PasswordExpirationHelper.assertNotExpired(activeCredential?.expiredAt);
 
     // Generar nuevo access token
     const newAccessToken = CryptoHelper.generateToken(

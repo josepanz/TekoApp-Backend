@@ -24,43 +24,43 @@
 <title>cluster_TrackingModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="67,-70 67,-195 429,-195 429,-70 67,-70"/>
 </g>
-<g id="clust6" class="cluster">
-<title>cluster_TrackingModule_providers</title>
-<polygon fill="none" stroke="black" points="227,-78 227,-130 421,-130 421,-78 227,-78"/>
-</g>
 <g id="clust3" class="cluster">
 <title>cluster_TrackingModule_imports</title>
-<polygon fill="none" stroke="black" points="75,-78 75,-130 219,-130 219,-78 75,-78"/>
+<polygon fill="none" stroke="black" points="277,-78 277,-130 421,-130 421,-78 277,-78"/>
+</g>
+<g id="clust6" class="cluster">
+<title>cluster_TrackingModule_providers</title>
+<polygon fill="none" stroke="black" points="75,-78 75,-130 269,-130 269,-78 75,-78"/>
 </g>
 <!-- TrackingDbModule -->
 <g id="node1" class="node">
 <title>TrackingDbModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="210.69,-122 207.69,-126 186.69,-126 183.69,-122 83.31,-122 83.31,-86 210.69,-86 210.69,-122"/>
-<text text-anchor="middle" x="147" y="-99.8" font-family="Times,serif" font-size="14.00">TrackingDbModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="412.69,-122 409.69,-126 388.69,-126 385.69,-122 285.31,-122 285.31,-86 412.69,-86 412.69,-122"/>
+<text text-anchor="middle" x="349" y="-99.8" font-family="Times,serif" font-size="14.00">TrackingDbModule</text>
 </g>
 <!-- TrackingModule -->
 <g id="node2" class="node">
 <title>TrackingModule</title>
-<polygon fill="#8dd3c7" stroke="black" points="290.08,-187 287.08,-191 266.08,-191 263.08,-187 179.92,-187 179.92,-151 290.08,-151 290.08,-187"/>
-<text text-anchor="middle" x="235" y="-164.8" font-family="Times,serif" font-size="14.00">TrackingModule</text>
+<polygon fill="#8dd3c7" stroke="black" points="315.08,-187 312.08,-191 291.08,-191 288.08,-187 204.92,-187 204.92,-151 315.08,-151 315.08,-187"/>
+<text text-anchor="middle" x="260" y="-164.8" font-family="Times,serif" font-size="14.00">TrackingModule</text>
 </g>
 <!-- TrackingDbModule&#45;&gt;TrackingModule -->
 <g id="edge1" class="edge">
 <title>TrackingDbModule&#45;&gt;TrackingModule</title>
-<path fill="none" stroke="black" d="M195.28,-122.11C195.28,-122.11 195.28,-140.99 195.28,-140.99"/>
-<polygon fill="black" stroke="black" points="191.78,-140.99 195.28,-150.99 198.78,-140.99 191.78,-140.99"/>
+<path fill="none" stroke="black" d="M300.22,-122.11C300.22,-122.11 300.22,-140.99 300.22,-140.99"/>
+<polygon fill="black" stroke="black" points="296.72,-140.99 300.22,-150.99 303.72,-140.99 296.72,-140.99"/>
 </g>
 <!-- TrackingApiService -->
 <g id="node3" class="node">
 <title>TrackingApiService</title>
-<ellipse fill="#fdb462" stroke="black" cx="324" cy="-104" rx="89.16" ry="18"/>
-<text text-anchor="middle" x="324" y="-99.8" font-family="Times,serif" font-size="14.00">TrackingApiService</text>
+<ellipse fill="#fdb462" stroke="black" cx="172" cy="-104" rx="89.16" ry="18"/>
+<text text-anchor="middle" x="172" y="-99.8" font-family="Times,serif" font-size="14.00">TrackingApiService</text>
 </g>
 <!-- TrackingApiService&#45;&gt;TrackingModule -->
 <g id="edge2" class="edge">
 <title>TrackingApiService&#45;&gt;TrackingModule</title>
-<path fill="none" stroke="black" d="M262.35,-117.15C262.35,-117.15 262.35,-140.69 262.35,-140.69"/>
-<polygon fill="black" stroke="black" points="258.85,-140.69 262.35,-150.69 265.85,-140.69 258.85,-140.69"/>
+<path fill="none" stroke="black" d="M233.15,-117.15C233.15,-117.15 233.15,-140.69 233.15,-140.69"/>
+<polygon fill="black" stroke="black" points="229.65,-140.69 233.15,-150.69 236.65,-140.69 229.65,-140.69"/>
 </g>
 </g>
 </svg>

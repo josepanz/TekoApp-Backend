@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { Prisma, ServiceStatus, RequestStatus } from '@prisma/client';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
@@ -18,24 +19,49 @@ import {
   ServiceRequestsListResponseDTO,
   ServiceStatsResponseDTO,
 } from '../dtos/response';
+import {
+  mapServiceToResponse,
+  mapServicesToResponse,
+  mapServiceRequestToResponse,
+  mapServiceRequestsToResponse,
+} from '../helpers/services-response.helper';
 
+import { t } from '@common/i18n/i18n.helper';
 const CANCELLABLE = new Set<ServiceStatus>([
   ServiceStatus.PENDING,
   ServiceStatus.ACCEPTED,
 ]);
 
+type ServiceEntity = NonNullable<
+  Awaited<ReturnType<ServicesDbService['findServiceByReferenceId']>>
+>;
+
 @Injectable()
 export class ServicesService {
   constructor(private readonly db: ServicesDbService) {}
+
+  /**
+   * Resuelve el UUID público (referenceId, recibido en la URL) a la entidad completa con su PK
+   * interna (Int). Lanza NotFound si no existe. Todas las operaciones internas (updates, checks de
+   * ownership, relaciones) usan `.id` numérico; el response nunca expone ese id.
+   */
+  private async getServiceEntityByRef(
+    referenceId: string,
+  ): Promise<ServiceEntity> {
+    const service = await this.db.findServiceByReferenceId(referenceId);
+    if (!service) throw new NotFoundException(t('services.NOT_FOUND'));
+    return service;
+  }
 
   async createService(
     dto: CreateServiceRequestDTO,
     userId: number,
   ): Promise<ServiceDetailResponseDTO> {
     const category = await this.db.findCategoryById(dto.categoryId);
-    if (!category) throw new NotFoundException('Categoría no encontrada');
+    if (!category)
+      throw new NotFoundException(t('services.CATEGORY_NOT_FOUND'));
 
-    return this.db.createService({
+    const created = await this.db.createService({
       userId,
       title: dto.title,
       description: dto.description,
@@ -52,7 +78,8 @@ export class ServicesService {
       isUrgent: dto.isUrgent ?? false,
       scheduledAt: dto.scheduledAt ? new Date(dto.scheduledAt) : undefined,
       status: ServiceStatus.PENDING,
-    }) as unknown as Promise<ServiceDetailResponseDTO>;
+    });
+    return mapServiceToResponse(created);
   }
 
   async getServices(
@@ -86,7 +113,7 @@ export class ServicesService {
     );
 
     return {
-      data: services as unknown as ServiceDetailResponseDTO[],
+      data: mapServicesToResponse(services),
       pagination: {
         total,
         page,
@@ -112,15 +139,13 @@ export class ServicesService {
     };
     if (categoryId) where.categoryId = categoryId;
 
-    return this.db.findNearby(where) as unknown as Promise<
-      ServiceDetailResponseDTO[]
-    >;
+    const services = await this.db.findNearby(where);
+    return mapServicesToResponse(services);
   }
 
   async getServiceById(id: string): Promise<ServiceDetailResponseDTO> {
-    const service = await this.db.findServiceById(id);
-    if (!service) throw new NotFoundException('Servicio no encontrado');
-    return service as unknown as ServiceDetailResponseDTO;
+    const service = await this.getServiceEntityByRef(id);
+    return mapServiceToResponse(service);
   }
 
   async updateService(
@@ -128,7 +153,7 @@ export class ServicesService {
     dto: UpdateServiceRequestDTO,
     userId: number,
   ): Promise<ServiceDetailResponseDTO> {
-    const service = await this.getServiceById(id);
+    const service = await this.getServiceEntityByRef(id);
 
     if (service.userId !== userId && service.professionalId !== null) {
       const professional =
@@ -136,26 +161,25 @@ export class ServicesService {
           ? await this.db.findProfessionalById(service.professionalId)
           : null;
       if (!professional || professional.userId !== userId) {
-        throw new ForbiddenException(
-          'No tienes permisos para modificar este servicio',
-        );
+        throw new ForbiddenException(t('services.UNAUTHORIZED_UPDATE'));
       }
     } else if (service.userId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este servicio',
-      );
+      throw new ForbiddenException(t('services.UNAUTHORIZED_UPDATE'));
     }
 
     if (!CANCELLABLE.has(service.status)) {
-      throw new BadRequestException(
-        'No se puede modificar un servicio en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_UPDATE_IN_STATUS'));
     }
 
-    return this.db.updateService(
-      id,
+    const updatedCount = await this.db.updateServiceConditional(
+      service.id,
+      Array.from(CANCELLABLE),
       dto,
-    ) as unknown as Promise<ServiceDetailResponseDTO>;
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_UPDATE'));
+    }
+    return this.getServiceById(id);
   }
 
   async cancelService(
@@ -163,12 +187,10 @@ export class ServicesService {
     reason: string,
     userId: number,
   ): Promise<ServiceDetailResponseDTO> {
-    const service = await this.getServiceById(id);
+    const service = await this.getServiceEntityByRef(id);
 
     if (!CANCELLABLE.has(service.status)) {
-      throw new BadRequestException(
-        'No se puede cancelar un servicio en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_CANCEL_IN_STATUS'));
     }
 
     const isProfessionalOwner = service.professionalId
@@ -178,72 +200,90 @@ export class ServicesService {
       : false;
 
     if (service.userId !== userId && !isProfessionalOwner) {
-      throw new ForbiddenException(
-        'No tienes permisos para cancelar este servicio',
-      );
+      throw new ForbiddenException(t('services.UNAUTHORIZED_CANCEL'));
     }
 
-    return this.db.updateService(id, {
-      status: ServiceStatus.CANCELLED,
-      cancelledAt: new Date(),
-      cancellationReason: reason,
-    }) as unknown as Promise<ServiceDetailResponseDTO>;
+    const updatedCount = await this.db.updateServiceConditional(
+      service.id,
+      Array.from(CANCELLABLE),
+      {
+        status: ServiceStatus.CANCELLED,
+        cancelledAt: new Date(),
+        cancellationReason: reason,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_CANCEL'));
+    }
+    return this.getServiceById(id);
   }
 
   async acceptService(
     id: string,
-    professionalId: number,
+    userId: number,
   ): Promise<ServiceDetailResponseDTO> {
-    const service = await this.getServiceById(id);
+    const service = await this.getServiceEntityByRef(id);
     if (service.status !== ServiceStatus.PENDING) {
-      throw new BadRequestException(
-        'El servicio no puede ser aceptado en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_BE_ACCEPTED_IN_STATUS'));
     }
-    const professional = await this.db.findProfessionalById(professionalId);
+    // `userId` es el id de `Users` (JWT) — se resuelve al `Professionals.id` correspondiente
+    // antes de usarlo, igual que ya hacen `getMyServices`/`getDashboardStats` en este mismo
+    // service. Antes se pasaba `req.user.id` directo como si ya fuera `Professionals.id`.
+    const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional)
-      throw new ForbiddenException('Usuario no es un profesional');
+      throw new ForbiddenException(t('services.USER_NOT_PROFESSIONAL'));
 
-    return this.db.updateService(id, {
-      status: ServiceStatus.ACCEPTED,
-      professionalId,
-    }) as unknown as Promise<ServiceDetailResponseDTO>;
+    const updatedCount = await this.db.updateServiceConditional(
+      service.id,
+      [ServiceStatus.PENDING],
+      { status: ServiceStatus.ACCEPTED, professionalId: professional.id },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(t('services.NO_LONGER_PENDING'));
+    }
+    return this.getServiceById(id);
   }
 
   async startService(
     id: string,
-    professionalId: number,
+    userId: number,
   ): Promise<ServiceDetailResponseDTO> {
-    const service = await this.getServiceById(id);
-    if (service.professionalId !== professionalId) {
+    const service = await this.getServiceEntityByRef(id);
+    const professional = await this.db.findProfessionalByUserId(userId);
+    if (!professional || service.professionalId !== professional.id) {
       throw new ForbiddenException(
-        'Solo el profesional asignado puede iniciar el servicio',
+        t('services.ONLY_ASSIGNED_PROFESSIONAL_CAN_START'),
       );
     }
     if (service.status !== ServiceStatus.ACCEPTED) {
-      throw new BadRequestException(
-        'El servicio no puede ser iniciado en este estado',
-      );
+      throw new BadRequestException(t('services.CANNOT_BE_STARTED_IN_STATUS'));
     }
-    return this.db.updateService(id, {
-      status: ServiceStatus.IN_PROGRESS,
-      startedAt: new Date(),
-    }) as unknown as Promise<ServiceDetailResponseDTO>;
+
+    const updatedCount = await this.db.updateServiceConditional(
+      service.id,
+      [ServiceStatus.ACCEPTED],
+      { status: ServiceStatus.IN_PROGRESS, startedAt: new Date() },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_START'));
+    }
+    return this.getServiceById(id);
   }
 
   async completeService(
     id: string,
-    professionalId: number,
+    userId: number,
   ): Promise<ServiceDetailResponseDTO> {
-    const service = await this.getServiceById(id);
-    if (service.professionalId !== professionalId) {
+    const service = await this.getServiceEntityByRef(id);
+    const professional = await this.db.findProfessionalByUserId(userId);
+    if (!professional || service.professionalId !== professional.id) {
       throw new ForbiddenException(
-        'Solo el profesional asignado puede completar el servicio',
+        t('services.ONLY_ASSIGNED_PROFESSIONAL_CAN_COMPLETE'),
       );
     }
     if (service.status !== ServiceStatus.IN_PROGRESS) {
       throw new BadRequestException(
-        'El servicio no puede ser completado en este estado',
+        t('services.CANNOT_BE_COMPLETED_IN_STATUS'),
       );
     }
 
@@ -261,46 +301,53 @@ export class ServicesService {
       data.finalAmount = finalAmount;
     }
 
-    return this.db.updateService(
-      id,
+    const updatedCount = await this.db.updateServiceConditional(
+      service.id,
+      [ServiceStatus.IN_PROGRESS],
       data,
-    ) as unknown as Promise<ServiceDetailResponseDTO>;
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_COMPLETE'));
+    }
+    return this.getServiceById(id);
   }
 
   async createServiceRequest(
     serviceId: string,
     dto: CreateServiceRequestRequestDTO,
-    professionalId: number,
+    userId: number,
   ): Promise<ServiceRequestDetailResponseDTO> {
-    const service = await this.getServiceById(serviceId);
+    const service = await this.getServiceEntityByRef(serviceId);
     if (service.status !== ServiceStatus.PENDING) {
-      throw new BadRequestException(
-        'Solo se pueden crear solicitudes para servicios pendientes',
-      );
+      throw new BadRequestException(t('services.ONLY_PENDING_ACCEPT_REQUESTS'));
     }
 
+    const professional = await this.db.findProfessionalByUserId(userId);
+    if (!professional)
+      throw new ForbiddenException(t('services.USER_NOT_PROFESSIONAL'));
+
     const existing = await this.db.findDuplicateRequest(
-      serviceId,
-      professionalId,
+      service.id,
+      professional.id,
     );
     if (existing)
-      throw new BadRequestException(
-        'Ya has enviado una solicitud para este servicio',
-      );
+      throw new BadRequestException(t('services.REQUEST_ALREADY_SENT'));
 
-    return this.db.createServiceRequest({
+    const created = await this.db.createServiceRequest({
       ...dto,
-      serviceId,
-      professionalId,
+      serviceId: service.id,
+      professionalId: professional.id,
       status: RequestStatus.PENDING,
-    }) as unknown as Promise<ServiceRequestDetailResponseDTO>;
+    });
+    return mapServiceRequestToResponse(created);
   }
 
   async getServiceRequests(
     serviceId: string,
   ): Promise<ServiceRequestsListResponseDTO> {
-    const data = await this.db.findServiceRequests(serviceId);
-    return { data: data as unknown as ServiceRequestDetailResponseDTO[] };
+    const service = await this.getServiceEntityByRef(serviceId);
+    const data = await this.db.findServiceRequests(service.id);
+    return { data: mapServiceRequestsToResponse(data) };
   }
 
   async respondToServiceRequest(
@@ -309,30 +356,38 @@ export class ServicesService {
     dto: RespondServiceRequestRequestDTO,
     userId: number,
   ): Promise<ServiceRequestDetailResponseDTO> {
-    const service = await this.getServiceById(serviceId);
+    const service = await this.getServiceEntityByRef(serviceId);
     if (service.userId !== userId) {
       throw new ForbiddenException(
-        'Solo el cliente puede responder a las solicitudes',
+        t('services.ONLY_CLIENT_CAN_ANSWER_REQUESTS'),
       );
     }
 
-    const request = await this.db.findServiceRequest(requestId, serviceId);
-    if (!request) throw new NotFoundException('Solicitud no encontrada');
+    const request = await this.db.findServiceRequestByReferenceId(
+      requestId,
+      service.id,
+    );
+    if (!request) throw new NotFoundException(t('services.REQUEST_NOT_FOUND'));
 
     if (dto.status === RequestStatus.ACCEPTED) {
-      await this.db.acceptRequestTransaction(
-        requestId,
-        serviceId,
+      const updatedCount = await this.db.acceptRequestTransaction(
+        request.id,
+        service.id,
         request.professionalId,
       );
-      return this.db.findServiceRequestById(
-        requestId,
-      ) as unknown as Promise<ServiceRequestDetailResponseDTO>;
+      if (updatedCount === 0) {
+        throw new ConflictException(t('services.NO_LONGER_ACCEPTING_REQUESTS'));
+      }
+      const accepted = await this.db.findServiceRequestById(request.id);
+      if (!accepted)
+        throw new NotFoundException(t('services.REQUEST_NOT_FOUND'));
+      return mapServiceRequestToResponse(accepted);
     }
 
-    return this.db.updateServiceRequest(requestId, {
+    const rejected = await this.db.updateServiceRequest(request.id, {
       status: RequestStatus.REJECTED,
-    }) as unknown as Promise<ServiceRequestDetailResponseDTO>;
+    });
+    return mapServiceRequestToResponse(rejected);
   }
 
   async getMyServices(
@@ -357,14 +412,13 @@ export class ServicesService {
 
     if (status) where.status = status;
 
-    return this.db.findMyServices(where) as unknown as Promise<
-      ServiceDetailResponseDTO[]
-    >;
+    const services = await this.db.findMyServices(where);
+    return mapServicesToResponse(services);
   }
 
   async getDashboardStats(userId: number): Promise<ServiceStatsResponseDTO> {
     const user = await this.db.findUserById(userId);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user) throw new NotFoundException(t('services.USER_NOT_FOUND'));
 
     const professional = await this.db.findProfessionalByUserId(userId);
     const baseWhere: Prisma.ServicesWhereInput = professional
