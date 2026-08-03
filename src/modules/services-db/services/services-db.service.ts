@@ -73,7 +73,11 @@ export class ServicesDbService {
       where: { referenceId },
       include: {
         users: true,
-        professional: true,
+        // `professional.user` (no solo `professional`) — ServiceDetailResponseDTO documenta
+        // `professional.user` anidado (ver services-response.helper.ts), y otros métodos de este
+        // archivo ya usan este mismo patrón. Sin el include anidado, `professional` viene sin
+        // `.user`, rompiendo cualquier consumidor que confíe en el DTO documentado.
+        professional: { include: { user: true } },
         category: true,
         requests: true,
       },

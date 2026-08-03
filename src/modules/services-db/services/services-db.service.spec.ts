@@ -233,7 +233,7 @@ describe('ServicesDbService', () => {
         where: { referenceId: 'svc-uuid-1' },
         include: {
           users: true,
-          professional: true,
+          professional: { include: { user: true } },
           category: true,
           requests: true,
         },
