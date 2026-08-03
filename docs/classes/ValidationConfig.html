@@ -170,6 +170,11 @@
                                     <span class="modifier">Static</span>
                                 <a href="#getValidationRules" >getValidationRules</a>
                             </li>
+                            <li>
+                                    <span class="modifier">Private</span>
+                                    <span class="modifier">Static</span>
+                                <a href="#translateChildren" >translateChildren</a>
+                            </li>
                         </ul>
                     </td>
                 </tr>
@@ -211,8 +216,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="118"
-                                    class="link-to-prism">src/core/config/validation.config.ts:118</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="135"
+                                    class="link-to-prism">src/core/config/validation.config.ts:135</a></div>
                         </td>
                     </tr>
 
@@ -221,7 +226,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Record&lt;string, string&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Record&lt;string, string&gt;</a></code>
 
                         </div>
                 </td>
@@ -250,8 +255,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="19"
-                                    class="link-to-prism">src/core/config/validation.config.ts:19</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="21"
+                                    class="link-to-prism">src/core/config/validation.config.ts:21</a></div>
                         </td>
                     </tr>
 
@@ -289,8 +294,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="55"
-                                    class="link-to-prism">src/core/config/validation.config.ts:55</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="74"
+                                    class="link-to-prism">src/core/config/validation.config.ts:74</a></div>
                         </td>
                     </tr>
 
@@ -302,6 +307,78 @@
                             <b>Returns : </b>        <code><a href="../interfaces/ValidationRuleItem.html" target="_self" >Record&lt;string, ValidationRuleItem&gt;</a></code>
 
                         </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="translateChildren"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                            <span class="modifier">Static</span>
+                        <span ><b>translateChildren</b></span>
+                        <a href="#translateChildren"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>translateChildren(children: <a href="../miscellaneous/functions.html#t" target="_self">ValidationError[]</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="61"
+                                    class="link-to-prism">src/core/config/validation.config.ts:61</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Traduce recursivamente los <code>constraints</code> de los errores anidados.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>children</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationError[]</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationError[]</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -318,6 +395,8 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { ValidationPipeOptions } from &#x27;@nestjs/common&#x27;;
 import { ValidationError } from &#x27;class-validator&#x27;;
+
+import { t, translateValidationConstraints } from &#x27;@common/i18n/i18n.helper&#x27;;
 
 export interface ValidationRuleItem {
   pattern?: RegExp;
@@ -349,20 +428,23 @@ export class ValidationConfig {
       skipUndefinedProperties: false,
       skipEmptyValues: false,
       errorHttpStatusCode: 422,
+      // Los mensajes producidos por &#x60;i18nValidationMessage()&#x60; llegan acá como
+      // &#x60;clave|{args}&#x60; y se resuelven al idioma del request; los mensajes por
+      // defecto de &#x60;class-validator&#x60; pasan sin tocar.
       exceptionFactory: (errors: ValidationError[]) &#x3D;&gt; {
         const formattedErrors &#x3D; errors.map((error) &#x3D;&gt; ({
           field: error.property,
           value: error.value as unknown,
-          constraints: error.constraints,
+          constraints: translateValidationConstraints(error.constraints),
           children:
             error.children &amp;&amp; error.children.length &gt; 0
-              ? error.children
+              ? ValidationConfig.translateChildren(error.children)
               : undefined,
         }));
 
         return {
           statusCode: 422,
-          message: &#x27;Error de validación&#x27;,
+          message: t(&#x27;validation.VALIDATION_ERROR&#x27;),
           errors: formattedErrors,
           timestamp: new Date().toISOString(),
         };
@@ -370,94 +452,106 @@ export class ValidationConfig {
     };
   }
 
+  /** Traduce recursivamente los &#x60;constraints&#x60; de los errores anidados. */
+  private static translateChildren(
+    children: ValidationError[],
+  ): ValidationError[] {
+    return children.map((child) &#x3D;&gt; ({
+      ...child,
+      constraints: translateValidationConstraints(child.constraints),
+      children:
+        child.children &amp;&amp; child.children.length &gt; 0
+          ? ValidationConfig.translateChildren(child.children)
+          : child.children,
+    }));
+  }
+
   static getValidationRules(): Record&lt;string, ValidationRuleItem&gt; {
     return {
       email: {
         pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        message: &#x27;El formato del email no es válido&#x27;,
+        message: t(&#x27;validation.EMAIL_FORMAT_INVALID&#x27;),
       },
       password: {
         minLength: 8,
         maxLength: 128,
         pattern:
           /^(?&#x3D;.*[a-z])(?&#x3D;.*[A-Z])(?&#x3D;.*\d)(?&#x3D;.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]/,
-        message:
-          &#x27;La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial&#x27;,
+        message: t(&#x27;validation.PASSWORD_POLICY&#x27;),
       },
       phone: {
         pattern: /^\+?[1-9]\d{1,14}$/,
-        message: &#x27;El formato del número de teléfono no es válido&#x27;,
+        message: t(&#x27;validation.PHONE_FORMAT_INVALID&#x27;),
       },
       latitude: {
         min: -90,
         max: 90,
-        message: &#x27;La latitud debe estar entre -90 y 90&#x27;,
+        message: t(&#x27;validation.LATITUDE_RANGE&#x27;),
       },
       longitude: {
         min: -180,
         max: 180,
-        message: &#x27;La longitud debe estar entre -180 y 180&#x27;,
+        message: t(&#x27;validation.LONGITUDE_RANGE&#x27;),
       },
       price: {
         min: 0,
         precision: 2,
-        message: &#x27;El precio debe ser mayor a 0 y tener máximo 2 decimales&#x27;,
+        message: t(&#x27;validation.PRICE_INVALID&#x27;),
       },
       rating: {
         min: 1,
         max: 5,
-        message: &#x27;La calificación debe estar entre 1 y 5&#x27;,
+        message: t(&#x27;validation.RATING_RANGE&#x27;),
       },
       name: {
         minLength: 2,
         maxLength: 50,
         pattern: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
-        message:
-          &#x27;El nombre debe tener entre 2 y 50 caracteres y solo puede contener letras y espacios&#x27;,
+        message: t(&#x27;validation.NAME_FORMAT&#x27;),
       },
       description: {
         minLength: 10,
         maxLength: 1000,
-        message: &#x27;La descripción debe tener entre 10 y 1000 caracteres&#x27;,
+        message: t(&#x27;validation.DESCRIPTION_LENGTH&#x27;),
       },
       url: {
         pattern:
           /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#&#x3D;]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&amp;//&#x3D;]*)$/,
-        message: &#x27;La URL no tiene un formato válido&#x27;,
+        message: t(&#x27;validation.URL_FORMAT_INVALID&#x27;),
       },
       uuid: {
         pattern:
           /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-        message: &#x27;El UUID no tiene un formato válido&#x27;,
+        message: t(&#x27;validation.UUID_FORMAT_INVALID&#x27;),
       },
     };
   }
 
   static getCustomMessages(): Record&lt;string, string&gt; {
     return {
-      isNotEmpty: &#x27;El campo no puede estar vacío&#x27;,
-      isString: &#x27;El campo debe ser una cadena de texto&#x27;,
-      isNumber: &#x27;El campo debe ser un número&#x27;,
-      isBoolean: &#x27;El campo debe ser un valor booleano&#x27;,
-      isDate: &#x27;El campo debe ser una fecha válida&#x27;,
-      isArray: &#x27;El campo debe ser un array&#x27;,
-      isObject: &#x27;El campo debe ser un objeto&#x27;,
-      isEmail: &#x27;El campo debe ser un email válido&#x27;,
-      isUrl: &#x27;El campo debe ser una URL válida&#x27;,
-      isUuid: &#x27;El campo debe ser un UUID válido&#x27;,
-      minLength: &#x27;El campo debe tener al menos $constraint1 caracteres&#x27;,
-      maxLength: &#x27;El campo debe tener máximo $constraint1 caracteres&#x27;,
-      min: &#x27;El valor mínimo permitido es $constraint1&#x27;,
-      max: &#x27;El valor máximo permitido es $constraint1&#x27;,
-      isPositive: &#x27;El valor debe ser positivo&#x27;,
-      isNegative: &#x27;El valor debe ser negativo&#x27;,
-      isInt: &#x27;El valor debe ser un número entero&#x27;,
-      isFloat: &#x27;El valor debe ser un número decimal&#x27;,
-      isDateString: &#x27;El campo debe ser una fecha válida en formato ISO&#x27;,
-      isEnum: &#x27;El valor debe ser uno de los siguientes: $constraint1&#x27;,
-      isArrayNotEmpty: &#x27;El array no puede estar vacío&#x27;,
-      arrayMinSize: &#x27;El array debe tener al menos $constraint1 elementos&#x27;,
-      arrayMaxSize: &#x27;El array debe tener máximo $constraint1 elementos&#x27;,
+      isNotEmpty: t(&#x27;validation.FIELD_NOT_EMPTY&#x27;),
+      isString: t(&#x27;validation.FIELD_MUST_BE_STRING&#x27;),
+      isNumber: t(&#x27;validation.FIELD_MUST_BE_NUMBER&#x27;),
+      isBoolean: t(&#x27;validation.FIELD_MUST_BE_BOOLEAN&#x27;),
+      isDate: t(&#x27;validation.FIELD_MUST_BE_DATE&#x27;),
+      isArray: t(&#x27;validation.FIELD_MUST_BE_ARRAY&#x27;),
+      isObject: t(&#x27;validation.FIELD_MUST_BE_OBJECT&#x27;),
+      isEmail: t(&#x27;validation.FIELD_MUST_BE_EMAIL&#x27;),
+      isUrl: t(&#x27;validation.FIELD_MUST_BE_URL&#x27;),
+      isUuid: t(&#x27;validation.FIELD_MUST_BE_UUID&#x27;),
+      minLength: t(&#x27;validation.MIN_LENGTH&#x27;),
+      maxLength: t(&#x27;validation.MAX_LENGTH&#x27;),
+      min: t(&#x27;validation.MIN_VALUE&#x27;),
+      max: t(&#x27;validation.MAX_VALUE&#x27;),
+      isPositive: t(&#x27;validation.VALUE_MUST_BE_POSITIVE&#x27;),
+      isNegative: t(&#x27;validation.VALUE_MUST_BE_NEGATIVE&#x27;),
+      isInt: t(&#x27;validation.VALUE_MUST_BE_INT&#x27;),
+      isFloat: t(&#x27;validation.VALUE_MUST_BE_FLOAT&#x27;),
+      isDateString: t(&#x27;validation.FIELD_MUST_BE_ISO_DATE&#x27;),
+      isEnum: t(&#x27;validation.ONE_OF_VALUES&#x27;),
+      isArrayNotEmpty: t(&#x27;validation.ARRAY_NOT_EMPTY&#x27;),
+      arrayMinSize: t(&#x27;validation.ARRAY_MIN_SIZE&#x27;),
+      arrayMaxSize: t(&#x27;validation.ARRAY_MAX_SIZE&#x27;),
     };
   }
 }

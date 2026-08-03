@@ -7,6 +7,7 @@ import { AuthService } from '@modules/auth/services/auth.service';
 import { EmailService } from '@modules/email/services/email.service';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
+import { UploadsService } from '@api/uploads/services/uploads.service';
 import { AuthMigrationService } from './auth-migration.service';
 
 @Injectable()
@@ -16,7 +17,17 @@ export class AuthApiService {
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
     private readonly authMigrationService: AuthMigrationService,
+    private readonly uploadsService: UploadsService,
   ) {}
+
+  /**
+   * `avatarKey` es la key de S3 (permanente); acá se resuelve a una URL presignada fresca (expira
+   * en 900s) en el momento de la respuesta — nunca se persiste ni cachea esta URL.
+   */
+  private resolveAvatarUrl(avatarKey: string | null): Promise<string | null> {
+    if (!avatarKey) return Promise.resolve(null);
+    return this.uploadsService.getPresignedUrl(avatarKey);
+  }
 
   async handleLogin(
     dto: DTO.LoginUserDTO,
@@ -62,6 +73,64 @@ export class AuthApiService {
     return await this.authService.changePassword(dto);
   }
 
+  async changeExpiredPassword(
+    dto: DTO.ChangeExpiredPasswordDTO,
+  ): Promise<{ success: boolean; message: string }> {
+    return await this.authService.changeExpiredPassword(dto);
+  }
+
+  async generateNonce(): Promise<DTO.NonceResponseDTO> {
+    return await this.authService.generateNonce();
+  }
+
+  me(user: IUserDataOnJwt): DTO.MeResponseDTO {
+    return {
+      id: user.referenceId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: user.userStatus,
+      profileStatus: user.profileStatus,
+      accessLevelId: user.accessLevelId,
+      roles: user.roles,
+      permissions: user.permissions,
+    };
+  }
+
+  /**
+   * Autoedición de perfil — el propio usuario actualiza sus datos básicos (nunca email, status,
+   * ni nada administrativo, ver `UpdateMeRequestDTO`). No requiere `USER.UPDATE`: la propiedad
+   * viene de `user.id` (JWT), no de un permiso.
+   */
+  async updateMe(
+    user: IUserDataOnJwt,
+    dto: DTO.UpdateMeRequestDTO,
+  ): Promise<DTO.MeResponseDTO> {
+    const updated = await this.userService.updateUser(
+      user.id,
+      {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        phoneNumber: dto.phoneNumber,
+        avatarKey: dto.avatarKey,
+      },
+      user.email,
+    );
+
+    return {
+      id: updated.referenceId,
+      email: updated.email,
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      avatarUrl: await this.resolveAvatarUrl(updated.avatarKey),
+      status: updated.status,
+      profileStatus: updated.profileStatus,
+      accessLevelId: updated.accessLevelId,
+      roles: user.roles,
+      permissions: user.permissions,
+    };
+  }
+
   async forgotPassword(
     dto: DTO.ForgotUserPasswordDTO,
   ): Promise<{ success: boolean; message: string }> {
@@ -86,12 +155,14 @@ export class AuthApiService {
       this.userService.findUserById(user.id),
       this.authService.getUserScope(user.id),
     ]);
+    const avatarUrl = await this.resolveAvatarUrl(fullUser.avatarKey);
 
     return {
       user: {
         id: fullUser.referenceId,
         email: fullUser.email,
         phoneNumber: fullUser.phoneNumber,
+        avatarUrl,
         firstName: fullUser.firstName,
         lastName: fullUser.lastName,
         status: fullUser.status,

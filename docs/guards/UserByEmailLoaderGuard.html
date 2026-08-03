@@ -183,7 +183,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/modules/auth/guards/user-by-email-loader.guard.ts:13</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="14" class="link-to-prism">src/modules/auth/guards/user-by-email-loader.guard.ts:14</a></div>
                             </td>
                         </tr>
 
@@ -241,15 +241,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>canActivate(context: ExecutionContext)</code>
+                    <code>canActivate(context: <a href="../miscellaneous/functions.html#t" target="_self">ExecutionContext</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="16"
-                                    class="link-to-prism">src/modules/auth/guards/user-by-email-loader.guard.ts:16</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="17"
+                                    class="link-to-prism">src/modules/auth/guards/user-by-email-loader.guard.ts:17</a></div>
                         </td>
                     </tr>
 
@@ -272,7 +272,7 @@
                                         <tr>
                                                 <td>context</td>
                                             <td>
-                                                        <code>ExecutionContext</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExecutionContext</a></code>
                                             </td>
 
                                             <td>
@@ -311,6 +311,7 @@ import { Request as ExpressRequest } from &#x27;express&#x27;;
 import { UsersDBService } from &#x27;@modules/users-db/services/users-db.service&#x27;;
 import { Users } from &#x27;@prisma/client&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class UserByEmailLoaderGuard implements CanActivate {
   constructor(private readonly usersService: UsersDBService) {}
@@ -323,9 +324,7 @@ export class UserByEmailLoaderGuard implements CanActivate {
     const query &#x3D; request.query as Record&lt;string, unknown&gt; | undefined;
 
     if (!body?.email &amp;&amp; !query?.email) {
-      throw new BadRequestException(
-        &#x27;La solicitud debe contener un campo &quot;email&quot; en el cuerpo o en los parametros.&#x27;,
-      );
+      throw new BadRequestException(t(&#x27;auth.EMAIL_FIELD_REQUIRED&#x27;));
     }
 
     const email: string &#x3D; (body?.email ?? query?.email) as string;
@@ -335,7 +334,7 @@ export class UserByEmailLoaderGuard implements CanActivate {
 
     if (!fullUser) {
       throw new NotFoundException(
-        &#x27;Usuario no encontrado o inactivo para el email proporcionado.&#x27;,
+        t(&#x27;auth.USER_NOT_FOUND_OR_INACTIVE_FOR_EMAIL&#x27;),
       );
     }
 

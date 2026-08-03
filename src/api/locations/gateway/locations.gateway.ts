@@ -14,6 +14,7 @@ import { LocationsService } from '../services/locations.service';
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location-request.dto';
 import { JwtService } from '@nestjs/jwt';
 
+import { t } from '@common/i18n/i18n.helper';
 @WebSocketGateway({
   cors: {
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -119,7 +120,7 @@ export class LocationsGateway
     await client.join(`professional:${data.professionalId}`);
     client.emit('subscriptionConfirmed', {
       professionalId: data.professionalId,
-      message: 'Suscrito a actualizaciones de ubicación',
+      message: t('locations.SUBSCRIBED'),
     });
   }
 
@@ -131,7 +132,7 @@ export class LocationsGateway
     await client.leave(`professional:${data.professionalId}`);
     client.emit('unsubscriptionConfirmed', {
       professionalId: data.professionalId,
-      message: 'Desuscrito de actualizaciones de ubicación',
+      message: t('locations.UNSUBSCRIBED'),
     });
   }
 }

@@ -8,6 +8,7 @@ import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
 import { Professionals } from '@prisma/client';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class LocationsService {
   constructor(
@@ -21,9 +22,7 @@ export class LocationsService {
   ): Promise<Professionals> {
     const professional = await this.locationsDb.findById(professionalId);
     if (!professional) {
-      throw new NotFoundException(
-        'Profesional no encontrado en los registros maestros',
-      );
+      throw new NotFoundException(t('locations.PROFESSIONAL_NOT_FOUND'));
     }
     return this.locationsDb.updateLocation(
       professionalId,
@@ -54,7 +53,7 @@ export class LocationsService {
       !professional.currentLongitude
     ) {
       throw new NotFoundException(
-        'El profesional solicitado no posee coordenadas activas de posicionamiento',
+        t('locations.PROFESSIONAL_WITHOUT_COORDINATES'),
       );
     }
 

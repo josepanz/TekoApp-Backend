@@ -1,0 +1,8 @@
+{
+  "AT_LEAST_ONE_ROLE_REQUIRED": "Debe asignarse al menos un rol al usuario.",
+  "EMAIL_ALREADY_EXISTS": "El usuario con el email {email} ya existe.",
+  "ID_NOT_FOUND": "Usuario con ID {id} no encontrado.",
+  "NOT_FOUND": "Usuario no encontrado.",
+  "ONLY_ONE_ROLE_ALLOWED": "Solo se permite asignar un rol por usuario.",
+  "UPDATED": "Usuario actualizado correctamente"
+}

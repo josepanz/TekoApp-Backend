@@ -2,7 +2,6 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   RatingDetailResponseDTO,
-  RatingsListResponseDTO,
   ProfessionalRatingStatsResponseDTO,
   UserRatingStatsResponseDTO,
   TopRatedProfessionalResponseDTO,
@@ -22,13 +21,34 @@ export const CreateRatingDocs = () =>
     }),
   );
 
+export const CreateProfessionalToClientRatingDocs = () =>
+  applyDecorators(
+    ApiOperation({
+      summary: 'Calificar a un cliente (profesional autenticado)',
+    }),
+    ApiResponse({
+      status: 201,
+      description: 'Calificación creada exitosamente',
+      type: RatingDetailResponseDTO,
+    }),
+    ApiResponse({
+      status: 400,
+      description: 'Datos inválidos o calificación duplicada',
+    }),
+    ApiResponse({
+      status: 403,
+      description: 'El usuario autenticado no tiene perfil profesional',
+    }),
+    ApiResponse({ status: 404, description: 'Cliente no encontrado' }),
+  );
+
 export const FindAllRatingsDocs = () =>
   applyDecorators(
     ApiOperation({ summary: 'Obtener todas las calificaciones' }),
     ApiResponse({
       status: 200,
       description: 'Lista de calificaciones obtenida exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -38,7 +58,7 @@ export const GetRecentRatingsDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones recientes obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -58,7 +78,7 @@ export const FindByUserDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones del usuario obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -80,7 +100,7 @@ export const FindByProfessionalDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones del profesional obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -92,7 +112,7 @@ export const GetClientRatingsDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones de clientes obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -116,7 +136,7 @@ export const FindByServiceRequestDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones de la solicitud obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 

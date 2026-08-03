@@ -2,7 +2,7 @@
 
 # TekoApp テコ — Plataforma de Servicios Profesionales
 
-![TekoApp Banner](https://example.com/path/to/your/banner.png)
+![TekoApp Banner](brand/banner.png)
 
 **Conectando talento con necesidad, donde sea, cuando sea.**
 
@@ -61,7 +61,24 @@ El nombre de nuestra plataforma fusiona dos conceptos culturales poderosos que d
 |------------|-------------|-------|
 | **Backend Core** | [TekoApp-Backend](https://github.com/josepanz/TekoApp-Backend) | NestJS 10, Prisma, Mongoose, Redis, Sharp |
 | **Mobile App** | [TekoApp-Mobile](https://github.com/josepanz/TekoApp-Frontend-Mobile) | Flutter 3, Riverpod, go_router, dio |
-| **Web Admin** | [TekoApp-Web](https://github.com/josepanz/TekoApp-Frontend-Web) | Next.js 14, shadcn/ui, TanStack Query |
+| **Web Admin** | [TekoApp-Web](https://github.com/josepanz/TekoApp-Frontend-Web) | Next.js 16, shadcn/ui, TanStack Query |
+
+---
+
+## Marca
+
+<img src="brand/logo.png" alt="Logo de TekoApp" width="220" />
+
+El manual de marca oficial (logo, banner y manual completo) vive en
+[`brand/`](brand/) — es la referencia autoritativa de
+color/tipografía para cualquier superficie con UI (hoy: `TekoApp-Web`; a futuro: `TekoApp-Mobile`
+en Flutter). Este repo no tiene UI propia, pero sirve el logo en templates de email (`modules/email`)
+y puede usarse para personalizar la portada de Swagger/Compodoc.
+
+La paleta oficial (`#0D1B2A` navy, `#28A745` verde, `#17BEBB` teal, `#FFC107` dorado, `#F5F7FA`
+gris claro) y la tipografía (Poppins) están implementadas como tokens de diseño en `TekoApp-Web`
+(`src/design-system/tokens/tokens.json`) — ver el README de ese repo para el detalle completo del
+rebrand 2026-08-02.
 
 ---
 

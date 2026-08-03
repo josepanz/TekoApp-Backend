@@ -1,0 +1,11 @@
+{
+  "DELETE_ERROR": "Error eliminando el archivo",
+  "FILE_DELETED": "Archivo eliminado exitosamente",
+  "FILE_TOO_LARGE": "El archivo excede el tamaño máximo de {maxSizeMb}MB",
+  "FILE_TYPE_NOT_ALLOWED": "Tipo de archivo no permitido",
+  "KEY_PARAM_REQUIRED": "El parámetro key es requerido",
+  "MERCHANT_DOCUMENTS_UPLOAD_ERROR": "Error al subir documentos de merchant",
+  "NO_FILE_UPLOADED": "No se ha subido ningún archivo",
+  "ONLY_IMAGES_ALLOWED": "Solo se permiten imágenes",
+  "UPLOAD_ERROR": "Error al subir el archivo"
+}

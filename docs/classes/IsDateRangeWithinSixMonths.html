@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ValidatorConstraintInterface</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidatorConstraintInterface</a></code>
             </p>
 
 
@@ -209,8 +209,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="50"
-                                    class="link-to-prism">src/common/validators/date-range.validator.ts:50</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="52"
+                                    class="link-to-prism">src/common/validators/date-range.validator.ts:52</a></div>
                         </td>
                     </tr>
 
@@ -219,7 +219,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                         </div>
                 </td>
@@ -239,15 +239,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>validate(endDate: unknown, args: ValidationArguments)</code>
+<code>validate(endDate: unknown, args: <a href="../miscellaneous/functions.html#t" target="_self">ValidationArguments</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="39"
-                                    class="link-to-prism">src/common/validators/date-range.validator.ts:39</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">src/common/validators/date-range.validator.ts:41</a></div>
                         </td>
                     </tr>
 
@@ -282,7 +282,7 @@
                                         <tr>
                                                 <td>args</td>
                                             <td>
-                                                        <code>ValidationArguments</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationArguments</a></code>
                                             </td>
 
                                             <td>
@@ -321,6 +321,8 @@
   ValidationArguments,
 } from &#x27;class-validator&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 export interface DateRangeDTO {
   startDate?: Date;
   endDate?: Date;
@@ -328,16 +330,16 @@ export interface DateRangeDTO {
 
 @ValidatorConstraint({ name: &#x27;IsEndDateAfterStartDate&#x27;, async: false })
 export class IsEndDateAfterStartDate implements ValidatorConstraintInterface {
-  private message: string &#x3D; &#x27;&#x27;;
+  private messageKey: string &#x3D; &#x27;&#x27;;
   validate(endDate: unknown, args: ValidationArguments) {
     const obj &#x3D; args.object as DateRangeDTO;
     if (!obj.startDate) {
-      this.message &#x3D; &#x27;startDate es requerido&#x27;;
+      this.messageKey &#x3D; &#x27;validation.START_DATE_REQUIRED&#x27;;
       return false;
     }
 
     if (new Date(endDate as Date) &lt; new Date(obj.startDate)) {
-      this.message &#x3D; &#x27;endDate debe ser posterior a startDate&#x27;;
+      this.messageKey &#x3D; &#x27;validation.END_DATE_AFTER_START_DATE&#x27;;
       return false;
     }
 
@@ -345,7 +347,7 @@ export class IsEndDateAfterStartDate implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return this.message || &#x27;endDate inválida&#x27;;
+    return t(this.messageKey || &#x27;validation.END_DATE_INVALID&#x27;);
   }
 }
 
@@ -365,7 +367,7 @@ export class IsDateRangeWithinSixMonths
   }
 
   defaultMessage(): string {
-    return &#x27;El rango de fechas no puede superar los 6 meses.&#x27;;
+    return t(&#x27;validation.DATE_RANGE_MAX_SIX_MONTHS&#x27;);
   }
 }
 </code></pre>

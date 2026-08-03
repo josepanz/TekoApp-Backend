@@ -1,0 +1,13 @@
+{
+  "AT_LEAST_ONE_FILE_REQUIRED": "At least one file is required",
+  "AT_LEAST_ONE_KEY_REQUIRED": "At least one key is required",
+  "EXPIRES_IN_SECONDS_INVALID": "expiresInSeconds must be greater than 0",
+  "FIELD_INVALID": "The provided {fieldName} is invalid",
+  "FIELD_MUST_BE_POSITIVE": "{fieldName} must be greater than 0",
+  "FIELD_REQUIRED": "A valid {fieldName} is required",
+  "FILE_CONTENT_EMPTY": "The file content is empty",
+  "FILE_NAME_REQUIRED": "A valid file name is required",
+  "FILE_REQUIRED": "A valid file is required",
+  "KEY_OR_PATH_REQUIRED": "A key or path is required",
+  "SERVICE_UNAVAILABLE": "Storage service is temporarily unavailable"
+}

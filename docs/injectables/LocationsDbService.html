@@ -254,7 +254,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>countOnline(whereClause: Prisma.ProfessionalsWhereInput)</code>
+                    <code>countOnline(whereClause: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ProfessionalsWhereInput</a>)</code>
                 </td>
             </tr>
 
@@ -285,7 +285,7 @@
                                         <tr>
                                                 <td>whereClause</td>
                                             <td>
-                                                        <code>Prisma.ProfessionalsWhereInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ProfessionalsWhereInput</a></code>
                                             </td>
 
                                             <td>
@@ -667,26 +667,29 @@ export class LocationsDbService {
       onlineOnly,
     } &#x3D; dto;
 
-    // Construcción dinámica de condiciones seguras de tipado para inyección en Query Raw
+    // Fragmentos parametrizados vía Prisma.sql — nunca interpolación de string cruda
     const categoryFilter &#x3D; categoryId
-      ? &#x60;AND category_id &#x3D; &#x27;${categoryId}&#x27;::uuid&#x60;
-      : &#x27;&#x27;;
-    const availableFilter &#x3D; availableOnly ? &#x60;AND is_available &#x3D; true&#x60; : &#x27;&#x27;;
-    const onlineFilter &#x3D; onlineOnly ? &#x60;AND is_online &#x3D; true&#x60; : &#x27;&#x27;;
+      ? Prisma.sql&#x60;AND category_id &#x3D; ${categoryId}&#x60;
+      : Prisma.empty;
+    const availableFilter &#x3D; availableOnly
+      ? Prisma.sql&#x60;AND is_available &#x3D; true&#x60;
+      : Prisma.empty;
+    const onlineFilter &#x3D; onlineOnly
+      ? Prisma.sql&#x60;AND is_online &#x3D; true&#x60;
+      : Prisma.empty;
 
-    // SQL puro parametrizado contra inyección usando Haversine Fórmula
-    return this.prisma.extended.$queryRawUnsafe&lt;
+    // SQL parametrizado (tagged template) usando Haversine Fórmula
+    return this.prisma.extended.$queryRaw&lt;
       (Professionals &amp; { distance: number })[]
-    &gt;(
-      &#x60;
+    &gt;&#x60;
       SELECT *, (
         6371 * acos(
-          cos(radians($1)) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians($2)) + 
-          sin(radians($1)) * sin(radians(current_latitude))
+          cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
+          sin(radians(${latitude})) * sin(radians(current_latitude))
         )
       ) AS distance
       FROM professionals
-      WHERE current_latitude IS NOT NULL 
+      WHERE current_latitude IS NOT NULL
         AND current_longitude IS NOT NULL
         AND status &#x3D; &#x27;approved&#x27;
         AND verification_status &#x3D; &#x27;verified&#x27;
@@ -696,18 +699,13 @@ export class LocationsDbService {
       GROUP BY id
       HAVING (
         6371 * acos(
-          cos(radians($1)) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians($2)) + 
-          sin(radians($1)) * sin(radians(current_latitude))
+          cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
+          sin(radians(${latitude})) * sin(radians(current_latitude))
         )
-      ) &lt;&#x3D; $3
+      ) &lt;&#x3D; ${radius}
       ORDER BY distance ASC, average_rating DESC
-      LIMIT $4
-    &#x60;,
-      latitude,
-      longitude,
-      radius,
-      limit,
-    );
+      LIMIT ${limit}
+    &#x60;;
   }
 }
 </code></pre>

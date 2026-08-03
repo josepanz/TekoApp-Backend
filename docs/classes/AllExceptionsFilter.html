@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ExceptionFilter</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExceptionFilter</a></code>
             </p>
 
 
@@ -199,15 +199,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>catch(exception: unknown, host: ArgumentsHost)</code>
+<code>catch(exception: unknown, host: <a href="../miscellaneous/functions.html#t" target="_self">ArgumentsHost</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="12"
-                                    class="link-to-prism">src/core/filters/http-exception.filter.ts:12</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="14"
+                                    class="link-to-prism">src/core/filters/http-exception.filter.ts:14</a></div>
                         </td>
                     </tr>
 
@@ -242,7 +242,7 @@
                                         <tr>
                                                 <td>host</td>
                                             <td>
-                                                        <code>ArgumentsHost</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ArgumentsHost</a></code>
                                             </td>
 
                                             <td>
@@ -284,6 +284,8 @@
 } from &#x27;@nestjs/common&#x27;;
 import { Response } from &#x27;express&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
@@ -294,7 +296,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let message &#x3D; &#x27;Internal server error&#x27;;
+    let message &#x3D; t(&#x27;common.INTERNAL_SERVER_ERROR&#x27;);
 
     if (exception instanceof HttpException) {
       const res &#x3D; exception.getResponse();

@@ -100,7 +100,7 @@
 <div align="center">
 
 <h1>TekoApp テコ — Plataforma de Servicios Profesionales</h1>
-<p><img src="https://example.com/path/to/your/banner.png" alt="TekoApp Banner" class="img-responsive"></p>
+<p><img src="brand/banner.png" alt="TekoApp Banner" class="img-responsive"></p>
 <p><strong>Conectando talento con necesidad, donde sea, cuando sea.</strong></p>
 <p><a href="https://nestjs.com/"><img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS" class="img-responsive"></a>
 <a href="https://www.prisma.io/"><img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma" class="img-responsive"></a>
@@ -192,10 +192,23 @@
 <tr>
 <td><strong>Web Admin</strong></td>
 <td><a href="https://github.com/josepanz/TekoApp-Frontend-Web">TekoApp-Web</a></td>
-<td>Next.js 14, shadcn/ui, TanStack Query</td>
+<td>Next.js 16, shadcn/ui, TanStack Query</td>
 </tr>
 </tbody>
 </table>
+<hr>
+<h2>Marca</h2>
+<img src="brand/logo.png" alt="Logo de TekoApp" width="220" />
+
+<p>El manual de marca oficial (logo, banner y manual completo) vive en
+<a href="brand/"><code>brand/</code></a> — es la referencia autoritativa de
+color/tipografía para cualquier superficie con UI (hoy: <code>TekoApp-Web</code>; a futuro: <code>TekoApp-Mobile</code>
+en Flutter). Este repo no tiene UI propia, pero sirve el logo en templates de email (<code>modules/email</code>)
+y puede usarse para personalizar la portada de Swagger/Compodoc.</p>
+<p>La paleta oficial (<code>#0D1B2A</code> navy, <code>#28A745</code> verde, <code>#17BEBB</code> teal, <code>#FFC107</code> dorado, <code>#F5F7FA</code>
+gris claro) y la tipografía (Poppins) están implementadas como tokens de diseño en <code>TekoApp-Web</code>
+(<code>src/design-system/tokens/tokens.json</code>) — ver el README de ese repo para el detalle completo del
+rebrand 2026-08-02.</p>
 <hr>
 <h2>Arquitectura del Backend</h2>
 <p>El backend de TekoApp está construido bajo principios estrictos de <strong>Clean Architecture</strong> y <strong>Domain-Driven Design (DDD)</strong>. </p>

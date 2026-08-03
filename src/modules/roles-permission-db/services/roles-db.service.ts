@@ -10,6 +10,7 @@ import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { GetRoleListQueryDTO } from '@api/roles-permission/dtos/request/get-role.request';
 import { RolePermissionsDBService } from './role-permissions-db.service';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class RolesDBService {
   private readonly logger = new Logger(RolesDBService.name);
@@ -158,19 +159,28 @@ export class RolesDBService {
     createdBy: string;
   }): Promise<Roles> {
     const exists = await this.existsByName(data.name);
-    if (exists) throw new ConflictException(`El rol "${data.name}" ya existe.`);
+    if (exists)
+      throw new ConflictException(
+        t('roles-permission.ROLE_ALREADY_EXISTS', { name: data.name }),
+      );
     return await this.create(data);
   }
 
   async getRoleById(id: number): Promise<Roles> {
     const role = await this.findById(id);
-    if (!role) throw new NotFoundException(`Rol con ID ${id} no encontrado.`);
+    if (!role)
+      throw new NotFoundException(
+        t('roles-permission.ROLE_ID_NOT_FOUND', { id }),
+      );
     return role;
   }
 
   async getRoleWithPermissions(id: number) {
     const role = await this.findByIdWithPermissions(id);
-    if (!role) throw new NotFoundException(`Rol con ID ${id} no encontrado.`);
+    if (!role)
+      throw new NotFoundException(
+        t('roles-permission.ROLE_ID_NOT_FOUND', { id }),
+      );
     return role;
   }
 
@@ -197,7 +207,9 @@ export class RolesDBService {
     if (data.name) {
       const exists = await this.existsByName(data.name, id);
       if (exists)
-        throw new ConflictException(`El rol "${data.name}" ya existe.`);
+        throw new ConflictException(
+          t('roles-permission.ROLE_ALREADY_EXISTS', { name: data.name }),
+        );
     }
 
     return await this.update(id, data);
@@ -213,7 +225,7 @@ export class RolesDBService {
     const usersAssigned = await this.hasUsers(id);
     if (usersAssigned) {
       throw new BadRequestException(
-        'No se puede eliminar el rol porque tiene usuarios asignados. Desactívalo en su lugar.',
+        t('roles-permission.CANNOT_DELETE_ROLE_WITH_USERS'),
       );
     }
 

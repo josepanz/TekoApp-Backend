@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { StorageUploadInput } from '../interfaces/storage.interface';
 
+import { t } from '@common/i18n/i18n.helper';
 export class StorageHelper {
   /**
    * Construye un path normalizado: "onboarding/123/documents"
@@ -30,7 +31,7 @@ export class StorageHelper {
     const normalizedValue = value?.trim().replace(/^\/+|\/+$/g, '');
 
     if (!normalizedValue) {
-      throw new BadRequestException(`A valid ${fieldName} is required`);
+      throw new BadRequestException(t('storage.FIELD_REQUIRED', { fieldName }));
     }
 
     if (
@@ -38,7 +39,7 @@ export class StorageHelper {
         .split('/')
         .some((segment) => segment === '.' || segment === '..' || !segment)
     ) {
-      throw new BadRequestException(`The provided ${fieldName} is invalid`);
+      throw new BadRequestException(t('storage.FIELD_INVALID', { fieldName }));
     }
 
     return normalizedValue;
@@ -46,21 +47,23 @@ export class StorageHelper {
 
   static validateFileInput(fileInput: StorageUploadInput): void {
     if (!fileInput.file) {
-      throw new BadRequestException('A valid file is required');
+      throw new BadRequestException(t('storage.FILE_REQUIRED'));
     }
 
     if (!fileInput.key && !fileInput.path) {
-      throw new BadRequestException('A key or path is required');
+      throw new BadRequestException(t('storage.KEY_OR_PATH_REQUIRED'));
     }
 
     if (!fileInput.file.buffer?.length) {
-      throw new BadRequestException('The file content is empty');
+      throw new BadRequestException(t('storage.FILE_CONTENT_EMPTY'));
     }
   }
 
   static resolvePositiveNumber(value: number, fieldName: string): number {
     if (!Number.isInteger(value) || value < 1) {
-      throw new BadRequestException(`${fieldName} must be greater than 0`);
+      throw new BadRequestException(
+        t('storage.FIELD_MUST_BE_POSITIVE', { fieldName }),
+      );
     }
 
     return value;
@@ -74,7 +77,7 @@ export class StorageHelper {
       ?.trim();
 
     if (!fileName) {
-      throw new BadRequestException('A valid file name is required');
+      throw new BadRequestException(t('storage.FILE_NAME_REQUIRED'));
     }
 
     return fileName;
@@ -95,7 +98,7 @@ export class StorageHelper {
     const expiresIn: number = value ?? 900;
 
     if (!Number.isInteger(expiresIn) || expiresIn < 1) {
-      throw new BadRequestException('expiresInSeconds must be greater than 0');
+      throw new BadRequestException(t('storage.EXPIRES_IN_SECONDS_INVALID'));
     }
 
     return expiresIn;

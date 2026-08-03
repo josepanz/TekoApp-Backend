@@ -56,7 +56,7 @@ export class RolesApiController {
   @Permissions(PERMISSIONS.ROLE.READ, PERMISSIONS.ADMIN.ALL)
   async getRoleById(
     @Param() paramDTO: RequestDTO.GetRoleParamDTO,
-  ): Promise<ResponseDTO.RoleResponseDTO> {
+  ): Promise<ResponseDTO.RoleWithPermissionsResponseDTO> {
     return await this.rolesApiService.getRoleById(paramDTO.id);
   }
 

@@ -4,14 +4,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import {
-  AccessLevel,
-  DocumentsType,
-  Prisma,
-  UserProfileStatus,
-  Users,
-  UserStatus,
-} from '@prisma/client';
+import { AccessLevel, Prisma, Users, UserStatus } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { UserCredentialsWithUser } from '@modules/auth/types';
 import {
@@ -26,6 +19,7 @@ import { UserRolesDBService } from './user-roles-db.service';
 import { RoleDTO, PermissionDTO } from '../interfaces/users-db.interface';
 import { UserWithDetail, userDetailInclude } from '../types/users-db.type';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UsersDBService {
   private readonly logger = new Logger(UsersDBService.name);
@@ -48,11 +42,9 @@ export class UsersDBService {
     lastName: string;
     documentNumber?: string;
     documentTypeId?: number;
-    access_level?: number;
     isEmployee: boolean;
     isLdap: boolean;
     status?: UserStatus;
-    legacyUserId?: string;
     lastLogin?: Date;
     createdBy: string;
     accessLevelId?: AccessLevel | number;
@@ -65,7 +57,7 @@ export class UsersDBService {
 
     if (existing) {
       throw new BadRequestException(
-        `El usuario con el email ${data.email} ya existe.`,
+        t('users.EMAIL_ALREADY_EXISTS', { email: data.email }),
       );
     }
 
@@ -77,7 +69,6 @@ export class UsersDBService {
     const created = await this.create({
       ...data,
       documentTypeId: data.documentTypeId ?? 1,
-      access_level: data.access_level ?? accessLevelIdNum ?? 0,
       accessLevelId: accessLevelIdNum,
     });
 
@@ -85,98 +76,6 @@ export class UsersDBService {
       await this.emailService.sendEmailByType(
         data.email,
         EmailTypeEnum.VERIFICATION,
-        created,
-      );
-    } catch (error) {
-      this.logger.error(`Error enviando email de verificación: ${error}`);
-    }
-
-    return created;
-  }
-
-  async createUserWithContext(data: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    documentNumber?: string;
-    documentTypeId?: number;
-    documentType?: DocumentsType;
-    phoneNumber?: string;
-    isEmployee: boolean;
-    isLdap: boolean;
-    status: UserStatus;
-    createdBy: string;
-    accessLevelId?: AccessLevel | number;
-    access_level?: number;
-    roleIds?: number[];
-    merchantCtx?: {
-      ruc: string;
-      merchantCode: string;
-      level: AccessLevel;
-      branchCodes?: string[];
-      groupingIds?: number[];
-    };
-  }): Promise<Users> {
-    const existing = await this.findByEmailAndDocument(
-      data.email,
-      data.documentNumber || '',
-    );
-
-    if (existing) {
-      throw new BadRequestException(
-        `El usuario con el email ${data.email} ya existe.`,
-      );
-    }
-
-    const accessLevelIdNum =
-      typeof data.accessLevelId === 'object'
-        ? data.accessLevelId.id
-        : data.accessLevelId;
-
-    const created = await this.prisma.extended.$transaction(async (tx) => {
-      const user = await tx.users.create({
-        data: {
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          documentNumber: data.documentNumber ?? null,
-          documentTypeId:
-            data.documentTypeId ??
-            (data.documentType as unknown as DocumentsType & { id: number })
-              ?.id ??
-            1,
-          phoneNumber: data.phoneNumber ?? null,
-          isEmployee: data.isEmployee,
-          isLdap: data.isLdap,
-          status: data.status,
-          createdBy: data.createdBy,
-          accessLevelId: accessLevelIdNum,
-          access_level: data.access_level ?? accessLevelIdNum ?? 0,
-          profileStatus: UserProfileStatus.COMPLETE,
-        },
-      });
-
-      if (data.roleIds?.length) {
-        await this.userRolesDBService.replaceUserRoles(
-          user.id,
-          data.roleIds,
-          data.createdBy,
-          tx as unknown as Prisma.TransactionClient,
-        );
-      }
-
-      return user;
-    });
-
-    try {
-      await this.emailService.sendEmailByType(
-        data.email,
-        EmailTypeEnum.VERIFICATION,
-        created,
-      );
-      await this.emailService.sendEmailByType(
-        data.email,
-        EmailTypeEnum.CREATE_PASSWORD,
         created,
       );
     } catch (error) {
@@ -199,11 +98,7 @@ export class UsersDBService {
     email?: string;
     documentNumber?: string;
     status?: UserStatus;
-    merchantCode?: string;
     accessLevelId?: AccessLevel;
-    level?: AccessLevel;
-    groupingId?: number;
-    branchCode?: string;
     operatorReferenceId?: string;
   }): Promise<{ data: Users[]; total: number }> {
     const {
@@ -280,11 +175,6 @@ export class UsersDBService {
     email?: string;
     documentNumber?: string;
     status?: UserStatus;
-    merchantCode?: string;
-    currentLevel?: AccessLevel;
-    level?: AccessLevel;
-    groupingId?: number;
-    branchCode?: string;
     operatorReferenceId?: string;
   }): Promise<{ data: Users[]; total: number }> {
     return this.findAll(params);
@@ -298,8 +188,7 @@ export class UsersDBService {
 
   async findUserById(id: number): Promise<Users> {
     const user = await this.findById(id);
-    if (!user)
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.ID_NOT_FOUND', { id }));
     return user;
   }
 
@@ -312,8 +201,7 @@ export class UsersDBService {
 
   async findUserByIdWithDetail(id: number): Promise<UserWithDetail> {
     const user = await this.findByIdWithDetail(id);
-    if (!user)
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.ID_NOT_FOUND', { id }));
     return user;
   }
 
@@ -325,7 +213,7 @@ export class UsersDBService {
 
   async findUserByReferenceId(referenceId: string): Promise<Users> {
     const user = await this.findByReferenceId(referenceId);
-    if (!user) throw new NotFoundException(`Usuario no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.NOT_FOUND'));
     return user;
   }
 
@@ -342,7 +230,7 @@ export class UsersDBService {
     referenceId: string,
   ): Promise<UserWithDetail> {
     const user = await this.findByReferenceIdWithDetail(referenceId);
-    if (!user) throw new NotFoundException(`Usuario no encontrado.`);
+    if (!user) throw new NotFoundException(t('users.NOT_FOUND'));
     return user;
   }
 
@@ -427,6 +315,7 @@ export class UsersDBService {
       lastName?: string;
       documentNumber?: string;
       phoneNumber?: string;
+      avatarKey?: string;
       isEmployee?: boolean;
       isLdap?: boolean;
       status?: UserStatus;

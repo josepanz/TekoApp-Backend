@@ -60,6 +60,8 @@ Principles to check:
 - **LSP**: are interfaces honored correctly? (rarely an issue at controller level)
 - **ISP**: are injected interfaces larger than what the class needs?
 - **DIP**: does the class depend on concrete implementations or infrastructure details instead of abstractions?
+- **DRY**: is there a repeated block that should be a shared helper (project-wide → `common/`)?
+- **KISS**: is there unnecessary abstraction/indirection beyond what the task actually needs?
 - **Project rules**: `@Param`, `@Query` without DTO; business logic in controller; missing `await`; inline `any`.
 
 ---

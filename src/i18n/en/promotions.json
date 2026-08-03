@@ -1,0 +1,9 @@
+{
+  "CODE_ALREADY_EXISTS": "The promotion code already exists",
+  "INVALID_CODE": "Invalid promotion code",
+  "MAX_USES_REACHED": "The promotion has reached its usage limit",
+  "NOT_ACTIVE_OR_EXPIRED": "The promotion is not active or has expired",
+  "NOT_AVAILABLE_FOR_USER_TYPE": "This promotion is not available for your user type",
+  "NOT_FOUND": "Promotion not found",
+  "USER_MAX_USES_REACHED": "You have already used this promotion the maximum number of times allowed"
+}

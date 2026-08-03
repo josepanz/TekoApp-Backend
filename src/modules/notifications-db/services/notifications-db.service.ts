@@ -26,7 +26,7 @@ export class NotificationsDbService {
   }
 
   async findByUserId(
-    userId: string,
+    userId: number,
     limit: number,
     offset: number,
   ): Promise<NotificationDocument[]> {
@@ -38,14 +38,14 @@ export class NotificationsDbService {
       .exec();
   }
 
-  async findUnreadByUserId(userId: string): Promise<NotificationDocument[]> {
+  async findUnreadByUserId(userId: number): Promise<NotificationDocument[]> {
     return this.model
       .find({ userId, status: { $ne: NotificationStatus.READ } })
       .sort({ createdAt: -1 })
       .exec();
   }
 
-  async countUnreadByUserId(userId: string): Promise<number> {
+  async countUnreadByUserId(userId: number): Promise<number> {
     return this.model
       .countDocuments({ userId, status: { $ne: NotificationStatus.READ } })
       .exec();
@@ -53,7 +53,7 @@ export class NotificationsDbService {
 
   async updateStatus(
     id: string,
-    userId: string,
+    userId: number,
     updateData: Partial<NotificationDocument>,
   ): Promise<NotificationDocument | null> {
     return this.model
@@ -61,7 +61,7 @@ export class NotificationsDbService {
       .exec();
   }
 
-  async markAllAsRead(userId: string): Promise<void> {
+  async markAllAsRead(userId: number): Promise<void> {
     await this.model
       .updateMany(
         { userId, status: { $ne: NotificationStatus.READ } },
@@ -70,7 +70,7 @@ export class NotificationsDbService {
       .exec();
   }
 
-  async deleteOne(id: string, userId: string): Promise<void> {
+  async deleteOne(id: string, userId: number): Promise<void> {
     await this.model.deleteOne({ _id: id, userId }).exec();
   }
 

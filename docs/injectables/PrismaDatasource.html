@@ -142,7 +142,7 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>PrismaClient</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PrismaClient</a></code>
             </p>
 
 
@@ -204,6 +204,54 @@
     </table>
 </section>
 
+            <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(configService: <a href="../injectables/AppConfig.html" target="_self">ConfigType&lt;AppConfigType&gt;</a>)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="70" class="link-to-prism">src/core/database/services/prisma.service.ts:70</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>configService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/AppConfig.html" target="_self" >ConfigType&lt;AppConfigType&gt;</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
 
             <section data-compodoc="block-methods">
     
@@ -232,8 +280,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="81"
-                                    class="link-to-prism">src/core/database/services/prisma.service.ts:81</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="142"
+                                    class="link-to-prism">src/core/database/services/prisma.service.ts:142</a></div>
                         </td>
                     </tr>
 
@@ -271,8 +319,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="69"
-                                    class="link-to-prism">src/core/database/services/prisma.service.ts:69</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="130"
+                                    class="link-to-prism">src/core/database/services/prisma.service.ts:130</a></div>
                         </td>
                     </tr>
 
@@ -348,15 +396,19 @@
                 await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.client_ip&#x27;, ${context.ip}, true)&#x60;;
                 await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.user_agent&#x27;, ${context.userAgent}, true)&#x60;;
                 await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.application_name&#x27;, ${context.applicationName}, true)&#x60;;
+                await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.audit_secret_pepper&#x27;, ${this.configService.database.auditSecretPepper}, true)&#x60;;
 
                 // Ejecutar la operación del modelo a través de tx (misma conexión/transacción)
                 // Así el trigger dispara dentro de la misma tx y lee las variables de sesión
-                return tx[model as string][operation](args) as Promise&lt;unknown&gt;;
+                const txResult &#x3D; (await tx[model as string][operation](
+                  args,
+                )) as unknown;
+                return convertDecimals(txResult);
               }),
             );
           }
 
-          return query(args);
+          return convertDecimals(await query(args));
         },
       },
     },
@@ -365,7 +417,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/core/database/services/prisma.service.ts:22</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="79" class="link-to-prism">src/core/database/services/prisma.service.ts:79</a></div>
                         </td>
                     </tr>
 
@@ -397,7 +449,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/core/database/services/prisma.service.ts:19</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="69" class="link-to-prism">src/core/database/services/prisma.service.ts:69</a></div>
                         </td>
                     </tr>
 
@@ -430,7 +482,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="20" class="link-to-prism">src/core/database/services/prisma.service.ts:20</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="70" class="link-to-prism">src/core/database/services/prisma.service.ts:70</a></div>
                         </td>
                     </tr>
 
@@ -443,9 +495,59 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, Logger, OnModuleInit } from &#x27;@nestjs/common&#x27;;
-import { PrismaClient } from &#x27;@prisma/client&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Inject, Injectable, Logger, OnModuleInit } from &#x27;@nestjs/common&#x27;;
+import { Prisma, PrismaClient } from &#x27;@prisma/client&#x27;;
 import { AsyncLocalStorage } from &#x27;async_hooks&#x27;;
+import { APP_CONFIG, AppConfigType } from &#x27;@core/config/config-loader&#x27;;
+import { ConfigType } from &#x27;@nestjs/config&#x27;;
+
+/**
+ * Los controllers de este proyecto devuelven filas crudas de Prisma &quot;as unknown as DTO&quot; (sin
+ * mapeo explícito field-por-field) — ver &#x60;rules/typescript.md&#x60; y el patrón repetido en casi todos
+ * los servicios de &#x60;api/*&#x60;. Los campos &#x60;Decimal&#x60; (hourlyRate, averageRating, amounts, rating,
+ * lat/lng, etc.) llegan como instancias de &#x60;Prisma.Decimal&#x60;; el &#x60;ClassSerializerInterceptor&#x60;
+ * global (ver &#x60;core/config/middleware.config.ts&#x60;) las serializa como su objeto interno crudo
+ * &#x60;{s, e, d}&#x60; en vez de invocar su &#x60;toJSON()&#x60;, porque &#x60;class-transformer&#x60; no las reconoce como
+ * DTOs ni como valores &quot;opacos&quot; a dejar pasar. Se normalizan ACÁ, en el resultado crudo de cada
+ * query, antes de que cualquier interceptor las toque — el punto más centralizado posible, ya
+ * que este extend ya envuelve &#x60;$allModels&#x60;/&#x60;$allOperations&#x60;.
+ *
+ * OJO: &#x60;instanceof Prisma.Decimal&#x60; NO es confiable acá — el cliente generado de Prisma empaqueta
+ * su propia copia de &#x60;decimal.js&#x60;, que puede terminar siendo una clase distinta (a nivel de
+ * identidad de módulo) de la que expone &#x60;Prisma.Decimal&#x60; en este archivo, según cómo pnpm resuelva
+ * la duplicación de paquetes. Se detecta por duck-typing (forma interna real de &#x60;decimal.js&#x60;:
+ * propiedades &#x60;s&#x60;/&#x60;e&#x60;/&#x60;d&#x60; + método &#x60;toNumber&#x60;) en vez de &#x60;instanceof&#x60;, que fallaba en silencio y
+ * dejaba pasar el objeto crudo &#x60;{s, e, d}&#x60; sin convertir.
+ */
+function isDecimalLike(value: unknown): value is Prisma.Decimal {
+  return (
+    typeof value &#x3D;&#x3D;&#x3D; &#x27;object&#x27; &amp;&amp;
+    value !&#x3D;&#x3D; null &amp;&amp;
+    typeof (value as { toNumber?: unknown }).toNumber &#x3D;&#x3D;&#x3D; &#x27;function&#x27; &amp;&amp;
+    &#x27;s&#x27; in value &amp;&amp;
+    &#x27;e&#x27; in value &amp;&amp;
+    &#x27;d&#x27; in value
+  );
+}
+
+function convertDecimals&lt;T&gt;(value: T): T {
+  if (value &#x3D;&#x3D;&#x3D; null || value &#x3D;&#x3D;&#x3D; undefined) return value;
+  if (isDecimalLike(value)) {
+    return value.toNumber() as unknown as T;
+  }
+  if (value instanceof Date) return value;
+  if (Array.isArray(value)) {
+    return value.map((item: unknown) &#x3D;&gt; convertDecimals(item)) as unknown as T;
+  }
+  if (typeof value &#x3D;&#x3D;&#x3D; &#x27;object&#x27;) {
+    const result: Record&lt;string, unknown&gt; &#x3D; {};
+    for (const [key, val] of Object.entries(value as Record&lt;string, unknown&gt;)) {
+      result[key] &#x3D; convertDecimals(val);
+    }
+    return result as unknown as T;
+  }
+  return value;
+}
 
 export const auditStorage &#x3D; new AsyncLocalStorage&lt;{
   userId: string;
@@ -461,6 +563,13 @@ const auditTxActive &#x3D; new AsyncLocalStorage&lt;boolean&gt;();
 export class PrismaDatasource extends PrismaClient implements OnModuleInit {
   public isConnected: boolean &#x3D; false;
   private readonly logger &#x3D; new Logger(PrismaDatasource.name);
+
+  constructor(
+    @Inject(APP_CONFIG.KEY)
+    private readonly configService: ConfigType&lt;AppConfigType&gt;,
+  ) {
+    super();
+  }
 
   public readonly extended &#x3D; this.$extends({
     query: {
@@ -495,15 +604,19 @@ export class PrismaDatasource extends PrismaClient implements OnModuleInit {
                 await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.client_ip&#x27;, ${context.ip}, true)&#x60;;
                 await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.user_agent&#x27;, ${context.userAgent}, true)&#x60;;
                 await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.application_name&#x27;, ${context.applicationName}, true)&#x60;;
+                await tx.$executeRaw&#x60;SELECT set_config(&#x27;app.audit_secret_pepper&#x27;, ${this.configService.database.auditSecretPepper}, true)&#x60;;
 
                 // Ejecutar la operación del modelo a través de tx (misma conexión/transacción)
                 // Así el trigger dispara dentro de la misma tx y lee las variables de sesión
-                return tx[model as string][operation](args) as Promise&lt;unknown&gt;;
+                const txResult &#x3D; (await tx[model as string][operation](
+                  args,
+                )) as unknown;
+                return convertDecimals(txResult);
               }),
             );
           }
 
-          return query(args);
+          return convertDecimals(await query(args));
         },
       },
     },

@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import { t } from '@common/i18n/i18n.helper';
+
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
@@ -15,7 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
-    let message = 'Error interno del servidor';
+    let message = t('common.INTERNAL_SERVER_ERROR');
     let error = 'Internal Server Error';
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {

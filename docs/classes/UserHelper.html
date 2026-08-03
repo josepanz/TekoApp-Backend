@@ -207,8 +207,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="27"
-                                    class="link-to-prism">src/api/users/helpers/user.helper.ts:27</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="34"
+                                    class="link-to-prism">src/api/users/helpers/user.helper.ts:34</a></div>
                         </td>
                     </tr>
 
@@ -276,14 +276,19 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="5"
-                                    class="link-to-prism">src/api/users/helpers/user.helper.ts:5</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="11"
+                                    class="link-to-prism">src/api/users/helpers/user.helper.ts:11</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p><code>avatarUrl</code> acá todavía es la KEY cruda de <code>user.avatarKey</code>, NO una URL — este helper es
+estático/sync y no puede resolver la URL presignada (requiere una llamada a S3). El caller
+(<code>UsersApiService</code>) DEBE sobrescribir <code>avatarUrl</code> con <code>UploadsService.getPresignedUrl(key)</code>
+antes de devolver la respuesta al cliente. Ver <code>UsersApiService#resolveAvatarUrl</code>.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -337,6 +342,12 @@
 import { UserDetailResponseDTO, UserResponseDTO } from &#x27;../dtos&#x27;;
 import { UserWithDetail } from &#x27;@modules/users-db/types/users-db.type&#x27;;
 export class UserHelper {
+  /**
+   * &#x60;avatarUrl&#x60; acá todavía es la KEY cruda de &#x60;user.avatarKey&#x60;, NO una URL — este helper es
+   * estático/sync y no puede resolver la URL presignada (requiere una llamada a S3). El caller
+   * (&#x60;UsersApiService&#x60;) DEBE sobrescribir &#x60;avatarUrl&#x60; con &#x60;UploadsService.getPresignedUrl(key)&#x60;
+   * antes de devolver la respuesta al cliente. Ver &#x60;UsersApiService#resolveAvatarUrl&#x60;.
+   */
   static mapUserToResponse(user: Users): UserResponseDTO {
     return {
       id: user.id,
@@ -347,6 +358,7 @@ export class UserHelper {
       lastName: user.lastName,
       documentNumber: user.documentNumber,
       phoneNumber: user.phoneNumber,
+      avatarUrl: user.avatarKey,
       isEmployee: user.isEmployee,
       isLdap: user.isLdap,
       lastLogin: user.lastLogin ?? new Date(0),
