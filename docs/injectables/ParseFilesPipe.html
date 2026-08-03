@@ -174,12 +174,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(options?: literal type)</code>
+<code>constructor(options?: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="4" class="link-to-prism">src/common/pipes/parse-files.pipe.ts:4</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="5" class="link-to-prism">src/common/pipes/parse-files.pipe.ts:5</a></div>
                             </td>
                         </tr>
 
@@ -200,7 +200,7 @@
                                                         <td>options</td>
                                                   
                                                         <td>
-                                                                    <code>literal type</code>
+                                                                        <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -235,15 +235,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>transform(files: Record<string | Express.Multer.File[]>)</code>
+<code>transform(files: <a href="../miscellaneous/functions.html#t" target="_self">Record&lt;string | Express.Multer.File[]&gt;</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="10"
-                                    class="link-to-prism">src/common/pipes/parse-files.pipe.ts:10</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="11"
+                                    class="link-to-prism">src/common/pipes/parse-files.pipe.ts:11</a></div>
                         </td>
                     </tr>
 
@@ -266,7 +266,7 @@
                                         <tr>
                                                 <td>files</td>
                                             <td>
-                                                        <code>Record&lt;string | Express.Multer.File[]&gt;</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Record&lt;string | Express.Multer.File[]&gt;</a></code>
                                             </td>
 
                                             <td>
@@ -279,7 +279,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Record&lt;string, {}&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Record&lt;string, {}&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -297,6 +297,7 @@
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { PipeTransform, Injectable, BadRequestException } from &#x27;@nestjs/common&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class ParseFilesPipe implements PipeTransform {
   /**
@@ -307,7 +308,7 @@ export class ParseFilesPipe implements PipeTransform {
   transform(files: Record&lt;string, Express.Multer.File[]&gt;) {
     // 1. Verificar si se subió algo
     if (!files || Object.keys(files).length &#x3D;&#x3D;&#x3D; 0) {
-      throw new BadRequestException(&#x27;No se han proporcionado archivos&#x27;);
+      throw new BadRequestException(t(&#x27;common.FILES_NOT_PROVIDED&#x27;));
     }
 
     // 2. Verificar campos obligatorios (si se definieron)
@@ -315,7 +316,7 @@ export class ParseFilesPipe implements PipeTransform {
       for (const field of this.options.requiredFields) {
         if (!files[field] || files[field].length &#x3D;&#x3D;&#x3D; 0) {
           throw new BadRequestException(
-            &#x60;El campo de archivo &#x27;${field}&#x27; es obligatorio&#x60;,
+            t(&#x27;common.FILE_FIELD_REQUIRED&#x27;, { field }),
           );
         }
       }

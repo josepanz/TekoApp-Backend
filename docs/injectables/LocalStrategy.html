@@ -142,7 +142,7 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>PassportStrategy(Strategy)</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PassportStrategy(Strategy)</a></code>
             </p>
 
 
@@ -186,7 +186,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="8" class="link-to-prism">src/modules/auth/strategies/local.strategy.ts:8</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/modules/auth/strategies/local.strategy.ts:9</a></div>
                             </td>
                         </tr>
 
@@ -244,15 +244,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>validate(email: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, password: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>validate(email: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, password: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="15"
-                                    class="link-to-prism">src/modules/auth/strategies/local.strategy.ts:15</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="16"
+                                    class="link-to-prism">src/modules/auth/strategies/local.strategy.ts:16</a></div>
                         </td>
                     </tr>
 
@@ -275,7 +275,7 @@
                                         <tr>
                                                 <td>email</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -287,7 +287,7 @@
                                         <tr>
                                                 <td>password</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -322,6 +322,7 @@ import { Strategy } from &#x27;passport-local&#x27;;
 import { AuthService } from &#x27;../services/auth.service&#x27;;
 import { UserCredentialsWithUser } from &#x27;@modules/auth/types&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
@@ -337,7 +338,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user &#x3D; await this.authService.validateUser(email, password);
 
     if (!user) {
-      throw new UnauthorizedException(&#x27;Credenciales inválidas&#x27;);
+      throw new UnauthorizedException(t(&#x27;auth.INVALID_CREDENTIALS&#x27;));
     }
 
     return user;

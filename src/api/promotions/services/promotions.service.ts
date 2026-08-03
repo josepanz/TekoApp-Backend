@@ -17,6 +17,7 @@ import { PromotionValidateResponseDTO } from '../dtos/response/promotion-validat
 import { PromotionApplyResponseDTO } from '../dtos/response/promotion-apply.response.dto';
 import { PromotionStatsResponseDTO } from '../dtos/response/promotion-stats.response.dto';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class PromotionsService {
   private readonly logger = new Logger(PromotionsService.name);
@@ -29,7 +30,7 @@ export class PromotionsService {
   ): Promise<PromotionDetailResponseDTO> {
     const existing = await this.db.findByCode(dto.code);
     if (existing)
-      throw new BadRequestException('El código de promoción ya existe');
+      throw new BadRequestException(t('promotions.CODE_ALREADY_EXISTS'));
 
     return this.db.create({
       ...dto,
@@ -52,14 +53,13 @@ export class PromotionsService {
 
   async findOne(id: string): Promise<PromotionDetailResponseDTO> {
     const promotion = await this.db.findById(id);
-    if (!promotion) throw new NotFoundException('Promoción no encontrada');
+    if (!promotion) throw new NotFoundException(t('promotions.NOT_FOUND'));
     return promotion as unknown as PromotionDetailResponseDTO;
   }
 
   async findByCode(code: string): Promise<Promotion> {
     const promotion = await this.db.findByCode(code);
-    if (!promotion)
-      throw new NotFoundException('Código de promoción no válido');
+    if (!promotion) throw new NotFoundException(t('promotions.INVALID_CODE'));
     return promotion;
   }
 
@@ -96,7 +96,7 @@ export class PromotionsService {
         return {
           isValid: false,
           discountAmount: 0,
-          message: 'La promoción no está activa o ha expirado',
+          message: t('promotions.NOT_ACTIVE_OR_EXPIRED'),
         };
       }
 
@@ -109,7 +109,7 @@ export class PromotionsService {
         return {
           isValid: false,
           discountAmount: 0,
-          message: 'Esta promoción no está disponible para tu tipo de usuario',
+          message: t('promotions.NOT_AVAILABLE_FOR_USER_TYPE'),
         };
       }
 
@@ -118,7 +118,7 @@ export class PromotionsService {
         return {
           isValid: false,
           discountAmount: 0,
-          message: 'Ya has usado esta promoción el máximo de veces permitido',
+          message: t('promotions.USER_MAX_USES_REACHED'),
         };
       }
 
@@ -143,7 +143,7 @@ export class PromotionsService {
       return {
         isValid: false,
         discountAmount: 0,
-        message: 'Código de promoción no válido',
+        message: t('promotions.INVALID_CODE'),
       };
     }
   }
@@ -175,7 +175,10 @@ export class PromotionsService {
     const { promotion, discountAmount } = validation;
     const finalAmount = serviceAmount - discountAmount;
 
-    await this.db.applyTransaction({
+    // El increment de currentUsage es condicional y atómico (ver applyTransaction) — la
+    // validación de arriba pudo haber leído un currentUsage ya desactualizado si otra
+    // aplicación concurrente acaba de agotar el cupo entre la lectura y este punto.
+    const applied = await this.db.applyTransaction({
       promotionId: promotion.id,
       userId,
       serviceId,
@@ -184,6 +187,15 @@ export class PromotionsService {
       finalAmount,
       metadata: serviceId ? { serviceId } : undefined,
     });
+
+    if (!applied) {
+      return {
+        success: false,
+        discountAmount: 0,
+        finalAmount: serviceAmount,
+        message: t('promotions.MAX_USES_REACHED'),
+      };
+    }
 
     this.logger.log(
       `Promoción ${promotion.code} aplicada. Descuento: ${discountAmount}`,

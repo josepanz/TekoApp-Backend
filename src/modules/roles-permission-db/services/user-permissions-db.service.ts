@@ -9,6 +9,7 @@ import { UserPermissions } from '@prisma/client';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { PermissionsDBService } from './permissions-db.service';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class UserPermissionsDBService {
   private readonly logger = new Logger(UserPermissionsDBService.name);
@@ -117,7 +118,7 @@ export class UserPermissionsDBService {
     const user = await this.usersDBService.findById(data.userId);
     if (!user)
       throw new NotFoundException(
-        `Usuario con ID ${data.userId} no encontrado.`,
+        t('roles-permission.USER_ID_NOT_FOUND', { userId: data.userId }),
       );
 
     if (data.permissionIds.length > 0) {
@@ -130,7 +131,9 @@ export class UserPermissionsDBService {
           (id) => !foundIds.includes(id),
         );
         throw new BadRequestException(
-          `Los siguientes id's de permisos no existen o están inactivos: ${missingIds.join(', ')}`,
+          t('roles-permission.PERMISSIONS_NOT_FOUND_OR_INACTIVE', {
+            missingIds: missingIds.join(', '),
+          }),
         );
       }
     }
@@ -141,7 +144,9 @@ export class UserPermissionsDBService {
   async getUserPermissions(userId: number) {
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado.`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_FOUND', { userId }),
+      );
     return await this.getPermissionsByUserId(userId);
   }
 
@@ -152,12 +157,14 @@ export class UserPermissionsDBService {
   ): Promise<void> {
     const user = await this.usersDBService.findById(userId);
     if (!user)
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado.`);
+      throw new NotFoundException(
+        t('roles-permission.USER_ID_NOT_FOUND', { userId }),
+      );
 
     const hasPermission = await this.userHasPermission(userId, permissionId);
     if (!hasPermission) {
       throw new BadRequestException(
-        `El usuario no tiene asignado el permiso con ID ${permissionId}.`,
+        t('roles-permission.USER_WITHOUT_PERMISSION', { permissionId }),
       );
     }
 

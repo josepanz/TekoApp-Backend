@@ -8,6 +8,8 @@
 NODE_ENV=qa
 PORT=3000
 APP_URL=https://qa-tekoapp.com.py
+ALLOWED_ORIGINS=https://qa-tekoapp.com.py
+FRONTEND_URL=https://qa-tekoapp.com.py
 
 # Base de datos PostgreSQL
 DATABASE_URL=postgresql://user:password@qa-db-host:5432/tekoapp

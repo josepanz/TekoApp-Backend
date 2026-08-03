@@ -1,0 +1,18 @@
+{
+  "CANNOT_DELETE_ASSIGNED_PERMISSION": "No se puede eliminar el permiso porque está asignado a roles o usuarios. Desactívalo en su lugar.",
+  "CANNOT_DELETE_ROLE_WITH_USERS": "No se puede eliminar el rol porque tiene usuarios asignados. Desactívalo en su lugar.",
+  "DIRECT_PERMISSION_ASSIGNED": "Permiso directo asignado correctamente",
+  "INVALID_PERMISSION_NAME_FORMAT": "El nombre del permiso debe seguir el formato \"resource:action\" (ej: customers:read)",
+  "PERMISSIONS_NOT_FOUND_OR_INACTIVE": "Los siguientes id's de permisos no existen o están inactivos: {missingIds}",
+  "PERMISSION_ALREADY_EXISTS": "El permiso \"{name}\" ya existe.",
+  "PERMISSION_ID_NOT_FOUND": "Permiso con ID {id} no encontrado.",
+  "PERMISSION_NOT_FOUND": "Permiso \"{name}\" no encontrado.",
+  "ROLES_NOT_FOUND_OR_INACTIVE": "Los siguientes roles no existen o están inactivos: {invalidRoles}",
+  "ROLE_ACTIVE_IN_USER_PROFILE": "Rol activo en el perfil del usuario",
+  "ROLE_ALREADY_EXISTS": "El rol \"{name}\" ya existe.",
+  "ROLE_ID_NOT_FOUND": "Rol con ID {id} no encontrado.",
+  "USER_ID_NOT_EXISTS": "El usuario con ID {userId} no existe",
+  "USER_ID_NOT_FOUND": "Usuario con ID {userId} no encontrado.",
+  "USER_WITHOUT_PERMISSION": "El usuario no tiene asignado el permiso con ID {permissionId}.",
+  "USER_WITHOUT_ROLE": "El usuario no tiene asignado el rol con ID {roleId}."
+}

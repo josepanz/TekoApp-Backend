@@ -8,6 +8,7 @@ import { AppConfigType } from '@core/config/config-loader';
 import { IJwtPayload } from '@api/auth/interfaces/jwt-payload.interface';
 import { Algorithm, SignOptions } from 'jsonwebtoken';
 
+import { t } from '@common/i18n/i18n.helper';
 export class CryptoHelper {
   private static configService: ConfigType<AppConfigType>;
 
@@ -57,7 +58,7 @@ export class CryptoHelper {
         this.configService.authentication.publicKey,
       ) as T;
     } catch {
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException(t('auth.INVALID_OR_EXPIRED_TOKEN'));
     }
   }
   /**
@@ -128,7 +129,9 @@ export class CryptoHelper {
         algorithms: ['RS256'],
       }) as IJwtPayload;
     } catch {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException(
+        t('auth.INVALID_OR_EXPIRED_REFRESH_TOKEN'),
+      );
     }
   }
 

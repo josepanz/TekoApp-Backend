@@ -9,9 +9,12 @@ import {
   Request,
   Query,
   Put,
+  Sse,
   HttpCode,
   HttpStatus,
+  MessageEvent,
 } from '@nestjs/common';
+import { Observable } from 'rxjs';
 import {
   ApiTags,
   ApiOperation,
@@ -24,8 +27,15 @@ import { NotificationsService } from '../services/notifications.service';
 import { CreateNotificationRequestDTO } from '../dtos/request/create-notification-request.dto';
 import { FindAllNotificationsQueryDTO } from '../dtos/request/find-all-notifications-query.dto';
 import { NotificationIdParamDTO } from '../dtos/request/notification-id-param.dto';
+import { CreatePushSubscriptionRequestDTO } from '../dtos/request/create-push-subscription.request.dto';
+import { PushSubscriptionReferenceIdParamDTO } from '../dtos/request/push-subscription-reference-id-param.dto';
+import { CreateFcmTokenRequestDTO } from '../dtos/request/create-fcm-token.request.dto';
+import { FcmTokenReferenceIdParamDTO } from '../dtos/request/fcm-token-reference-id-param.dto';
 import { UnreadCountResponseDTO } from '../dtos/response/unread-count-response.dto';
 import { NotificationResponseDTO } from '../dtos/response/notification-response.dto';
+import { VapidPublicKeyResponseDTO } from '../dtos/response/vapid-public-key-response.dto';
+import { PushSubscriptionResponseDTO } from '../dtos/response/push-subscription-response.dto';
+import { FcmTokenResponseDTO } from '../dtos/response/fcm-token-response.dto';
 
 @ApiTags('Notificaciones')
 @Controller('notifications')
@@ -42,7 +52,7 @@ export class NotificationsController {
     @Body() dto: CreateNotificationRequestDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.notificationsService.create(dto, String(req.user.id));
+    return this.notificationsService.create(dto, req.user.id);
   }
 
   @Get()
@@ -55,7 +65,7 @@ export class NotificationsController {
     @Query() query: FindAllNotificationsQueryDTO,
   ) {
     return this.notificationsService.findAll(
-      String(req.user.id),
+      req.user.id,
       query.limit,
       query.offset,
     );
@@ -65,7 +75,7 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Listar las notificaciones no leídas' })
   @ApiResponse({ status: 200, type: [NotificationResponseDTO] })
   async findUnread(@Request() req: { user: IUserDataOnJwt }) {
-    return this.notificationsService.findUnread(String(req.user.id));
+    return this.notificationsService.findUnread(req.user.id);
   }
 
   @Get('unread/count')
@@ -74,9 +84,7 @@ export class NotificationsController {
   async getUnreadCount(
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<UnreadCountResponseDTO> {
-    const count = await this.notificationsService.getUnreadCount(
-      String(req.user.id),
-    );
+    const count = await this.notificationsService.getUnreadCount(req.user.id);
     return { count };
   }
 
@@ -87,7 +95,7 @@ export class NotificationsController {
     @Param() param: NotificationIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    return this.notificationsService.markAsRead(param.id, String(req.user.id));
+    return this.notificationsService.markAsRead(param.id, req.user.id);
   }
 
   @Put('read-all')
@@ -97,7 +105,7 @@ export class NotificationsController {
   })
   @ApiResponse({ status: 204 })
   async markAllAsRead(@Request() req: { user: IUserDataOnJwt }) {
-    await this.notificationsService.markAllAsRead(String(req.user.id));
+    await this.notificationsService.markAllAsRead(req.user.id);
   }
 
   @Delete(':id')
@@ -108,6 +116,93 @@ export class NotificationsController {
     @Param() param: NotificationIdParamDTO,
     @Request() req: { user: IUserDataOnJwt },
   ) {
-    await this.notificationsService.delete(param.id, String(req.user.id));
+    await this.notificationsService.delete(param.id, req.user.id);
+  }
+
+  // ─── Tiempo real (SSE) ────────────────────────────────────────────────────
+
+  @Sse('stream')
+  @ApiOperation({
+    summary:
+      'Stream en tiempo real de notificaciones (SSE) para el usuario autenticado — solo cubre "app abierta ahora mismo", complementario a Web Push/FCM',
+  })
+  stream(@Request() req: { user: IUserDataOnJwt }): Observable<MessageEvent> {
+    return this.notificationsService.streamForUser(req.user.id);
+  }
+
+  // ─── Web Push (VAPID) ─────────────────────────────────────────────────────
+
+  @Get('push/vapid-public-key')
+  @ApiOperation({
+    summary: 'Obtener la clave pública VAPID para pushManager.subscribe()',
+  })
+  @ApiResponse({ status: 200, type: VapidPublicKeyResponseDTO })
+  getVapidPublicKey(): VapidPublicKeyResponseDTO {
+    return { publicKey: this.notificationsService.getVapidPublicKey() };
+  }
+
+  @Post('push-subscriptions')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary:
+      'Registrar (o actualizar) la suscripción Web Push del navegador actual',
+  })
+  @ApiResponse({ status: 201, type: PushSubscriptionResponseDTO })
+  async registerPushSubscription(
+    @Body() dto: CreatePushSubscriptionRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    return this.notificationsService.registerPushSubscription(
+      dto,
+      req.user.id,
+      req.user.email,
+    );
+  }
+
+  @Delete('push-subscriptions/:referenceId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Dar de baja una suscripción Web Push' })
+  @ApiResponse({ status: 204 })
+  async removePushSubscription(
+    @Param() param: PushSubscriptionReferenceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    await this.notificationsService.removePushSubscription(
+      param.referenceId,
+      req.user.id,
+    );
+  }
+
+  // ─── FCM (mobile) ─────────────────────────────────────────────────────────
+
+  @Post('fcm-tokens')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar (o actualizar) el token FCM del dispositivo actual',
+  })
+  @ApiResponse({ status: 201, type: FcmTokenResponseDTO })
+  async registerFcmToken(
+    @Body() dto: CreateFcmTokenRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    return this.notificationsService.registerFcmToken(
+      dto,
+      req.user.id,
+      req.user.email,
+    );
+  }
+
+  @Delete('fcm-tokens/:referenceId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Dar de baja un token FCM' })
+  @ApiResponse({ status: 204 })
+  async removeFcmToken(
+    @Param() param: FcmTokenReferenceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ) {
+    await this.notificationsService.removeFcmToken(
+      param.referenceId,
+      req.user.id,
+    );
   }
 }

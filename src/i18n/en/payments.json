@@ -1,0 +1,14 @@
+{
+  "ALREADY_EXISTS_FOR_SERVICE": "A payment already exists for this service",
+  "CANNOT_BE_CANCELLED": "This payment cannot be cancelled",
+  "CANNOT_DELETE_ONLY_METHOD": "The only payment method cannot be deleted",
+  "METHOD_NOT_FOUND": "Payment method not found",
+  "NOT_FOUND": "Payment not found",
+  "ONLY_COMPLETED_CAN_BE_REFUNDED": "Only completed payments can be refunded",
+  "ONLY_PENDING_CAN_BE_UPDATED": "Only pending payments can be updated",
+  "PROVIDER_NOT_SUPPORTED": "Payment provider not supported",
+  "REFUND_EXCEEDS_AVAILABLE": "The refund amount exceeds the available amount",
+  "SERVICE_NOT_FOUND": "Service not found",
+  "STATUS_CHANGED_BEFORE_CANCEL": "The payment changed status before it could be cancelled",
+  "UNAUTHORIZED_CANCEL": "You do not have permission to cancel this payment"
+}

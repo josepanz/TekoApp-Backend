@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+import { t } from '@common/i18n/i18n.helper';
+
 @Catch(BadRequestException)
 export class ValidationExceptionFilter implements ExceptionFilter {
   catch(exception: BadRequestException, host: ArgumentsHost) {
@@ -15,14 +17,14 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
-    let message = 'Error de validación';
+    let message = t('validation.VALIDATION_ERROR');
     let errors = [];
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
       if ('message' in exceptionResponse) {
         if (Array.isArray(exceptionResponse.message)) {
           errors = exceptionResponse.message;
-          message = 'Múltiples errores de validación';
+          message = t('validation.MULTIPLE_VALIDATION_ERRORS');
         } else {
           message = exceptionResponse.message as string;
         }

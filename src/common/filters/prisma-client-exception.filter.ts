@@ -8,6 +8,8 @@ import {
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
+import { t } from '@common/i18n/i18n.helper';
+
 // CRÍTICO: Se deben agregar ambos tipos en el decorador para que NestJS los intercepte
 @Catch(Prisma.PrismaClientKnownRequestError, Prisma.PrismaClientValidationError)
 export class PrismaClientExceptionFilter implements ExceptionFilter {
@@ -35,43 +37,48 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
         case 'P2002':
           return response.status(HttpStatus.CONFLICT).json({
             statusCode: HttpStatus.CONFLICT,
-            message: `El registro ya existe. Campo duplicado: ${(exception?.meta?.target ?? '') as string}`,
+            message: t('common.DB_DUPLICATE_RECORD', {
+              target: exception?.meta?.target ?? '',
+            }),
             error: 'Conflict',
           });
 
         case 'P2003':
           return response.status(HttpStatus.BAD_REQUEST).json({
             statusCode: HttpStatus.BAD_REQUEST,
-            message: `Error de relación. La llave foránea provista no es válida: ${(exception?.meta?.field_name ?? '') as string}`,
+            message: t('common.DB_INVALID_FOREIGN_KEY', {
+              fieldName: exception?.meta?.field_name ?? '',
+            }),
             error: 'Bad Request',
           });
 
         case 'P2021':
           return response.status(HttpStatus.SERVICE_UNAVAILABLE).json({
             statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-            message: 'La tabla no existe en la DB.',
+            message: t('common.DB_TABLE_MISSING'),
             error: 'Service Unavailable',
           });
 
         case 'P2024':
           return response.status(HttpStatus.SERVICE_UNAVAILABLE).json({
             statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-            message:
-              'La base de datos está experimentando una alta latencia. Intente más tarde.',
+            message: t('common.DB_HIGH_LATENCY'),
             error: 'Internal Server Error',
           });
 
         case 'P2025':
           return response.status(HttpStatus.NOT_FOUND).json({
             statusCode: HttpStatus.NOT_FOUND,
-            message: 'El registro solicitado no existe o fue eliminado.',
+            message: t('common.DB_RECORD_NOT_FOUND'),
             error: 'Not Found',
           });
 
         default:
           return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: `Error interno de persistencia. Código de referencia: ${exception.code}`,
+            message: t('common.DB_PERSISTENCE_ERROR', {
+              code: exception.code,
+            }),
             error: 'Internal Server Error',
           });
       }
@@ -100,7 +107,7 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
       return response.status(HttpStatus.BAD_REQUEST).json({
         statusCode: HttpStatus.BAD_REQUEST,
         error: 'Bad Request',
-        message: 'Error en los parámetros de consulta.',
+        message: t('common.DB_INVALID_QUERY_PARAMS'),
         timestamp: new Date().toISOString(),
       });
     }

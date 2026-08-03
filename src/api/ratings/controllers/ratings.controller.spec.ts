@@ -9,10 +9,12 @@ import { RatingsController } from './ratings.controller';
 import { RatingsService } from '../services/ratings.service';
 import {
   CreateRatingRequestDTO,
+  CreateProfessionalToClientRatingRequestDTO,
   UpdateRatingRequestDTO,
 } from '../dtos/request';
 
 const mockCreate = jest.fn();
+const mockCreateProfessionalToClientRating = jest.fn();
 const mockFindAll = jest.fn();
 const mockGetRecentRatings = jest.fn();
 const mockGetTopRatedProfessionals = jest.fn();
@@ -48,6 +50,8 @@ describe('RatingsController', () => {
           provide: RatingsService,
           useValue: {
             create: mockCreate,
+            createProfessionalToClientRating:
+              mockCreateProfessionalToClientRating,
             findAll: mockFindAll,
             getRecentRatings: mockGetRecentRatings,
             getTopRatedProfessionals: mockGetTopRatedProfessionals,
@@ -102,6 +106,46 @@ describe('RatingsController', () => {
       await expect(
         controller.create(mockReq, {} as CreateRatingRequestDTO),
       ).rejects.toThrow('Ya has calificado este servicio');
+    });
+  });
+
+  describe('createProfessionalToClientRating', () => {
+    it('debe crear la calificación profesional→cliente pasando el userId del token', async () => {
+      // Arrange
+      const dto = {
+        clientId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        serviceRequestId: 'svc-001',
+        rating: 5,
+      } as unknown as CreateProfessionalToClientRatingRequestDTO;
+      const expected = { id: 'rating-uuid-002', rating: 5 };
+      mockCreateProfessionalToClientRating.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.createProfessionalToClientRating(
+        mockReq,
+        dto,
+      );
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockCreateProfessionalToClientRating).toHaveBeenCalledWith(1, dto);
+    });
+
+    it('debe propagar ForbiddenException si el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockCreateProfessionalToClientRating.mockRejectedValue(
+        new ForbiddenException(
+          'Solo un profesional puede calificar a un cliente',
+        ),
+      );
+
+      // Act & Assert
+      await expect(
+        controller.createProfessionalToClientRating(
+          mockReq,
+          {} as CreateProfessionalToClientRatingRequestDTO,
+        ),
+      ).rejects.toThrow('Solo un profesional puede calificar a un cliente');
     });
   });
 

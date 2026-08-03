@@ -3,8 +3,11 @@ import { RatingType } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { RatingsDbService } from './ratings-db.service';
 
-// ─── Mocks de professionals ──────────────────────────────────────────────────
+// ─── Mocks de professionals / users / services ───────────────────────────────
 const mockProfessionalsFindFirst = jest.fn();
+const mockProfessionalsFindUnique = jest.fn();
+const mockUsersFindUnique = jest.fn();
+const mockServicesFindUnique = jest.fn();
 
 // ─── Mocks de rating ─────────────────────────────────────────────────────────
 const mockRatingFindFirst = jest.fn();
@@ -19,6 +22,13 @@ const mockPrisma = {
   extended: {
     professionals: {
       findFirst: mockProfessionalsFindFirst,
+      findUnique: mockProfessionalsFindUnique,
+    },
+    users: {
+      findUnique: mockUsersFindUnique,
+    },
+    services: {
+      findUnique: mockServicesFindUnique,
     },
     rating: {
       findFirst: mockRatingFindFirst,
@@ -78,18 +88,36 @@ describe('RatingsDbService', () => {
     });
   });
 
+  // ─── findServiceByReferenceId ────────────────────────────────────────────
+  describe('findServiceByReferenceId', () => {
+    it('debe resolver el UUID público del servicio a su PK interna', async () => {
+      // Arrange
+      mockServicesFindUnique.mockResolvedValue({ id: 30 });
+
+      // Act
+      const result = await service.findServiceByReferenceId('svc-uuid-1');
+
+      // Assert
+      expect(result).toEqual({ id: 30 });
+      expect(mockServicesFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'svc-uuid-1' },
+        select: { id: true },
+      });
+    });
+  });
+
   // ─── findDuplicate ───────────────────────────────────────────────────────
   describe('findDuplicate', () => {
     it('debe retornar la calificación existente cuando ya fue creada para esa combinación', async () => {
       // Arrange
-      const existingRating = { id: 'rating-1', userId: 1, professionalId: 2 };
+      const existingRating = { id: 1, userId: 1, professionalId: 2 };
       mockRatingFindFirst.mockResolvedValue(existingRating);
 
       // Act
       const result = await service.findDuplicate(
         1,
         2,
-        'svc-1',
+        30,
         RatingType.CLIENT_TO_PROFESSIONAL,
       );
 
@@ -99,7 +127,7 @@ describe('RatingsDbService', () => {
         where: {
           userId: 1,
           professionalId: 2,
-          serviceId: 'svc-1',
+          serviceId: 30,
           type: RatingType.CLIENT_TO_PROFESSIONAL,
         },
       });
@@ -124,7 +152,7 @@ describe('RatingsDbService', () => {
 
   // ─── create ──────────────────────────────────────────────────────────────
   describe('create', () => {
-    it('debe retornar la calificación creada con los datos proporcionados', async () => {
+    it('debe retornar la calificación creada incluyendo el servicio', async () => {
       // Arrange
       const data = {
         userId: 1,
@@ -132,7 +160,7 @@ describe('RatingsDbService', () => {
         rating: 5,
         type: RatingType.CLIENT_TO_PROFESSIONAL,
       };
-      const created = { id: 'new-rating', ...data };
+      const created = { id: 1, referenceId: 'rating-uuid-1', ...data };
       mockRatingCreate.mockResolvedValue(created);
 
       // Act
@@ -140,7 +168,10 @@ describe('RatingsDbService', () => {
 
       // Assert
       expect(result).toEqual(created);
-      expect(mockRatingCreate).toHaveBeenCalledWith({ data });
+      expect(mockRatingCreate).toHaveBeenCalledWith({
+        data,
+        include: { service: true },
+      });
     });
   });
 
@@ -149,8 +180,8 @@ describe('RatingsDbService', () => {
     it('debe retornar todas las calificaciones con sus relaciones incluidas', async () => {
       // Arrange
       const ratings = [
-        { id: 'r1', rating: 4 },
-        { id: 'r2', rating: 5 },
+        { id: 1, rating: 4 },
+        { id: 2, rating: 5 },
       ];
       mockRatingFindMany.mockResolvedValue(ratings);
 
@@ -170,7 +201,7 @@ describe('RatingsDbService', () => {
   describe('findRecent', () => {
     it('debe retornar las últimas N calificaciones limitadas por el parámetro', async () => {
       // Arrange
-      const ratings = [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }];
+      const ratings = [{ id: 1 }, { id: 2 }, { id: 3 }];
       mockRatingFindMany.mockResolvedValue(ratings);
 
       // Act
@@ -190,7 +221,7 @@ describe('RatingsDbService', () => {
   describe('findByUser', () => {
     it('debe retornar todas las calificaciones del usuario especificado', async () => {
       // Arrange
-      const ratings = [{ id: 'r1', userId: 10 }];
+      const ratings = [{ id: 1, userId: 10 }];
       mockRatingFindMany.mockResolvedValue(ratings);
 
       // Act
@@ -210,7 +241,7 @@ describe('RatingsDbService', () => {
   describe('findByProfessional', () => {
     it('debe retornar solo las calificaciones activas del profesional', async () => {
       // Arrange
-      const ratings = [{ id: 'r1', professionalId: 5, isActive: true }];
+      const ratings = [{ id: 1, professionalId: 5, isActive: true }];
       mockRatingFindMany.mockResolvedValue(ratings);
 
       // Act
@@ -232,7 +263,7 @@ describe('RatingsDbService', () => {
       // Arrange
       const ratings = [
         {
-          id: 'r1',
+          id: 1,
           type: RatingType.CLIENT_TO_PROFESSIONAL,
           isAnonymous: false,
           isActive: true,
@@ -264,7 +295,7 @@ describe('RatingsDbService', () => {
       // Arrange
       const ratings = [
         {
-          id: 'r1',
+          id: 1,
           type: RatingType.PROFESSIONAL_TO_CLIENT,
           isAnonymous: false,
           isActive: true,
@@ -292,19 +323,19 @@ describe('RatingsDbService', () => {
 
   // ─── findByServiceId ─────────────────────────────────────────────────────
   describe('findByServiceId', () => {
-    it('debe retornar todas las calificaciones activas de un servicio específico', async () => {
+    it('debe retornar todas las calificaciones activas de un servicio específico (por PK interna)', async () => {
       // Arrange
-      const ratings = [{ id: 'r1', serviceId: 'svc-abc', isActive: true }];
+      const ratings = [{ id: 1, serviceId: 30, isActive: true }];
       mockRatingFindMany.mockResolvedValue(ratings);
 
       // Act
-      const result = await service.findByServiceId('svc-abc');
+      const result = await service.findByServiceId(30);
 
       // Assert
       expect(result).toEqual(ratings);
       expect(mockRatingFindMany).toHaveBeenCalledWith({
-        where: { serviceId: 'svc-abc', isActive: true },
-        include: { user: true, professional: true },
+        where: { serviceId: 30, isActive: true },
+        include: { user: true, professional: true, service: true },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -312,18 +343,18 @@ describe('RatingsDbService', () => {
 
   // ─── findById ────────────────────────────────────────────────────────────
   describe('findById', () => {
-    it('debe retornar la calificación con todas las relaciones cuando existe el id', async () => {
+    it('debe retornar la calificación con todas las relaciones cuando existe la PK interna', async () => {
       // Arrange
-      const rating = { id: 'r1', rating: 5 };
+      const rating = { id: 1, rating: 5 };
       mockRatingFindUnique.mockResolvedValue(rating);
 
       // Act
-      const result = await service.findById('r1');
+      const result = await service.findById(1);
 
       // Assert
       expect(result).toEqual(rating);
       expect(mockRatingFindUnique).toHaveBeenCalledWith({
-        where: { id: 'r1' },
+        where: { id: 1 },
         include: { user: true, professional: true, service: true },
       });
     });
@@ -333,10 +364,29 @@ describe('RatingsDbService', () => {
       mockRatingFindUnique.mockResolvedValue(null);
 
       // Act
-      const result = await service.findById('no-existe');
+      const result = await service.findById(999);
 
       // Assert
       expect(result).toBeNull();
+    });
+  });
+
+  // ─── findByReferenceId ───────────────────────────────────────────────────
+  describe('findByReferenceId', () => {
+    it('debe buscar la calificación por su referenceId (UUID público) con sus relaciones', async () => {
+      // Arrange
+      const rating = { id: 1, referenceId: 'rating-uuid-1', rating: 5 };
+      mockRatingFindUnique.mockResolvedValue(rating);
+
+      // Act
+      const result = await service.findByReferenceId('rating-uuid-1');
+
+      // Assert
+      expect(result).toEqual(rating);
+      expect(mockRatingFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'rating-uuid-1' },
+        include: { user: true, professional: true, service: true },
+      });
     });
   });
 
@@ -344,17 +394,18 @@ describe('RatingsDbService', () => {
   describe('update', () => {
     it('debe retornar la calificación actualizada con los datos provistos', async () => {
       // Arrange
-      const updated = { id: 'r1', rating: 3 };
+      const updated = { id: 1, rating: 3 };
       mockRatingUpdate.mockResolvedValue(updated);
 
       // Act
-      const result = await service.update('r1', { rating: 3 });
+      const result = await service.update(1, { rating: 3 });
 
       // Assert
       expect(result).toEqual(updated);
       expect(mockRatingUpdate).toHaveBeenCalledWith({
-        where: { id: 'r1' },
+        where: { id: 1 },
         data: { rating: 3 },
+        include: { service: true },
       });
     });
   });
@@ -363,14 +414,14 @@ describe('RatingsDbService', () => {
   describe('deactivate', () => {
     it('debe marcar la calificación como inactiva sin retornar valor', async () => {
       // Arrange
-      mockRatingUpdate.mockResolvedValue({ id: 'r1', isActive: false });
+      mockRatingUpdate.mockResolvedValue({ id: 1, isActive: false });
 
       // Act
-      await service.deactivate('r1');
+      await service.deactivate(1);
 
       // Assert
       expect(mockRatingUpdate).toHaveBeenCalledWith({
-        where: { id: 'r1' },
+        where: { id: 1 },
         data: { isActive: false },
       });
     });
@@ -380,17 +431,18 @@ describe('RatingsDbService', () => {
   describe('report', () => {
     it('debe marcar la calificación como reportada con la razón indicada', async () => {
       // Arrange
-      const reported = { id: 'r1', isReported: true, reportReason: 'ofensivo' };
+      const reported = { id: 1, isReported: true, reportReason: 'ofensivo' };
       mockRatingUpdate.mockResolvedValue(reported);
 
       // Act
-      const result = await service.report('r1', 'ofensivo');
+      const result = await service.report(1, 'ofensivo');
 
       // Assert
       expect(result).toEqual(reported);
       expect(mockRatingUpdate).toHaveBeenCalledWith({
-        where: { id: 'r1' },
+        where: { id: 1 },
         data: { isReported: true, reportReason: 'ofensivo' },
+        include: { service: true },
       });
     });
   });

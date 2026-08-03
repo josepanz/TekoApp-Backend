@@ -6,6 +6,8 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
+import { t } from '@common/i18n/i18n.helper';
+
 @ValidatorConstraint({ name: 'notExpired', async: false })
 export class NotExpiredConstraint implements ValidatorConstraintInterface {
   validate(value: string, args: ValidationArguments) {
@@ -19,7 +21,7 @@ export class NotExpiredConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `${args.property} no puede ser una fecha pasada`;
+    return t('validation.DATE_NOT_EXPIRED', { property: args.property });
   }
 }
 

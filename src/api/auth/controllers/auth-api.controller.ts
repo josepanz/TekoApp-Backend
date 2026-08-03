@@ -35,6 +35,7 @@ import { AuthCookieService } from '@api/auth/services/auth-cookie.service';
 import { AuthDocs } from '@api/auth/docs/auth-api.docs';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 
+import { t } from '@common/i18n/i18n.helper';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthApiController {
@@ -98,6 +99,17 @@ export class AuthApiController {
     return await this.authApiService.updatePassword(dto);
   }
 
+  @Put('change-expired-password')
+  @ApiBasicAuth()
+  @Version('1')
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs('changeExpiredPassword')
+  async changeExpiredPassword(
+    @Body() dto: DTO.ChangeExpiredPasswordDTO,
+  ): Promise<DTO.PasswordResponseDTO> {
+    return await this.authApiService.changeExpiredPassword(dto);
+  }
+
   @Put('forgot-password')
   @ApiBasicAuth()
   @Version('1')
@@ -107,6 +119,36 @@ export class AuthApiController {
     @Body() dto: DTO.ForgotUserPasswordDTO,
   ): Promise<DTO.PasswordResponseDTO> {
     return await this.authApiService.forgotPassword(dto);
+  }
+
+  @Post('nonce')
+  @Version('1')
+  @ApiBasicAuth()
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs('nonce')
+  async nonce(): Promise<DTO.NonceResponseDTO> {
+    return await this.authApiService.generateNonce();
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Version('1')
+  @AuthDocs('me')
+  me(@User() user: IUserDataOnJwt): DTO.MeResponseDTO {
+    return this.authApiService.me(user);
+  }
+
+  @Put('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Version('1')
+  @AuthDocs('updateMe')
+  async updateMe(
+    @User() user: IUserDataOnJwt,
+    @Body() dto: DTO.UpdateMeRequestDTO,
+  ): Promise<DTO.MeResponseDTO> {
+    return await this.authApiService.updateMe(user, dto);
   }
 
   @Post('refresh-token')
@@ -120,14 +162,14 @@ export class AuthApiController {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
-      throw new UnauthorizedException('No se provee el token.');
+      throw new UnauthorizedException(t('auth.TOKEN_NOT_PROVIDED'));
     }
 
     const { accessToken } =
       await this.authApiService.refreshAccessToken(refreshToken);
     this.cookieService.setAccessToken(res, accessToken);
 
-    return { message: 'Token actualizado', accessToken };
+    return { message: t('auth.TOKEN_REFRESHED'), accessToken };
   }
 
   @Get('scope')
@@ -170,7 +212,7 @@ export class AuthApiController {
     @User() user: Users,
   ): Promise<DTO.PasswordOnlyMessageResponseDTO> {
     await this.authApiService.sendVerificationEmail(dto.email, user);
-    return { message: 'Email de verificación enviado correctamente.' };
+    return { message: t('auth.VERIFICATION_EMAIL_SENT') };
   }
 
   @Post('email/send-create-password')
@@ -184,7 +226,7 @@ export class AuthApiController {
   ): Promise<DTO.PasswordOnlyMessageResponseDTO> {
     await this.authApiService.sendPasswordCreationEmail(dto.email, user);
     return {
-      message: 'Email para creación de contraseña enviado correctamente.',
+      message: t('auth.SET_PASSWORD_EMAIL_SENT'),
     };
   }
 
@@ -199,7 +241,7 @@ export class AuthApiController {
   ): Promise<DTO.PasswordOnlyMessageResponseDTO> {
     await this.authApiService.sendPasswordResetEmail(dto.email, user);
     return {
-      message: 'Email para recuperación de cuenta enviado correctamente.',
+      message: t('auth.RECOVERY_EMAIL_SENT'),
     };
   }
 }

@@ -16,7 +16,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly configService: ConfigType<AppConfigType>,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // EventSource (SSE) no puede mandar el header Authorization — se agrega el fallback de
+      // query param `access_token` solo para eso (mismo patrón estándar de passport-jwt para SSE
+      // y websockets). El header Bearer sigue siendo la vía normal para el resto de la API.
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        ExtractJwt.fromUrlQueryParameter('access_token'),
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.authentication.publicKey,
     });

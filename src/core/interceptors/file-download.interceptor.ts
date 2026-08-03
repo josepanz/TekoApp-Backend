@@ -14,6 +14,7 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 import { DOWNLOAD_FILE_KEY } from '@common/decorators/file-download.decorator';
 
+import { t } from '@common/i18n/i18n.helper';
 export type ExportFormat = 'xlsx' | 'pdf' | 'csv';
 
 export interface IDownloadResponse {
@@ -49,7 +50,7 @@ export class FileDownloadInterceptor implements NestInterceptor {
       map((data: IDownloadResponse) => {
         if (!data || !data.buffer || !data.filename || !data.format) {
           throw new InternalServerErrorException(
-            'El servicio no retornó la estructura requerida para descargas (buffer, filename, format).',
+            t('common.DOWNLOAD_STRUCTURE_INVALID'),
           );
         }
 

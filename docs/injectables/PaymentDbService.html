@@ -191,7 +191,15 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
-                                <a href="#findPaymentMethodById" >findPaymentMethodById</a>
+                                <a href="#findPaymentByReferenceId" >findPaymentByReferenceId</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#findPaymentMethodByReferenceId" >findPaymentMethodByReferenceId</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#findServiceByReferenceId" >findServiceByReferenceId</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -208,6 +216,10 @@
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#updatePayment" >updatePayment</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#updatePaymentConditional" >updatePaymentConditional</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -240,7 +252,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="26" class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:26</a></div>
                             </td>
                         </tr>
 
@@ -305,8 +317,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="88"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:88</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="140"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:140</a></div>
                         </td>
                     </tr>
 
@@ -374,8 +386,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="117"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:117</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="170"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:170</a></div>
                         </td>
                     </tr>
 
@@ -436,15 +448,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createPaymentMethod(data: Prisma.PaymentMethodEntityUncheckedCreateInput)</code>
+                    <code>createPaymentMethod(data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PaymentMethodEntityUncheckedCreateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="95"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:95</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="147"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:147</a></div>
                         </td>
                     </tr>
 
@@ -467,7 +479,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.PaymentMethodEntityUncheckedCreateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PaymentMethodEntityUncheckedCreateInput</a></code>
                                             </td>
 
                                             <td>
@@ -480,7 +492,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;PaymentMethodEntity&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;PaymentMethodEntity&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -505,15 +517,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createPaymentWithTransaction(data: Omit<Prisma.PaymentsUncheckedCreateInput | "id" | "createdAt" | "updatedAt">, transactionId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>createPaymentWithTransaction(data: <a href="../miscellaneous/functions.html#t" target="_self">Omit&lt;Prisma.PaymentsUncheckedCreateInput | &quot;id&quot; | &quot;referenceId&quot; | &quot;createdAt&quot; | &quot;updatedAt&quot;&gt;</a>, transactionId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="29"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:29</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="52"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:52</a></div>
                         </td>
                     </tr>
 
@@ -536,7 +548,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Omit&lt;Prisma.PaymentsUncheckedCreateInput | &quot;id&quot; | &quot;createdAt&quot; | &quot;updatedAt&quot;&gt;</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Omit&lt;Prisma.PaymentsUncheckedCreateInput | &quot;id&quot; | &quot;referenceId&quot; | &quot;createdAt&quot; | &quot;updatedAt&quot;&gt;</a></code>
                                             </td>
 
                                             <td>
@@ -548,7 +560,7 @@
                                         <tr>
                                                 <td>transactionId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -561,7 +573,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;Payments&gt;</code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -586,21 +598,31 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>executeRefund(paymentId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, refundAmount: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, reason: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, isFullRefund: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank">boolean</a>, newTotalRefunded: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>executeRefund(paymentId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, refundAmount: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, reason: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="135"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:135</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="200"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:200</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Reembolsa un pago de forma atómica: bloquea la fila (<code>SELECT ... FOR UPDATE</code>) antes de
+validar estado/monto disponible y escribir, dentro de la MISMA transacción. Sin este lock,
+dos reembolsos concurrentes sobre el mismo pago pueden leer el mismo <code>refundedAmount</code>
+acumulado antes de que ninguno escriba, y el segundo en confirmar pisa (no suma) el
+resultado del primero — riesgo real de doble reembolso o de perder el registro de uno de
+los dos. Mantiene el mismo comportamiento que antes (solo pagos COMPLETED son reembolsables)
+— la única diferencia es que ahora es seguro bajo concurrencia.</p>
+<p><code>paymentId</code> es la PK interna (Int) ya resuelta en la capa API; el <code>SELECT ... FOR UPDATE</code>
+usa el valor directamente (sin cast <code>::uuid</code>, que rompería contra una columna integer).</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -617,7 +639,7 @@
                                         <tr>
                                                 <td>paymentId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -641,31 +663,7 @@
                                         <tr>
                                                 <td>reason</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>isFullRefund</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>newTotalRefunded</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -678,7 +676,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;Payments&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;Payments&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -710,8 +708,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="101"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:101</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:153</a></div>
                         </td>
                     </tr>
 
@@ -747,7 +745,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;PaymentMethodEntity[]&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;PaymentMethodEntity[]&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -772,15 +770,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findAllPayments(userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, professionalId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, status?: PaymentStatus)</code>
+                    <code>findAllPayments(userId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, professionalId?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, status?: <a href="../miscellaneous/functions.html#t" target="_self">PaymentStatus</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="54"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:54</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="80"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:80</a></div>
                         </td>
                     </tr>
 
@@ -827,7 +825,7 @@
                                         <tr>
                                                 <td>status</td>
                                             <td>
-                                                        <code>PaymentStatus</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PaymentStatus</a></code>
                                             </td>
 
                                             <td>
@@ -840,7 +838,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;Payments[]&gt;</code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -865,15 +863,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findExistingPayment(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, serviceRequestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findExistingPayment(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="20"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:20</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="43"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:43</a></div>
                         </td>
                     </tr>
 
@@ -906,9 +904,9 @@
 
                                         </tr>
                                         <tr>
-                                                <td>serviceRequestId</td>
+                                                <td>serviceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -921,7 +919,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;Payments | null&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;Payments | null&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -946,21 +944,23 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findPaymentById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findPaymentById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="70"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:70</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="97"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:97</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Busca un pago por su PK interna (Int). Uso interno tras resolver el referenceId.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -977,7 +977,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -990,7 +990,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;Payments | null&gt;</code>
+                            <b>Returns : </b>    <code>unknown</code>
 
                         </div>
                             <div class="io-description">
@@ -1004,32 +1004,34 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="findPaymentMethodById"></a>
+                    <a name="findPaymentByReferenceId"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
-                        <span ><b>findPaymentMethodById</b></span>
-                        <a href="#findPaymentMethodById"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>findPaymentByReferenceId</b></span>
+                        <a href="#findPaymentByReferenceId"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findPaymentMethodById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>findPaymentByReferenceId(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="108"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:108</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:105</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Busca un pago por su referenceId (UUID público recibido en la URL).</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -1044,9 +1046,80 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findPaymentMethodByReferenceId"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>findPaymentMethodByReferenceId</b></span>
+                        <a href="#findPaymentMethodByReferenceId"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findPaymentMethodByReferenceId(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="161"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:161</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Busca un método de pago por su referenceId (UUID) validando pertenencia al usuario.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1071,7 +1144,78 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;PaymentMethodEntity | null&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;PaymentMethodEntity | null&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findServiceByReferenceId"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>findServiceByReferenceId</b></span>
+                        <a href="#findServiceByReferenceId"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findServiceByReferenceId(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="32"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:32</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Resuelve el UUID público de un servicio a su PK interna (Int), o null si no existe.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;literal type | null&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1096,15 +1240,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findTransactionByExternalId(externalTransactionId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findTransactionByExternalId(externalTransactionId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="170"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:170</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="270"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:270</a></div>
                         </td>
                     </tr>
 
@@ -1127,7 +1271,7 @@
                                         <tr>
                                                 <td>externalTransactionId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1140,7 +1284,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;PaymentTransaction | null&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;PaymentTransaction | null&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1172,8 +1316,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="213"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:213</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="313"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:313</a></div>
                         </td>
                     </tr>
 
@@ -1253,8 +1397,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="246"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:246</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="346"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:346</a></div>
                         </td>
                     </tr>
 
@@ -1327,15 +1471,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updatePayment(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, data: Prisma.PaymentsUpdateInput)</code>
+                    <code>updatePayment(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PaymentsUpdateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="76"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:76</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="112"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:112</a></div>
                         </td>
                     </tr>
 
@@ -1358,7 +1502,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1370,7 +1514,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.PaymentsUpdateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PaymentsUpdateInput</a></code>
                                             </td>
 
                                             <td>
@@ -1383,7 +1527,105 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;Payments&gt;</code>
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="updatePaymentConditional"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>updatePaymentConditional</b></span>
+                        <a href="#updatePaymentConditional"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updatePaymentConditional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, expectedStatuses: <a href="../miscellaneous/functions.html#t" target="_self">PaymentStatus[]</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PaymentsUpdateInput</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="126"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:126</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Actualiza el pago solo si su estado actual está entre <code>expectedStatuses</code> — evita
+condiciones de carrera entre dos escrituras concurrentes (ej. cancelar + webhook de
+confirmación corriendo al mismo tiempo). Devuelve la cantidad de filas afectadas: 0
+significa que el estado cambió entre la lectura de validación y esta escritura.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>expectedStatuses</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PaymentStatus[]</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>data</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PaymentsUpdateInput</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -1408,15 +1650,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updatePaymentMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, data: Prisma.PaymentMethodEntityUpdateInput)</code>
+                    <code>updatePaymentMethod(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.PaymentMethodEntityUpdateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="123"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:123</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="176"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:176</a></div>
                         </td>
                     </tr>
 
@@ -1439,7 +1681,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1451,7 +1693,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.PaymentMethodEntityUpdateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.PaymentMethodEntityUpdateInput</a></code>
                                             </td>
 
                                             <td>
@@ -1464,7 +1706,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;PaymentMethodEntity&gt;</code>
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;PaymentMethodEntity&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -1489,15 +1731,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateTransactionAndPaymentStatus(transactionId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, paymentId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, tStatus: TransactionStatus, pStatus: PaymentStatus, failureReason?: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>updateTransactionAndPaymentStatus(transactionId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, paymentId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, tStatus: <a href="../miscellaneous/functions.html#t" target="_self">TransactionStatus</a>, pStatus: <a href="../miscellaneous/functions.html#t" target="_self">PaymentStatus</a>, failureReason?: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="178"
-                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:178</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="278"
+                                    class="link-to-prism">src/modules/payments-db/services/payment-db.service.ts:278</a></div>
                         </td>
                     </tr>
 
@@ -1520,7 +1762,7 @@
                                         <tr>
                                                 <td>transactionId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1532,7 +1774,7 @@
                                         <tr>
                                                 <td>paymentId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1544,7 +1786,7 @@
                                         <tr>
                                                 <td>tStatus</td>
                                             <td>
-                                                        <code>TransactionStatus</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >TransactionStatus</a></code>
                                             </td>
 
                                             <td>
@@ -1556,7 +1798,7 @@
                                         <tr>
                                                 <td>pStatus</td>
                                             <td>
-                                                        <code>PaymentStatus</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PaymentStatus</a></code>
                                             </td>
 
                                             <td>
@@ -1568,7 +1810,7 @@
                                         <tr>
                                                 <td>failureReason</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1597,7 +1839,11 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from &#x27;@nestjs/common&#x27;;
 import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;; // Ajusta la ruta a tu PrismaService
 import {
   Payments,
@@ -1609,31 +1855,53 @@ import {
   PaymentMethodEntity,
 } from &#x27;@prisma/client&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+// Include que trae el referenceId (UUID público) del servicio para exponerlo en las respuestas
+// de pagos sin filtrar la PK interna (Int).
+const serviceRefInclude &#x3D; {
+  service: { select: { referenceId: true } },
+} satisfies Prisma.PaymentsInclude;
+
 @Injectable()
 export class PaymentDbService {
   constructor(private readonly prisma: PrismaDatasource) {}
+
+  // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; RESOLUCIÓN DE REFERENCIAS &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+  /** Resuelve el UUID público de un servicio a su PK interna (Int), o null si no existe. */
+  async findServiceByReferenceId(
+    referenceId: string,
+  ): Promise&lt;{ id: number } | null&gt; {
+    return this.prisma.extended.services.findUnique({
+      where: { referenceId },
+      select: { id: true },
+    });
+  }
 
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; PAGOS &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
   async findExistingPayment(
     userId: number,
-    serviceRequestId: string,
+    serviceId: number,
   ): Promise&lt;Payments | null&gt; {
     return this.prisma.extended.payments.findFirst({
-      where: { userId, serviceRequestId },
+      where: { userId, serviceId },
     });
   }
 
   async createPaymentWithTransaction(
     data: Omit&lt;
       Prisma.PaymentsUncheckedCreateInput,
-      &#x27;id&#x27; | &#x27;createdAt&#x27; | &#x27;updatedAt&#x27;
+      &#x27;id&#x27; | &#x27;referenceId&#x27; | &#x27;createdAt&#x27; | &#x27;updatedAt&#x27;
     &gt;,
     transactionId: string,
-  ): Promise&lt;Payments&gt; {
+  ) {
     // Usamos transacción ACID de Prisma para asegurar que el pago y su registro histórico se creen juntos
     return this.prisma.extended.$transaction(async (tx) &#x3D;&gt; {
-      const payment &#x3D; await tx.payments.create({ data });
+      const payment &#x3D; await tx.payments.create({
+        data,
+        include: serviceRefInclude,
+      });
 
       await tx.paymentTransaction.create({
         data: {
@@ -1653,7 +1921,7 @@ export class PaymentDbService {
     userId?: number,
     professionalId?: number,
     status?: PaymentStatus,
-  ): Promise&lt;Payments[]&gt; {
+  ) {
     return this.prisma.extended.payments.findMany({
       where: {
         ...(userId &amp;&amp; { userId }),
@@ -1665,20 +1933,46 @@ export class PaymentDbService {
     });
   }
 
-  async findPaymentById(id: string): Promise&lt;Payments | null&gt; {
+  /** Busca un pago por su PK interna (Int). Uso interno tras resolver el referenceId. */
+  async findPaymentById(id: number) {
     return this.prisma.extended.payments.findUnique({
       where: { id },
+      include: serviceRefInclude,
     });
   }
 
-  async updatePayment(
-    id: string,
-    data: Prisma.PaymentsUpdateInput,
-  ): Promise&lt;Payments&gt; {
+  /** Busca un pago por su referenceId (UUID público recibido en la URL). */
+  async findPaymentByReferenceId(referenceId: string) {
+    return this.prisma.extended.payments.findUnique({
+      where: { referenceId },
+      include: serviceRefInclude,
+    });
+  }
+
+  async updatePayment(id: number, data: Prisma.PaymentsUpdateInput) {
     return this.prisma.extended.payments.update({
       where: { id },
       data,
+      include: serviceRefInclude,
     });
+  }
+
+  /**
+   * Actualiza el pago solo si su estado actual está entre &#x60;expectedStatuses&#x60; — evita
+   * condiciones de carrera entre dos escrituras concurrentes (ej. cancelar + webhook de
+   * confirmación corriendo al mismo tiempo). Devuelve la cantidad de filas afectadas: 0
+   * significa que el estado cambió entre la lectura de validación y esta escritura.
+   */
+  async updatePaymentConditional(
+    id: number,
+    expectedStatuses: PaymentStatus[],
+    data: Prisma.PaymentsUpdateInput,
+  ): Promise&lt;number&gt; {
+    const result &#x3D; await this.prisma.extended.payments.updateMany({
+      where: { id, status: { in: expectedStatuses } },
+      data,
+    });
+    return result.count;
   }
 
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; MÉTODOS DE PAGO &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -1703,12 +1997,13 @@ export class PaymentDbService {
     });
   }
 
-  async findPaymentMethodById(
-    id: string,
+  /** Busca un método de pago por su referenceId (UUID) validando pertenencia al usuario. */
+  async findPaymentMethodByReferenceId(
+    referenceId: string,
     userId: number,
   ): Promise&lt;PaymentMethodEntity | null&gt; {
     return await this.prisma.extended.paymentMethodEntity.findFirst({
-      where: { id, userId },
+      where: { referenceId, userId },
     });
   }
 
@@ -1719,7 +2014,7 @@ export class PaymentDbService {
   }
 
   async updatePaymentMethod(
-    id: string,
+    id: number,
     data: Prisma.PaymentMethodEntityUpdateInput,
   ): Promise&lt;PaymentMethodEntity&gt; {
     return await this.prisma.extended.paymentMethodEntity.update({
@@ -1730,14 +2025,61 @@ export class PaymentDbService {
 
   // &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; TRANSACCIONES Y REEMBOLSOS &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
+  /**
+   * Reembolsa un pago de forma atómica: bloquea la fila (&#x60;SELECT ... FOR UPDATE&#x60;) antes de
+   * validar estado/monto disponible y escribir, dentro de la MISMA transacción. Sin este lock,
+   * dos reembolsos concurrentes sobre el mismo pago pueden leer el mismo &#x60;refundedAmount&#x60;
+   * acumulado antes de que ninguno escriba, y el segundo en confirmar pisa (no suma) el
+   * resultado del primero — riesgo real de doble reembolso o de perder el registro de uno de
+   * los dos. Mantiene el mismo comportamiento que antes (solo pagos COMPLETED son reembolsables)
+   * — la única diferencia es que ahora es seguro bajo concurrencia.
+   *
+   * &#x60;paymentId&#x60; es la PK interna (Int) ya resuelta en la capa API; el &#x60;SELECT ... FOR UPDATE&#x60;
+   * usa el valor directamente (sin cast &#x60;::uuid&#x60;, que rompería contra una columna integer).
+   */
   async executeRefund(
-    paymentId: string,
+    paymentId: number,
     refundAmount: number,
     reason: string,
-    isFullRefund: boolean,
-    newTotalRefunded: number,
   ): Promise&lt;Payments&gt; {
     return this.prisma.extended.$transaction(async (tx) &#x3D;&gt; {
+      const locked &#x3D; await tx.$queryRaw&lt;
+        {
+          id: number;
+          status: PaymentStatus;
+          total_amount: Prisma.Decimal;
+          refund_details: Prisma.JsonValue | null;
+        }[]
+      &gt;&#x60;SELECT id, status, total_amount, refund_details FROM payments WHERE id &#x3D; ${paymentId} FOR UPDATE&#x60;;
+      const payment &#x3D; locked[0];
+
+      if (!payment) {
+        throw new NotFoundException(t(&#x27;payments.NOT_FOUND&#x27;));
+      }
+      if (payment.status !&#x3D;&#x3D; PaymentStatus.COMPLETED) {
+        throw new BadRequestException(
+          t(&#x27;payments.ONLY_COMPLETED_CAN_BE_REFUNDED&#x27;),
+        );
+      }
+
+      const currentRefundDetails &#x3D; payment.refund_details as Record&lt;
+        string,
+        unknown
+      &gt; | null;
+      const currentlyRefunded &#x3D;
+        typeof currentRefundDetails?.refundedAmount &#x3D;&#x3D;&#x3D; &#x27;number&#x27;
+          ? currentRefundDetails.refundedAmount
+          : 0;
+      const totalAmountNum &#x3D; Number(payment.total_amount);
+      const availableToRefund &#x3D; totalAmountNum - currentlyRefunded;
+
+      if (refundAmount &gt; availableToRefund) {
+        throw new BadRequestException(t(&#x27;payments.REFUND_EXCEEDS_AVAILABLE&#x27;));
+      }
+
+      const newTotalRefunded &#x3D; currentlyRefunded + refundAmount;
+      const isFullRefund &#x3D; newTotalRefunded &gt;&#x3D; totalAmountNum;
+
       await tx.paymentTransaction.create({
         data: {
           payment: { connect: { id: paymentId } },
@@ -1774,8 +2116,8 @@ export class PaymentDbService {
   }
 
   async updateTransactionAndPaymentStatus(
-    transactionId: string,
-    paymentId: string,
+    transactionId: number,
+    paymentId: number,
     tStatus: TransactionStatus,
     pStatus: PaymentStatus,
     failureReason?: string,
@@ -1848,16 +2190,16 @@ export class PaymentDbService {
     // En Prisma, los agrupamientos por fecha (DATE) requieren $queryRaw
     // Adaptado de forma segura contra inyecciones SQL
     const trends &#x3D; await this.prisma.extended.$queryRaw&#x60;
-      SELECT 
-        DATE(&quot;createdAt&quot;) as date,
+      SELECT
+        DATE(created_at) as date,
         COUNT(*)::int as &quot;totalPayments&quot;,
-        COALESCE(SUM(&quot;totalAmount&quot;), 0)::float as &quot;totalAmount&quot;,
+        COALESCE(SUM(total_amount), 0)::float as &quot;totalAmount&quot;,
         COUNT(CASE WHEN status &#x3D; &#x27;COMPLETED&#x27; THEN 1 END)::int as &quot;successfulPayments&quot;,
         COUNT(CASE WHEN status &#x3D; &#x27;FAILED&#x27; THEN 1 END)::int as &quot;failedPayments&quot;
-      FROM &quot;Payment&quot;
-      WHERE &quot;createdAt&quot; &gt;&#x3D; ${startDate}
-      ${userId ? Prisma.sql&#x60;AND &quot;userId&quot; &#x3D; ${userId}&#x60; : Prisma.empty}
-      GROUP BY DATE(&quot;createdAt&quot;)
+      FROM payments
+      WHERE created_at &gt;&#x3D; ${startDate}
+      ${userId ? Prisma.sql&#x60;AND user_id &#x3D; ${userId}&#x60; : Prisma.empty}
+      GROUP BY DATE(created_at)
       ORDER BY date ASC
     &#x60;;
     return trends;

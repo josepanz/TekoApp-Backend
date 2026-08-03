@@ -9,6 +9,7 @@ import { IJwtPayload } from '@api/auth/interfaces';
 import { APP_CONFIG, AppConfigType } from '@core/config/config-loader';
 import { UserWithSecurities } from '@modules/auth/types/user.types';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
@@ -35,7 +36,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     const user = await this.usersService.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado o inactivo.');
+      throw new UnauthorizedException(t('auth.USER_NOT_FOUND_OR_INACTIVE'));
     }
 
     return user;

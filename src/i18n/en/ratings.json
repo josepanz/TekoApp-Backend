@@ -1,0 +1,12 @@
+{
+  "ALREADY_RATED": "You have already rated this service",
+  "CANNOT_DELETE": "This rating cannot be deleted",
+  "CANNOT_EDIT_AFTER_24H": "The rating cannot be edited after 24 hours",
+  "CANNOT_REPORT_OWN": "You cannot report your own rating",
+  "CLIENT_NOT_FOUND": "Client not found",
+  "NOT_FOUND": "Rating not found",
+  "ONLY_PROFESSIONAL_CAN_RATE_CLIENT": "Only a professional can rate a client",
+  "SERVICE_NOT_FOUND": "Service not found",
+  "UNAUTHORIZED_DELETE": "You cannot delete this rating",
+  "UNAUTHORIZED_EDIT": "You cannot edit this rating"
+}

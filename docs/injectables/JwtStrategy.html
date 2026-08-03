@@ -142,7 +142,7 @@
                 <h3>Extends</h3>
             </p>
             <p class="comment">
-                        <code>PassportStrategy(Strategy, &#x27;jwt&#x27;)</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >PassportStrategy(Strategy, &#x27;jwt&#x27;)</a></code>
             </p>
 
 
@@ -263,8 +263,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="25"
-                                    class="link-to-prism">src/modules/auth/strategies/jwt.strategy.ts:25</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="31"
+                                    class="link-to-prism">src/modules/auth/strategies/jwt.strategy.ts:31</a></div>
                         </td>
                     </tr>
 
@@ -334,7 +334,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, &#x27;jwt&#x27;) {
     private readonly configService: ConfigType&lt;AppConfigType&gt;,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // EventSource (SSE) no puede mandar el header Authorization — se agrega el fallback de
+      // query param &#x60;access_token&#x60; solo para eso (mismo patrón estándar de passport-jwt para SSE
+      // y websockets). El header Bearer sigue siendo la vía normal para el resto de la API.
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        ExtractJwt.fromUrlQueryParameter(&#x27;access_token&#x27;),
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.authentication.publicKey,
     });

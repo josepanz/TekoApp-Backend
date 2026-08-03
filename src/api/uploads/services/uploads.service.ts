@@ -20,6 +20,7 @@ import {
   MAX_FILE_SIZE,
 } from '../const/uploads.const';
 
+import { t } from '@common/i18n/i18n.helper';
 // Sharp es opcional — carga lazy para arrancar sin el binario nativo
 let sharp: typeof import('sharp') | null = null;
 try {
@@ -104,21 +105,23 @@ export class UploadsService {
       this.logger.error(
         `Error eliminando archivo: ${error instanceof Error ? error.message : 'Unknown'}`,
       );
-      throw new BadRequestException('Error eliminando el archivo');
+      throw new BadRequestException(t('uploads.DELETE_ERROR'));
     }
   }
 
   validateFile(file: Express.Multer.File, imageOnly = false): void {
     if (file.size > MAX_FILE_SIZE) {
       throw new BadRequestException(
-        `El archivo excede el tamaño máximo de ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+        t('uploads.FILE_TOO_LARGE', {
+          maxSizeMb: MAX_FILE_SIZE / (1024 * 1024),
+        }),
       );
     }
     if (imageOnly && !file.mimetype.startsWith('image/')) {
-      throw new BadRequestException('Solo se permiten imágenes');
+      throw new BadRequestException(t('uploads.ONLY_IMAGES_ALLOWED'));
     }
     if (!imageOnly && !ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException('Tipo de archivo no permitido');
+      throw new BadRequestException(t('uploads.FILE_TYPE_NOT_ALLOWED'));
     }
   }
 
@@ -143,7 +146,7 @@ export class UploadsService {
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      throw new InternalServerErrorException('Error al subir el archivo', {
+      throw new InternalServerErrorException(t('uploads.UPLOAD_ERROR'), {
         cause: error,
       });
     }
@@ -170,7 +173,7 @@ export class UploadsService {
     } catch (error) {
       if (error instanceof HttpException) throw error;
       throw new InternalServerErrorException(
-        'Error al subir documentos de merchant',
+        t('uploads.MERCHANT_DOCUMENTS_UPLOAD_ERROR'),
         { cause: error },
       );
     }

@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ValidatorConstraintInterface</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidatorConstraintInterface</a></code>
             </p>
 
 
@@ -202,15 +202,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>defaultMessage(args: ValidationArguments)</code>
+<code>defaultMessage(args: <a href="../miscellaneous/functions.html#t" target="_self">ValidationArguments</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="21"
-                                    class="link-to-prism">src/common/validators/date-not-expired.validator.ts:21</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="23"
+                                    class="link-to-prism">src/common/validators/date-not-expired.validator.ts:23</a></div>
                         </td>
                     </tr>
 
@@ -233,7 +233,7 @@
                                         <tr>
                                                 <td>args</td>
                                             <td>
-                                                        <code>ValidationArguments</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationArguments</a></code>
                                             </td>
 
                                             <td>
@@ -246,7 +246,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                             <div class="io-description">
@@ -269,15 +269,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>validate(value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, args: ValidationArguments)</code>
+<code>validate(value: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, args: <a href="../miscellaneous/functions.html#t" target="_self">ValidationArguments</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="11"
-                                    class="link-to-prism">src/common/validators/date-not-expired.validator.ts:11</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="13"
+                                    class="link-to-prism">src/common/validators/date-not-expired.validator.ts:13</a></div>
                         </td>
                     </tr>
 
@@ -300,7 +300,7 @@
                                         <tr>
                                                 <td>value</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -312,7 +312,7 @@
                                         <tr>
                                                 <td>args</td>
                                             <td>
-                                                        <code>ValidationArguments</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidationArguments</a></code>
                                             </td>
 
                                             <td>
@@ -353,6 +353,8 @@
   ValidationArguments,
 } from &#x27;class-validator&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 @ValidatorConstraint({ name: &#x27;notExpired&#x27;, async: false })
 export class NotExpiredConstraint implements ValidatorConstraintInterface {
   validate(value: string, args: ValidationArguments) {
@@ -366,7 +368,7 @@ export class NotExpiredConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return &#x60;${args.property} no puede ser una fecha pasada&#x60;;
+    return t(&#x27;validation.DATE_NOT_EXPIRED&#x27;, { property: args.property });
   }
 }
 

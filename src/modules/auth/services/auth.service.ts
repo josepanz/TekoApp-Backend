@@ -8,9 +8,12 @@ import { Users, UserStatus } from '@prisma/client';
 
 import { AuthTokenService } from '@modules/auth/services/auth-token.service';
 import { AuthPasswordService } from '@modules/auth/services/auth-password.service';
+import { NonceService } from '@modules/auth/services/nonce.service';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { UserCredentialsWithUser } from '@/modules/auth/types';
+import { PasswordExpirationHelper } from '@modules/auth/helpers';
 
+import { t } from '@common/i18n/i18n.helper';
 /**
  * Servicio principal de autenticación - Lógica de Negocio
  * Usa helpers especializados para mantener el código organizado
@@ -23,6 +26,7 @@ export class AuthService {
     private readonly userRepository: UsersDBService,
     private readonly authTokenService: AuthTokenService,
     private readonly authPasswordService: AuthPasswordService,
+    private readonly nonceService: NonceService,
   ) {}
 
   /**
@@ -62,16 +66,32 @@ export class AuthService {
     // Validar estado
     this.validateUserStatus(userCredentials.user.status);
 
-    // Validar contraseña encriptada
-    const isPasswordValid = this.authPasswordService.validateEncryptedPassword(
+    // Desencriptar y parsear el payload: { password, nonce }
+    const { password, nonce } = this.authPasswordService.decryptLoginPayload(
       payload.encryptedPassword,
+    );
+
+    // Nonce anti-replay de uso único: se valida y consume atómicamente ANTES de
+    // validar la contraseña. Si no existe (nunca emitido, ya usado o expirado),
+    // se rechaza con el mismo mensaje genérico para no filtrar la causa.
+    const nonceValid = await this.nonceService.consume(nonce);
+    if (!nonceValid) {
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
+    }
+
+    // Validar contraseña (texto plano ya extraído del payload)
+    const isPasswordValid = this.authPasswordService.validatePassword(
+      password,
       userCredentials.passwordHash,
     );
 
     if (!isPasswordValid) {
       await this.authPasswordService.handleFailedAttempt(userCredentials);
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
+
+    // Rechazar el login si la contraseña de la credencial activa expiró
+    PasswordExpirationHelper.assertNotExpired(userCredentials.expiredAt);
 
     // Resetear intentos fallidos
     await this.authPasswordService.resetFailedAttempts(userCredentials);
@@ -103,7 +123,7 @@ export class AuthService {
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado.');
+      throw new NotFoundException(t('auth.USER_NOT_FOUND'));
     }
 
     await this.authPasswordService.createOrUpdateEncryptedPassword(
@@ -113,7 +133,7 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Contraseña creada correctamente.',
+      message: t('auth.PASSWORD_CREATED'),
     };
   }
 
@@ -128,7 +148,7 @@ export class AuthService {
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado.');
+      throw new NotFoundException(t('auth.USER_NOT_FOUND'));
     }
 
     const userCredentials = await this.userRepository.findCredentialsByEmail(
@@ -136,9 +156,7 @@ export class AuthService {
     );
 
     if (!userCredentials) {
-      throw new NotFoundException(
-        'No se encontraron credenciales para el usuario, favor crear contraseña.',
-      );
+      throw new NotFoundException(t('auth.CREDENTIALS_NOT_FOUND'));
     }
 
     await this.authPasswordService.changeEncryptedPassword(
@@ -149,8 +167,36 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Contraseña actualizada correctamente.',
+      message: t('auth.PASSWORD_UPDATED'),
     };
+  }
+
+  /**
+   * Cambia la contraseña de un usuario cuya contraseña YA expiró.
+   *
+   * Flujo pre-login (sin sesión JWT): valida la contraseña vieja contra el hash
+   * de la credencial activa MÁS RECIENTE (aunque `expiredAt` ya pasó — la
+   * expiración bloquea el login normal, no este flujo de recuperación), aplica
+   * complejidad a la nueva y rota manteniendo el histórico. La nueva credencial
+   * queda con `expiredAt = null`, restaurando el acceso.
+   *
+   * Reutiliza íntegramente la lógica de `changePassword` (que no valida
+   * expiración), evitando duplicar reglas de negocio.
+   */
+  async changeExpiredPassword(payload: {
+    email: string;
+    encryptedOldPassword: string;
+    encryptedNewPassword: string;
+  }): Promise<{ success: boolean; message: string }> {
+    return await this.changePassword(payload);
+  }
+
+  /**
+   * Genera un nonce anti-replay de uso único para el login.
+   */
+  async generateNonce(): Promise<{ nonce: string }> {
+    const nonce = await this.nonceService.issue();
+    return { nonce };
   }
 
   /**
@@ -170,13 +216,13 @@ export class AuthService {
     );
 
     if (newPassword !== confirmPassword) {
-      throw new UnauthorizedException('Las contraseñas no coinciden.');
+      throw new UnauthorizedException(t('auth.PASSWORDS_DO_NOT_MATCH'));
     }
 
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
-      throw new NotFoundException('Usuario no encontrado.');
+      throw new NotFoundException(t('auth.USER_NOT_FOUND'));
     }
 
     const userCredentials = await this.userRepository.findCredentialsByEmail(
@@ -184,16 +230,14 @@ export class AuthService {
     );
 
     if (!userCredentials) {
-      throw new NotFoundException(
-        'No se encontraron credenciales para el usuario, favor crear contraseña.',
-      );
+      throw new NotFoundException(t('auth.CREDENTIALS_NOT_FOUND'));
     }
 
     await this.authPasswordService.createOrUpdatePassword(user.id, newPassword);
 
     return {
       success: true,
-      message: 'Contraseña actualizada correctamente.',
+      message: t('auth.PASSWORD_UPDATED'),
     };
   }
 
@@ -270,11 +314,11 @@ export class AuthService {
   private validateUserStatus(status: UserStatus): void {
     switch (status) {
       case UserStatus.BLOCKED:
-        throw new UnauthorizedException('El usuario está bloqueado.');
+        throw new UnauthorizedException(t('auth.USER_BLOCKED'));
       case UserStatus.INACTIVE:
-        throw new UnauthorizedException('El usuario no está activo.');
+        throw new UnauthorizedException(t('auth.USER_NOT_ACTIVE'));
       case UserStatus.DELETED:
-        throw new UnauthorizedException('El usuario está eliminado.');
+        throw new UnauthorizedException(t('auth.USER_DELETED'));
       case UserStatus.PENDING_VERIFICATION:
         this.logger.warn('El usuario no ha verificado su cuenta.');
         return;
@@ -296,7 +340,7 @@ export class AuthService {
       this.logger.log(
         'No se encontraron datos para los parámetros proporcionados.',
       );
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
     const isPasswordValid = this.authPasswordService.validateEncryptedPassword(
       password,
@@ -305,7 +349,7 @@ export class AuthService {
 
     if (!isPasswordValid) {
       await this.authPasswordService.handleFailedAttempt(userCredential);
-      throw new UnauthorizedException('Credenciales inválidas.');
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     return userCredential;

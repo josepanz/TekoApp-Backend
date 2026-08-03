@@ -30,11 +30,14 @@ FROM node:22-alpine AS prod
 
 RUN apk update && \
     apk add --no-cache openssl tzdata && \
-    cp /usr/share/zoneinfo/America/Asuncion /etc/localtime && \
-    echo "America/Asuncion" > /etc/timezone
+    cp /usr/share/zoneinfo/Etc/GMT+3 /etc/localtime && \
+    echo "Etc/GMT+3" > /etc/timezone
 
 ENV NODE_ENV=production
-ENV TZ=America/Asuncion
+# Offset fijo UTC-3 (Ley 7127 - Paraguay abolio el horario de verano), no la zona IANA
+# America/Asuncion (sigue cargando reglas de DST y depende del tzdata del host - ver
+# .claude/rules/datetime.md). Etc/GMT+3 usa signo invertido por convencion POSIX (GMT+3 = UTC-3).
+ENV TZ=Etc/GMT+3
 
 WORKDIR /app
 
