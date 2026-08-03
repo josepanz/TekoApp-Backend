@@ -7,6 +7,8 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { t } from '@common/i18n/i18n.helper';
+
 export interface Response<T> {
   success: boolean;
   data: T;
@@ -31,7 +33,7 @@ export class TransformInterceptor<T>
       map((data: T) => ({
         success: response.statusCode >= 200 && response.statusCode < 300,
         data,
-        message: 'Operación exitosa',
+        message: t('common.SUCCESS'),
         timestamp: new Date().toISOString(),
         path: request.url,
       })),

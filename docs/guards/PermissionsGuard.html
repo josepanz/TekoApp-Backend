@@ -177,12 +177,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(reflector: Reflector)</code>
+<code>constructor(reflector: <a href="../miscellaneous/functions.html#t" target="_self">Reflector</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="13" class="link-to-prism">src/modules/auth/guards/permissions.guard.ts:13</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="14" class="link-to-prism">src/modules/auth/guards/permissions.guard.ts:14</a></div>
                             </td>
                         </tr>
 
@@ -203,7 +203,7 @@
                                                         <td>reflector</td>
                                                   
                                                         <td>
-                                                                    <code>Reflector</code>
+                                                                        <code><a href="../miscellaneous/functions.html#t" target="_self" >Reflector</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -238,15 +238,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>canActivate(context: ExecutionContext)</code>
+<code>canActivate(context: <a href="../miscellaneous/functions.html#t" target="_self">ExecutionContext</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="16"
-                                    class="link-to-prism">src/modules/auth/guards/permissions.guard.ts:16</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="17"
+                                    class="link-to-prism">src/modules/auth/guards/permissions.guard.ts:17</a></div>
                         </td>
                     </tr>
 
@@ -269,7 +269,7 @@
                                         <tr>
                                                 <td>context</td>
                                             <td>
-                                                        <code>ExecutionContext</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ExecutionContext</a></code>
                                             </td>
 
                                             <td>
@@ -306,6 +306,7 @@
 import { Reflector } from &#x27;@nestjs/core&#x27;;
 import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 const PERMISSIONS_KEY &#x3D; &#x27;permissions&#x27;;
 
 @Injectable()
@@ -327,7 +328,7 @@ export class PermissionsGuard implements CanActivate {
       .getRequest&lt;{ user: IUserDataOnJwt }&gt;();
 
     if (!user || !user.permissions || !Array.isArray(user.permissions)) {
-      throw new ForbiddenException(&#x60;Usuario sin permisos asignados.&#x60;);
+      throw new ForbiddenException(t(&#x27;auth.NO_PERMISSIONS_ASSIGNED&#x27;));
     }
 
     const hasPermission &#x3D; requiredPermissions.some((permission) &#x3D;&gt;
@@ -336,7 +337,9 @@ export class PermissionsGuard implements CanActivate {
 
     if (!hasPermission) {
       throw new ForbiddenException(
-        &#x60;Usuario no tiene los permisos necesarios: ${requiredPermissions.toString()}.&#x60;,
+        t(&#x27;auth.MISSING_REQUIRED_PERMISSIONS&#x27;, {
+          requiredPermissions: requiredPermissions.toString(),
+        }),
       );
     }
 

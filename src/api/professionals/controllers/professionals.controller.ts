@@ -20,6 +20,7 @@ import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interf
 import { ProfessionalsService } from '../services/professionals.service';
 import {
   ProfessionalIdParamDTO,
+  ProfessionalReferenceIdParamDTO,
   GetProfessionalsListQueryDTO,
   GetNearbyProfessionalsQueryDTO,
   SearchBySkillsQueryDTO,
@@ -92,6 +93,48 @@ export class ProfessionalsController {
     @Query() query: GetTopRatedQueryDTO,
   ): Promise<ProfessionalDetailResponseDTO[]> {
     return this.professionalsService.getTopRatedProfessionals(query);
+  }
+
+  @Get('me')
+  @ApiOperation({
+    summary: 'Obtener el perfil profesional propio del usuario autenticado',
+  })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
+  @ApiResponse({
+    status: 404,
+    description: 'El usuario autenticado no tiene perfil profesional',
+  })
+  async getMyProfessionalProfile(
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise<ProfessionalDetailResponseDTO> {
+    return this.professionalsService.getMyProfessionalProfile(req.user.id);
+  }
+
+  @Get('reference/:referenceId')
+  @ApiOperation({ summary: 'Obtener un profesional por su referenceId' })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
+  @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
+  async getProfessionalByReference(
+    @Param() param: ProfessionalReferenceIdParamDTO,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    return this.professionalsService.getProfessionalByReference(
+      param.referenceId,
+    );
+  }
+
+  @Put('reference/:referenceId')
+  @ApiOperation({ summary: 'Actualizar perfil de profesional por referenceId' })
+  @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
+  async updateProfessionalByReference(
+    @Param() param: ProfessionalReferenceIdParamDTO,
+    @Body() dto: UpdateProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise<ProfessionalDetailResponseDTO> {
+    return this.professionalsService.updateProfessionalByReference(
+      param.referenceId,
+      dto,
+      req.user.id,
+    );
   }
 
   @Get(':id')

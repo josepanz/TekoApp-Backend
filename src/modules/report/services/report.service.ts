@@ -5,6 +5,7 @@ import { ExcelGenerator } from '../infrastructure/excel-generator.hint';
 import { PdfHtmlGenerator } from '../infrastructure/pdf-html-generator.hint';
 import { PdfNativeGenerator } from '../infrastructure/pdf-native-generator.hint';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class ReportService implements IReportService {
   public async generate(
@@ -23,7 +24,7 @@ export class ReportService implements IReportService {
 
       default:
         throw new BadRequestException(
-          `Formato no soportado: ${options.format as string}`,
+          t('report.UNSUPPORTED_FORMAT', { format: options.format }),
         );
     }
   }
@@ -37,7 +38,7 @@ export class ReportService implements IReportService {
     if (engine === 'html') {
       if (!options.templateHtml) {
         throw new BadRequestException(
-          'El motor HTML requiere la propiedad "templateHtml".',
+          t('report.HTML_ENGINE_REQUIRES_TEMPLATE'),
         );
       }
       return await PdfHtmlGenerator.generate(payload, options.templateHtml);
@@ -46,14 +47,14 @@ export class ReportService implements IReportService {
     if (engine === 'native') {
       if (!options.nativeDefinition) {
         throw new BadRequestException(
-          'El motor Nativo requiere la propiedad "nativeDefinition".',
+          t('report.NATIVE_ENGINE_REQUIRES_DEFINITION'),
         );
       }
       return await PdfNativeGenerator.generate(options.nativeDefinition);
     }
 
     throw new BadRequestException(
-      `Motor PDF "${engine as string}" no reconocido.`,
+      t('report.PDF_ENGINE_NOT_RECOGNIZED', { engine: engine }),
     );
   }
 }

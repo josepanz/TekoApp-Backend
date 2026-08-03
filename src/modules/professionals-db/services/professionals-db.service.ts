@@ -28,6 +28,7 @@ import {
   professionalReviewsInclude,
 } from '../types/professionals-db.type';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class ProfessionalsDbService {
   constructor(private readonly prisma: PrismaDatasource) {}
@@ -39,18 +40,21 @@ export class ProfessionalsDbService {
     const user = await this.prisma.extended.users.findUnique({
       where: { id: userId },
     });
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user) throw new NotFoundException(t('professionals.USER_NOT_FOUND'));
 
     const existing = await this.prisma.extended.professionals.findUnique({
       where: { userId },
     });
     if (existing)
-      throw new BadRequestException('El usuario ya es un profesional');
+      throw new BadRequestException(
+        t('professionals.USER_ALREADY_PROFESSIONAL'),
+      );
 
     const category = await this.prisma.extended.category.findUnique({
       where: { id: dto.categoryId },
     });
-    if (!category) throw new BadRequestException('La categoría no existe');
+    if (!category)
+      throw new BadRequestException(t('professionals.CATEGORY_DOES_NOT_EXIST'));
 
     return this.prisma.extended.professionals.create({
       data: {
@@ -146,7 +150,8 @@ export class ProfessionalsDbService {
       where: { id },
       include: professionalWithRelationsInclude,
     });
-    if (!professional) throw new NotFoundException('Profesional no encontrado');
+    if (!professional)
+      throw new NotFoundException(t('professionals.NOT_FOUND'));
     return professional;
   }
 
@@ -155,7 +160,26 @@ export class ProfessionalsDbService {
       where: { userId },
       include: professionalWithRelationsInclude,
     });
-    if (!professional) throw new NotFoundException('Profesional no encontrado');
+    if (!professional)
+      throw new NotFoundException(t('professionals.NOT_FOUND'));
+    return professional;
+  }
+
+  async findByReferenceId(
+    referenceId: string,
+  ): Promise<ProfessionalWithRelations | null> {
+    return this.prisma.extended.professionals.findUnique({
+      where: { referenceId },
+      include: professionalWithRelationsInclude,
+    });
+  }
+
+  async findProfessionalByReferenceId(
+    referenceId: string,
+  ): Promise<ProfessionalWithRelations> {
+    const professional = await this.findByReferenceId(referenceId);
+    if (!professional)
+      throw new NotFoundException(t('professionals.NOT_FOUND'));
     return professional;
   }
 

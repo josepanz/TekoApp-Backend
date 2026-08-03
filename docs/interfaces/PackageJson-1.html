@@ -207,7 +207,7 @@
                                 </tr>
                                 <tr>
                                     <td class="col-md-4">
-                                        <code>version:         <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                        <code>version:         <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 </code>
                                     </td>
                                 </tr>
@@ -215,7 +215,7 @@
 
                                     <tr>
                                         <td class="col-md-4">
-                                            <i>Type : </i>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                            <i>Type : </i>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
 
                                         </td>
                                     </tr>
@@ -231,7 +231,7 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Controller, Get, Version } from &#x27;@nestjs/common&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Controller, Get } from &#x27;@nestjs/common&#x27;;
 import { ApiTags, ApiOperation } from &#x27;@nestjs/swagger&#x27;;
 import {
   HealthCheck,
@@ -284,7 +284,6 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  @Version(&#x27;1&#x27;)
   @ApiOperation({
     summary:
       &#x27;Verifica el estado de salud global de la infraestructura de TekoApp&#x27;,
@@ -328,7 +327,9 @@ export class HealthController {
     ]);
 
     return {
-      date: toZonedTime(new Date(), &#x27;America/Asuncion&#x27;),
+      // Offset fijo UTC-3 (Ley 7127), no la zona IANA America/Asuncion (reglas de DST que
+      // Paraguay no tiene, depende del tzdata del host) - ver .claude/rules/datetime.md.
+      date: toZonedTime(new Date(), &#x27;Etc/GMT+3&#x27;),
       status: result.status,
       info: result.info,
       error: result.error,

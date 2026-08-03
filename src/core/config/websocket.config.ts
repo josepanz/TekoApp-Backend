@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { UseGuards, Logger } from '@nestjs/common';
 import { WsAuthGuard } from '../guards/ws-auth.guard';
 
+import { t } from '@common/i18n/i18n.helper';
 @WebSocketGateway({
   cors: {
     origin: process.env.ALLOWED_ORIGINS?.split(',') || [
@@ -35,7 +36,7 @@ export class WebSocketConfig
     void client.join('general');
 
     client.emit('connected', {
-      message: 'Conectado al servidor de TekoApp',
+      message: t('locations.WEBSOCKET_CONNECTED'),
       clientId: client.id,
       timestamp: new Date().toISOString(),
     });

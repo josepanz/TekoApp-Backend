@@ -46,11 +46,12 @@ export const RolesApiDocs = {
     HttpCode(200),
     ApiOperation({
       summary: 'Obtener un rol por ID',
-      description: 'Obtiene los detalles de un rol específico por su ID.',
+      description:
+        'Obtiene los detalles de un rol específico por su ID, incluyendo los permisos asignados.',
     }),
     ApiOkResponse({
       description: 'Rol obtenido exitosamente.',
-      type: ResponseDTO.RoleResponseDTO,
+      type: ResponseDTO.RoleWithPermissionsResponseDTO,
     }),
     ApiNotFoundResponse({
       description: 'Rol no encontrado.',

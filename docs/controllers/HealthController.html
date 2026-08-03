@@ -161,7 +161,6 @@
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
                                     <span class="modifier"></span>
-                                    <span class="modifier"></span>
                                     <span class="modifier">Async</span>
                                 <a href="#check" >check</a>
                             </li>
@@ -191,7 +190,6 @@
                             <span class="modifier"></span>
                             <span class="modifier"></span>
                             <span class="modifier"></span>
-                            <span class="modifier"></span>
                             <span class="modifier">Async</span>
                         <span ><b>check</b></span>
                         <a href="#check"><span class="icon ion-ios-link"></span></a>
@@ -209,14 +207,14 @@
                 <td class="col-md-4">
                     <b>Decorators : </b>
                     <br />
-                    <code>@Get()<br />@HealthCheck()<br />@Version(&#x27;1&#x27;)<br />@ApiOperation({summary: &#x27;Verifica el estado de salud global de la infraestructura de TekoApp&#x27;})<br /></code>
+                    <code>@Get()<br />@HealthCheck()<br />@ApiOperation({summary: &#x27;Verifica el estado de salud global de la infraestructura de TekoApp&#x27;})<br /></code>
                 </td>
             </tr>
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="60"
-                                    class="link-to-prism">src/modules/health/health.controller.ts:60</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="59"
+                                    class="link-to-prism">src/modules/health/health.controller.ts:59</a></div>
                         </td>
                     </tr>
 
@@ -237,7 +235,7 @@
 
     <div class="tab-pane fade  tab-source-code" id="source">
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">// api/health/health.controller.ts
-import { Controller, Get, Version } from &#x27;@nestjs/common&#x27;;
+import { Controller, Get } from &#x27;@nestjs/common&#x27;;
 import { ApiTags, ApiOperation } from &#x27;@nestjs/swagger&#x27;;
 import {
   HealthCheck,
@@ -290,7 +288,6 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  @Version(&#x27;1&#x27;)
   @ApiOperation({
     summary:
       &#x27;Verifica el estado de salud global de la infraestructura de TekoApp&#x27;,
@@ -334,7 +331,9 @@ export class HealthController {
     ]);
 
     return {
-      date: toZonedTime(new Date(), &#x27;America/Asuncion&#x27;),
+      // Offset fijo UTC-3 (Ley 7127), no la zona IANA America/Asuncion (reglas de DST que
+      // Paraguay no tiene, depende del tzdata del host) - ver .claude/rules/datetime.md.
+      date: toZonedTime(new Date(), &#x27;Etc/GMT+3&#x27;),
       status: result.status,
       info: result.info,
       error: result.error,

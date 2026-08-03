@@ -31,6 +31,19 @@ export class UserResponseDTO {
   @IsOptional()
   phoneNumber?: string | null;
 
+  @ApiProperty({
+    example:
+      'https://tekoapp-uploads.s3.amazonaws.com/avatars/abc123.jpg?X-Amz-...',
+    required: false,
+    nullable: true,
+    description:
+      'URL presignada de la foto de perfil, resuelta fresca en el momento de la respuesta (expira ' +
+      'en 900s) — nunca almacenar/cachear este valor, siempre volver a pedirlo.',
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string | null;
+
   @ApiProperty({ example: true })
   isEmployee!: boolean;
 

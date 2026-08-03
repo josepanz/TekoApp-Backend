@@ -1,0 +1,12 @@
+{
+  "ALREADY_RATED": "Ya has calificado este servicio",
+  "CANNOT_DELETE": "No se puede eliminar esta calificación",
+  "CANNOT_EDIT_AFTER_24H": "No se puede editar la calificación después de 24 horas",
+  "CANNOT_REPORT_OWN": "No puedes reportar tu propia calificación",
+  "CLIENT_NOT_FOUND": "Cliente no encontrado",
+  "NOT_FOUND": "Calificación no encontrada",
+  "ONLY_PROFESSIONAL_CAN_RATE_CLIENT": "Solo un profesional puede calificar a un cliente",
+  "SERVICE_NOT_FOUND": "Servicio no encontrado",
+  "UNAUTHORIZED_DELETE": "No puedes eliminar esta calificación",
+  "UNAUTHORIZED_EDIT": "No puedes editar esta calificación"
+}

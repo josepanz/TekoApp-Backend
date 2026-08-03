@@ -178,6 +178,16 @@
                                 <a href="#getEditContext" >getEditContext</a>
                             </li>
                             <li>
+                                    <span class="modifier">Private</span>
+                                    <span class="modifier">Async</span>
+                                <a href="#resolveAvatarUrl" >resolveAvatarUrl</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Private</span>
+                                    <span class="modifier">Async</span>
+                                <a href="#resolveAvatarUrls" >resolveAvatarUrls</a>
+                            </li>
+                            <li>
                                     <span class="modifier">Async</span>
                                 <a href="#unblock" >unblock</a>
                             </li>
@@ -211,12 +221,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(usersService: <a href="../injectables/UsersDBService.html" target="_self">UsersDBService</a>, userRolesDBService: <a href="../injectables/UserRolesDBService.html" target="_self">UserRolesDBService</a>)</code>
+<code>constructor(usersService: <a href="../injectables/UsersDBService.html" target="_self">UsersDBService</a>, userRolesDBService: <a href="../injectables/UserRolesDBService.html" target="_self">UserRolesDBService</a>, uploadsService: <a href="../injectables/UploadsService.html" target="_self">UploadsService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="25" class="link-to-prism">src/api/users/services/users-api.service.ts:25</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="26" class="link-to-prism">src/api/users/services/users-api.service.ts:26</a></div>
                             </td>
                         </tr>
 
@@ -257,6 +267,18 @@
                                                     </td>
                                                     
                                                 </tr>
+                                                <tr>
+                                                        <td>uploadsService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/UploadsService.html" target="_self" >UploadsService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
                                         </tbody>
                                     </table>
                             </div>
@@ -286,15 +308,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>block(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/BlockUserRequestDTO.html" target="_self">BlockUserRequestDTO</a>, updatedBy: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>block(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/BlockUserRequestDTO.html" target="_self">BlockUserRequestDTO</a>, updatedBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="210"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:210</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="231"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:231</a></div>
                         </td>
                     </tr>
 
@@ -341,7 +363,7 @@
                                         <tr>
                                                 <td>updatedBy</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -379,15 +401,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>deleteByReference(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, deletedBy: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>deleteByReference(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, deletedBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="202"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:202</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="223"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:223</a></div>
                         </td>
                     </tr>
 
@@ -410,7 +432,7 @@
                                         <tr>
                                                 <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -422,7 +444,7 @@
                                         <tr>
                                                 <td>deletedBy</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -460,15 +482,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findAll(dto: <a href="../classes/ListUsersRequestDTO.html" target="_self">ListUsersRequestDTO</a>, merchantCtx: <a href="../interfaces/IMerchantContext.html" target="_self">IMerchantContext</a>, user: <a href="../interfaces/IUserDataOnJwt.html" target="_self">IUserDataOnJwt</a>)</code>
+                    <code>findAll(dto: <a href="../classes/ListUsersRequestDTO.html" target="_self">ListUsersRequestDTO</a>, user: <a href="../interfaces/IUserDataOnJwt.html" target="_self">IUserDataOnJwt</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="31"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:31</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="54"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:54</a></div>
                         </td>
                     </tr>
 
@@ -492,18 +514,6 @@
                                                 <td>dto</td>
                                             <td>
                                                             <code><a href="../classes/ListUsersRequestDTO.html" target="_self" >ListUsersRequestDTO</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>merchantCtx</td>
-                                            <td>
-                                                            <code><a href="../interfaces/IMerchantContext.html" target="_self" >IMerchantContext</a></code>
                                             </td>
 
                                             <td>
@@ -560,8 +570,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="71"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:71</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="90"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:90</a></div>
                         </td>
                     </tr>
 
@@ -622,15 +632,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findOneByReference(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findOneByReference(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="77"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:77</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="96"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:96</a></div>
                         </td>
                     </tr>
 
@@ -653,7 +663,7 @@
                                         <tr>
                                                 <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -691,15 +701,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getEditContext(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getEditContext(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="86"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:86</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:105</a></div>
                         </td>
                     </tr>
 
@@ -722,7 +732,7 @@
                                         <tr>
                                                 <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -749,6 +759,166 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="resolveAvatarUrl"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>resolveAvatarUrl</b></span>
+                        <a href="#resolveAvatarUrl"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>resolveAvatarUrl(dto: T)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="38"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:38</a></div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <b>Type parameters :</b>
+                            <ul class="type-parameters">
+                                    <li>T</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p><code>UserHelper.mapUserToResponse()</code> deja en <code>avatarUrl</code> la key cruda de S3 (no puede resolver la
+URL presignada, es estático/sync) — acá se resuelve la URL real antes de devolver la
+respuesta al cliente. Nunca se persiste esta URL resuelta, se recalcula en cada request.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                        <code>T</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;T&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="resolveAvatarUrls"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                            <span class="modifier">Async</span>
+                        <span ><b>resolveAvatarUrls</b></span>
+                        <a href="#resolveAvatarUrls"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>resolveAvatarUrls(dtos: T[])</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="48"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:48</a></div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="col-md-4">
+                            <b>Type parameters :</b>
+                            <ul class="type-parameters">
+                                    <li>T</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dtos</td>
+                                            <td>
+                                                        <code>T[]</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;T[]&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="unblock"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -760,15 +930,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>unblock(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UnblockUserRequestDTO.html" target="_self">UnblockUserRequestDTO</a>, updatedBy: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>unblock(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UnblockUserRequestDTO.html" target="_self">UnblockUserRequestDTO</a>, updatedBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="227"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:227</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="248"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:248</a></div>
                         </td>
                     </tr>
 
@@ -815,7 +985,7 @@
                                         <tr>
                                                 <td>updatedBy</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -853,15 +1023,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UpdateUserRequestDTO.html" target="_self">UpdateUserRequestDTO</a>, updatedBy: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>update(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, dto: <a href="../classes/UpdateUserRequestDTO.html" target="_self">UpdateUserRequestDTO</a>, updatedBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="152"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:152</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="171"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:171</a></div>
                         </td>
                     </tr>
 
@@ -908,7 +1078,7 @@
                                         <tr>
                                                 <td>updatedBy</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -946,15 +1116,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateByReference(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdateUserRequestDTO.html" target="_self">UpdateUserRequestDTO</a>, updatedBy: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>updateByReference(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, dto: <a href="../classes/UpdateUserRequestDTO.html" target="_self">UpdateUserRequestDTO</a>, updatedBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="176"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:176</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="196"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:196</a></div>
                         </td>
                     </tr>
 
@@ -977,7 +1147,7 @@
                                         <tr>
                                                 <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1001,7 +1171,7 @@
                                         <tr>
                                                 <td>updatedBy</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1039,15 +1209,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateEditContext(referenceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, dto: <a href="../classes/UpdateEditContextRequestDTO.html" target="_self">UpdateEditContextRequestDTO</a>, operatorUser: literal type)</code>
+                    <code>updateEditContext(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, dto: <a href="../classes/UpdateEditContextRequestDTO.html" target="_self">UpdateEditContextRequestDTO</a>, operatorUser: <a href="../miscellaneous/functions.html#t" target="_self">literal type</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="136"
-                                    class="link-to-prism">src/api/users/services/users-api.service.ts:136</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="155"
+                                    class="link-to-prism">src/api/users/services/users-api.service.ts:155</a></div>
                         </td>
                     </tr>
 
@@ -1070,7 +1240,7 @@
                                         <tr>
                                                 <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1094,7 +1264,7 @@
                                         <tr>
                                                 <td>operatorUser</td>
                                             <td>
-                                                        <code>literal type</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >literal type</a></code>
                                             </td>
 
                                             <td>
@@ -1141,21 +1311,43 @@ import {
   UpdateEditContextResponseDTO,
 } from &#x27;@api/users/dtos/response/edit-context.response.dto&#x27;;
 import { UsersDBService } from &#x27;@modules/users-db/services/users-db.service&#x27;;
-import { IMerchantContext } from &#x27;@common/interfaces/merchant-context.interface&#x27;;
 import { UserRolesDBService } from &#x27;@modules/users-db/services/user-roles-db.service&#x27;;
+import { UploadsService } from &#x27;@api/uploads/services/uploads.service&#x27;;
 import { UserHelper } from &#x27;../helpers/user.helper&#x27;;
 import { IUserDataOnJwt } from &#x27;@modules/auth/interfaces/user-data-on-jwt.interface&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
 @Injectable()
 export class UsersApiService {
   constructor(
     private readonly usersService: UsersDBService,
     private readonly userRolesDBService: UserRolesDBService,
+    private readonly uploadsService: UploadsService,
   ) {}
+
+  /**
+   * &#x60;UserHelper.mapUserToResponse()&#x60; deja en &#x60;avatarUrl&#x60; la key cruda de S3 (no puede resolver la
+   * URL presignada, es estático/sync) — acá se resuelve la URL real antes de devolver la
+   * respuesta al cliente. Nunca se persiste esta URL resuelta, se recalcula en cada request.
+   */
+  private async resolveAvatarUrl&lt;T extends { avatarUrl?: string | null }&gt;(
+    dto: T,
+  ): Promise&lt;T&gt; {
+    if (!dto.avatarUrl) return dto;
+    return {
+      ...dto,
+      avatarUrl: await this.uploadsService.getPresignedUrl(dto.avatarUrl),
+    };
+  }
+
+  private async resolveAvatarUrls&lt;T extends { avatarUrl?: string | null }&gt;(
+    dtos: T[],
+  ): Promise&lt;T[]&gt; {
+    return Promise.all(dtos.map((dto) &#x3D;&gt; this.resolveAvatarUrl(dto)));
+  }
 
   async findAll(
     dto: ListUsersRequestDTO,
-    merchantCtx: IMerchantContext,
     user: IUserDataOnJwt,
   ): Promise&lt;UsersListResponseDTO&gt; {
     const page &#x3D; Number(dto.page ?? 1);
@@ -1174,16 +1366,13 @@ export class UsersApiService {
       email: dto.email,
       documentNumber: dto.documentNumber,
       status: dto.status,
-      merchantCode: merchantCtx.merchantCode,
-      currentLevel: merchantCtx.level,
-      level: merchantCtx.level,
-      groupingId: merchantCtx.groupingId,
-      branchCode: merchantCtx.branchCode,
       operatorReferenceId: user.referenceId,
     });
 
     return {
-      data: data.map((user) &#x3D;&gt; UserHelper.mapUserToResponse(user)),
+      data: await this.resolveAvatarUrls(
+        data.map((user) &#x3D;&gt; UserHelper.mapUserToResponse(user)),
+      ),
       pagination: {
         total,
         page,
@@ -1196,7 +1385,7 @@ export class UsersApiService {
   async findOne(id: number): Promise&lt;UserDetailResponseDTO&gt; {
     const user &#x3D; await this.usersService.findUserByIdWithDetail(id);
 
-    return UserHelper.mapUserToDetailResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToDetailResponse(user));
   }
 
   async findOneByReference(
@@ -1205,7 +1394,7 @@ export class UsersApiService {
     const user &#x3D;
       await this.usersService.findUserByReferenceIdWithDetail(referenceId);
 
-    return UserHelper.mapUserToDetailResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToDetailResponse(user));
   }
 
   async getEditContext(
@@ -1271,7 +1460,7 @@ export class UsersApiService {
       dto,
       operatorUser.email,
     );
-    return { message: &#x27;Usuario actualizado correctamente&#x27; };
+    return { message: t(&#x27;users.UPDATED&#x27;) };
   }
 
   async update(
@@ -1287,6 +1476,7 @@ export class UsersApiService {
         lastName: dto.lastName,
         documentNumber: dto.documentNumber,
         phoneNumber: dto.phoneNumber,
+        avatarKey: dto.avatarKey,
         isEmployee: dto.isEmployee,
         isLdap: dto.isLdap,
         status: dto.status,
@@ -1295,7 +1485,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(user));
   }
 
   async updateByReference(
@@ -1313,6 +1503,7 @@ export class UsersApiService {
         lastName: dto.lastName,
         documentNumber: dto.documentNumber,
         phoneNumber: dto.phoneNumber,
+        avatarKey: dto.avatarKey,
         isEmployee: dto.isEmployee,
         isLdap: dto.isLdap,
         status: dto.status,
@@ -1321,7 +1512,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(updated);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(updated));
   }
 
   async deleteByReference(
@@ -1346,7 +1537,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(user));
   }
 
   async unblock(
@@ -1363,7 +1554,7 @@ export class UsersApiService {
       updatedBy,
     );
 
-    return UserHelper.mapUserToResponse(user);
+    return this.resolveAvatarUrl(UserHelper.mapUserToResponse(user));
   }
 }
 </code></pre>

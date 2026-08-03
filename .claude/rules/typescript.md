@@ -97,12 +97,10 @@ src/modules/<domain>-db/
         },
       );
 
-    if (rawOrders.length === 0) {
-      throw new NotFoundException(
-        'No se encontraron órdenes de venta para los filtros aplicados.',
-      );
-    }
-
+    // Un listado/búsqueda sin resultados es un 200 con data:[], nunca un 404 — un cliente HTTP
+    // no debería tratar "sin resultados" como error (ver "Lecciones de la auditoría comparativa
+    // con portal-comercios-backend" más abajo; auditado 2026-07-22, TekoApp-Backend no repite
+    // este anti-patrón en ningún endpoint real hoy).
     return {
       data: rawOrders.map((order) =>
         CustomerDBHelper.mapToCustomersResponse(order),
@@ -294,3 +292,99 @@ src/modules/<domain>-db/
   }
   ```
 - SIEMPRE solucionar hasta el más minimo mensaje debe quedar clean 0 WARNINGS y 0 ERRORES tanto de test, format o lint.
+
+## Lecciones de integración real (encontradas probando contra la DB real, no solo mocks de test)
+
+- **Campos `Decimal` de Prisma serializan como su objeto interno crudo `{s,e,d}`** (no como
+  number) al pasar por `ClassSerializerInterceptor` cuando el controller devuelve un objeto crudo
+  de Prisma `as unknown as DTO` (el patrón normal de este proyecto, sin mapeo field-a-field). Ya
+  está resuelto de forma centralizada en `core/database/services/prisma.service.ts` (el `$extends`
+  normaliza cualquier valor Decimal-like a `number` en el resultado crudo de cada query) — no hace
+  falta nada extra al agregar un modelo/campo `Decimal` nuevo, es universal. OJO: la detección es
+  por duck-typing (`toNumber` + `s`/`e`/`d`), nunca `instanceof Prisma.Decimal` — ese instanceof
+  falla en silencio (el cliente generado empaqueta su propia copia de decimal.js) y el fallback
+  de "objeto genérico" reconstruye exactamente el mismo `{s,e,d}` roto si no se detecta bien.
+- Los tests unitarios (mocks de Prisma) NUNCA ejercitan el `$extends` real — si se toca esa
+  lógica, probar contra una DB real, no solo `pnpm test`.
+- Antes de agregar un campo obligatorio nuevo a un DTO de response usado por un mapper explícito
+  (no solo cast crudo), revisar TODOS los call sites del mapper — `roles-permission` reusaba
+  `permissionToResponse()` para Roles en 3 de 4 métodos por error (`roleToResponse()` existía y
+  nunca se llamaba); el compilador lo detectó recién al agregar `referenceId` como campo requerido.
+
+## Lecciones de la limpieza de schema + migración init unificada (2026-07-21/22)
+
+- **Nunca confiar en un hallazgo de auditoría sobre comportamiento de Postgres sin verificarlo
+  contra una DB real.** Una auditoría previa reportó que el trigger genérico de auditoría
+  "rompía toda operación DELETE" por referenciar `NEW` sin asignar — sonaba plausible pero era
+  falso: un trigger combinado `BEFORE INSERT OR UPDATE OR DELETE` en Postgres SÍ provee `NEW`/`OLD`
+  como registros válidos (con valor NULL para el que no aplica) para el patrón
+  `COALESCE(NEW.x, OLD.x)` — es el patrón oficial de la wiki de Postgres para triggers de
+  auditoría genéricos. Se verificó creando una tabla scratch con el trigger real y ejecutando
+  INSERT/UPDATE/DELETE antes de tocar una sola línea de la función — evitó reescribir algo que
+  no estaba roto. Los bugs reales SÍ confirmados empíricamente: `aud_version` no incrementaba en
+  DELETE, tablas con PK natural sin columna `id` (ej. `Currency`) rompen el trigger genérico
+  (`record "new" has no field "id"`), y tablas sin columna `created_by` (ej. `Promotion`, que solo
+  tenía `createdById` como FK) rompen igual.
+- **La función de trigger `fn_audit_generic_trigger()` NUNCA debe pisar `created_at`/
+  `last_changed_at` si el caller ya los seteó explícitamente** (ej. seeds, backfills, migraciones
+  de datos históricos). Patrón correcto: `IF NEW.created_at IS NULL THEN ... := CURRENT_TIMESTAMP`
+  en INSERT (nunca incondicional), y `IF NEW.last_changed_at IS NOT DISTINCT FROM OLD.last_changed_at
+  THEN ... := CURRENT_TIMESTAMP` en UPDATE (compara contra OLD, no contra NULL, porque Postgres ya
+  trae el valor previo en NEW para columnas no tocadas por el UPDATE) — esto preserva el
+  auto-stamping normal cuando el caller no toca el campo, y respeta un valor explícito cuando sí lo
+  toca. Mismo patrón ya existente para `created_by`/`last_changed_by`, ahora extendido a las fechas.
+- **El pepper de firma del audit trigger (`v_secret_key`) nunca debe estar hardcodeado en el SQL
+  de la migración** (quedaba en git en texto plano) — se lee de una GUC de sesión
+  (`current_setting('app.audit_secret_pepper', true)`) que setea `PrismaDatasource#extended` vía
+  `set_config` (mismo mecanismo ya usado para `app.current_user_id`/`app.client_ip`), con el valor
+  real viniendo de `APP_CONFIG.database.auditSecretPepper` (env var `AUDIT_SECRET_PEPPER`,
+  validada en `config-schema.ts`). El fallback hardcodeado solo cubre conexiones fuera de la app
+  (psql manual) y está marcado explícitamente como `CHANGE_ME`.
+- **La asociación trigger↔tabla es una función SQL reusable e idempotente**
+  (`fn_attach_audit_triggers()`), no un `DO $$ ... $$` de una sola vez — requiere que la tabla
+  tenga `id` + `created_by` + `change_signature` (no solo `change_signature`) para calificar, lo
+  que excluye automáticamente catálogos con PK natural (`Currency`, PK=`alpha_code`) sin necesitar
+  una excepción manual por nombre de tabla. Volver a invocar `SELECT fn_attach_audit_triggers();`
+  después de agregar una tabla nueva que necesite auditoría — Prisma no tiene hook post-migración
+  para SQL crudo.
+- **Al eliminar un campo "muerto" de `schema.prisma`, grepear TODO el repo (`src/`, no solo el
+  código de producción) antes de confirmar que está muerto** — `access_level`/`legacyUserId`
+  aparecían en 3 sitios de escritura reales (`users-db.service.ts`, `onboarding.service.ts`,
+  `seed.ts`) y en ~8 archivos `.spec.ts` como parte de objetos mock tipados `Users` (rompen con
+  "excess property" al remover el campo del tipo generado). El build/lint pasando no detecta specs
+  con mocks NO usados directamente como el tipo (ver el caso de `seed.ts`, que no corre en
+  build/test normal — solo lo detectó `pnpm run seed`).
+
+## Lecciones de la auditoría comparativa con portal-comercios-backend (2026-07-21)
+
+- **Transiciones de estado (`status`) SIEMPRE vía `updateMany({ where: { id, status: { in:
+  [ESTADOS_VÁLIDOS] } }, data: {...} })` + chequear `count === 0` → `ConflictException`** — nunca
+  `findUnique` + validar en código + `update()` plano incondicional (patrón TOCTOU: dos requests
+  concurrentes pueden pasar ambas la validación inicial antes de que la primera escriba). Gap real
+  confirmado hoy en `services.service.ts` (`acceptService`/`startService`/`completeService`/
+  `cancelService`/`respondToServiceRequest`), `payments.service.ts` (`cancelPayment`/
+  `refundPayment` — riesgo de doble reembolso si corre en paralelo con el webhook) y
+  `promotions.service.ts` (`applyPromotion`/`validatePromotion` — `maxUsage` puede excederse con
+  redenciones concurrentes). Retrofit pendiente, priorizar `payments.service.ts` primero (dinero
+  real en juego) — ver memoria de proyecto para el backlog completo.
+- **Nunca lanzar `NotFoundException` cuando un endpoint de listado/búsqueda da 0 resultados** —
+  responder `200` con `data: []`. Un cliente HTTP no debería tratar "sin resultados" como error.
+  Verificado 2026-07-22: el anti-patrón NO existe en ningún endpoint real de este proyecto hoy —
+  solo estaba en el ejemplo de `PrismaPaginationUtil` de este archivo (ya corregido arriba). Se
+  audita todo `src/api/**/services/*.ts` y se confirmó que cada `NotFoundException` es una
+  búsqueda legítima de una sola entidad por id/código/slug, nunca un listado vacío.
+- **En `config-schema.ts`, usar siempre `Joi.valid(...)` para restringir un campo a un enum de
+  valores — nunca `Joi.allow(...)`**, que solo AGREGA valores permitidos sin restringir nada sobre
+  un tipo ya válido (`Joi.string().allow('a','b')` deja pasar cualquier string). Bug real
+  encontrado y corregido en `NODE_ENV`/`SEQ_ENABLED` (además, `.required()` + `.default()` juntos
+  en el mismo campo es contradictorio — usar uno u otro).
+- **Toda tabla de entidad de negocio nueva debe evaluarse para el patrón `id` secuencial interno
+  (`Int`/`BigInt autoincrement`, nunca expuesto) + `referenceId` público separado** — no usar UUID
+  como PK primaria salvo justificación explícita. `Services`/`ServiceRequests`/`PaymentMethodEntity`/
+  `Payments`/`PaymentTransaction`/`Rating` hoy usan UUID como PK (`@default(uuid())` client-side, no
+  `dbgenerated`), decisión ya tomada y con FKs en cascada — migrar es un refactor grande, no hacerlo
+  sin decidirlo explícitamente primero (ver memoria de proyecto).
+- **Checklist de cierre obligatorio, no solo una línea suelta**: antes de reportar cualquier tarea
+  como terminada, correr `pnpm run format` (si existe) y `pnpm run lint` (con `--fix`), y
+  **prohibido reportar "completado" si el lint queda en rojo** — no alcanza con la intención, hay
+  que verificar el resultado del comando.

@@ -1,0 +1,13 @@
+{
+  "CANNOT_BE_ITS_OWN_PARENT": "A category cannot be its own parent",
+  "CANNOT_DELETE_WITH_ACTIVE_PROFESSIONALS": "A category with active associated professionals cannot be deleted",
+  "CANNOT_DELETE_WITH_CHILDREN": "A category that has child subcategories cannot be removed",
+  "CANNOT_DELETE_WITH_LINKED_SERVICES": "A category with linked services cannot be deleted",
+  "CANNOT_NEST_MULTIPLE_SUBLEVELS": "Subcategories cannot be nested across multiple sublevels",
+  "NAME_ALREADY_EXISTS": "A category with this name already exists",
+  "NAME_ALREADY_TAKEN": "Another category with this name already exists",
+  "NOT_FOUND": "Category not found",
+  "NOT_FOUND_BY_SLUG": "No category found for the provided slug",
+  "PARENT_NOT_FOUND": "Parent category not found",
+  "THIRD_LEVEL_NOT_ALLOWED": "Third level subcategories cannot be created"
+}

@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
+import { t } from '@common/i18n/i18n.helper';
 export class ProcessBatchManager {
   async executeWithRetry<T>(
     operation: () => Promise<T>,
@@ -28,9 +29,7 @@ export class ProcessBatchManager {
       }
     }
 
-    throw new ServiceUnavailableException(
-      'Storage service is temporarily unavailable',
-    );
+    throw new ServiceUnavailableException(t('common.STORAGE_UNAVAILABLE'));
   }
 
   private shouldRetry(error: unknown): boolean {
@@ -80,7 +79,7 @@ export class ProcessBatchManager {
     const retryAttempts: number = value ?? 3;
 
     if (!Number.isInteger(retryAttempts) || retryAttempts < 0) {
-      throw new BadRequestException('retryAttempts must be 0 or greater');
+      throw new BadRequestException(t('common.RETRY_ATTEMPTS_INVALID'));
     }
 
     return retryAttempts;
@@ -90,7 +89,7 @@ export class ProcessBatchManager {
     const retryDelayMs: number = value ?? 1000;
 
     if (!Number.isInteger(retryDelayMs) || retryDelayMs < 0) {
-      throw new BadRequestException('retryDelayMs must be 0 or greater');
+      throw new BadRequestException(t('common.RETRY_DELAY_INVALID'));
     }
 
     return retryDelayMs;

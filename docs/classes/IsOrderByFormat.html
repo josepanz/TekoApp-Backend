@@ -147,7 +147,7 @@
                 <h3>Implements</h3>
             </p>
             <p class="comment">
-                        <code>ValidatorConstraintInterface</code>
+                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ValidatorConstraintInterface</a></code>
             </p>
 
 
@@ -209,8 +209,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="16"
-                                    class="link-to-prism">src/common/validators/is-order-by-format.validator.ts:16</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="18"
+                                    class="link-to-prism">src/common/validators/is-order-by-format.validator.ts:18</a></div>
                         </td>
                     </tr>
 
@@ -219,7 +219,7 @@
                 <td class="col-md-4">
 
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >any</a></code>
 
                         </div>
                 </td>
@@ -239,15 +239,15 @@
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>validate(value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+<code>validate(value: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="10"
-                                    class="link-to-prism">src/common/validators/is-order-by-format.validator.ts:10</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="12"
+                                    class="link-to-prism">src/common/validators/is-order-by-format.validator.ts:12</a></div>
                         </td>
                     </tr>
 
@@ -270,7 +270,7 @@
                                         <tr>
                                                 <td>value</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -308,6 +308,8 @@
   ValidatorConstraintInterface,
 } from &#x27;class-validator&#x27;;
 
+import { t } from &#x27;@common/i18n/i18n.helper&#x27;;
+
 export type SortDirection &#x3D; &#x27;desc&#x27; | &#x27;asc&#x27;;
 
 @ValidatorConstraint({ name: &#x27;isOrderByFormat&#x27;, async: false })
@@ -319,7 +321,7 @@ export class IsOrderByFormat implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return &#x60;orderBy must be in the format &#x27;field:asc&#x27; or &#x27;field:desc&#x27;&#x60;;
+    return t(&#x27;validation.ORDER_BY_FORMAT&#x27;);
   }
 }
 </code></pre>

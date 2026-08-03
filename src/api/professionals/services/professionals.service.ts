@@ -22,6 +22,7 @@ import {
   ProfessionalStatsResponseDTO,
 } from '../dtos/response';
 
+import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class ProfessionalsService {
   constructor(private readonly professionalsDb: ProfessionalsDbService) {}
@@ -75,6 +76,21 @@ export class ProfessionalsService {
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
+  async getMyProfessionalProfile(
+    userId: number,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const result = await this.professionalsDb.findByUserId(userId);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  async getProfessionalByReference(
+    referenceId: string,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const result =
+      await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
   async updateProfessional(
     id: number,
     dto: UpdateProfessionalRequestDTO,
@@ -82,11 +98,23 @@ export class ProfessionalsService {
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     if (professional.userId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este profesional',
-      );
+      throw new ForbiddenException(t('professionals.UNAUTHORIZED_UPDATE'));
     }
     const result = await this.professionalsDb.update(id, dto);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  async updateProfessionalByReference(
+    referenceId: string,
+    dto: UpdateProfessionalRequestDTO,
+    userId: number,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const professional =
+      await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    if (professional.userId !== userId) {
+      throw new ForbiddenException(t('professionals.UNAUTHORIZED_UPDATE'));
+    }
+    const result = await this.professionalsDb.update(professional.id, dto);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -97,9 +125,7 @@ export class ProfessionalsService {
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     if (professional.userId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este profesional',
-      );
+      throw new ForbiddenException(t('professionals.UNAUTHORIZED_UPDATE'));
     }
     const result = await this.professionalsDb.update(id, { isAvailable });
     return result as unknown as ProfessionalDetailResponseDTO;
@@ -112,9 +138,7 @@ export class ProfessionalsService {
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     if (professional.userId !== userId) {
-      throw new ForbiddenException(
-        'No tienes permisos para modificar este profesional',
-      );
+      throw new ForbiddenException(t('professionals.UNAUTHORIZED_UPDATE'));
     }
     const result = await this.professionalsDb.update(id, {
       currentLatitude: dto.latitude,

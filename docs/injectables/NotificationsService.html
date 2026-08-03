@@ -194,12 +194,34 @@
                                 <a href="#getUnreadCount" >getUnreadCount</a>
                             </li>
                             <li>
+                                <a href="#getVapidPublicKey" >getVapidPublicKey</a>
+                            </li>
+                            <li>
                                     <span class="modifier">Async</span>
                                 <a href="#markAllAsRead" >markAllAsRead</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#markAsRead" >markAsRead</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#registerFcmToken" >registerFcmToken</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#registerPushSubscription" >registerPushSubscription</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#removeFcmToken" >removeFcmToken</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#removePushSubscription" >removePushSubscription</a>
+                            </li>
+                            <li>
+                                <a href="#streamForUser" >streamForUser</a>
                             </li>
                         </ul>
                     </td>
@@ -219,12 +241,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(dbService: <a href="../injectables/NotificationsDbService.html" target="_self">NotificationsDbService</a>, queue: Queue)</code>
+<code>constructor(dbService: <a href="../injectables/NotificationsDbService.html" target="_self">NotificationsDbService</a>, pushSubscriptionsDb: <a href="../injectables/PushSubscriptionsDbService.html" target="_self">PushSubscriptionsDbService</a>, fcmTokensDb: <a href="../injectables/FcmTokensDbService.html" target="_self">FcmTokensDbService</a>, webPushProvider: <a href="../injectables/WebPushProviderService.html" target="_self">WebPushProviderService</a>, sseService: <a href="../injectables/NotificationsSseService.html" target="_self">NotificationsSseService</a>, queue: Queue)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/api/notifications/services/notifications.service.ts:12</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/api/notifications/services/notifications.service.ts:19</a></div>
                             </td>
                         </tr>
 
@@ -246,6 +268,54 @@
                                                   
                                                         <td>
                                                                         <code><a href="../injectables/NotificationsDbService.html" target="_self" >NotificationsDbService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>pushSubscriptionsDb</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/PushSubscriptionsDbService.html" target="_self" >PushSubscriptionsDbService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>fcmTokensDb</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/FcmTokensDbService.html" target="_self" >FcmTokensDbService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>webPushProvider</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/WebPushProviderService.html" target="_self" >WebPushProviderService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>sseService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/NotificationsSseService.html" target="_self" >NotificationsSseService</a></code>
                                                         </td>
                                                   
                                                     <td>
@@ -294,15 +364,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>create(dto: <a href="../classes/CreateNotificationRequestDTO.html" target="_self">CreateNotificationRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>create(dto: <a href="../classes/CreateNotificationRequestDTO.html" target="_self">CreateNotificationRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="19"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:19</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="30"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:30</a></div>
                         </td>
                     </tr>
 
@@ -337,7 +407,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -382,8 +452,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="73"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:73</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="87"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:87</a></div>
                         </td>
                     </tr>
 
@@ -444,15 +514,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>delete(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>delete(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="69"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:69</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="83"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:83</a></div>
                         </td>
                     </tr>
 
@@ -475,7 +545,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -487,7 +557,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -525,15 +595,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findAll(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, offset: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>findAll(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, limit: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, offset: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="39"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:39</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="53"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:53</a></div>
                         </td>
                     </tr>
 
@@ -556,7 +626,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -618,15 +688,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findUnread(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findUnread(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="47"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:47</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="61"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:61</a></div>
                         </td>
                     </tr>
 
@@ -649,7 +719,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -687,76 +757,7 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>getUnreadCount(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="51"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:51</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>userId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="markAllAsRead"></a>
-                    <span class="name">
-                            <span class="modifier">Async</span>
-                        <span ><b>markAllAsRead</b></span>
-                        <a href="#markAllAsRead"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-                        <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>markAllAsRead(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>getUnreadCount(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
@@ -787,7 +788,113 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="getVapidPublicKey"></a>
+                    <span class="name">
+                        <span ><b>getVapidPublicKey</b></span>
+                        <a href="#getVapidPublicKey"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>getVapidPublicKey()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="118"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:118</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="markAllAsRead"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>markAllAsRead</b></span>
+                        <a href="#markAllAsRead"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>markAllAsRead(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="79"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:79</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -825,15 +932,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>markAsRead(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>markAsRead(id: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="55"
-                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:55</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="69"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:69</a></div>
                         </td>
                     </tr>
 
@@ -856,7 +963,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -868,7 +975,7 @@
                                         <tr>
                                                 <td>userId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -882,6 +989,421 @@
                             </div>
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="../classes/NotificationDocument.html" target="_self" >Promise&lt;NotificationDocument | null&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="registerFcmToken"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>registerFcmToken</b></span>
+                        <a href="#registerFcmToken"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>registerFcmToken(dto: <a href="../classes/CreateFcmTokenRequestDTO.html" target="_self">CreateFcmTokenRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, createdBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="146"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:146</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreateFcmTokenRequestDTO.html" target="_self" >CreateFcmTokenRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>createdBy</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;FcmTokens&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="registerPushSubscription"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>registerPushSubscription</b></span>
+                        <a href="#registerPushSubscription"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>registerPushSubscription(dto: <a href="../classes/CreatePushSubscriptionRequestDTO.html" target="_self">CreatePushSubscriptionRequestDTO</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, createdBy: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="122"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:122</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>dto</td>
+                                            <td>
+                                                            <code><a href="../classes/CreatePushSubscriptionRequestDTO.html" target="_self" >CreatePushSubscriptionRequestDTO</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>createdBy</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Promise&lt;PushSubscriptions&gt;</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="removeFcmToken"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>removeFcmToken</b></span>
+                        <a href="#removeFcmToken"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>removeFcmToken(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="159"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:159</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="removePushSubscription"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>removePushSubscription</b></span>
+                        <a href="#removePushSubscription"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>removePushSubscription(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="137"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:137</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="streamForUser"></a>
+                    <span class="name">
+                        <span ><b>streamForUser</b></span>
+                        <a href="#streamForUser"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>streamForUser(userId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="112"
+                                    class="link-to-prism">src/api/notifications/services/notifications.service.ts:112</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>userId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="../miscellaneous/functions.html#t" target="_self" >Observable&lt;MessageEvent&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -923,7 +1445,7 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/api/notifications/services/notifications.service.ts:12</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="19" class="link-to-prism">src/api/notifications/services/notifications.service.ts:19</a></div>
                         </td>
                     </tr>
 
@@ -936,14 +1458,21 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, Logger } from &#x27;@nestjs/common&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, Logger, MessageEvent } from &#x27;@nestjs/common&#x27;;
 import { InjectQueue } from &#x27;@nestjs/bull&#x27;;
 import { Queue } from &#x27;bull&#x27;;
-import { Types } from &#x27;mongoose&#x27;;
+import { Observable } from &#x27;rxjs&#x27;;
+import { DeviceType, FcmTokens, PushSubscriptions } from &#x27;@prisma/client&#x27;;
 import { NotificationsDbService } from &#x27;@modules/notifications-db/services/notifications-db.service&#x27;;
+import { PushSubscriptionsDbService } from &#x27;@modules/push-notifications-db/services/push-subscriptions-db.service&#x27;;
+import { FcmTokensDbService } from &#x27;@modules/push-notifications-db/services/fcm-tokens-db.service&#x27;;
+import { WebPushProviderService } from &#x27;@modules/push-provider/services/web-push-provider.service&#x27;;
 import { CreateNotificationRequestDTO } from &#x27;../dtos/request/create-notification-request.dto&#x27;;
+import { CreatePushSubscriptionRequestDTO } from &#x27;../dtos/request/create-push-subscription.request.dto&#x27;;
+import { CreateFcmTokenRequestDTO } from &#x27;../dtos/request/create-fcm-token.request.dto&#x27;;
 import { NotificationStatus } from &#x27;@/modules/notifications-db/enums/notification-status.enum&#x27;;
 import { NotificationDocument } from &#x27;@/modules/notifications-db/schemas/notification.schema&#x27;;
+import { NotificationsSseService } from &#x27;./notifications-sse.service&#x27;;
 
 @Injectable()
 export class NotificationsService {
@@ -951,16 +1480,20 @@ export class NotificationsService {
 
   constructor(
     private readonly dbService: NotificationsDbService,
+    private readonly pushSubscriptionsDb: PushSubscriptionsDbService,
+    private readonly fcmTokensDb: FcmTokensDbService,
+    private readonly webPushProvider: WebPushProviderService,
+    private readonly sseService: NotificationsSseService,
     @InjectQueue(&#x27;notifications&#x27;) private readonly queue: Queue,
   ) {}
 
   async create(
     dto: CreateNotificationRequestDTO,
-    userId: string,
+    userId: number,
   ): Promise&lt;NotificationDocument&gt; {
     const saved &#x3D; await this.dbService.create({
       ...dto,
-      userId: new Types.ObjectId(userId),
+      userId,
       status: NotificationStatus.PENDING,
     });
 
@@ -968,6 +1501,9 @@ export class NotificationsService {
       notificationId: saved._id,
       userId: saved.userId,
       type: saved.type,
+      title: saved.title,
+      message: saved.message,
+      data: saved.data,
       channels: saved.channels || [&#x27;in_app&#x27;],
     });
 
@@ -975,24 +1511,24 @@ export class NotificationsService {
   }
 
   async findAll(
-    userId: string,
+    userId: number,
     limit: number,
     offset: number,
   ): Promise&lt;NotificationDocument[]&gt; {
     return this.dbService.findByUserId(userId, limit, offset);
   }
 
-  async findUnread(userId: string): Promise&lt;NotificationDocument[]&gt; {
+  async findUnread(userId: number): Promise&lt;NotificationDocument[]&gt; {
     return this.dbService.findUnreadByUserId(userId);
   }
 
-  async getUnreadCount(userId: string): Promise&lt;number&gt; {
+  async getUnreadCount(userId: number): Promise&lt;number&gt; {
     return this.dbService.countUnreadByUserId(userId);
   }
 
   async markAsRead(
     id: string,
-    userId: string,
+    userId: number,
   ): Promise&lt;NotificationDocument | null&gt; {
     return this.dbService.updateStatus(id, userId, {
       status: NotificationStatus.READ,
@@ -1000,20 +1536,19 @@ export class NotificationsService {
     });
   }
 
-  async markAllAsRead(userId: string): Promise&lt;void&gt; {
+  async markAllAsRead(userId: number): Promise&lt;void&gt; {
     await this.dbService.markAllAsRead(userId);
   }
 
-  async delete(id: string, userId: string): Promise&lt;void&gt; {
+  async delete(id: string, userId: number): Promise&lt;void&gt; {
     await this.dbService.deleteOne(id, userId);
   }
 
   async createBulk(
-    notifications: (CreateNotificationRequestDTO &amp; { userId: string })[],
+    notifications: (CreateNotificationRequestDTO &amp; { userId: number })[],
   ): Promise&lt;void&gt; {
     const payloads &#x3D; notifications.map((n) &#x3D;&gt; ({
       ...n,
-      userId: new Types.ObjectId(n.userId),
       status: NotificationStatus.PENDING,
     }));
 
@@ -1024,9 +1559,65 @@ export class NotificationsService {
         notificationId: item._id,
         userId: item.userId,
         type: item.type,
+        title: item.title,
+        message: item.message,
+        data: item.data,
         channels: item.channels || [&#x27;in_app&#x27;],
       });
     }
+  }
+
+  // ─── Tiempo real (SSE) ──────────────────────────────────────────────────
+
+  streamForUser(userId: number): Observable&lt;MessageEvent&gt; {
+    return this.sseService.subscribe(userId);
+  }
+
+  // ─── Web Push (VAPID) ───────────────────────────────────────────────────
+
+  getVapidPublicKey(): string {
+    return this.webPushProvider.getPublicKey();
+  }
+
+  async registerPushSubscription(
+    dto: CreatePushSubscriptionRequestDTO,
+    userId: number,
+    createdBy: string,
+  ): Promise&lt;PushSubscriptions&gt; {
+    return this.pushSubscriptionsDb.upsertByEndpoint({
+      userId,
+      endpoint: dto.endpoint,
+      p256dh: dto.keys.p256dh,
+      auth: dto.keys.auth,
+      userAgent: dto.userAgent,
+      createdBy,
+    });
+  }
+
+  async removePushSubscription(
+    referenceId: string,
+    userId: number,
+  ): Promise&lt;void&gt; {
+    await this.pushSubscriptionsDb.deleteByReferenceId(referenceId, userId);
+  }
+
+  // ─── FCM (mobile) ───────────────────────────────────────────────────────
+
+  async registerFcmToken(
+    dto: CreateFcmTokenRequestDTO,
+    userId: number,
+    createdBy: string,
+  ): Promise&lt;FcmTokens&gt; {
+    return this.fcmTokensDb.upsertByToken({
+      userId,
+      token: dto.token,
+      deviceType: dto.deviceType ?? DeviceType.ANDROID,
+      createdBy,
+    });
+  }
+
+  async removeFcmToken(referenceId: string, userId: number): Promise&lt;void&gt; {
+    await this.fcmTokensDb.deleteByReferenceId(referenceId, userId);
   }
 }
 </code></pre>

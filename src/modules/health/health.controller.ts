@@ -95,7 +95,9 @@ export class HealthController {
     ]);
 
     return {
-      date: toZonedTime(new Date(), 'America/Asuncion'),
+      // Offset fijo UTC-3 (Ley 7127), no la zona IANA America/Asuncion (reglas de DST que
+      // Paraguay no tiene, depende del tzdata del host) - ver .claude/rules/datetime.md.
+      date: toZonedTime(new Date(), 'Etc/GMT+3'),
       status: result.status,
       info: result.info,
       error: result.error,

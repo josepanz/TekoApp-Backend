@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Users } from '@prisma/client';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
-import { MerchantContextGuard } from '@modules/auth/guards/merchant-context.guard';
-import { IMerchantContext } from '@common/interfaces/merchant-context.interface';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { UsersController } from './users.controller';
 import { UsersApiService } from '@api/users/services/users-api.service';
@@ -23,13 +21,6 @@ const mockFindOne = jest.fn();
 const mockUpdate = jest.fn();
 const mockBlock = jest.fn();
 const mockUnblock = jest.fn();
-
-const mockMerchantCtx = {
-  merchantCode: 'MC001',
-  ruc: '80012345-6',
-  level: 'BRANCH' as never,
-  branchCode: 'BR001',
-} as unknown as IMerchantContext;
 
 const mockJwtUser = {
   id: 1,
@@ -65,8 +56,6 @@ describe('UsersController', () => {
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .overrideGuard(PermissionsGuard)
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
-      .overrideGuard(MerchantContextGuard)
-      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .compile();
 
     controller = module.get<UsersController>(UsersController);
@@ -75,7 +64,7 @@ describe('UsersController', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('findAll', () => {
-    it('debe retornar la lista de usuarios con el contexto de merchant y usuario autenticado', async () => {
+    it('debe retornar la lista de usuarios para el usuario autenticado', async () => {
       // Arrange
       const query = {
         page: 1,
@@ -90,19 +79,11 @@ describe('UsersController', () => {
       mockFindAll.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.findAll(
-        query,
-        mockMerchantCtx,
-        mockJwtUser,
-      );
+      const result = await controller.findAll(query, mockJwtUser);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindAll).toHaveBeenCalledWith(
-        query,
-        mockMerchantCtx,
-        mockJwtUser,
-      );
+      expect(mockFindAll).toHaveBeenCalledWith(query, mockJwtUser);
     });
   });
 

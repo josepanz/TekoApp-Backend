@@ -207,11 +207,15 @@
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
-                                <a href="#findServiceRequest" >findServiceRequest</a>
+                                <a href="#findServiceByReferenceId" >findServiceByReferenceId</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#findServiceRequestById" >findServiceRequestById</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#findServiceRequestByReferenceId" >findServiceRequestByReferenceId</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -224,6 +228,10 @@
                             <li>
                                     <span class="modifier">Async</span>
                                 <a href="#updateService" >updateService</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Async</span>
+                                <a href="#updateServiceConditional" >updateServiceConditional</a>
                             </li>
                             <li>
                                     <span class="modifier">Async</span>
@@ -252,7 +260,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/modules/services-db/services/services-db.service.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="12" class="link-to-prism">src/modules/services-db/services/services-db.service.ts:12</a></div>
                             </td>
                         </tr>
 
@@ -310,21 +318,26 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>acceptRequestTransaction(requestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>acceptRequestTransaction(requestId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="143"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:143</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="207"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:207</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Acepta una solicitud de servicio de forma atómica: el <code>services.updateMany</code> con <code>where: { status: PENDING }</code> es la guarda contra la carrera (dos solicitudes aceptadas para el mismo
+servicio, o un cliente cancelando mientras se acepta una solicitud). Si el servicio ya no
+está PENDING, no se acepta nada y se devuelve 0 — el caller decide qué hacer (antes esto era
+un <code>$transaction([...])</code> de array, que siempre escribía sin chequear el estado del servicio).</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -341,7 +354,7 @@
                                         <tr>
                                                 <td>requestId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -353,7 +366,7 @@
                                         <tr>
                                                 <td>serviceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -378,7 +391,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>    <code>Promise&lt;void&gt;</code>
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
 
                         </div>
                             <div class="io-description">
@@ -410,8 +423,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="96"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:96</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="142"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:142</a></div>
                         </td>
                     </tr>
 
@@ -472,15 +485,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>countServices(where: Prisma.ServicesWhereInput)</code>
+                    <code>countServices(where: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesWhereInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="92"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:92</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="138"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:138</a></div>
                         </td>
                     </tr>
 
@@ -503,7 +516,7 @@
                                         <tr>
                                                 <td>where</td>
                                             <td>
-                                                        <code>Prisma.ServicesWhereInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesWhereInput</a></code>
                                             </td>
 
                                             <td>
@@ -541,15 +554,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createService(data: Prisma.ServicesUncheckedCreateInput)</code>
+                    <code>createService(data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesUncheckedCreateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="17"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:17</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="23"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:23</a></div>
                         </td>
                     </tr>
 
@@ -572,7 +585,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.ServicesUncheckedCreateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesUncheckedCreateInput</a></code>
                                             </td>
 
                                             <td>
@@ -610,15 +623,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>createServiceRequest(data: Prisma.ServiceRequestsUncheckedCreateInput)</code>
+                    <code>createServiceRequest(data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServiceRequestsUncheckedCreateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="111"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:111</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="157"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:157</a></div>
                         </td>
                     </tr>
 
@@ -641,7 +654,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.ServiceRequestsUncheckedCreateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServiceRequestsUncheckedCreateInput</a></code>
                                             </td>
 
                                             <td>
@@ -686,8 +699,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="11"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:11</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="17"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:17</a></div>
                         </td>
                     </tr>
 
@@ -748,15 +761,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findDuplicateRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>findDuplicateRequest(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, professionalId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="105"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:105</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="151"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:151</a></div>
                         </td>
                     </tr>
 
@@ -779,7 +792,7 @@
                                         <tr>
                                                 <td>serviceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -829,15 +842,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findManyWithCount(where: Prisma.ServicesWhereInput, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, pageSize: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                    <code>findManyWithCount(where: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesWhereInput</a>, page: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, pageSize: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="21"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:21</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="27"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:27</a></div>
                         </td>
                     </tr>
 
@@ -860,7 +873,7 @@
                                         <tr>
                                                 <td>where</td>
                                             <td>
-                                                        <code>Prisma.ServicesWhereInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesWhereInput</a></code>
                                             </td>
 
                                             <td>
@@ -922,15 +935,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findMyServices(where: Prisma.ServicesWhereInput)</code>
+                    <code>findMyServices(where: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesWhereInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="66"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:66</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="108"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:108</a></div>
                         </td>
                     </tr>
 
@@ -953,7 +966,7 @@
                                         <tr>
                                                 <td>where</td>
                                             <td>
-                                                        <code>Prisma.ServicesWhereInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesWhereInput</a></code>
                                             </td>
 
                                             <td>
@@ -991,15 +1004,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findNearby(where: Prisma.ServicesWhereInput)</code>
+                    <code>findNearby(where: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesWhereInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="38"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:38</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="48"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:48</a></div>
                         </td>
                     </tr>
 
@@ -1022,7 +1035,7 @@
                                         <tr>
                                                 <td>where</td>
                                             <td>
-                                                        <code>Prisma.ServicesWhereInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesWhereInput</a></code>
                                             </td>
 
                                             <td>
@@ -1067,8 +1080,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="76"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:76</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="122"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:122</a></div>
                         </td>
                     </tr>
 
@@ -1136,8 +1149,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="80"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:80</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="126"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:126</a></div>
                         </td>
                     </tr>
 
@@ -1198,21 +1211,23 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findServiceById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findServiceById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="47"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:47</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="58"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:58</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Busca un servicio por su PK interna (Int). Uso interno tras resolver el referenceId.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -1229,7 +1244,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1256,32 +1271,34 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="findServiceRequest"></a>
+                    <a name="findServiceByReferenceId"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
-                        <span ><b>findServiceRequest</b></span>
-                        <a href="#findServiceRequest"><span class="icon ion-ios-link"></span></a>
+                        <span ><b>findServiceByReferenceId</b></span>
+                        <a href="#findServiceByReferenceId"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findServiceRequest(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findServiceByReferenceId(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="123"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:123</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="71"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:71</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Busca un servicio por su referenceId (UUID público recibido en la URL).</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -1296,21 +1313,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>id</td>
+                                                <td>referenceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                        <tr>
-                                                <td>serviceId</td>
-                                            <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
                                             </td>
 
                                             <td>
@@ -1348,15 +1353,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findServiceRequestById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findServiceRequestById(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="129"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:129</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="182"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:182</a></div>
                         </td>
                     </tr>
 
@@ -1379,7 +1384,90 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>unknown</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="findServiceRequestByReferenceId"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>findServiceRequestByReferenceId</b></span>
+                        <a href="#findServiceRequestByReferenceId"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>findServiceRequestByReferenceId(referenceId: <a href="../miscellaneous/functions.html#t" target="_self">string</a>, serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="173"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:173</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Busca una solicitud por su referenceId (UUID) validando que pertenezca al servicio dado.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>referenceId</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >string</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>serviceId</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1417,15 +1505,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>findServiceRequests(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>findServiceRequests(serviceId: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="115"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:115</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="164"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:164</a></div>
                         </td>
                     </tr>
 
@@ -1448,7 +1536,7 @@
                                         <tr>
                                                 <td>serviceId</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1493,8 +1581,8 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="86"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:86</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="132"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:132</a></div>
                         </td>
                     </tr>
 
@@ -1555,15 +1643,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, data: Prisma.ServicesUncheckedUpdateInput)</code>
+                    <code>updateService(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesUncheckedUpdateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="59"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:59</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="83"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:83</a></div>
                         </td>
                     </tr>
 
@@ -1586,7 +1674,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1598,7 +1686,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.ServicesUncheckedUpdateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesUncheckedUpdateInput</a></code>
                                             </td>
 
                                             <td>
@@ -1625,6 +1713,104 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
+                    <a name="updateServiceConditional"></a>
+                    <span class="name">
+                            <span class="modifier">Async</span>
+                        <span ><b>updateServiceConditional</b></span>
+                        <a href="#updateServiceConditional"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>updateServiceConditional(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, expectedStatuses: <a href="../miscellaneous/functions.html#t" target="_self">ServiceStatus[]</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServicesUncheckedUpdateInput</a>)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="96"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:96</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+                        <div class="io-description"><p>Actualiza el servicio solo si su estado actual está entre <code>expectedStatuses</code> — evita
+condiciones de carrera entre dos transiciones concurrentes (ej. aceptar + cancelar el mismo
+servicio al mismo tiempo). Devuelve la cantidad de filas afectadas: 0 significa que el
+estado cambió entre la lectura de validación y esta escritura.</p>
+</div>
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>id</td>
+                                            <td>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>expectedStatuses</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >ServiceStatus[]</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                        <tr>
+                                                <td>data</td>
+                                            <td>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServicesUncheckedUpdateInput</a></code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>    <code>Promise&lt;number&gt;</code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
                     <a name="updateServiceRequest"></a>
                     <span class="name">
                             <span class="modifier">Async</span>
@@ -1636,15 +1822,15 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>updateServiceRequest(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, data: Prisma.ServiceRequestsUpdateInput)</code>
+                    <code>updateServiceRequest(id: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank">number</a>, data: <a href="../miscellaneous/functions.html#t" target="_self">Prisma.ServiceRequestsUpdateInput</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="133"
-                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:133</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="189"
+                                    class="link-to-prism">src/modules/services-db/services/services-db.service.ts:189</a></div>
                         </td>
                     </tr>
 
@@ -1667,7 +1853,7 @@
                                         <tr>
                                                 <td>id</td>
                                             <td>
-                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
+                                                            <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/number" target="_blank" >number</a></code>
                                             </td>
 
                                             <td>
@@ -1679,7 +1865,7 @@
                                         <tr>
                                                 <td>data</td>
                                             <td>
-                                                        <code>Prisma.ServiceRequestsUpdateInput</code>
+                                                            <code><a href="../miscellaneous/functions.html#t" target="_self" >Prisma.ServiceRequestsUpdateInput</a></code>
                                             </td>
 
                                             <td>
@@ -1712,6 +1898,12 @@
 import { Prisma, ServiceStatus, RequestStatus } from &#x27;@prisma/client&#x27;;
 import { PrismaDatasource } from &#x27;@core/database/services/prisma.service&#x27;;
 
+// Include que trae el &#x60;referenceId&#x60; (UUID público) del servicio padre para poder exponerlo
+// en las respuestas de solicitudes sin filtrar el &#x60;id&#x60; interno (Int).
+const serviceRefInclude &#x3D; {
+  service: { select: { referenceId: true } },
+} satisfies Prisma.ServiceRequestsInclude;
+
 @Injectable()
 export class ServicesDbService {
   constructor(private readonly prisma: PrismaDatasource) {}
@@ -1736,7 +1928,11 @@ export class ServicesDbService {
     return Promise.all([
       this.prisma.extended.services.findMany({
         where,
-        include: { users: true, professional: true, category: true },
+        include: {
+          users: true,
+          professional: { include: { user: true } },
+          category: true,
+        },
         orderBy: { createdAt: &#x27;desc&#x27; },
         skip: (page - 1) * pageSize,
         take: pageSize,
@@ -1754,7 +1950,8 @@ export class ServicesDbService {
     });
   }
 
-  async findServiceById(id: string) {
+  /** Busca un servicio por su PK interna (Int). Uso interno tras resolver el referenceId. */
+  async findServiceById(id: number) {
     return this.prisma.extended.services.findUnique({
       where: { id },
       include: {
@@ -1766,17 +1963,52 @@ export class ServicesDbService {
     });
   }
 
-  async updateService(id: string, data: Prisma.ServicesUncheckedUpdateInput) {
+  /** Busca un servicio por su referenceId (UUID público recibido en la URL). */
+  async findServiceByReferenceId(referenceId: string) {
+    return this.prisma.extended.services.findUnique({
+      where: { referenceId },
+      include: {
+        users: true,
+        professional: true,
+        category: true,
+        requests: true,
+      },
+    });
+  }
+
+  async updateService(id: number, data: Prisma.ServicesUncheckedUpdateInput) {
     return this.prisma.extended.services.update({
       where: { id },
       data: data,
     });
   }
 
+  /**
+   * Actualiza el servicio solo si su estado actual está entre &#x60;expectedStatuses&#x60; — evita
+   * condiciones de carrera entre dos transiciones concurrentes (ej. aceptar + cancelar el mismo
+   * servicio al mismo tiempo). Devuelve la cantidad de filas afectadas: 0 significa que el
+   * estado cambió entre la lectura de validación y esta escritura.
+   */
+  async updateServiceConditional(
+    id: number,
+    expectedStatuses: ServiceStatus[],
+    data: Prisma.ServicesUncheckedUpdateInput,
+  ): Promise&lt;number&gt; {
+    const result &#x3D; await this.prisma.extended.services.updateMany({
+      where: { id, status: { in: expectedStatuses } },
+      data,
+    });
+    return result.count;
+  }
+
   async findMyServices(where: Prisma.ServicesWhereInput) {
     return this.prisma.extended.services.findMany({
       where,
-      include: { users: true, professional: true, category: true },
+      include: {
+        users: true,
+        professional: { include: { user: true } },
+        category: true,
+      },
       orderBy: { createdAt: &#x27;desc&#x27; },
     });
   }
@@ -1812,67 +2044,91 @@ export class ServicesDbService {
 
   // ─── Service requests ───────────────────────────────────────────────────────
 
-  async findDuplicateRequest(serviceId: string, professionalId: number) {
+  async findDuplicateRequest(serviceId: number, professionalId: number) {
     return this.prisma.extended.serviceRequests.findFirst({
       where: { serviceId, professionalId },
     });
   }
 
   async createServiceRequest(data: Prisma.ServiceRequestsUncheckedCreateInput) {
-    return this.prisma.extended.serviceRequests.create({ data });
+    return this.prisma.extended.serviceRequests.create({
+      data,
+      include: serviceRefInclude,
+    });
   }
 
-  async findServiceRequests(serviceId: string) {
+  async findServiceRequests(serviceId: number) {
     return this.prisma.extended.serviceRequests.findMany({
       where: { serviceId },
-      include: { professional: true },
+      include: { professional: true, ...serviceRefInclude },
       orderBy: { createdAt: &#x27;desc&#x27; },
     });
   }
 
-  async findServiceRequest(id: string, serviceId: string) {
+  /** Busca una solicitud por su referenceId (UUID) validando que pertenezca al servicio dado. */
+  async findServiceRequestByReferenceId(
+    referenceId: string,
+    serviceId: number,
+  ) {
     return this.prisma.extended.serviceRequests.findFirst({
-      where: { id, serviceId },
+      where: { referenceId, serviceId },
     });
   }
 
-  async findServiceRequestById(id: string) {
-    return this.prisma.extended.serviceRequests.findUnique({ where: { id } });
+  async findServiceRequestById(id: number) {
+    return this.prisma.extended.serviceRequests.findUnique({
+      where: { id },
+      include: serviceRefInclude,
+    });
   }
 
   async updateServiceRequest(
-    id: string,
+    id: number,
     data: Prisma.ServiceRequestsUpdateInput,
   ) {
     return this.prisma.extended.serviceRequests.update({
       where: { id },
       data,
+      include: serviceRefInclude,
     });
   }
 
+  /**
+   * Acepta una solicitud de servicio de forma atómica: el &#x60;services.updateMany&#x60; con &#x60;where:
+   * { status: PENDING }&#x60; es la guarda contra la carrera (dos solicitudes aceptadas para el mismo
+   * servicio, o un cliente cancelando mientras se acepta una solicitud). Si el servicio ya no
+   * está PENDING, no se acepta nada y se devuelve 0 — el caller decide qué hacer (antes esto era
+   * un &#x60;$transaction([...])&#x60; de array, que siempre escribía sin chequear el estado del servicio).
+   */
   async acceptRequestTransaction(
-    requestId: string,
-    serviceId: string,
+    requestId: number,
+    serviceId: number,
     professionalId: number,
-  ): Promise&lt;void&gt; {
-    await this.prisma.extended.$transaction([
-      this.prisma.extended.serviceRequests.update({
+  ): Promise&lt;number&gt; {
+    return this.prisma.extended.$transaction(async (tx) &#x3D;&gt; {
+      const serviceUpdateResult &#x3D; await tx.services.updateMany({
+        where: { id: serviceId, status: ServiceStatus.PENDING },
+        data: { status: ServiceStatus.ACCEPTED, professionalId },
+      });
+      if (serviceUpdateResult.count &#x3D;&#x3D;&#x3D; 0) {
+        return 0;
+      }
+
+      await tx.serviceRequests.update({
         where: { id: requestId },
         data: { status: RequestStatus.ACCEPTED },
-      }),
-      this.prisma.extended.services.update({
-        where: { id: serviceId },
-        data: { status: ServiceStatus.ACCEPTED, professionalId },
-      }),
-      this.prisma.extended.serviceRequests.updateMany({
+      });
+      await tx.serviceRequests.updateMany({
         where: {
           serviceId,
           status: RequestStatus.PENDING,
           id: { not: requestId },
         },
         data: { status: RequestStatus.REJECTED },
-      }),
-    ]);
+      });
+
+      return serviceUpdateResult.count;
+    });
   }
 }
 </code></pre>

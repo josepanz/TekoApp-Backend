@@ -3,11 +3,23 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { NotificationsDbService } from '@modules/notifications-db/services/notifications-db.service';
 import { NotificationStatus } from '@/modules/notifications-db/enums/notification-status.enum';
+import { PushSubscriptionsDbService } from '@modules/push-notifications-db/services/push-subscriptions-db.service';
+import { FcmTokensDbService } from '@modules/push-notifications-db/services/fcm-tokens-db.service';
+import { WebPushProviderService } from '@modules/push-provider/services/web-push-provider.service';
+import { FcmProviderService } from '@modules/push-provider/services/fcm-provider.service';
+import {
+  IPushPayload,
+  PushSendOutcome,
+} from '@modules/push-provider/interfaces/push-provider.interface';
+import { NotificationsSseService } from '@api/notifications/services/notifications-sse.service';
 
-interface NotificationJobPayload {
+export interface NotificationJobPayload {
   notificationId: string;
-  userId: string;
+  userId: number;
   type: string;
+  title: string;
+  message: string;
+  data?: Record<string, unknown>;
   channels: string[];
 }
 
@@ -15,7 +27,14 @@ interface NotificationJobPayload {
 export class NotificationsProcessor {
   private readonly logger = new Logger(NotificationsProcessor.name);
 
-  constructor(private readonly dbService: NotificationsDbService) {}
+  constructor(
+    private readonly dbService: NotificationsDbService,
+    private readonly pushSubscriptionsDb: PushSubscriptionsDbService,
+    private readonly fcmTokensDb: FcmTokensDbService,
+    private readonly webPushProvider: WebPushProviderService,
+    private readonly fcmProvider: FcmProviderService,
+    private readonly sseService: NotificationsSseService,
+  ) {}
 
   @Process('send-notification')
   async handleSendNotification(job: Job<NotificationJobPayload>) {
@@ -26,9 +45,11 @@ export class NotificationsProcessor {
         `Procesando envío de la notificación: ${notificationId} para el usuario: ${userId}`,
       );
 
-      for (const channel of channels) {
-        this.sendNotificationByChannel(channel, job.data);
-      }
+      await Promise.all(
+        channels.map((channel) =>
+          this.sendNotificationByChannel(channel, job.data),
+        ),
+      );
 
       await this.dbService.updateStatusByIdDirectly(notificationId, {
         status: NotificationStatus.SENT,
@@ -52,19 +73,24 @@ export class NotificationsProcessor {
     }
   }
 
-  private sendNotificationByChannel(
+  private async sendNotificationByChannel(
     channel: string,
     data: NotificationJobPayload,
-  ): void {
+  ): Promise<void> {
+    const payload: IPushPayload = {
+      title: data.title,
+      message: data.message,
+      referenceId:
+        typeof data.data?.referenceId === 'string'
+          ? data.data.referenceId
+          : undefined,
+      type: data.type,
+    };
+
     switch (channel) {
       case 'email':
         this.logger.log(
           `[Canal Email] Despachando hacia AWS SES / SendGrid para el usuario: ${data.userId}`,
-        );
-        break;
-      case 'push':
-        this.logger.log(
-          `[Canal Push] Despachando Firebase Cloud Messaging (FCM) al usuario: ${data.userId}`,
         );
         break;
       case 'sms':
@@ -73,11 +99,64 @@ export class NotificationsProcessor {
         );
         break;
       case 'in_app':
+        // Entrega en tiempo real vía SSE — solo llega si el usuario tiene la app/pestaña abierta
+        // ahora mismo. GET /notifications sigue siendo el fallback universal (polling/al abrir).
+        this.sseService.emit(data.userId, {
+          notificationId: data.notificationId,
+          type: data.type,
+          title: data.title,
+          message: data.message,
+          data: data.data,
+        });
+        break;
+      case 'push':
+        await this.sendWebPush(data.userId, payload);
+        break;
+      case 'fcm':
+        await this.sendFcm(data.userId, payload);
         break;
       default:
         this.logger.warn(
           `Canal de comunicación no soportado en la infraestructura actual: ${channel}`,
         );
     }
+  }
+
+  private async sendWebPush(userId: number, payload: IPushPayload) {
+    const subscriptions =
+      await this.pushSubscriptionsDb.findActiveByUserId(userId);
+
+    await Promise.all(
+      subscriptions.map(async (subscription) => {
+        const result = await this.webPushProvider.send(
+          {
+            endpoint: subscription.endpoint,
+            p256dh: subscription.p256dh,
+            auth: subscription.auth,
+          },
+          payload,
+        );
+
+        if (result.outcome === PushSendOutcome.GONE) {
+          await this.pushSubscriptionsDb.deactivateByEndpoint(
+            subscription.endpoint,
+          );
+        }
+      }),
+    );
+  }
+
+  private async sendFcm(userId: number, payload: IPushPayload) {
+    const tokens = await this.fcmTokensDb.findActiveByUserId(userId);
+
+    await Promise.all(
+      tokens.map(async (fcmToken) => {
+        const result = await this.fcmProvider.send(fcmToken.token, payload);
+
+        if (result.outcome === PushSendOutcome.GONE) {
+          await this.fcmTokensDb.deactivateByToken(fcmToken.token);
+        }
+      }),
+    );
   }
 }

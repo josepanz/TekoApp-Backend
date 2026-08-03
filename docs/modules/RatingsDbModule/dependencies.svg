@@ -24,10 +24,6 @@
 <title>cluster_RatingsDbModule</title>
 <polygon fill="none" stroke="black" stroke-dasharray="1,5" points="84,-70 84,-268 412,-268 412,-70 84,-70"/>
 </g>
-<g id="clust4" class="cluster">
-<title>cluster_RatingsDbModule_exports</title>
-<polygon fill="none" stroke="black" points="189,-208 189,-260 327,-260 327,-208 189,-208"/>
-</g>
 <g id="clust3" class="cluster">
 <title>cluster_RatingsDbModule_imports</title>
 <polygon fill="none" stroke="black" points="278,-78 278,-130 404,-130 404,-78 278,-78"/>
@@ -35,6 +31,10 @@
 <g id="clust6" class="cluster">
 <title>cluster_RatingsDbModule_providers</title>
 <polygon fill="none" stroke="black" points="92,-78 92,-130 270,-130 270,-78 92,-78"/>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_RatingsDbModule_exports</title>
+<polygon fill="none" stroke="black" points="189,-208 189,-260 327,-260 327,-208 189,-208"/>
 </g>
 <!-- DatabaseModule -->
 <g id="node1" class="node">

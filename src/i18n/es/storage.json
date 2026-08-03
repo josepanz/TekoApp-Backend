@@ -1,0 +1,13 @@
+{
+  "AT_LEAST_ONE_FILE_REQUIRED": "Se requiere al menos un archivo",
+  "AT_LEAST_ONE_KEY_REQUIRED": "Se requiere al menos una clave",
+  "EXPIRES_IN_SECONDS_INVALID": "expiresInSeconds debe ser mayor a 0",
+  "FIELD_INVALID": "El {fieldName} provisto no es válido",
+  "FIELD_MUST_BE_POSITIVE": "{fieldName} debe ser mayor a 0",
+  "FIELD_REQUIRED": "Se requiere un {fieldName} válido",
+  "FILE_CONTENT_EMPTY": "El contenido del archivo está vacío",
+  "FILE_NAME_REQUIRED": "Se requiere un nombre de archivo válido",
+  "FILE_REQUIRED": "Se requiere un archivo válido",
+  "KEY_OR_PATH_REQUIRED": "Se requiere una clave o una ruta",
+  "SERVICE_UNAVAILABLE": "El servicio de almacenamiento no está disponible temporalmente"
+}

@@ -10,6 +10,7 @@ import { APP_CONFIG } from '@core/config/config-loader';
 // ─── Mocks de dependencias ────────────────────────────────────────────────────
 
 const mockFindUnique = jest.fn();
+const mockFindFirstCredentials = jest.fn();
 
 jest.mock('@common/helpers/crypto-helpers', () => ({
   CryptoHelper: {
@@ -68,6 +69,9 @@ describe('AuthTokenService', () => {
             extended: {
               users: {
                 findUnique: mockFindUnique,
+              },
+              userCredentials: {
+                findFirst: mockFindFirstCredentials,
               },
             },
           },
@@ -166,6 +170,7 @@ describe('AuthTokenService', () => {
         sub: 'ref-uuid-123',
       });
       mockFindUnique.mockResolvedValue(buildUser());
+      mockFindFirstCredentials.mockResolvedValue({ expiredAt: null });
       (CryptoHelper.generateToken as jest.Mock).mockReturnValue(
         'new_access_token',
       );
@@ -244,6 +249,23 @@ describe('AuthTokenService', () => {
       await expect(
         service.generateAccessTokenFromRefresh('valid_token'),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('debe lanzar PASSWORD_EXPIRED si la contraseña activa del usuario expiró', async () => {
+      // Arrange
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        sub: 'ref-uuid-123',
+      });
+      mockFindUnique.mockResolvedValue(buildUser());
+      mockFindFirstCredentials.mockResolvedValue({
+        expiredAt: new Date(Date.now() - 1000),
+      });
+
+      // Act & Assert
+      await expect(
+        service.generateAccessTokenFromRefresh('valid_token'),
+      ).rejects.toMatchObject({ response: { code: 'PASSWORD_EXPIRED' } });
     });
   });
 });
