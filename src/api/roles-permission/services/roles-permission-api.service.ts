@@ -42,10 +42,12 @@ export class RolesApiService {
     return this.mapper.roleToResponse(role);
   }
 
-  async getRoleById(id: number): Promise<ResponseDTO.RoleResponseDTO> {
+  async getRoleById(
+    id: number,
+  ): Promise<ResponseDTO.RoleWithPermissionsResponseDTO> {
     this.logger.log(`Obteniendo rol con ID: ${id}`);
-    const role = await this.rolesDBService.getRoleById(id);
-    return this.mapper.roleToResponse(role);
+    const role = await this.rolesDBService.getRoleWithPermissions(id);
+    return this.mapper.roleWithPermissionsToResponse(role);
   }
 
   async getAllRoles(

@@ -2,7 +2,7 @@
 
 # TekoApp テコ — Plataforma de Servicios Profesionales
 
-![TekoApp Banner](.claude/documentation/brand/banner.png)
+![TekoApp Banner](brand/banner.png)
 
 **Conectando talento con necesidad, donde sea, cuando sea.**
 
@@ -67,10 +67,10 @@ El nombre de nuestra plataforma fusiona dos conceptos culturales poderosos que d
 
 ## Marca
 
-<img src=".claude/documentation/brand/logo.png" alt="Logo de TekoApp" width="220" />
+<img src="brand/logo.png" alt="Logo de TekoApp" width="220" />
 
 El manual de marca oficial (logo, banner y manual completo) vive en
-[`.claude/documentation/brand/`](.claude/documentation/brand/) — es la referencia autoritativa de
+[`brand/`](brand/) — es la referencia autoritativa de
 color/tipografía para cualquier superficie con UI (hoy: `TekoApp-Web`; a futuro: `TekoApp-Mobile`
 en Flutter). Este repo no tiene UI propia, pero sirve el logo en templates de email (`modules/email`)
 y puede usarse para personalizar la portada de Swagger/Compodoc.

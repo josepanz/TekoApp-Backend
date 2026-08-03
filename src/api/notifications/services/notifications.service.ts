@@ -11,8 +11,9 @@ import { CreateNotificationRequestDTO } from '../dtos/request/create-notificatio
 import { CreatePushSubscriptionRequestDTO } from '../dtos/request/create-push-subscription.request.dto';
 import { CreateFcmTokenRequestDTO } from '../dtos/request/create-fcm-token.request.dto';
 import { NotificationStatus } from '@/modules/notifications-db/enums/notification-status.enum';
-import { NotificationDocument } from '@/modules/notifications-db/schemas/notification.schema';
+import { NotificationDbHelper } from '@/modules/notifications-db/helpers/notification-db.helper';
 import { NotificationsSseService } from './notifications-sse.service';
+import { NotificationResponseDTO } from '../dtos/response/notification-response.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -30,7 +31,7 @@ export class NotificationsService {
   async create(
     dto: CreateNotificationRequestDTO,
     userId: number,
-  ): Promise<NotificationDocument> {
+  ): Promise<NotificationResponseDTO> {
     const saved = await this.dbService.create({
       ...dto,
       userId,
@@ -47,19 +48,21 @@ export class NotificationsService {
       channels: saved.channels || ['in_app'],
     });
 
-    return saved;
+    return NotificationDbHelper.mapToResponse(saved);
   }
 
   async findAll(
     userId: number,
     limit: number,
     offset: number,
-  ): Promise<NotificationDocument[]> {
-    return this.dbService.findByUserId(userId, limit, offset);
+  ): Promise<NotificationResponseDTO[]> {
+    const docs = await this.dbService.findByUserId(userId, limit, offset);
+    return NotificationDbHelper.mapManyToResponse(docs);
   }
 
-  async findUnread(userId: number): Promise<NotificationDocument[]> {
-    return this.dbService.findUnreadByUserId(userId);
+  async findUnread(userId: number): Promise<NotificationResponseDTO[]> {
+    const docs = await this.dbService.findUnreadByUserId(userId);
+    return NotificationDbHelper.mapManyToResponse(docs);
   }
 
   async getUnreadCount(userId: number): Promise<number> {
@@ -69,11 +72,12 @@ export class NotificationsService {
   async markAsRead(
     id: string,
     userId: number,
-  ): Promise<NotificationDocument | null> {
-    return this.dbService.updateStatus(id, userId, {
+  ): Promise<NotificationResponseDTO | null> {
+    const updated = await this.dbService.updateStatus(id, userId, {
       status: NotificationStatus.READ,
       readAt: new Date(),
     });
+    return updated ? NotificationDbHelper.mapToResponse(updated) : null;
   }
 
   async markAllAsRead(userId: number): Promise<void> {

@@ -2,7 +2,20 @@ import { Injectable } from '@nestjs/common';
 import {
   PermissionResponseDTO,
   RoleResponseDTO,
+  RoleWithPermissionsResponseDTO,
 } from '@api/roles-permission/dtos/response';
+
+interface IRoleWithPermissions extends IRolePermission {
+  rolePermissions: {
+    permission: {
+      id: number;
+      name: string;
+      displayName: string | null;
+      description: string | null;
+      isActive: boolean;
+    };
+  }[];
+}
 
 interface IRolePermission {
   id: number;
@@ -34,6 +47,30 @@ export class RolesPermissionsMapper {
       createdBy: role.createdBy,
       lastChangedAt: role.lastChangedAt,
       lastChangedBy: role.lastChangedBy,
+    };
+  }
+
+  roleWithPermissionsToResponse(
+    role: IRoleWithPermissions,
+  ): RoleWithPermissionsResponseDTO {
+    const permissions = role.rolePermissions.map((rp) => ({
+      id: rp.permission.id,
+      name: rp.permission.name,
+      displayName: rp.permission.displayName ?? rp.permission.name,
+      description: rp.permission.description,
+      isActive: rp.permission.isActive,
+    }));
+
+    return {
+      id: role.id,
+      name: role.name,
+      displayName: role.displayName ?? role.name,
+      description: role.description,
+      isActive: role.isActive,
+      permissions,
+      permissionsCount: permissions.length,
+      createdAt: role.createdAt,
+      createdBy: role.createdBy,
     };
   }
 

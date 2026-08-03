@@ -101,10 +101,13 @@ describe('NotificationsService', () => {
 
       const savedDoc = {
         _id: new Types.ObjectId(),
-        userId: new Types.ObjectId(userId),
+        userId,
+        title: dto.title,
+        message: 'Tienes una solicitud nueva',
         type: dto.type,
         channels: dto.channels,
         status: NotificationStatus.PENDING,
+        createdAt: new Date(),
       } as unknown as NotificationDocument;
 
       mockDbCreate.mockResolvedValue(savedDoc);
@@ -128,7 +131,14 @@ describe('NotificationsService', () => {
           type: savedDoc.type,
         }),
       );
-      expect(result).toBe(savedDoc);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: savedDoc._id.toString(),
+          userId: String(userId),
+          type: dto.type,
+          status: NotificationStatus.PENDING,
+        }),
+      );
     });
 
     it('debe encolar con canal in_app por defecto cuando la notificación no tiene canales definidos', async () => {
@@ -142,10 +152,13 @@ describe('NotificationsService', () => {
 
       const savedDoc = {
         _id: new Types.ObjectId(),
-        userId: new Types.ObjectId(userId),
+        userId,
+        title: dto.title,
+        message: 'Tu pago fue procesado',
         type: dto.type,
         channels: undefined,
         status: NotificationStatus.PENDING,
+        createdAt: new Date(),
       } as unknown as NotificationDocument;
 
       mockDbCreate.mockResolvedValue(savedDoc);
@@ -167,17 +180,28 @@ describe('NotificationsService', () => {
     it('debe retornar las notificaciones del usuario paginadas por limit y offset', async () => {
       // Arrange
       const userId = 42;
-      const expected: NotificationDocument[] = [
-        { _id: new Types.ObjectId() } as unknown as NotificationDocument,
+      const docs: NotificationDocument[] = [
+        {
+          _id: new Types.ObjectId(),
+          userId,
+          title: 'Título',
+          message: 'Mensaje',
+          type: 'SERVICE_REQUEST',
+          status: NotificationStatus.PENDING,
+          channels: ['in_app'],
+          createdAt: new Date(),
+        } as unknown as NotificationDocument,
       ];
-      mockDbFindByUserId.mockResolvedValue(expected);
+      mockDbFindByUserId.mockResolvedValue(docs);
 
       // Act
       const result = await service.findAll(userId, 10, 0);
 
       // Assert
       expect(mockDbFindByUserId).toHaveBeenCalledWith(userId, 10, 0);
-      expect(result).toBe(expected);
+      expect(result).toEqual([
+        expect.objectContaining({ id: docs[0]._id.toString() }),
+      ]);
     });
   });
 
@@ -186,20 +210,28 @@ describe('NotificationsService', () => {
     it('debe retornar únicamente las notificaciones no leídas del usuario', async () => {
       // Arrange
       const userId = 42;
-      const expected: NotificationDocument[] = [
+      const docs: NotificationDocument[] = [
         {
           _id: new Types.ObjectId(),
+          userId,
+          title: 'Título',
+          message: 'Mensaje',
+          type: 'SERVICE_REQUEST',
           status: NotificationStatus.PENDING,
+          channels: ['in_app'],
+          createdAt: new Date(),
         } as unknown as NotificationDocument,
       ];
-      mockDbFindUnreadByUserId.mockResolvedValue(expected);
+      mockDbFindUnreadByUserId.mockResolvedValue(docs);
 
       // Act
       const result = await service.findUnread(userId);
 
       // Assert
       expect(mockDbFindUnreadByUserId).toHaveBeenCalledWith(userId);
-      expect(result).toBe(expected);
+      expect(result).toEqual([
+        expect.objectContaining({ id: docs[0]._id.toString() }),
+      ]);
     });
   });
 
@@ -227,8 +259,14 @@ describe('NotificationsService', () => {
       const userId = 42;
       const updated: NotificationDocument = {
         _id: new Types.ObjectId(id),
+        userId,
+        title: 'Título',
+        message: 'Mensaje',
+        type: 'SERVICE_REQUEST',
+        channels: ['in_app'],
         status: NotificationStatus.READ,
         readAt: new Date(),
+        createdAt: new Date(),
       } as unknown as NotificationDocument;
       mockDbUpdateStatus.mockResolvedValue(updated);
 
@@ -241,7 +279,12 @@ describe('NotificationsService', () => {
         userId,
         expect.objectContaining({ status: NotificationStatus.READ }),
       );
-      expect(result).toBe(updated);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: updated._id.toString(),
+          status: NotificationStatus.READ,
+        }),
+      );
     });
 
     it('debe retornar null cuando la notificación no existe o no pertenece al usuario', async () => {

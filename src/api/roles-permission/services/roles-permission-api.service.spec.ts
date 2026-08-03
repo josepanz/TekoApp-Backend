@@ -11,6 +11,7 @@ import { RolesPermissionsMapper } from '../helpers';
 // --- RolesDBService mocks ---
 const mockCreateRole = jest.fn();
 const mockGetRoleById = jest.fn();
+const mockGetRoleWithPermissions = jest.fn();
 const mockGetAllRoles = jest.fn();
 const mockGetRolesStats = jest.fn();
 const mockUpdateRole = jest.fn();
@@ -33,6 +34,7 @@ const mockGetRolePermissions = jest.fn();
 // --- RolesPermissionsMapper mocks ---
 const mockPermissionToResponse = jest.fn();
 const mockRoleToResponse = jest.fn();
+const mockRoleWithPermissionsToResponse = jest.fn();
 
 describe('RolesApiService', () => {
   let service: RolesApiService;
@@ -46,6 +48,7 @@ describe('RolesApiService', () => {
           useValue: {
             createRole: mockCreateRole,
             getRoleById: mockGetRoleById,
+            getRoleWithPermissions: mockGetRoleWithPermissions,
             getAllRoles: mockGetAllRoles,
             getRolesStats: mockGetRolesStats,
             updateRole: mockUpdateRole,
@@ -85,6 +88,7 @@ describe('RolesApiService', () => {
           useValue: {
             permissionToResponse: mockPermissionToResponse,
             roleToResponse: mockRoleToResponse,
+            roleWithPermissionsToResponse: mockRoleWithPermissionsToResponse,
           },
         },
       ],
@@ -126,19 +130,40 @@ describe('RolesApiService', () => {
   // getRoleById
   // ──────────────────────────────────────────────
   describe('getRoleById', () => {
-    it('debe retornar el rol mapeado cuando existe', async () => {
+    it('debe retornar el rol con sus permisos asignados cuando existe', async () => {
       // Arrange
-      const roleEntity = { id: 5, name: 'editor' };
-      const mappedResponse = { id: 5, name: 'editor' };
-      mockGetRoleById.mockResolvedValue(roleEntity);
-      mockRoleToResponse.mockReturnValue(mappedResponse);
+      const roleEntity = {
+        id: 5,
+        name: 'editor',
+        rolePermissions: [
+          {
+            permission: {
+              id: 1,
+              name: 'content:read',
+              displayName: 'Leer contenido',
+              description: null,
+              isActive: true,
+            },
+          },
+        ],
+      };
+      const mappedResponse = {
+        id: 5,
+        name: 'editor',
+        permissions: [{ id: 1, name: 'content:read' }],
+        permissionsCount: 1,
+      };
+      mockGetRoleWithPermissions.mockResolvedValue(roleEntity);
+      mockRoleWithPermissionsToResponse.mockReturnValue(mappedResponse);
 
       // Act
       const result = await service.getRoleById(5);
 
       // Assert
-      expect(mockGetRoleById).toHaveBeenCalledWith(5);
-      expect(mockRoleToResponse).toHaveBeenCalledWith(roleEntity);
+      expect(mockGetRoleWithPermissions).toHaveBeenCalledWith(5);
+      expect(mockRoleWithPermissionsToResponse).toHaveBeenCalledWith(
+        roleEntity,
+      );
       expect(result).toEqual(mappedResponse);
     });
   });

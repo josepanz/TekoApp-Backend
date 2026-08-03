@@ -2,7 +2,6 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   RatingDetailResponseDTO,
-  RatingsListResponseDTO,
   ProfessionalRatingStatsResponseDTO,
   UserRatingStatsResponseDTO,
   TopRatedProfessionalResponseDTO,
@@ -49,7 +48,7 @@ export const FindAllRatingsDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Lista de calificaciones obtenida exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -59,7 +58,7 @@ export const GetRecentRatingsDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones recientes obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -79,7 +78,7 @@ export const FindByUserDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones del usuario obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -101,7 +100,7 @@ export const FindByProfessionalDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones del profesional obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -113,7 +112,7 @@ export const GetClientRatingsDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones de clientes obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
@@ -137,7 +136,7 @@ export const FindByServiceRequestDocs = () =>
     ApiResponse({
       status: 200,
       description: 'Calificaciones de la solicitud obtenidas exitosamente',
-      type: RatingsListResponseDTO,
+      type: [RatingDetailResponseDTO],
     }),
   );
 
