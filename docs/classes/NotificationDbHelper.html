@@ -93,7 +93,7 @@
                    <compodoc-menu mode="normal"></compodoc-menu>
                </div>
                <!-- START CONTENT -->
-               <div class="content injectable">
+               <div class="content class">
                    <div class="content-data">
 
 
@@ -107,9 +107,13 @@
 
 
 
+
+
+
+
 <ol class="breadcrumb">
-  <li class="breadcrumb-item">Injectables</li>
-  <li class="breadcrumb-item" >RolesPermissionsMapper</li>
+  <li class="breadcrumb-item">Classes</li>
+  <li class="breadcrumb-item" >NotificationDbHelper</li>
 </ol>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -133,8 +137,9 @@
             <h3>File</h3>
         </p>
         <p class="comment">
-            <code>src/api/roles-permission/helpers/roles-permissions.mapper.ts</code>
+            <code>src/modules/notifications-db/helpers/notification-db.helper.ts</code>
         </p>
+
 
 
 
@@ -154,13 +159,12 @@
                     <td class="col-md-4">
                         <ul class="index-list">
                             <li>
-                                <a href="#permissionToResponse" >permissionToResponse</a>
+                                    <span class="modifier">Static</span>
+                                <a href="#mapManyToResponse" >mapManyToResponse</a>
                             </li>
                             <li>
-                                <a href="#roleToResponse" >roleToResponse</a>
-                            </li>
-                            <li>
-                                <a href="#roleWithPermissionsToResponse" >roleWithPermissionsToResponse</a>
+                                    <span class="modifier">Static</span>
+                                <a href="#mapToResponse" >mapToResponse</a>
                             </li>
                         </ul>
                     </td>
@@ -175,6 +179,7 @@
 </section>
 
 
+
             <section data-compodoc="block-methods">
     
     <h3 id="methods">
@@ -184,24 +189,26 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="permissionToResponse"></a>
+                    <a name="mapManyToResponse"></a>
                     <span class="name">
-                        <span ><b>permissionToResponse</b></span>
-                        <a href="#permissionToResponse"><span class="icon ion-ios-link"></span></a>
+                            <span class="modifier">Static</span>
+                        <span ><b>mapManyToResponse</b></span>
+                        <a href="#mapManyToResponse"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>permissionToResponse(permission: <a href="../interfaces/IRolePermission.html" target="_self">IRolePermission</a>)</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>mapManyToResponse(docs: <a href="../classes/NotificationDocument.html" target="_self">NotificationDocument[]</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="77"
-                                    class="link-to-prism">src/api/roles-permission/helpers/roles-permissions.mapper.ts:77</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="25"
+                                    class="link-to-prism">src/modules/notifications-db/helpers/notification-db.helper.ts:25</a></div>
                         </td>
                     </tr>
 
@@ -222,9 +229,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>permission</td>
+                                                <td>docs</td>
                                             <td>
-                                                            <code><a href="../interfaces/IRolePermission.html" target="_self" >IRolePermission</a></code>
+                                                            <code><a href="../classes/NotificationDocument.html" target="_self" >NotificationDocument[]</a></code>
                                             </td>
 
                                             <td>
@@ -237,7 +244,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/PermissionResponseDTO.html" target="_self" >PermissionResponseDTO</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >NotificationResponseDTO[]</a></code>
 
                         </div>
                             <div class="io-description">
@@ -251,24 +258,26 @@
         <tbody>
             <tr>
                 <td class="col-md-4">
-                    <a name="roleToResponse"></a>
+                    <a name="mapToResponse"></a>
                     <span class="name">
-                        <span ><b>roleToResponse</b></span>
-                        <a href="#roleToResponse"><span class="icon ion-ios-link"></span></a>
+                            <span class="modifier">Static</span>
+                        <span ><b>mapToResponse</b></span>
+                        <a href="#mapToResponse"><span class="icon ion-ios-link"></span></a>
                     </span>
                 </td>
             </tr>
             <tr>
                 <td class="col-md-4">
-<code>roleToResponse(role: <a href="../interfaces/IRolePermission.html" target="_self">IRolePermission</a>)</code>
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>mapToResponse(doc: <a href="../classes/NotificationDocument.html" target="_self">NotificationDocument</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="35"
-                                    class="link-to-prism">src/api/roles-permission/helpers/roles-permissions.mapper.ts:35</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="9"
+                                    class="link-to-prism">src/modules/notifications-db/helpers/notification-db.helper.ts:9</a></div>
                         </td>
                     </tr>
 
@@ -289,9 +298,9 @@
                                     </thead>
                                     <tbody>
                                         <tr>
-                                                <td>role</td>
+                                                <td>doc</td>
                                             <td>
-                                                            <code><a href="../interfaces/IRolePermission.html" target="_self" >IRolePermission</a></code>
+                                                            <code><a href="../classes/NotificationDocument.html" target="_self" >NotificationDocument</a></code>
                                             </td>
 
                                             <td>
@@ -304,74 +313,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoleResponseDTO.html" target="_self" >RoleResponseDTO</a></code>
-
-                        </div>
-                            <div class="io-description">
-                                
-                            </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <td class="col-md-4">
-                    <a name="roleWithPermissionsToResponse"></a>
-                    <span class="name">
-                        <span ><b>roleWithPermissionsToResponse</b></span>
-                        <a href="#roleWithPermissionsToResponse"><span class="icon ion-ios-link"></span></a>
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="col-md-4">
-<code>roleWithPermissionsToResponse(role: <a href="../interfaces/IRoleWithPermissions.html" target="_self">IRoleWithPermissions</a>)</code>
-                </td>
-            </tr>
-
-
-                    <tr>
-                        <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="53"
-                                    class="link-to-prism">src/api/roles-permission/helpers/roles-permissions.mapper.ts:53</a></div>
-                        </td>
-                    </tr>
-
-
-            <tr>
-                <td class="col-md-4">
-
-                            <div class="io-description">
-                                <b>Parameters :</b>
-                                
-                                <table class="params">
-                                    <thead>
-                                        <tr>
-                                            <td>Name</td>
-                                                <td>Type</td>
-                                            <td>Optional</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                                <td>role</td>
-                                            <td>
-                                                            <code><a href="../interfaces/IRoleWithPermissions.html" target="_self" >IRoleWithPermissions</a></code>
-                                            </td>
-
-                                            <td>
-                                                    No
-                                            </td>
-
-
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../classes/RoleWithPermissionsResponseDTO.html" target="_self" >RoleWithPermissionsResponseDTO</a></code>
+                            <b>Returns : </b>        <code><a href="../classes/NotificationResponseDTO.html" target="_self" >NotificationResponseDTO</a></code>
 
                         </div>
                             <div class="io-description">
@@ -383,108 +325,47 @@
     </table>
 </section>
 
+
+
+
+
     </div>
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
-import {
-  PermissionResponseDTO,
-  RoleResponseDTO,
-  RoleWithPermissionsResponseDTO,
-} from &#x27;@api/roles-permission/dtos/response&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { NotificationResponseDTO } from &#x27;@api/notifications/dtos/response/notification-response.dto&#x27;;
+import { NotificationDocument } from &#x27;../schemas/notification.schema&#x27;;
 
-interface IRoleWithPermissions extends IRolePermission {
-  rolePermissions: {
-    permission: {
-      id: number;
-      name: string;
-      displayName: string | null;
-      description: string | null;
-      isActive: boolean;
-    };
-  }[];
-}
-
-interface IRolePermission {
-  id: number;
-  referenceId?: string;
-  name: string;
-  displayName: string | null;
-  description: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  createdBy: string;
-  lastChangedAt: Date | null;
-  lastChangedBy: string | null;
-}
-
-@Injectable()
-export class RolesPermissionsMapper {
-  roleToResponse(role: IRolePermission): RoleResponseDTO {
+export class NotificationDbHelper {
+  // El controller nunca debe devolver un NotificationDocument crudo de Mongoose — el
+  // ClassSerializerInterceptor global usa class-transformer (instanceToPlain), que ignora el
+  // toJSON() custom de Mongoose y serializa las propiedades internas del documento ($__, _doc,
+  // $isNew) en vez de los campos reales. Mapear siempre a un objeto plano con esta forma.
+  static mapToResponse(doc: NotificationDocument): NotificationResponseDTO {
     return {
-      id: role.id,
-      // Los roles siempre tienen referenceId (columna &#x60;reference_id&#x60; NOT NULL en &#x60;Roles&#x60;) — a
-      // diferencia de &#x60;IRolePermission&#x60;, que es una interfaz compartida con &#x60;Permissions&#x60; (sin
-      // referenceId), por eso queda opcional ahí y se afirma acá.
-      referenceId: role.referenceId,
-      name: role.name,
-      displayName: role.displayName,
-      description: role.description,
-      isActive: role.isActive,
-      createdAt: role.createdAt,
-      createdBy: role.createdBy,
-      lastChangedAt: role.lastChangedAt,
-      lastChangedBy: role.lastChangedBy,
+      id: doc._id.toString(),
+      userId: String(doc.userId),
+      title: doc.title,
+      message: doc.message,
+      type: doc.type,
+      status: doc.status,
+      channels: doc.channels,
+      data: doc.data,
+      readAt: doc.readAt ?? null,
+      sentAt: doc.sentAt ?? null,
+      createdAt: doc.createdAt,
     };
   }
 
-  roleWithPermissionsToResponse(
-    role: IRoleWithPermissions,
-  ): RoleWithPermissionsResponseDTO {
-    const permissions &#x3D; role.rolePermissions.map((rp) &#x3D;&gt; ({
-      id: rp.permission.id,
-      name: rp.permission.name,
-      displayName: rp.permission.displayName ?? rp.permission.name,
-      description: rp.permission.description,
-      isActive: rp.permission.isActive,
-    }));
-
-    return {
-      id: role.id,
-      name: role.name,
-      displayName: role.displayName ?? role.name,
-      description: role.description,
-      isActive: role.isActive,
-      permissions,
-      permissionsCount: permissions.length,
-      createdAt: role.createdAt,
-      createdBy: role.createdBy,
-    };
-  }
-
-  permissionToResponse(permission: IRolePermission): PermissionResponseDTO {
-    return {
-      id: permission.id,
-      name: permission.name,
-      displayName: permission.displayName,
-      description: permission.description,
-      isActive: permission.isActive,
-      createdAt: permission.createdAt,
-      createdBy: permission.createdBy,
-      lastChangedAt: permission.lastChangedAt,
-      lastChangedBy: permission.lastChangedBy,
-    };
+  static mapManyToResponse(
+    docs: NotificationDocument[],
+  ): NotificationResponseDTO[] {
+    return docs.map((doc) &#x3D;&gt; NotificationDbHelper.mapToResponse(doc));
   }
 }
 </code></pre>
     </div>
-
 </div>
-
-
-
-
 
 
 
@@ -519,8 +400,8 @@ export class RolesPermissionsMapper {
 
        <script>
             var COMPODOC_CURRENT_PAGE_DEPTH = 1;
-            var COMPODOC_CURRENT_PAGE_CONTEXT = 'injectable';
-            var COMPODOC_CURRENT_PAGE_URL = 'RolesPermissionsMapper.html';
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'class';
+            var COMPODOC_CURRENT_PAGE_URL = 'NotificationDbHelper.html';
             var MAX_SEARCH_RESULTS = 15;
        </script>
 

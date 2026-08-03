@@ -448,7 +448,7 @@
                                 </table>
                             </div>
                         <div class="io-description">
-                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ResponseDTO.RoleResponseDTO&gt;</a></code>
+                            <b>Returns : </b>        <code><a href="../interfaces/Response.html" target="_self" >Promise&lt;ResponseDTO.RoleWithPermissionsResponseDTO&gt;</a></code>
 
                         </div>
                             <div class="io-description">
@@ -612,7 +612,7 @@ export class RolesApiController {
   @Permissions(PERMISSIONS.ROLE.READ, PERMISSIONS.ADMIN.ALL)
   async getRoleById(
     @Param() paramDTO: RequestDTO.GetRoleParamDTO,
-  ): Promise&lt;ResponseDTO.RoleResponseDTO&gt; {
+  ): Promise&lt;ResponseDTO.RoleWithPermissionsResponseDTO&gt; {
     return await this.rolesApiService.getRoleById(paramDTO.id);
   }
 
