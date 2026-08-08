@@ -693,6 +693,81 @@ describe('PaymentDbService', () => {
         'Solo se pueden reembolsar pagos completados',
       );
     });
+
+    it('debe permitir un segundo reembolso parcial sobre el mismo pago (PARTIAL_REFUNDED sigue siendo reembolsable)', async () => {
+      // Arrange — primer reembolso: pago COMPLETED de 1000, se reembolsan 300
+      const firstPartialPayment = {
+        ...fakePayment,
+        status: PaymentStatus.PARTIAL_REFUNDED,
+      };
+      mockTransaction.mockImplementationOnce(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.COMPLETED,
+              total_amount: 1000,
+            }),
+            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+            payments: {
+              update: jest.fn().mockResolvedValue(firstPartialPayment),
+            },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act — primer reembolso parcial
+      const firstResult = await service.executeRefund(1, 300, 'parcial 1');
+
+      // Assert — primer reembolso exitoso, pago queda PARTIAL_REFUNDED
+      expect(firstResult).toEqual(firstPartialPayment);
+
+      // Arrange — segundo reembolso: la fila bloqueada ahora refleja el estado dejado por el
+      // primer reembolso (PARTIAL_REFUNDED, con los 300 ya acumulados en refund_details)
+      const secondPartialPayment = {
+        ...fakePayment,
+        status: PaymentStatus.PARTIAL_REFUNDED,
+      };
+      let secondUpdateData:
+        | { status: PaymentStatus; refundDetails: { refundedAmount: number } }
+        | undefined;
+      mockTransaction.mockImplementationOnce(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.PARTIAL_REFUNDED,
+              total_amount: 1000,
+              refund_details: { refundedAmount: 300 },
+            }),
+            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+            payments: {
+              update: jest.fn().mockImplementation(
+                ({
+                  data,
+                }: {
+                  data: {
+                    status: PaymentStatus;
+                    refundDetails: { refundedAmount: number };
+                  };
+                }) => {
+                  secondUpdateData = data;
+                  return Promise.resolve(secondPartialPayment);
+                },
+              ),
+            },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act — segundo reembolso parcial sobre el mismo pago (no debe lanzar)
+      const secondResult = await service.executeRefund(1, 200, 'parcial 2');
+
+      // Assert — segundo reembolso exitoso y monto acumulado correcto (300 + 200 = 500)
+      expect(secondResult).toEqual(secondPartialPayment);
+      expect(secondUpdateData?.status).toBe(PaymentStatus.PARTIAL_REFUNDED);
+      expect(secondUpdateData?.refundDetails.refundedAmount).toBe(500);
+    });
   });
 
   // ── findTransactionByExternalId ──────────────────────────────────────────────
