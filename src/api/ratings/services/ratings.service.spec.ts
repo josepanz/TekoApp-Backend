@@ -4,9 +4,10 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
-import { RatingType } from '@prisma/client';
+import { Prisma, RatingType } from '@prisma/client';
 import { RatingsService } from './ratings.service';
 import { RatingsDbService } from '@modules/ratings-db/services/ratings-db.service';
+import { PrismaErrorCodes } from '@common/enum/prisma-error-codes.enum';
 
 const mockFindProfessionalByUserRef = jest.fn();
 const mockFindProfessionalByUserId = jest.fn();
@@ -136,6 +137,27 @@ describe('RatingsService', () => {
       // Act & Assert
       await expect(service.create(1, dto)).rejects.toThrow(BadRequestException);
       expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it('debe traducir la colisión del unique constraint (carrera entre dos altas concurrentes) al mismo BadRequestException', async () => {
+      // Arrange
+      const dto = {
+        professionalId: 5,
+        type: RatingType.CLIENT_TO_PROFESSIONAL,
+        rating: 4,
+      } as never;
+      const prismaUniqueError = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint failed',
+        {
+          code: PrismaErrorCodes.UniqueConstraintFailed,
+          clientVersion: '5.0.0',
+        },
+      );
+      mockFindDuplicate.mockResolvedValue(null);
+      mockCreate.mockRejectedValue(prismaUniqueError);
+
+      // Act & Assert
+      await expect(service.create(1, dto)).rejects.toThrow(BadRequestException);
     });
 
     it('debe resolver el professionalId desde referenceId cuando se pasa como string', async () => {
