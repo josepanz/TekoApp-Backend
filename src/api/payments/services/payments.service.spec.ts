@@ -487,6 +487,28 @@ describe('PaymentApiService', () => {
   });
 
   // ============================================================
+  // getPaymentMethods
+  // ============================================================
+
+  describe('getPaymentMethods', () => {
+    it('debe retornar los métodos de pago del usuario exponiendo el referenceId como id', async () => {
+      // Arrange
+      const methods = [
+        { id: BASE_PM_PK, referenceId: BASE_PM_REF, userId: BASE_USER_ID },
+      ];
+      mockFindAllPaymentMethods.mockResolvedValue(methods);
+
+      // Act
+      const result = await service.getPaymentMethods(BASE_USER_ID);
+
+      // Assert
+      expect(mockFindAllPaymentMethods).toHaveBeenCalledWith(BASE_USER_ID);
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(BASE_PM_REF);
+    });
+  });
+
+  // ============================================================
   // createPaymentMethod
   // ============================================================
 

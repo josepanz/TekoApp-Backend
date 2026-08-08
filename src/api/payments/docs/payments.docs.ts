@@ -112,6 +112,17 @@ export const ApiRefundPayment = () =>
     }),
   );
 
+export const ApiGetPaymentMethods = () =>
+  applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: 'Obtener los métodos de pago propios' }),
+    ApiResponse({
+      status: 200,
+      description: 'Lista de métodos de pago activos del usuario autenticado',
+      type: [PaymentMethodDetailResponseDTO],
+    }),
+  );
+
 export const ApiCreatePaymentMethod = () =>
   applyDecorators(
     ApiBearerAuth(),
