@@ -38,6 +38,16 @@ export class PaymentDbService {
     });
   }
 
+  /** Resuelve el UUID público de un profesional a su PK interna (Int), o null si no existe. */
+  async findProfessionalByReferenceId(
+    referenceId: string,
+  ): Promise<{ id: number } | null> {
+    return this.prisma.extended.professionals.findUnique({
+      where: { referenceId },
+      select: { id: true },
+    });
+  }
+
   // ==================== PAGOS ====================
 
   async findExistingPayment(
@@ -137,10 +147,24 @@ export class PaymentDbService {
 
   // ==================== MÉTODOS DE PAGO ====================
 
-  async clearDefaultPaymentMethods(userId: number): Promise<void> {
-    await this.prisma.extended.paymentMethodEntity.updateMany({
-      where: { userId, isDefault: true },
-      data: { isDefault: false },
+  /**
+   * Marca un método como default de forma atómica: limpia el default anterior y setea el nuevo
+   * dentro de la misma transacción. Evita que dos "marcar default" concurrentes dejen dos
+   * métodos con `isDefault=true` — el `updateMany` de ambas transacciones apunta a las mismas
+   * filas candidatas, así que Postgres serializa la segunda detrás de la primera (bloqueo de
+   * fila bajo READ COMMITTED, mismo mecanismo que `executeRefund`).
+   */
+  async setPaymentMethodAsDefault(
+    id: number,
+    userId: number,
+    data: Prisma.PaymentMethodEntityUpdateInput,
+  ): Promise<PaymentMethodEntity> {
+    return this.prisma.extended.$transaction(async (tx) => {
+      await tx.paymentMethodEntity.updateMany({
+        where: { userId, isDefault: true },
+        data: { isDefault: false },
+      });
+      return tx.paymentMethodEntity.update({ where: { id }, data });
     });
   }
 
@@ -170,6 +194,35 @@ export class PaymentDbService {
   async countActivePaymentMethods(userId: number): Promise<number> {
     return this.prisma.extended.paymentMethodEntity.count({
       where: { userId, isActive: true },
+    });
+  }
+
+  /**
+   * Desactiva un método de pago solo si no es el único activo del usuario — atómico vía
+   * `SELECT ... FOR UPDATE` sobre todos los métodos activos del usuario dentro de una
+   * transacción: fuerza a que una segunda baja concurrente del mismo usuario espere a que esta
+   * transacción termine antes de contar, evitando que dos bajas simultáneas (sobre métodos
+   * distintos) dejen al usuario con 0 métodos activos. Devuelve `false` sin efecto si era el
+   * único activo.
+   */
+  async deactivatePaymentMethodIfNotLast(
+    id: number,
+    userId: number,
+  ): Promise<boolean> {
+    return this.prisma.extended.$transaction(async (tx) => {
+      const activeMethods = await tx.$queryRaw<{ id: number }[]>`
+        SELECT id FROM payment_method_entity
+        WHERE user_id = ${userId} AND is_active = true
+        FOR UPDATE
+      `;
+      if (activeMethods.length <= 1) {
+        return false;
+      }
+      await tx.paymentMethodEntity.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      return true;
     });
   }
 

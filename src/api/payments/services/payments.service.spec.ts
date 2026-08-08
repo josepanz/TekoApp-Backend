@@ -23,6 +23,7 @@ import type { UpdatePaymentMethodDto } from '../dtos/request/update-payment-meth
 
 // PaymentDbService
 const mockFindServiceByReferenceId = jest.fn();
+const mockFindProfessionalByReferenceId = jest.fn();
 const mockFindExistingPayment = jest.fn();
 const mockCreatePaymentWithTransaction = jest.fn();
 const mockFindAllPayments = jest.fn();
@@ -35,9 +36,9 @@ const mockUpdateTransactionAndPaymentStatus = jest.fn();
 const mockCreatePaymentMethod = jest.fn();
 const mockFindAllPaymentMethods = jest.fn();
 const mockFindPaymentMethodByReferenceId = jest.fn();
-const mockCountActivePaymentMethods = jest.fn();
 const mockUpdatePaymentMethod = jest.fn();
-const mockClearDefaultPaymentMethods = jest.fn();
+const mockSetPaymentMethodAsDefault = jest.fn();
+const mockDeactivatePaymentMethodIfNotLast = jest.fn();
 const mockGetPaymentSummary = jest.fn();
 const mockGetPaymentTrends = jest.fn();
 
@@ -53,7 +54,8 @@ const mockCalculatePlatformFee = jest.fn();
 const BASE_PAYMENT_REF = 'pay-uuid-0001';
 const BASE_PAYMENT_PK = 1;
 const BASE_USER_ID = 42;
-const BASE_PROFESSIONAL_ID = '77';
+const BASE_PROFESSIONAL_ID = '77'; // referenceId (UUID) tal como viaja en el DTO
+const BASE_PROFESSIONAL_PK = 99; // PK interna (Int) que resuelve findProfessionalByReferenceId
 const BASE_SERVICE_REF = 'svc-uuid-0001';
 const BASE_SERVICE_PK = 30;
 const BASE_PM_REF = 'pm-uuid-0001';
@@ -64,7 +66,7 @@ function buildPayment(overrides: Record<string, unknown> = {}) {
     id: BASE_PAYMENT_PK,
     referenceId: BASE_PAYMENT_REF,
     userId: BASE_USER_ID,
-    professionalId: Number(BASE_PROFESSIONAL_ID),
+    professionalId: BASE_PROFESSIONAL_PK,
     serviceId: BASE_SERVICE_PK,
     service: { referenceId: BASE_SERVICE_REF },
     amount: 100,
@@ -121,6 +123,7 @@ describe('PaymentApiService', () => {
           provide: PaymentDbService,
           useValue: {
             findServiceByReferenceId: mockFindServiceByReferenceId,
+            findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             findExistingPayment: mockFindExistingPayment,
             createPaymentWithTransaction: mockCreatePaymentWithTransaction,
             findAllPayments: mockFindAllPayments,
@@ -134,9 +137,10 @@ describe('PaymentApiService', () => {
             createPaymentMethod: mockCreatePaymentMethod,
             findAllPaymentMethods: mockFindAllPaymentMethods,
             findPaymentMethodByReferenceId: mockFindPaymentMethodByReferenceId,
-            countActivePaymentMethods: mockCountActivePaymentMethods,
             updatePaymentMethod: mockUpdatePaymentMethod,
-            clearDefaultPaymentMethods: mockClearDefaultPaymentMethods,
+            setPaymentMethodAsDefault: mockSetPaymentMethodAsDefault,
+            deactivatePaymentMethodIfNotLast:
+              mockDeactivatePaymentMethodIfNotLast,
             getPaymentSummary: mockGetPaymentSummary,
             getPaymentTrends: mockGetPaymentTrends,
           },
@@ -167,6 +171,9 @@ describe('PaymentApiService', () => {
       // Arrange
       const dto = buildCreatePaymentDto();
       mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(3);
       mockCalculatePlatformFee.mockResolvedValue(10.3);
@@ -189,6 +196,9 @@ describe('PaymentApiService', () => {
       // Arrange
       const dto = buildCreatePaymentDto({ amount: 100 });
       mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(3);
       mockCalculatePlatformFee.mockResolvedValue(10.3);
@@ -212,10 +222,25 @@ describe('PaymentApiService', () => {
       );
     });
 
+    it('debe lanzar NotFoundException si el profesional (UUID) no existe', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto();
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.createPayment(BASE_USER_ID, dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
     it('debe lanzar BadRequestException si ya existe un pago para el mismo servicio', async () => {
       // Arrange
       const dto = buildCreatePaymentDto();
       mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
       mockFindExistingPayment.mockResolvedValue(buildPayment());
 
       // Act & Assert
@@ -237,6 +262,9 @@ describe('PaymentApiService', () => {
       });
 
       mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(fee);
       mockCalculatePlatformFee.mockResolvedValue(tax);
@@ -253,6 +281,7 @@ describe('PaymentApiService', () => {
           totalAmount: expectedTotal,
           status: PaymentStatus.PENDING,
           userId: BASE_USER_ID,
+          professionalId: BASE_PROFESSIONAL_PK,
           serviceId: BASE_SERVICE_PK,
         }),
         expect.any(String), // uuid generado dinámicamente
@@ -266,6 +295,9 @@ describe('PaymentApiService', () => {
       // Arrange
       const dto = buildCreatePaymentDto();
       mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(0);
       mockCalculatePlatformFee.mockResolvedValue(0);
@@ -504,7 +536,7 @@ describe('PaymentApiService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('debe limpiar los métodos por defecto antes de actualizar si isDefault es true', async () => {
+    it('debe marcar como default de forma atómica (clear+set) cuando isDefault es true', async () => {
       // Arrange
       const method = {
         id: BASE_PM_PK,
@@ -512,8 +544,10 @@ describe('PaymentApiService', () => {
         userId: BASE_USER_ID,
       };
       mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
-      mockClearDefaultPaymentMethods.mockResolvedValue(undefined);
-      mockUpdatePaymentMethod.mockResolvedValue({ ...method, isDefault: true });
+      mockSetPaymentMethodAsDefault.mockResolvedValue({
+        ...method,
+        isDefault: true,
+      });
       const dto: UpdatePaymentMethodDto = {
         isDefault: true,
       };
@@ -522,14 +556,15 @@ describe('PaymentApiService', () => {
       await service.updatePaymentMethod(BASE_PM_REF, BASE_USER_ID, dto);
 
       // Assert
-      expect(mockClearDefaultPaymentMethods).toHaveBeenCalledWith(BASE_USER_ID);
-      expect(mockUpdatePaymentMethod).toHaveBeenCalledWith(
+      expect(mockSetPaymentMethodAsDefault).toHaveBeenCalledWith(
         BASE_PM_PK,
+        BASE_USER_ID,
         expect.objectContaining({ isDefault: true }),
       );
+      expect(mockUpdatePaymentMethod).not.toHaveBeenCalled();
     });
 
-    it('no debe limpiar los métodos por defecto si isDefault es false', async () => {
+    it('debe usar la actualización simple (sin tocar el default de otros) si isDefault es false', async () => {
       // Arrange
       const method = {
         id: BASE_PM_PK,
@@ -549,7 +584,8 @@ describe('PaymentApiService', () => {
       await service.updatePaymentMethod(BASE_PM_REF, BASE_USER_ID, dto);
 
       // Assert
-      expect(mockClearDefaultPaymentMethods).not.toHaveBeenCalled();
+      expect(mockSetPaymentMethodAsDefault).not.toHaveBeenCalled();
+      expect(mockUpdatePaymentMethod).toHaveBeenCalledWith(BASE_PM_PK, dto);
     });
   });
 
@@ -576,7 +612,7 @@ describe('PaymentApiService', () => {
         userId: BASE_USER_ID,
       };
       mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
-      mockCountActivePaymentMethods.mockResolvedValue(1);
+      mockDeactivatePaymentMethodIfNotLast.mockResolvedValue(false);
 
       // Act & Assert
       await expect(
@@ -592,16 +628,16 @@ describe('PaymentApiService', () => {
         userId: BASE_USER_ID,
       };
       mockFindPaymentMethodByReferenceId.mockResolvedValue(method);
-      mockCountActivePaymentMethods.mockResolvedValue(3);
-      mockUpdatePaymentMethod.mockResolvedValue({ ...method, isActive: false });
+      mockDeactivatePaymentMethodIfNotLast.mockResolvedValue(true);
 
       // Act
       await service.deletePaymentMethod(BASE_PM_REF, BASE_USER_ID);
 
       // Assert
-      expect(mockUpdatePaymentMethod).toHaveBeenCalledWith(BASE_PM_PK, {
-        isActive: false,
-      });
+      expect(mockDeactivatePaymentMethodIfNotLast).toHaveBeenCalledWith(
+        BASE_PM_PK,
+        BASE_USER_ID,
+      );
     });
   });
 
