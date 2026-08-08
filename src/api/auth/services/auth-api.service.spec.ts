@@ -10,6 +10,7 @@ import { EmailService } from '@modules/email/services/email.service';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { UploadsService } from '@api/uploads/services/uploads.service';
+import { APP_CONFIG } from '@core/config/config-loader';
 import * as DTO from '@api/auth/dtos';
 
 // ─── Mock functions (module-scope standalone, evita @typescript-eslint/unbound-method) ───
@@ -121,6 +122,15 @@ describe('AuthApiService', () => {
         {
           provide: UploadsService,
           useValue: { getPresignedUrl: mockGetPresignedUrl },
+        },
+        {
+          provide: APP_CONFIG.KEY,
+          useValue: {
+            authentication: {
+              publicKey:
+                '-----BEGIN PUBLIC KEY-----\nMOCK\n-----END PUBLIC KEY-----',
+            },
+          },
         },
       ],
     }).compile();
@@ -308,6 +318,19 @@ describe('AuthApiService', () => {
 
       expect(result).toEqual({ nonce: 'nonce-abc' });
       expect(mockGenerateNonce).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ─── publicKey ────────────────────────────────────────────────────────────
+
+  describe('publicKey', () => {
+    it('retorna la clave pública configurada para autenticación', () => {
+      const result = service.publicKey();
+
+      expect(result).toEqual({
+        publicKeyPem:
+          '-----BEGIN PUBLIC KEY-----\nMOCK\n-----END PUBLIC KEY-----',
+      });
     });
   });
 

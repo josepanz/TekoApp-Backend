@@ -25,6 +25,7 @@ const mockUpdatePassword = jest.fn();
 const mockChangeExpiredPassword = jest.fn();
 const mockForgotPassword = jest.fn();
 const mockGenerateNonce = jest.fn();
+const mockPublicKey = jest.fn();
 const mockMe = jest.fn();
 const mockUpdateMe = jest.fn();
 const mockRefreshAccessToken = jest.fn();
@@ -57,6 +58,7 @@ describe('AuthApiController', () => {
             changeExpiredPassword: mockChangeExpiredPassword,
             forgotPassword: mockForgotPassword,
             generateNonce: mockGenerateNonce,
+            publicKey: mockPublicKey,
             me: mockMe,
             updateMe: mockUpdateMe,
             refreshAccessToken: mockRefreshAccessToken,
@@ -300,6 +302,25 @@ describe('AuthApiController', () => {
 
       expect(mockGenerateNonce).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ nonce: 'abc123' });
+    });
+  });
+
+  // ── public-key ─────────────────────────────────────────────────────────────
+
+  describe('publicKey', () => {
+    it('debe retornar la clave pública generada por el servicio', () => {
+      mockPublicKey.mockReturnValue({
+        publicKeyPem:
+          '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----',
+      });
+
+      const result = controller.publicKey();
+
+      expect(mockPublicKey).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        publicKeyPem:
+          '-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----',
+      });
     });
   });
 
