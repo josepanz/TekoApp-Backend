@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Prisma, RatingType } from '@prisma/client';
+import { PrismaErrorCodes } from '@common/enum/prisma-error-codes.enum';
 import { RatingsDbService } from '@modules/ratings-db/services/ratings-db.service';
 import { CreateRatingRequestDTO } from '../dtos/request/create-rating.request.dto';
 import { CreateProfessionalToClientRatingRequestDTO } from '../dtos/request/create-professional-to-client-rating.request.dto';
@@ -46,6 +47,27 @@ export class RatingsService {
     return rating;
   }
 
+  /**
+   * Crea el rating atrapando la colisión del `@@unique([userId, professionalId, serviceId,
+   * type])` — el chequeo `findDuplicate` de más arriba tiene una ventana de carrera real (dos
+   * altas concurrentes pueden pasarlo ambas); sin esto, la segunda terminaría en el 409 genérico
+   * del filtro global de Prisma en vez del mismo 400 `ALREADY_RATED` que ya usa el chequeo
+   * no-concurrente.
+   */
+  private async createRatingSafely(data: Prisma.RatingUncheckedCreateInput) {
+    try {
+      return await this.db.create(data);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === (PrismaErrorCodes.UniqueConstraintFailed as string)
+      ) {
+        throw new BadRequestException(t('ratings.ALREADY_RATED'));
+      }
+      throw error;
+    }
+  }
+
   async create(
     userId: number,
     dto: CreateRatingRequestDTO,
@@ -73,7 +95,7 @@ export class RatingsService {
     );
     if (existing) throw new BadRequestException(t('ratings.ALREADY_RATED'));
 
-    const created = await this.db.create({
+    const created = await this.createRatingSafely({
       userId,
       professionalId,
       serviceId,
@@ -119,7 +141,7 @@ export class RatingsService {
     );
     if (existing) throw new BadRequestException(t('ratings.ALREADY_RATED'));
 
-    const created = await this.db.create({
+    const created = await this.createRatingSafely({
       userId: client.id,
       professionalId: professional.id,
       serviceId,
