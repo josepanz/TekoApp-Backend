@@ -1,3 +1,10 @@
+## 1.0.0-develop.14 (2026-08-08)
+
+* feat(auth): exponer GET /auth/public-key para clientes sin servidor propio ([8a1363e](https://github.com/josepanz/TekoApp-Backend/commit/8a1363e))
+* feat(auth): exponer GET /auth/public-key para clientes sin servidor propio (#23) ([5143d2a](https://github.com/josepanz/TekoApp-Backend/commit/5143d2a)), closes [#23](https://github.com/josepanz/TekoApp-Backend/issues/23)
+* chore: update graphify knowledge graph (#20) ([bd155fd](https://github.com/josepanz/TekoApp-Backend/commit/bd155fd)), closes [#20](https://github.com/josepanz/TekoApp-Backend/issues/20)
+* chore: update graphify knowledge graph (AST-only) ([d030930](https://github.com/josepanz/TekoApp-Backend/commit/d030930))
+
 ## 1.0.0-develop.13 (2026-08-03)
 
 * docs: regenerate compodoc ([1d13fa1](https://github.com/josepanz/TekoApp-Backend/commit/1d13fa1))
