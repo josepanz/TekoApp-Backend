@@ -1,16 +1,16 @@
-# Graph Report - TekoApp-Backend  (2026-08-08)
+# Graph Report - TekoApp-Backend  (2026-08-03)
 
 ## Corpus Check
-- 714 files · ~1,363,402 words
+- 713 files · ~1,361,581 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 6258 nodes · 13711 edges · 397 communities (243 shown, 154 thin omitted)
+- 6245 nodes · 13680 edges · 406 communities (254 shown, 152 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 536 edges (avg confidence: 0.6)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f72bb73e`
+- Built from commit: `ede3dae3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -150,6 +150,7 @@
 - yx
 - TrackingApiService
 - DO
+- promotions-db.service.spec.ts
 - role-permissions-db.service.spec.ts
 - TemplatePlayground
 - Incremental Update (--update)
@@ -341,9 +342,11 @@
 - D
 - cf
 - Arquitectura de notificaciones push — decisión, implementación y estado (actualizado 2026-08-02)
+- He
 - bb
 - ik
 - clipboard.min.js
+- de
 - promise.min.js
 - .getDataSet
 - mw
@@ -351,10 +354,13 @@
 - search.js
 - HbsRenderService
 - tracking.docs.ts
+- In
 - ab
 - qp
 - seed-dummy.ts
+- CategoryIdParamDTO
 - ProfessionalRatingStatsResponseDTO
+- ListUsersRequestDTO
 - .moveTo
 - Cs
 - df
@@ -363,6 +369,8 @@
 - es
 - J
 - mx
+- RefundPaymentDto
+- WsAuthGuard
 - Convención de IDs
 - svg-pan-zoom.min.js
 - Vl
@@ -371,6 +379,7 @@
 - ju
 - LunrSearchEngine
 - services.module.ts
+- password-policy.helper.ts
 - menu-wc.js
 - cherry-pick.md
 - report.module.ts
@@ -379,6 +388,7 @@
 - CLAUDE.md
 - compression
 - @eslint/js
+- jest-mock-extended
 - jwks-rsa
 - nestjs-i18n
 - @nestjs/platform-socket.io
@@ -389,7 +399,7 @@
 - @types/jest
 
 ## God Nodes (most connected - your core abstractions)
-1. `t()` - 216 edges
+1. `t()` - 215 edges
 2. `i()` - 159 edges
 3. `@prisma/client` - 121 edges
 4. `PrismaDatasource` - 90 edges
@@ -426,19 +436,19 @@
 - **Develop Environment Kubernetes Stack (Deployment+Service+Ingress+HPA)** — ci_develop_1_deployment_deploy_tekoapp_backend, ci_develop_2_service_service_tekoapp_backend, ci_develop_3_ingress_ingress_tekoapp_backend, ci_develop_4_hpa_autoscale_tekoapp_backend [EXTRACTED 0.90]
 - **Semantic-release Versioning: release PR checklist -> pipeline release job -> CHANGELOG** — github_pull_request_template_release, github_workflows_pipeline_semanticrelease, changelog [EXTRACTED 0.85]
 
-## Communities (397 total, 154 thin omitted)
+## Communities (406 total, 152 thin omitted)
 
 ### Community 0 - "PrismaDatasource"
-Cohesion: 0.02
-Nodes (91): prisma, @prisma/client, PaymentQueryDto, FlatMerchantAssignment, GroupedAssignments, auditStorage, auditTxActive, convertDecimals() (+83 more)
+Cohesion: 0.03
+Nodes (52): test, auditStorage, auditTxActive, convertDecimals(), isDecimalLike(), PrismaDatasource, Inject, Injectable (+44 more)
 
 ### Community 1 - "config-loader.ts"
-Cohesion: 0.04
-Nodes (52): mockAuthRefreshAccessToken, mockChangeExpiredPassword, mockChangePassword, mockCheckVerificationStatus, mockCreatePassword, mockFindUserById, mockGenerateNonce, mockGetPresignedUrl (+44 more)
+Cohesion: 0.05
+Nodes (27): AuthCookieService, Inject, Injectable, mockCreatePassword, mockCreateUser, mockFindActiveUserByEmail, mockGenerateTokens, CryptoHelper (+19 more)
 
 ### Community 2 - "users-api.service.ts"
-Cohesion: 0.10
-Nodes (25): IsISO8601, BlockUserRequestDTO, ApiProperty, IsNotEmpty, IsString, ApiProperty, IsNotEmpty, IsString (+17 more)
+Cohesion: 0.11
+Nodes (18): IsISO8601, ApiProperty, IsOptional, IsString, UpdateUserRequestDTO, PaginationMetaDTO, PermissionResponseDTO, RoleResponseDTO (+10 more)
 
 ### Community 3 - "scripts"
 Cohesion: 0.09
@@ -446,83 +456,87 @@ Nodes (23): scripts, build, check:types, docs:generate, docs:json, docs:rebuild,
 
 ### Community 4 - "PaginatedRequest"
 Cohesion: 0.05
-Nodes (40): ProfessionalReferenceIdParamDTO, ApiProperty, IsUUID, AssignPermissionsToRoleRequestDTO, ApiProperty, IsArray, IsInt, AssignRolesToUserRequestDTO (+32 more)
+Nodes (39): AnalyticsType, GetProfessionalServicesQueryDTO, ApiPropertyOptional, IsEnum, IsOptional, ProfessionalReferenceIdParamDTO, ApiProperty, IsUUID (+31 more)
 
 ### Community 5 - "auth-api.controller.spec.ts"
 Cohesion: 0.07
-Nodes (25): mockChangeExpiredPassword, mockCreatePasswordWithToken, mockForgotPassword, mockGenerateNonce, mockHandleLogin, mockMe, mockPublicKey, mockRefreshAccessToken (+17 more)
+Nodes (26): @nestjs/core, mockChangeExpiredPassword, mockCreatePasswordWithToken, mockForgotPassword, mockGenerateNonce, mockHandleLogin, mockMe, mockRefreshAccessToken (+18 more)
 
 ### Community 6 - "permissions-db.service.spec.ts"
-Cohesion: 0.17
-Nodes (11): GetPermissionListQueryDTO, GetPermissionParamDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsNotEmpty, IsNumber, IsOptional (+3 more)
+Cohesion: 0.09
+Nodes (20): GetPermissionListQueryDTO, GetPermissionParamDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsNotEmpty, IsNumber, IsOptional (+12 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.05
 Nodes (40): config, jest, multer, node, nodemailer, src/api/*, src/common/*, src/core/* (+32 more)
 
 ### Community 8 - "auth.service.spec.ts"
-Cohesion: 0.04
-Nodes (40): redis, redis, mockCreatePassword, mockCreateUser, mockFindActiveUserByEmail, mockGenerateTokens, PasswordExpirationHelper, mockChangeEncryptedPassword (+32 more)
+Cohesion: 0.05
+Nodes (31): redis, redis, PasswordExpirationHelper, mockChangeEncryptedPassword, mockCreateOrUpdateEncryptedPassword, mockCreateOrUpdatePassword, mockDecryptLoginPayload, mockDecryptPassword (+23 more)
 
 ### Community 9 - "ServicesController"
-Cohesion: 0.20
-Nodes (14): ServicesController, ApiBearerAuth, ApiTags, Body, Controller, Delete, Param, Post (+6 more)
+Cohesion: 0.17
+Nodes (15): ServicesController, ApiBearerAuth, ApiTags, Body, Controller, Delete, Get, Param (+7 more)
 
 ### Community 10 - "TekoApp-Backend README"
 Cohesion: 0.07
 Nodes (41): TekoApp-Backend CHANGELOG, Deployment deploy-tekoapp-backend (develop), Service service-tekoapp-backend (develop), Ingress ingress-tekoapp-backend (develop, dev-tekoapp.com.py), HPA autoscale-tekoapp-backend (develop), Deployment deploy-tekoapp-backend (master), Service service-tekoapp-backend (master), Ingress ingress-tekoapp-backend (master, prod-tekoapp.com.py) (+33 more)
 
 ### Community 11 - "PaginationResponseDTO"
-Cohesion: 0.10
-Nodes (16): PaginationQueryDTO, ApiPropertyOptional, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, Min (+8 more)
+Cohesion: 0.06
+Nodes (38): PaginationQueryDTO, PaginationResponseDTO, ApiProperty, ApiPropertyOptional, IsDate, IsNotEmpty, IsNumber, IsOptional (+30 more)
 
 ### Community 12 - "RatingsDbService"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (4): RatingsService, Injectable, RatingsDbService, Injectable
 
 ### Community 13 - "payments.controller.spec.ts"
-Cohesion: 0.06
-Nodes (34): mockCancelPayment, mockCreatePayment, mockCreatePaymentMethod, mockDeletePaymentMethod, mockGetMetricsSummary, mockGetMetricsTrends, mockGetPaymentById, mockGetPayments (+26 more)
+Cohesion: 0.07
+Nodes (26): mockCancelPayment, mockCreatePayment, mockCreatePaymentMethod, mockDeletePaymentMethod, mockGetMetricsSummary, mockGetMetricsTrends, mockGetPaymentById, mockGetPayments (+18 more)
 
 ### Community 14 - "pagination.dto.ts"
-Cohesion: 0.11
-Nodes (19): CategorySummaryResponseDTO, ApiProperty, ApiPropertyOptional, UserSummaryResponseDTO, ProfessionalReviewsListResponseDTO, ReviewSummaryResponseDTO, ApiProperty, ApiPropertyOptional (+11 more)
+Cohesion: 0.13
+Nodes (14): CategorySummaryResponseDTO, ApiProperty, ApiPropertyOptional, UserSummaryResponseDTO, ReviewSummaryResponseDTO, ApiProperty, ApiPropertyOptional, ProfessionalServicesListResponseDTO (+6 more)
 
 ### Community 15 - "PaymentController"
-Cohesion: 0.19
-Nodes (14): PaymentController, ApiTags, Body, Controller, Delete, HttpCode, Param, Post (+6 more)
+Cohesion: 0.15
+Nodes (15): PaymentController, ApiTags, Body, Controller, Delete, HttpCode, Param, Post (+7 more)
 
 ### Community 16 - "AuthPasswordService"
-Cohesion: 0.07
-Nodes (15): PrismaClientExceptionFilter, Catch, t(), DateRangeDTO, IsDateRangeWithinSixMonths, IsEndDateAfterStartDate, ValidatorConstraint, PasswordPolicyHelper (+7 more)
+Cohesion: 0.10
+Nodes (10): CredentialsRepository, Injectable, AuthPasswordService, Inject, Injectable, AuthService, Injectable, LocalStrategy (+2 more)
 
 ### Community 17 - "PrismaBaseRepository"
 Cohesion: 0.06
 Nodes (3): PrismaBaseRepository, PrismaBaseService, PrismaModelDelegate
 
 ### Community 18 - "CategoryDetailResponseDTO"
-Cohesion: 0.11
-Nodes (25): CategoriesController, ApiTags, Body, Controller, Delete, HttpCode, Param, Patch (+17 more)
+Cohesion: 0.12
+Nodes (23): CategoriesController, ApiTags, Body, Controller, Get, Param, Patch, Post (+15 more)
 
 ### Community 19 - "ProfessionalIdRatingParamDTO"
 Cohesion: 0.17
 Nodes (5): ProfessionalIdRatingParamDTO, ApiProperty, IsInt, Min, Type
 
 ### Community 20 - "ProfessionalDetailResponseDTO"
-Cohesion: 0.14
-Nodes (20): ProfessionalsController, ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, Body, Controller, Get (+12 more)
+Cohesion: 0.13
+Nodes (22): ProfessionalsController, ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, Body, Controller, Get (+14 more)
 
 ### Community 21 - "vis-network.min.js"
 Cohesion: 0.03
-Nodes (91): an(), _apply(), As(), Bf(), _bindHammer(), bs(), Bu(), check() (+83 more)
+Nodes (96): _apply(), As(), Bf(), bg(), bh(), _bindHammer(), bm(), bs() (+88 more)
+
+### Community 22 - "RolesDBService"
+Cohesion: 0.06
+Nodes (23): GetRoleListQueryDTO, ApiPropertyOptional, IsBoolean, IsNotEmpty, IsOptional, IsString, RolePermissionsDBService, Injectable (+15 more)
 
 ### Community 23 - "locations.controller.ts"
-Cohesion: 0.15
-Nodes (13): CalculateDistanceQueryDTO, ApiProperty, IsNumber, Max, Min, Type, DistanceResponseDTO, ApiProperty (+5 more)
+Cohesion: 0.09
+Nodes (23): mockCalculateDistance, mockFindNearbyProfessionals, mockGetOnlineProfessionalsCount, mockGetProfessionalLocation, mockGetProfessionalsByArea, mockReq, mockUpdateLocation, CalculateDistanceQueryDTO (+15 more)
 
 ### Community 24 - "basic-auth.guard.ts"
-Cohesion: 0.06
-Nodes (28): IJwtPayload, OnboardingController, mockOnboarding, ApiBasicAuth, ApiTags, Body, Controller, Post (+20 more)
+Cohesion: 0.07
+Nodes (24): OnboardingController, mockOnboarding, ApiBasicAuth, ApiTags, Body, Controller, Post, UseGuards (+16 more)
 
 ### Community 25 - "professionals.controller.spec.ts"
 Cohesion: 0.05
@@ -533,24 +547,24 @@ Cohesion: 0.17
 Nodes (15): IReportService, IExcelColumn, IPdfEngine, IReportDataMetadata, IReportFormat, IReportOptions, IReportPayload, ExcelGenerator (+7 more)
 
 ### Community 27 - "middleware.config.ts"
-Cohesion: 0.04
-Nodes (42): @nestjs/core, HttpExceptionFilter, Catch, Catch, ValidationExceptionFilter, flatten(), I18N_PATH, interpolate() (+34 more)
+Cohesion: 0.08
+Nodes (17): HttpExceptionFilter, Catch, Catch, ValidationExceptionFilter, translateConstraint(), translateValidationConstraints(), MiddlewareConfig, RateLimitConfig (+9 more)
 
 ### Community 28 - "ServiceRequestDetailResponseDTO"
-Cohesion: 0.11
-Nodes (17): nestjs-pino, ApiModule, Module, AppModule, Module, ObservabilityInterceptor, Injectable, TraceIdMiddleware (+9 more)
+Cohesion: 0.12
+Nodes (14): Put, RespondToServiceRequestDocs(), RespondServiceRequestRequestDTO, ApiProperty, ApiPropertyOptional, IsEnum, IsOptional, IsString (+6 more)
 
 ### Community 29 - "t"
-Cohesion: 0.14
-Nodes (13): StorageHelper, STORAGE_MODULE_OPTIONS, StorageDeleteInput, StorageExecutionOptions, StorageModuleOptions, StoragePresignedUrlInput, StoragePresignedUrlOptions, StoragePresignedUrlResult (+5 more)
+Cohesion: 0.10
+Nodes (18): ProcessBatchManager, t(), StorageHelper, STORAGE_MODULE_OPTIONS, StorageDeleteInput, StorageExecutionOptions, StorageModuleOptions, StoragePresignedUrlInput (+10 more)
 
 ### Community 30 - "UsersDBService"
 Cohesion: 0.07
-Nodes (8): JwtRefreshStrategy, Inject, Injectable, PermissionDTO, RoleDTO, Injectable, UsersDBService, UserWithDetail
+Nodes (12): PrismaErrorCodes, Inject, Inject, OnboardingService, createdUser, mockCreateOrUpdatePassword, mockSendEmailByType, mockUsersCreate (+4 more)
 
 ### Community 31 - "ug"
-Cohesion: 0.09
-Nodes (69): ai(), At(), au(), B(), be(), bt(), Ce(), ch() (+61 more)
+Cohesion: 0.08
+Nodes (78): ag(), ai(), an(), au(), BC(), be(), bt(), Ca() (+70 more)
 
 ### Community 32 - "promotions.controller.ts"
 Cohesion: 0.08
@@ -561,52 +575,52 @@ Cohesion: 0.05
 Nodes (33): ChangeExpiredPasswordDTO, ApiProperty, IsEmail, IsString, CreatePasswordDTO, ApiProperty, IsEmail, IsNotEmpty (+25 more)
 
 ### Community 34 - "users.controller.spec.ts"
-Cohesion: 0.09
-Nodes (26): mockBlock, mockDeleteByReference, mockFindAll, mockFindOne, mockFindOneByReference, mockGetEditContext, mockJwtUser, mockOperatorUser (+18 more)
+Cohesion: 0.11
+Nodes (14): mockBlock, mockDeleteByReference, mockFindAll, mockFindOne, mockFindOneByReference, mockGetEditContext, mockJwtUser, mockOperatorUser (+6 more)
 
 ### Community 35 - "ServicesDbService"
 Cohesion: 0.11
 Nodes (5): CANCELLABLE, ServicesService, Injectable, ServicesDbService, Injectable
 
 ### Community 36 - "AuthApiService"
-Cohesion: 0.08
-Nodes (19): Req, Res, AuthApiController, ApiBasicAuth, ApiBearerAuth, ApiTags, Body, Controller (+11 more)
+Cohesion: 0.11
+Nodes (18): Req, Res, AuthApiController, ApiBasicAuth, ApiBearerAuth, ApiTags, Body, Controller (+10 more)
 
 ### Community 37 - "promotions.module.ts"
-Cohesion: 0.06
-Nodes (30): AuthApiModule, Module, CategoriesModule, Module, CurrenciesModule, Module, LanguagesModule, Module (+22 more)
+Cohesion: 0.40
+Nodes (4): PromotionsModule, Module, PromotionsDbModule, Module
 
 ### Community 38 - "PaymentDbService"
-Cohesion: 0.09
-Nodes (5): UpdatePaymentMethodDto, PaymentApiService, Injectable, PaymentDbService, Injectable
+Cohesion: 0.08
+Nodes (6): PaymentApiService, Injectable, FeeCalculatorService, Injectable, PaymentDbService, Injectable
 
 ### Community 39 - "api.module.ts"
-Cohesion: 0.10
-Nodes (24): Global, Module, UploadsModule, DatabaseModule, Module, AuthModule, Module, nonceRedisProvider (+16 more)
+Cohesion: 0.05
+Nodes (44): Global, nestjs-pino, ApiModule, Module, AuthApiModule, Module, CurrenciesModule, Module (+36 more)
 
 ### Community 40 - "auth-api.service.spec.ts"
-Cohesion: 0.10
-Nodes (18): PaginationOptions, PrismaModelDelegate, PrismaPaginationUtil, mockCountryFindUnique, mockPaginate, mockPrisma, paraguay, mockCategoryFindUnique (+10 more)
+Cohesion: 0.08
+Nodes (22): mockAuthRefreshAccessToken, mockChangeExpiredPassword, mockChangePassword, mockCheckVerificationStatus, mockCreatePassword, mockFindUserById, mockGenerateNonce, mockGetPresignedUrl (+14 more)
 
 ### Community 41 - "ratings.service.ts"
-Cohesion: 0.14
-Nodes (16): bg(), bm(), Fm(), $g(), gg(), im(), Km(), Ng() (+8 more)
+Cohesion: 0.21
+Nodes (6): mapRatingsToResponse(), mapRatingToResponse(), RatingsModule, Module, RatingsDbModule, Module
 
 ### Community 42 - "service-types.module.ts"
-Cohesion: 0.12
-Nodes (15): ServiceTypesController, ApiOperation, ApiResponse, ApiTags, Controller, Get, ServiceTypeResponseDTO, ApiProperty (+7 more)
+Cohesion: 0.11
+Nodes (17): ServiceTypesController, ApiOperation, ApiResponse, ApiTags, Controller, Get, ServiceTypeResponseDTO, ApiProperty (+9 more)
 
 ### Community 43 - "uploads.controller.ts"
-Cohesion: 0.16
-Nodes (14): ApiQuery, ApiBearerAuth, ApiTags, Controller, Delete, Get, Param, Post (+6 more)
+Cohesion: 0.06
+Nodes (38): ApiQuery, mockDeleteFile, mockFileInfo, mockGetPresignedUrl, mockUploadAvatar, mockUploadDocument, mockUploadImage, mockUploadMerchantDocs (+30 more)
 
 ### Community 44 - "Permissions"
 Cohesion: 0.23
-Nodes (16): ApiBearerAuth, ApiTags, Body, Controller, Delete, Get, Param, Patch (+8 more)
+Nodes (15): ApiBearerAuth, ApiTags, Body, Controller, Delete, Get, Param, Patch (+7 more)
 
 ### Community 45 - "users-db.service.spec.ts"
-Cohesion: 0.06
-Nodes (24): mockPrisma, mockRolesFindMany, mockUserRolesFindMany, mockUserRolesUpdateMany, mockUserRolesUpsert, Injectable, UserRolesDBService, fakeUser (+16 more)
+Cohesion: 0.05
+Nodes (23): EmailHelper, EmailService, Inject, Injectable, Injectable, UserRolesDBService, fakeUser, mockEmailService (+15 more)
 
 ### Community 46 - "AppConfig"
 Cohesion: 0.07
@@ -617,23 +631,23 @@ Cohesion: 0.08
 Nodes (23): IsIn, mockAcceptService, mockCancelService, mockCompleteService, mockCreateService, mockCreateServiceRequest, mockGetDashboardStats, mockGetMyServices (+15 more)
 
 ### Community 48 - "JwtAuthGuard"
-Cohesion: 0.13
-Nodes (9): mockCreateRole, mockGetAllRoles, mockGetRoleById, mockUpdateRole, UsersApiDocs, PERMISSIONS, PermissionType, JwtAuthGuard (+1 more)
+Cohesion: 0.14
+Nodes (10): mockCreateRole, mockGetAllRoles, mockGetRoleById, mockUpdateRole, RolesApiService, Injectable, PERMISSIONS, PermissionType (+2 more)
 
 ### Community 49 - "roles-permission/dtos/response/index.ts"
-Cohesion: 0.08
-Nodes (26): PermissionListResponseDTO, ApiProperty, PermissionResponseDTO, ApiProperty, RoleListResponseDTO, ApiProperty, AssignedPermissionDTO, RolePermissionAssignmentResponseDTO (+18 more)
+Cohesion: 0.06
+Nodes (28): PermissionListResponseDTO, ApiProperty, PermissionResponseDTO, ApiProperty, RoleListResponseDTO, ApiProperty, AssignedPermissionDTO, RolePermissionAssignmentResponseDTO (+20 more)
 
 ### Community 50 - "d3.v3.min.js"
-Cohesion: 0.03
-Nodes (38): ar(), be(), bt(), fe(), fn(), ft(), ge(), gn() (+30 more)
+Cohesion: 0.04
+Nodes (35): ar(), be(), cn(), fe(), fn(), ft(), gn(), gt() (+27 more)
 
 ### Community 51 - "notifications.service.spec.ts"
 Cohesion: 0.10
 Nodes (20): CreateFcmTokenRequestDTO, ApiProperty, IsEnum, IsNotEmpty, IsString, mockDbCountUnreadByUserId, mockDbCreate, mockDbDeleteOne (+12 more)
 
 ### Community 52 - "PromotionsService"
-Cohesion: 0.14
+Cohesion: 0.12
 Nodes (4): PromotionsService, Injectable, PromotionsDbService, Injectable
 
 ### Community 53 - "PaymentListQueryDTO"
@@ -641,12 +655,12 @@ Cohesion: 0.25
 Nodes (7): PaymentListQueryDTO, ApiPropertyOptional, IsEnum, IsInt, IsOptional, Min, Type
 
 ### Community 54 - "CategoriesService"
-Cohesion: 0.18
+Cohesion: 0.15
 Nodes (4): CategoriesService, Injectable, CategoriesDbService, Injectable
 
 ### Community 55 - "LocationsController"
-Cohesion: 0.23
-Nodes (8): LocationsController, ApiOperation, ApiResponse, ApiTags, Controller, Get, Param, Query
+Cohesion: 0.17
+Nodes (14): LocationsController, ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, Body, Controller, Get (+6 more)
 
 ### Community 56 - "IUserDataOnJwt"
 Cohesion: 0.20
@@ -658,31 +672,31 @@ Nodes (22): mockAcceptRequestTransaction, mockAggregateEarnings, mockCategory, m
 
 ### Community 58 - "payment-db.service.spec.ts"
 Cohesion: 0.07
-Nodes (25): fakePayment, fakePaymentMethod, fakeTransaction, mockPaymentMethodCount, mockPaymentMethodCreate, mockPaymentMethodFindFirst, mockPaymentMethodFindMany, mockPaymentMethodUpdate (+17 more)
+Nodes (24): fakePayment, fakePaymentMethod, fakeTransaction, mockPaymentMethodCount, mockPaymentMethodCreate, mockPaymentMethodFindFirst, mockPaymentMethodFindMany, mockPaymentMethodUpdate (+16 more)
 
 ### Community 59 - "CreateCategoryDto"
-Cohesion: 0.14
-Nodes (15): IsHexColor, CreateCategoryDto, ApiProperty, ApiPropertyOptional, IsBoolean, IsEnum, IsInt, IsNumber (+7 more)
+Cohesion: 0.09
+Nodes (21): IsHexColor, CreateCategoryDto, ApiProperty, ApiPropertyOptional, IsBoolean, IsEnum, IsInt, IsNumber (+13 more)
 
 ### Community 60 - "payments.service.spec.ts"
 Cohesion: 0.06
-Nodes (29): RefundPaymentDto, RefundReason, ApiProperty, IsEnum, IsNumber, IsOptional, IsString, Min (+21 more)
+Nodes (29): CreatePaymentMethodRequestDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString (+21 more)
 
 ### Community 61 - "services.controller.ts"
-Cohesion: 0.13
-Nodes (22): Get, Query, AcceptServiceDocs(), CancelServiceDocs(), CompleteServiceDocs(), CreateServiceDocs(), CreateServiceRequestDocs(), GetDashboardStatsDocs() (+14 more)
+Cohesion: 0.17
+Nodes (21): AcceptServiceDocs(), CancelServiceDocs(), CompleteServiceDocs(), CreateServiceDocs(), CreateServiceRequestDocs(), GetDashboardStatsDocs(), GetMyServicesDocs(), GetNearbyServicesDocs() (+13 more)
 
 ### Community 62 - "PromotionsController"
-Cohesion: 0.13
-Nodes (14): PromotionsController, ApiTags, Body, Controller, Delete, Get, Param, Post (+6 more)
+Cohesion: 0.15
+Nodes (16): PromotionsController, ApiTags, Body, Controller, Delete, Param, Post, Put (+8 more)
 
 ### Community 63 - "Get"
 Cohesion: 0.11
 Nodes (16): Get, Query, GetRecentRatingsQueryDTO, ApiPropertyOptional, IsInt, IsOptional, Max, Min (+8 more)
 
 ### Community 64 - "auth/dtos/response/index.ts"
-Cohesion: 0.08
-Nodes (26): LoginUserResponseDTO, ApiProperty, MeResponseDTO, ApiProperty, ApiPropertyOptional, NonceResponseDTO, ApiProperty, IsString (+18 more)
+Cohesion: 0.10
+Nodes (23): LoginUserResponseDTO, ApiProperty, MeResponseDTO, ApiProperty, ApiPropertyOptional, NonceResponseDTO, ApiProperty, IsString (+15 more)
 
 ### Community 65 - "ratings.controller.spec.ts"
 Cohesion: 0.10
@@ -693,44 +707,44 @@ Cohesion: 0.09
 Nodes (21): mockAggregateUserStats, mockCreate, mockDeactivate, mockFindAll, mockFindByProfessional, mockFindByReferenceId, mockFindByServiceId, mockFindByUser (+13 more)
 
 ### Community 67 - "uploads.service.ts"
-Cohesion: 0.17
-Nodes (14): ALLOWED_MIME_TYPES, IMAGE_PROCESSING, MERCHANT_DOC_ALLOWED_MIME_TYPES, MERCHANT_DOC_FIELDS, DeleteFileDocs(), GetPresignedUrlDocs(), UploadAvatarDocs(), UploadDocumentDocs() (+6 more)
+Cohesion: 0.18
+Nodes (10): ALLOWED_MIME_TYPES, IMAGE_PROCESSING, MERCHANT_DOC_ALLOWED_MIME_TYPES, MERCHANT_DOC_FIELDS, IUploadedDocUrls, IUploadMerchantDocsParams, mockDeleteFilesQueue, mockGetPresignedUrlQueue (+2 more)
 
 ### Community 68 - "WebSocketConfig"
-Cohesion: 0.11
-Nodes (9): ConnectedSocket, MessageBody, SubscribeMessage, UseGuards, WebSocketGateway, WebSocketServer, WebSocketConfig, Injectable (+1 more)
+Cohesion: 0.16
+Nodes (7): ConnectedSocket, MessageBody, SubscribeMessage, UseGuards, WebSocketGateway, WebSocketServer, WebSocketConfig
 
 ### Community 69 - "RatingsController"
 Cohesion: 0.13
 Nodes (15): RatingsController, ApiBearerAuth, ApiTags, Body, Controller, Delete, HttpCode, Param (+7 more)
 
 ### Community 70 - "i"
-Cohesion: 0.41
-Nodes (12): aE(), dE(), hE(), iE(), jE(), ke(), lE(), me() (+4 more)
+Cohesion: 0.10
+Nodes (55): aE(), At(), B(), bv(), ci(), Cu(), dE(), E() (+47 more)
 
 ### Community 71 - "CreateUserRequestDTO"
-Cohesion: 0.11
-Nodes (16): CreateUserRequestDTO, ApiProperty, IsBoolean, IsDate, IsEmail, IsEnum, IsOptional, IsString (+8 more)
+Cohesion: 0.10
+Nodes (16): BlockUserRequestDTO, ApiProperty, IsNotEmpty, IsString, CreateUserRequestDTO, ApiProperty, IsBoolean, IsDate (+8 more)
 
 ### Community 72 - "tacking-db.service.spec.ts"
 Cohesion: 0.14
 Nodes (15): MongoCollections, GeoTrackingLog, GeoTrackingLogSchema, Prop, Schema, GeoTrackingLogLean, baseLogLean, basePing (+7 more)
 
 ### Community 73 - "hi"
-Cohesion: 0.07
-Nodes (84): ag(), ay(), bv(), ci(), Cu(), dh(), di(), Dp() (+76 more)
+Cohesion: 0.06
+Nodes (52): ay(), dh(), Dp(), el(), fC(), fh(), fO(), gh() (+44 more)
 
 ### Community 74 - "context.md — Project State"
 Cohesion: 0.16
 Nodes (16): APP_CONFIG token, DatabaseModule (@Global), PrismaDatasource, context.md — Project State, Rationale: APP_CONFIG registered via ConfigModule.forRoot load, Rationale: always use prisma.extended.*, Rationale: Sharp as native win32-x64 dependency, Rationale: api/storage removed as dead code (+8 more)
 
 ### Community 75 - "RolesApiController"
-Cohesion: 0.09
-Nodes (19): RolesApiController, ApiBearerAuth, ApiTags, Body, Controller, Get, Param, Post (+11 more)
+Cohesion: 0.14
+Nodes (15): RolesApiController, ApiBearerAuth, ApiTags, Body, Controller, Get, Param, Post (+7 more)
 
 ### Community 76 - "roles-permission-db/services/user-roles-db.service.spec.ts"
-Cohesion: 0.07
-Nodes (16): mockGetPermissionsByRoleIds, mockPrisma, mockRolesDBService, mockRolesFindById, mockTransaction, mockTx, mockTxAuditLogsCreate, mockTxUserRolesCreateMany (+8 more)
+Cohesion: 0.11
+Nodes (14): mockGetPermissionsByRoleIds, mockPrisma, mockRolesDBService, mockRolesFindById, mockTransaction, mockTx, mockTxAuditLogsCreate, mockTxUserRolesCreateMany (+6 more)
 
 ### Community 77 - "services-db.service.spec.ts"
 Cohesion: 0.10
@@ -741,16 +755,16 @@ Cohesion: 0.12
 Nodes (17): @autotelic/pino-seq-transport, axios, cache-manager-redis-store, express-rate-limit, html-pdf-node, dependencies, @autotelic/pino-seq-transport, axios (+9 more)
 
 ### Community 79 - "PromotionDetailResponseDTO"
-Cohesion: 0.17
-Nodes (20): ApiApplyPromotion(), ApiCreatePromotion(), ApiDeletePromotion(), ApiGetActivePromotions(), ApiGetPromotionById(), ApiGetPromotions(), ApiGetPromotionStats(), ApiUpdatePromotion() (+12 more)
+Cohesion: 0.15
+Nodes (18): Get, ApiApplyPromotion(), ApiCreatePromotion(), ApiGetActivePromotions(), ApiGetPromotions(), ApiGetPromotionStats(), ApiValidatePromotion(), PromotionApplyResponseDTO (+10 more)
 
 ### Community 80 - "user-permissions-db.service.spec.ts"
-Cohesion: 0.13
-Nodes (7): mockDeleteFilesQueue, mockGetPresignedUrlQueue, mockUpdateDocumentInfo, mockUploadFilesQueue, StorageService, Inject, Injectable
+Cohesion: 0.12
+Nodes (13): mockPermissionsDBService, mockPermissionsFindByIds, mockPrisma, mockTransaction, mockTx, mockTxAuditLogsCreate, mockTxUserPermissionsCreateMany, mockTxUserPermissionsDeleteMany (+5 more)
 
 ### Community 81 - "Wl"
-Cohesion: 0.04
-Nodes (18): es(), ff, gf, hf, hs(), ko(), lf(), ln() (+10 more)
+Cohesion: 0.06
+Nodes (13): ff, gf, ko(), lf(), ln(), mf(), mn(), vf() (+5 more)
 
 ### Community 82 - "ScheduleConfig"
 Cohesion: 0.17
@@ -769,7 +783,7 @@ Cohesion: 0.12
 Nodes (15): ahora, ayer, manana, mockAggregateUsage, mockApplyTransaction, mockCountPromotions, mockCountUsageByUser, mockCreate (+7 more)
 
 ### Community 86 - "UsersRolesApiController"
-Cohesion: 0.16
+Cohesion: 0.19
 Nodes (12): ApiBearerAuth, ApiTags, Body, Controller, Get, Param, Post, UseGuards (+4 more)
 
 ### Community 87 - "tracking.controller.ts"
@@ -785,20 +799,20 @@ Cohesion: 0.15
 Nodes (10): ApiProperty, ApiPropertyOptional, IsNumber, IsOptional, Max, Min, Type, UpdateLocationRequestDTO (+2 more)
 
 ### Community 90 - "CreatePaymentDto"
-Cohesion: 0.17
-Nodes (14): CreatePaymentDto, PaymentDetailsDto, ApiProperty, IsBoolean, IsEnum, IsNumber, IsOptional, IsString (+6 more)
+Cohesion: 0.21
+Nodes (13): CreatePaymentDto, PaymentDetailsDto, ApiProperty, IsBoolean, IsEnum, IsNumber, IsOptional, IsString (+5 more)
 
 ### Community 91 - "CreateRatingRequestDTO"
 Cohesion: 0.12
-Nodes (17): CreateRatingRequestDTO, RatingCriteriaRequestDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsEnum, IsNumber, IsOptional (+9 more)
+Nodes (18): CreateRatingRequestDTO, RatingCriteriaRequestDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsEnum, IsNumber, IsOptional (+10 more)
 
 ### Community 92 - "UserRolesDBService"
-Cohesion: 0.13
-Nodes (13): mockAssignPermissionsToRole, mockGetPermissionsByRoleId, mockPrisma, mockRemovePermissionFromRole, mockRolePermissionsDBService, mockRolePermissionsFindMany, mockRolesCount, mockRolesCreate (+5 more)
+Cohesion: 0.09
+Nodes (4): Injectable, UserPermissionsDBService, Injectable, UserRolesDBService
 
 ### Community 93 - "roles-permission-api.service.spec.ts"
-Cohesion: 0.04
-Nodes (42): mockAssignPermissionsToUserWithValidation, mockAssignRolesToUserWithValidation, mockCreateRole, mockFindById, mockGetAllRoles, mockGetRoleById, mockGetRolePermissions, mockGetRolesStats (+34 more)
+Cohesion: 0.12
+Nodes (16): mockAssignPermissionsToUserWithValidation, mockAssignRolesToUserWithValidation, mockCreateRole, mockFindById, mockGetAllRoles, mockGetRoleById, mockGetRolePermissions, mockGetRolesStats (+8 more)
 
 ### Community 94 - "countries.controller.ts"
 Cohesion: 0.07
@@ -807,6 +821,10 @@ Nodes (36): CountriesController, mockFindAll, mockFindOne, ApiTags, Controller, 
 ### Community 95 - "users-api.service.spec.ts"
 Cohesion: 0.13
 Nodes (14): mockFindAllUsers, mockFindUserByIdWithDetail, mockFindUserByReferenceId, mockFindUserByReferenceIdWithDetail, mockGetAllAvailableRoles, mockGetPresignedUrl, mockGetUserRoleIds, mockInactivateUser (+6 more)
+
+### Community 96 - "@prisma/client"
+Cohesion: 0.05
+Nodes (35): prisma, @prisma/client, PaymentQueryDto, FlatMerchantAssignment, GroupedAssignments, CacheEntry, mockCommissionConfig, mockFindFirstCommissionConfig (+27 more)
 
 ### Community 97 - "GetNearbyProfessionalsRequestDTO"
 Cohesion: 0.17
@@ -821,24 +839,24 @@ Cohesion: 0.14
 Nodes (13): mockChangeStatus, mockCreate, mockFindAll, mockFindAllWithRelations, mockFindBySlug, mockFindMainCategories, mockFindOne, mockFindSubcategories (+5 more)
 
 ### Community 100 - "LocationsService"
-Cohesion: 0.18
-Nodes (6): ApiBearerAuth, Body, HttpCode, Post, Request, UseGuards
+Cohesion: 0.17
+Nodes (4): LocationsService, Injectable, LocationsDbService, Injectable
 
 ### Community 101 - "professionals.service.spec.ts"
 Cohesion: 0.14
 Nodes (13): mockCreate, mockFindById, mockFindByUserId, mockFindMany, mockFindNearby, mockFindProfessionalByReferenceId, mockFindReviews, mockFindServices (+5 more)
 
 ### Community 102 - "UpdateEditContextRequestDTO"
-Cohesion: 0.18
-Nodes (10): mockCalculateDistance, mockFindNearbyProfessionals, mockGetOnlineProfessionalsCount, mockGetProfessionalLocation, mockGetProfessionalsByArea, mockReq, mockUpdateLocation, GetProfessionalLocationParamDTO (+2 more)
+Cohesion: 0.17
+Nodes (13): EditContextAccessDTO, EditContextUserDTO, ApiProperty, ApiPropertyOptional, IsArray, IsBoolean, IsEnum, IsNumber (+5 more)
 
 ### Community 103 - "languages.controller.ts"
 Cohesion: 0.08
-Nodes (25): LanguagesController, mockFindAll, mockFindOne, ApiTags, Controller, Get, Param, ApiGetLanguageById() (+17 more)
+Nodes (27): LanguagesController, mockFindAll, mockFindOne, ApiTags, Controller, Get, Param, ApiGetLanguageById() (+19 more)
 
 ### Community 104 - "C"
-Cohesion: 0.09
-Nodes (5): C(), k(), mo(), nn(), _t()
+Cohesion: 0.06
+Nodes (12): C(), constructor(), cw, dw(), Ea(), ev(), Gm(), iv() (+4 more)
 
 ### Community 105 - "tdd-refactor agent"
 Cohesion: 0.21
@@ -846,18 +864,18 @@ Nodes (13): tdd-refactor agent, AuthApiController (worked example), AuthApiServi
 
 ### Community 106 - "devDependencies"
 Cohesion: 0.06
-Nodes (35): @commitlint/config-conventional, eslint-config-prettier, husky, jest-mock-extended, @nestjs/schematics, devDependencies, @commitlint/config-conventional, eslint-config-prettier (+27 more)
+Nodes (33): @commitlint/cli, eslint-config-prettier, husky, lint-staged, @nestjs/schematics, devDependencies, @commitlint/cli, eslint-config-prettier (+25 more)
 
 ### Community 107 - "currencies.controller.ts"
 Cohesion: 0.08
-Nodes (26): Length, CurrenciesController, mockFindAll, mockFindOne, ApiTags, Controller, Get, Param (+18 more)
+Nodes (24): Length, CurrenciesController, mockFindAll, mockFindOne, ApiTags, Controller, Get, Param (+16 more)
 
 ### Community 108 - "SearchCategoriesQueryDTO"
-Cohesion: 0.15
-Nodes (8): ChangeCategoryStatusQueryDTO, ApiProperty, IsEnum, GetSubcategoriesParamDTO, ApiProperty, IsInt, Min, Type
+Cohesion: 0.17
+Nodes (7): ChangeCategoryStatusQueryDTO, ApiProperty, IsEnum, SearchCategoriesQueryDTO, ApiProperty, IsNotEmpty, IsString
 
 ### Community 109 - "FindNearbyQueryDTO"
-Cohesion: 0.15
+Cohesion: 0.17
 Nodes (11): FindNearbyQueryDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsInt, IsNumber, IsOptional, Max (+3 more)
 
 ### Community 110 - "LocationsGateway"
@@ -865,24 +883,28 @@ Cohesion: 0.23
 Nodes (7): LocationsGateway, ConnectedSocket, MessageBody, SubscribeMessage, UseGuards, WebSocketGateway, WebSocketServer
 
 ### Community 111 - "notifications.service.ts"
-Cohesion: 0.10
-Nodes (22): NotificationResponseDTO, ApiProperty, ApiPropertyOptional, NotificationStatus, NotificationType, NotificationDbHelper, NotificationDocument, NotificationSchema (+14 more)
+Cohesion: 0.14
+Nodes (13): NotificationResponseDTO, ApiProperty, ApiPropertyOptional, NotificationStatus, NotificationType, NotificationDbHelper, NotificationDocument, NotificationSchema (+5 more)
 
 ### Community 112 - "services.service.ts"
-Cohesion: 0.09
-Nodes (26): CreateServiceRequestDTO, ApiProperty, ApiPropertyOptional, IsArray, IsBoolean, IsDateString, IsInt, IsNotEmpty (+18 more)
+Cohesion: 0.11
+Nodes (19): CreateServiceRequestDTO, ApiProperty, ApiPropertyOptional, IsArray, IsBoolean, IsDateString, IsInt, IsNotEmpty (+11 more)
 
 ### Community 113 - "file-uploader.decorator.ts"
-Cohesion: 0.22
-Nodes (6): Body, FileUploader(), UploadedFilesValidated(), FileUploaderOptions, ParseFilesPipe, Injectable
+Cohesion: 0.28
+Nodes (4): UploadedFilesValidated(), FileUploaderOptions, ParseFilesPipe, Injectable
 
 ### Community 114 - "UploadMerchantDocsRequestDTO"
-Cohesion: 0.15
-Nodes (10): ApiProperty, IsNotEmpty, IsString, UploadFileParamDTO, MerchantDocTypeEnum, ApiPropertyOptional, IsEnum, IsOptional (+2 more)
+Cohesion: 0.29
+Nodes (6): MerchantDocTypeEnum, ApiPropertyOptional, IsEnum, IsOptional, IsString, UploadMerchantDocsRequestDTO
 
 ### Community 115 - ".findSubcategories"
-Cohesion: 0.20
-Nodes (4): Get, ApiGetAllCategories(), ApiGetMainCategories(), ApiGetSubcategories()
+Cohesion: 0.25
+Nodes (6): ApiGetSubcategories(), GetSubcategoriesParamDTO, ApiProperty, IsInt, Min, Type
+
+### Community 116 - "PaymentTrendsQueryDTO"
+Cohesion: 0.13
+Nodes (9): Get, Query, PaymentTrendsQueryDTO, ApiPropertyOptional, IsInt, IsOptional, Max, Min (+1 more)
 
 ### Community 117 - "tekoapp-backend Project Overview (CLAUDE.md)"
 Cohesion: 0.18
@@ -898,15 +920,15 @@ Nodes (12): Sesión 10 — specs roles-permission + report + restructura uploads
 
 ### Community 120 - "analytics.service.spec.ts"
 Cohesion: 0.06
-Nodes (46): AnalyticsModule, Module, AnalyticsController, mockGetCategoriesPerformanceMetrics, mockGetDashboardMetrics, Controller, Get, Query (+38 more)
+Nodes (45): AnalyticsModule, Module, AnalyticsController, mockGetCategoriesPerformanceMetrics, mockGetDashboardMetrics, Controller, Get, Query (+37 more)
 
 ### Community 121 - "users-db.service.ts"
-Cohesion: 0.07
-Nodes (18): CredentialsRepository, mockFindFirst, mockFindMany, mockTransaction, mockTx, mockTxCreate, mockTxUpdateMany, mockUpdate (+10 more)
+Cohesion: 0.08
+Nodes (18): IJwtPayload, ILoginPayload, mockConfig, mockCreate, mockFindByUserId, mockFindRecentByUserId, mockRotatePassword, mockUpdate (+10 more)
 
 ### Community 122 - "CreateProfessionalRequestDTO"
-Cohesion: 0.18
-Nodes (9): ApiPropertyOptional, IsArray, IsInt, IsNumber, IsOptional, IsString, Min, Type (+1 more)
+Cohesion: 0.17
+Nodes (11): CreateProfessionalRequestDTO, ApiProperty, ApiPropertyOptional, IsArray, IsInt, IsNotEmpty, IsNumber, IsOptional (+3 more)
 
 ### Community 123 - "CreatePromotionRequestDTO"
 Cohesion: 0.17
@@ -917,16 +939,12 @@ Cohesion: 0.17
 Nodes (12): CreateProfessionalToClientRatingRequestDTO, ApiProperty, ApiPropertyOptional, IsBoolean, IsNumber, IsOptional, IsString, IsUUID (+4 more)
 
 ### Community 125 - "SuspendProfessionalRequestDTO"
-Cohesion: 0.40
-Nodes (4): SuspendProfessionalRequestDTO, ApiProperty, IsNotEmpty, IsString
+Cohesion: 0.16
+Nodes (9): SuspendProfessionalRequestDTO, ApiProperty, IsNotEmpty, IsString, CreatePermissionRequestDTO, ApiProperty, IsOptional, IsString (+1 more)
 
 ### Community 126 - "notifications-db.service.spec.ts"
-Cohesion: 0.18
-Nodes (8): mockDeleteFile, mockFileInfo, mockGetPresignedUrl, mockUploadAvatar, mockUploadDocument, mockUploadImage, mockUploadMerchantDocs, mockValidateFile
-
-### Community 127 - "NotificationsService"
-Cohesion: 0.09
-Nodes (5): InjectQueue, NotificationsService, Injectable, FcmTokensDbService, Injectable
+Cohesion: 0.17
+Nodes (9): baseNotification, mockCountDocuments, mockDeleteOne, mockFind, mockFindByIdAndUpdate, mockFindOneAndUpdate, mockInsertMany, mockSave (+1 more)
 
 ### Community 128 - "update-readme.js"
 Cohesion: 0.18
@@ -942,11 +960,19 @@ Nodes (9): CreateNotificationRequestDTO, ApiProperty, ApiPropertyOptional, IsArr
 
 ### Community 131 - "professionals.controller.ts"
 Cohesion: 0.06
-Nodes (34): CreateProfessionalRequestDTO, ApiProperty, ApiPropertyOptional, IsArray, IsInt, IsNotEmpty, IsNumber, IsOptional (+26 more)
+Nodes (35): GetProfessionalReviewsQueryDTO, GetProfessionalsListQueryDTO, ApiPropertyOptional, IsBoolean, IsInt, IsNumber, IsOptional, Max (+27 more)
+
+### Community 132 - "yx"
+Cohesion: 0.10
+Nodes (3): Ts(), vx, yx
 
 ### Community 133 - "TrackingApiService"
 Cohesion: 0.18
 Nodes (8): mockConfigGet, mockFindInRadius, mockSaveLocationPing, TrackingApiService, Injectable, TrackingDbService, Injectable, InjectModel
+
+### Community 135 - "promotions-db.service.spec.ts"
+Cohesion: 0.15
+Nodes (10): mockPrisma, mockPromotionCount, mockPromotionCreate, mockPromotionFindMany, mockPromotionFindUnique, mockPromotionUpdate, mockPromotionUsageAggregate, mockPromotionUsageCount (+2 more)
 
 ### Community 136 - "role-permissions-db.service.spec.ts"
 Cohesion: 0.18
@@ -970,15 +996,15 @@ Nodes (22): A(), B(), ba(), C(), da(), E(), F(), G() (+14 more)
 
 ### Community 142 - "services/dtos/request/index.ts"
 Cohesion: 0.07
-Nodes (22): CancelServiceRequestDTO, ApiProperty, IsNotEmpty, IsString, CreateServiceRequestRequestDTO, ApiPropertyOptional, IsNumber, IsOptional (+14 more)
+Nodes (21): CancelServiceRequestDTO, ApiProperty, IsNotEmpty, IsString, GetNearbyServicesQueryDTO, ApiProperty, ApiPropertyOptional, IsInt (+13 more)
 
 ### Community 143 - "edit-context.response.dto.ts"
-Cohesion: 0.31
+Cohesion: 0.43
 Nodes (7): EditContextRoleDTO, EditContextRolesResponseDTO, EditContextUserResponseDTO, GetEditContextResponseDTO, ApiProperty, ApiPropertyOptional, UpdateEditContextResponseDTO
 
 ### Community 144 - "e"
-Cohesion: 0.22
-Nodes (29): a(), bn(), c(), d(), dt(), e(), et(), f() (+21 more)
+Cohesion: 0.20
+Nodes (35): bn(), c(), d(), e(), eu(), f(), fi(), g() (+27 more)
 
 ### Community 145 - "TrackingController"
 Cohesion: 0.17
@@ -997,8 +1023,8 @@ Cohesion: 0.22
 Nodes (8): AnalyticsQueryDto, AnalyticsType, TimeRange, ApiPropertyOptional, IsDateString, IsEnum, IsOptional, IsString
 
 ### Community 149 - "t"
-Cohesion: 0.12
-Nodes (27): an(), bi(), bu(), ce(), ct(), du(), gu(), j() (+19 more)
+Cohesion: 0.10
+Nodes (32): ae(), an(), bu(), ce(), ct(), du(), ee(), ei() (+24 more)
 
 ### Community 150 - "notifications.controller.spec.ts"
 Cohesion: 0.13
@@ -1014,30 +1040,30 @@ Nodes (8): PollingStatus, ProcessPaymentPollingDto, IsEnum, IsNotEmpty, IsObject
 
 ### Community 154 - "._toggleEventListeners"
 Cohesion: 0.09
-Nodes (4): Ps, Ve, Xe, xs
+Nodes (5): ls, Ps, Ve, Xe, xs
 
 ### Community 155 - "file-download.interceptor.ts"
-Cohesion: 0.20
-Nodes (9): categoriaBase, mockCountSubcategories, mockCreate, mockDelete, mockFindFirst, mockFindMany, mockFindUnique, mockSearch (+1 more)
+Cohesion: 0.22
+Nodes (4): ExportFormat, FileDownloadInterceptor, IDownloadResponse, Injectable
 
 ### Community 156 - "date-range.validator.ts"
-Cohesion: 0.20
-Nodes (10): GetProfessionalsListQueryDTO, ApiPropertyOptional, IsBoolean, IsInt, IsNumber, IsOptional, Max, Min (+2 more)
+Cohesion: 0.25
+Nodes (4): DateRangeDTO, IsDateRangeWithinSixMonths, IsEndDateAfterStartDate, ValidatorConstraint
 
 ### Community 157 - "ac"
-Cohesion: 0.11
-Nodes (4): ac(), fO(), Jc(), rc()
+Cohesion: 0.09
+Nodes (6): ac(), Ib(), Jc(), Mb(), rc(), ud()
 
 ### Community 158 - "rules/test.md"
 Cohesion: 0.36
 Nodes (6): code-reviewer agent, db-advisor agent, Suite de specs roles-permission (api + db), Patrón AAA obligatorio (Arrange/Act/Assert), Regla de scope: mocks como const a nivel de módulo, Regla: 0 WARNINGS y 0 ERRORES en test/format/lint
 
 ### Community 160 - "locations.service.spec.ts"
-Cohesion: 0.17
-Nodes (9): LocationsService, mockConfigGet, mockCountOnline, mockFindById, mockFindMany, mockFindNearby, mockProfessional, mockUpdateLocation (+1 more)
+Cohesion: 0.25
+Nodes (7): mockConfigGet, mockCountOnline, mockFindById, mockFindMany, mockFindNearby, mockProfessional, mockUpdateLocation
 
 ### Community 161 - ".resize"
-Cohesion: 0.12
+Cohesion: 0.13
 Nodes (4): draw(), fw, ow, updateBoundingBox()
 
 ### Community 162 - "lit-html.js"
@@ -1049,8 +1075,8 @@ Cohesion: 0.20
 Nodes (10): mockAssignPermissionsToUser, mockAssignRolesToUser, mockGetUserWithRoles, AssignPermissionsToUserRequestDTO, PermissionItemDTO, ApiProperty, IsArray, IsInt (+2 more)
 
 ### Community 165 - "locations-db.service.spec.ts"
-Cohesion: 0.28
-Nodes (8): ae(), ee(), le(), mn(), oe(), re(), ue(), xn()
+Cohesion: 0.25
+Nodes (7): baseProfessional, mockCount, mockFindMany, mockFindUnique, mockPrisma, mockQueryRaw, mockUpdate
 
 ### Community 166 - "dx"
 Cohesion: 0.17
@@ -1065,12 +1091,12 @@ Cohesion: 0.29
 Nodes (7): graphify reference: add-watch, graphify reference: exports and benchmark, graphify reference: extraction subagent prompt, graphify reference: GitHub clone and cross-repo merge, graphify reference: commit hook and CLAUDE.md integration, graphify reference: query, path, explain, /graphify skill
 
 ### Community 169 - "payments.controller.ts"
-Cohesion: 0.15
-Nodes (20): Get, Query, ApiCancelPayment(), ApiCreatePayment(), ApiCreatePaymentMethod(), ApiDeletePaymentMethod(), ApiGetPaymentById(), ApiGetPayments() (+12 more)
+Cohesion: 0.16
+Nodes (20): ApiCancelPayment(), ApiCreatePayment(), ApiCreatePaymentMethod(), ApiDeletePaymentMethod(), ApiGetPaymentById(), ApiGetPayments(), ApiGetPaymentSummary(), ApiGetPaymentTrends() (+12 more)
 
 ### Community 170 - "notifications.processor.spec.ts"
-Cohesion: 0.07
-Nodes (35): Processor, NotificationJobPayload, NotificationsProcessor, mockDeactivateByEndpoint, mockDeactivateByToken, mockFcmSend, mockFindActiveFcmTokens, mockFindActivePushSubscriptions (+27 more)
+Cohesion: 0.06
+Nodes (33): Process, Processor, NotificationJobPayload, NotificationsProcessor, mockDeactivateByEndpoint, mockDeactivateByToken, mockFcmSend, mockFindActiveFcmTokens (+25 more)
 
 ### Community 171 - "jszip.min.js"
 Cohesion: 0.25
@@ -1080,17 +1106,21 @@ Nodes (22): A(), c(), d(), f(), G(), h(), i(), j() (+14 more)
 Cohesion: 0.29
 Nodes (6): ReportRatingRequestDTO, ApiProperty, IsNotEmpty, IsString, MaxLength, MinLength
 
+### Community 173 - "UpdatePermissionRequestDTO"
+Cohesion: 0.29
+Nodes (6): ApiProperty, IsBoolean, IsOptional, IsString, MaxLength, UpdatePermissionRequestDTO
+
 ### Community 174 - "UpdateRoleRequestDTO"
 Cohesion: 0.29
 Nodes (6): ApiProperty, IsBoolean, IsOptional, IsString, MaxLength, UpdateRoleRequestDTO
 
 ### Community 175 - "CreateServiceRequestRequestDTO"
-Cohesion: 0.22
-Nodes (9): GetNearbyServicesQueryDTO, ApiProperty, ApiPropertyOptional, IsInt, IsNumber, IsOptional, Max, Min (+1 more)
+Cohesion: 0.29
+Nodes (7): CreateServiceRequestRequestDTO, ApiPropertyOptional, IsNumber, IsOptional, IsString, Max, Min
 
 ### Community 176 - "i18n.helper.ts"
-Cohesion: 0.29
-Nodes (6): GetRoleListQueryDTO, ApiPropertyOptional, IsBoolean, IsNotEmpty, IsOptional, IsString
+Cohesion: 0.10
+Nodes (15): PrismaClientExceptionFilter, Catch, flatten(), I18N_PATH, interpolate(), loadFallbackCatalog(), readArgPath(), resetFallbackCatalogForTests() (+7 more)
 
 ### Community 177 - "custom-http-response-helper.helper.ts"
 Cohesion: 0.48
@@ -1098,14 +1128,14 @@ Nodes (3): CustomHttpResponseHelper, ApiErrorResponse, handleHttpErrors()
 
 ### Community 178 - "is-order-by-format.validator.ts"
 Cohesion: 0.29
-Nodes (6): Query, ApiSearchCategories(), SearchCategoriesQueryDTO, ApiProperty, IsNotEmpty, IsString
+Nodes (3): IsOrderByFormat, SortDirection, ValidatorConstraint
 
 ### Community 181 - "categories.module.ts"
-Cohesion: 0.29
-Nodes (6): PaymentSummaryQueryDTO, ApiPropertyOptional, IsInt, IsOptional, Min, Type
+Cohesion: 0.40
+Nodes (4): CategoriesModule, Module, CategoriesDbModule, Module
 
 ### Community 182 - "GetProfessionalsAreaQueryDTO"
-Cohesion: 0.22
+Cohesion: 0.33
 Nodes (6): GetProfessionalsAreaQueryDTO, ApiProperty, IsNumber, Max, Min, Type
 
 ### Community 183 - "locations.module.ts"
@@ -1113,12 +1143,16 @@ Cohesion: 0.40
 Nodes (4): LocationsModule, Module, LocationsDbModule, Module
 
 ### Community 184 - "payments.module.ts"
-Cohesion: 0.53
-Nodes (5): ServiceCategorySummaryResponseDTO, ServiceProfessionalSummaryResponseDTO, ServiceUserSummaryResponseDTO, ApiProperty, ApiPropertyOptional
+Cohesion: 0.40
+Nodes (4): PaymentsModule, Module, PaymentsDbModule, Module
 
 ### Community 185 - "UserIdParamDTO"
-Cohesion: 0.14
+Cohesion: 0.18
 Nodes (7): ApiProperty, IsInt, Min, Type, UserIdParamDTO, ApiProperty, UserRatingStatsResponseDTO
+
+### Community 187 - "NotExpiredConstraint"
+Cohesion: 0.40
+Nodes (3): NotExpired(), NotExpiredConstraint, ValidatorConstraint
 
 ### Community 188 - "engram"
 Cohesion: 0.40
@@ -1133,40 +1167,44 @@ Cohesion: 0.53
 Nodes (4): badRequestResponseExample, forbiddenResponseExample, internalServerErrorExample, unauthorizedResponseExample
 
 ### Community 191 - "ratings.controller.ts"
-Cohesion: 0.15
-Nodes (21): CreateProfessionalToClientRatingDocs(), CreateRatingDocs(), FindAllRatingsDocs(), FindByProfessionalDocs(), FindByServiceRequestDocs(), FindByUserDocs(), FindOneRatingDocs(), GetClientRatingsDocs() (+13 more)
+Cohesion: 0.19
+Nodes (18): CreateProfessionalToClientRatingDocs(), CreateRatingDocs(), FindAllRatingsDocs(), FindByProfessionalDocs(), FindByServiceRequestDocs(), FindByUserDocs(), FindOneRatingDocs(), GetClientRatingsDocs() (+10 more)
 
 ### Community 192 - "bootstrap-native.js"
-Cohesion: 0.10
-Nodes (11): Ai(), Ci(), Hi(), _i(), mn(), ms, Qs(), Si() (+3 more)
+Cohesion: 0.13
+Nodes (10): Ai(), Ci(), Hi(), _i(), mn(), Qs(), Si(), ts (+2 more)
 
 ### Community 193 - "database.d.ts"
 Cohesion: 0.40
 Nodes (4): AppConnectionOptions, DatabaseModuleOptions, Db2ConnectionOptions, PostgresConnectionOptions
+
+### Community 194 - "professionals.module.ts"
+Cohesion: 0.40
+Nodes (4): ProfessionalsModule, Module, ProfessionalsDbModule, Module
 
 ### Community 195 - "bO"
 Cohesion: 0.15
 Nodes (3): bO(), OO, to()
 
 ### Community 196 - "kw"
-Cohesion: 0.13
-Nodes (4): kw, Ps(), qs(), xs()
+Cohesion: 0.12
+Nodes (3): kw, Ps(), qs()
 
 ### Community 198 - "zepto.min.js"
-Cohesion: 0.13
-Nodes (15): B(), d(), F(), G(), J(), k(), M(), p() (+7 more)
+Cohesion: 0.14
+Nodes (14): B(), d(), F(), G(), J(), k(), M(), p() (+6 more)
 
 ### Community 201 - ".hide"
-Cohesion: 0.10
-Nodes (6): bs, He, Ui(), ur(), Xr(), ro()
+Cohesion: 0.12
+Nodes (3): bs, ms, Xr()
 
 ### Community 202 - "Transcribe Video/Audio Files Step (Graphify)"
 Cohesion: 0.67
 Nodes (3): Transcribe Video/Audio Files Step (Graphify), transcribe_all() (graphify.transcribe), Whisper Transcription Model
 
 ### Community 207 - "Tx"
-Cohesion: 0.09
-Nodes (6): Cx, Ex(), kx(), Tx, uf, xx()
+Cohesion: 0.13
+Nodes (4): Ex(), kx(), Tx, xx()
 
 ### Community 210 - "$m"
 Cohesion: 0.12
@@ -1178,42 +1216,38 @@ Nodes (3): Fb, Gn(), print()
 
 ### Community 223 - "_d"
 Cohesion: 0.19
-Nodes (18): bd(), cd(), _d(), dd(), Ed(), fd(), gd(), $h() (+10 more)
+Nodes (19): bd(), cd(), _d(), dd(), Ed(), fd(), gd(), $h() (+11 more)
 
 ### Community 228 - "TemplatePlaygroundComponent"
 Cohesion: 0.14
 Nodes (3): Component, TemplatePlaygroundComponent, ViewChild
 
 ### Community 234 - "_makeItem"
-Cohesion: 0.40
-Nodes (5): GetRoleParamDTO, ApiProperty, IsNumber, Min, Type
+Cohesion: 0.19
+Nodes (12): _getValue(), _handleArray(), _handleObject(), hf, _makeCheckbox(), _makeColorField(), _makeDropdown(), _makeItem() (+4 more)
 
 ### Community 268 - "package.json"
 Cohesion: 0.10
 Nodes (19): author, commitlint, extends, description, license, name, pnpm, onlyBuiltDependencies (+11 more)
 
 ### Community 273 - "n"
-Cohesion: 0.12
-Nodes (18): at(), b(), br(), cn(), hu(), k(), kt(), n() (+10 more)
+Cohesion: 0.14
+Nodes (19): a(), b(), bi(), br(), dt(), hr(), hu(), ii() (+11 more)
 
 ### Community 281 - "notifications.module.ts"
-Cohesion: 0.13
-Nodes (3): Process, PushSubscriptionsDbService, Injectable
-
-### Community 284 - "@semantic-release/exec"
-Cohesion: 0.50
-Nodes (4): ji(), mi(), ui(), xi()
+Cohesion: 0.12
+Nodes (12): InjectQueue, NotificationsApiModule, Module, INotificationSseEvent, NotificationsSseService, Injectable, NotificationsDbModule, Module (+4 more)
 
 ### Community 310 - "menu-wc_es5.js"
 Cohesion: 0.22
 Nodes (17): _assertThisInitialized(), _callSuper(), _class(), _classCallCheck(), _construct(), _createClass(), _defineProperties(), _getPrototypeOf() (+9 more)
 
 ### Community 311 - "._distanceToBorder"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (4): bw, distanceToBorder(), ew(), yw
 
 ### Community 322 - ".needsRefresh"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (3): gw, hw, resize()
 
 ### Community 323 - "template-playground.component.ts"
@@ -1221,20 +1255,20 @@ Cohesion: 0.18
 Nodes (8): CompoDocConfig, TODO: Implement reset functionality, Session, Template, TemplatePlaygroundModule, Injectable, ZipExportService, NgModule
 
 ### Community 324 - "payments.service.ts"
-Cohesion: 0.18
-Nodes (8): PaymentMethodDetailResponseDTO, ApiProperty, ApiPropertyOptional, PaymentTrendItemResponseDTO, ApiProperty, mapPaymentMethodToResponse(), mapPaymentsToResponse(), mapPaymentToResponse()
+Cohesion: 0.24
+Nodes (7): PaymentTrendItemResponseDTO, PaymentTrendsResponseDTO, ApiProperty, mapPaymentMethodToResponse(), mapPaymentsToResponse(), mapPaymentToResponse(), exposeReferenceAsId()
 
 ### Community 325 - "CreatePushSubscriptionRequestDTO"
-Cohesion: 0.20
+Cohesion: 0.16
 Nodes (11): IsUrl, CreatePushSubscriptionRequestDTO, PushSubscriptionKeysDTO, ApiProperty, ApiPropertyOptional, IsNotEmpty, IsObject, IsOptional (+3 more)
 
 ### Community 326 - "categories.controller.ts"
-Cohesion: 0.21
-Nodes (4): ApiGetCategoryBySlug(), ApiGetCategoryStats(), CategoryStatsResponseDTO, ApiProperty
+Cohesion: 0.30
+Nodes (4): ApiGetCategoryStats(), UpdateCategoryDto, CategoryStatsResponseDTO, ApiProperty
 
 ### Community 327 - "D"
-Cohesion: 0.14
-Nodes (4): ls, nr(), Xi(), D()
+Cohesion: 0.20
+Nodes (5): nr(), Ui(), ur(), Xi(), D()
 
 ### Community 329 - "Arquitectura de notificaciones push — decisión, implementación y estado (actualizado 2026-08-02)"
 Cohesion: 0.18
@@ -1243,6 +1277,10 @@ Nodes (10): Arquitectura de notificaciones push — decisión, implementación y
 ### Community 333 - "clipboard.min.js"
 Cohesion: 0.42
 Nodes (8): a(), e(), i(), n(), o(), r(), t(), u()
+
+### Community 334 - "de"
+Cohesion: 0.20
+Nodes (10): bt(), de(), ge(), mt(), nn(), ot(), tn(), ve() (+2 more)
 
 ### Community 335 - "promise.min.js"
 Cohesion: 0.47
@@ -1260,33 +1298,49 @@ Nodes (4): HbsRenderService, Injectable, handlebars, handlebars
 Cohesion: 0.36
 Nodes (8): ApplyNearbyDocs(), ApplyPingDocs(), GeoLocationCoordinatesDTO, GetNearbyProfessionalsMetaDTO, GetNearbyProfessionalsResponseDTO, NearbyProfessionalDataDTO, ApiProperty, HttpResponseDOC()
 
+### Community 342 - "In"
+Cohesion: 0.25
+Nodes (9): at(), et(), In(), it(), kt(), nt(), st(), tt() (+1 more)
+
 ### Community 344 - "qp"
-Cohesion: 0.18
-Nodes (13): Dt(), en(), Jo(), Jp(), no(), on(), $p(), Qo() (+5 more)
+Cohesion: 0.31
+Nodes (9): Dt(), en(), Jo(), on(), Qo(), qp(), tn(), Wp() (+1 more)
 
 ### Community 345 - "seed-dummy.ts"
 Cohesion: 0.36
 Nodes (8): FIRST_NAMES, fullName(), jitter(), LAST_NAMES, main(), pick(), prisma, randInt()
 
+### Community 346 - "CategoryIdParamDTO"
+Cohesion: 0.22
+Nodes (8): Delete, HttpCode, ApiDeleteCategory(), CategoryIdParamDTO, ApiProperty, IsInt, Min, Type
+
 ### Community 347 - "ProfessionalRatingStatsResponseDTO"
 Cohesion: 0.33
 Nodes (5): GetAverageRatingDocs(), AverageCriteriaResponseDTO, ProfessionalRatingStatsResponseDTO, RatingDistributionResponseDTO, ApiProperty
 
+### Community 348 - "ListUsersRequestDTO"
+Cohesion: 0.22
+Nodes (8): ListUsersRequestDTO, ApiPropertyOptional, IsEnum, IsInt, IsOptional, IsString, Min, Type
+
 ### Community 349 - ".moveTo"
-Cohesion: 0.33
-Nodes (3): ao(), ho(), so()
+Cohesion: 0.25
+Nodes (4): ao(), ho(), ro(), so()
 
 ### Community 351 - "df"
-Cohesion: 0.08
-Nodes (23): BC(), bh(), Ca(), Da(), df, eo(), Gv(), Ib() (+15 more)
+Cohesion: 0.25
+Nodes (3): df, eo(), io()
 
 ### Community 354 - "Regla de fechas / zona horaria"
 Cohesion: 0.29
 Nodes (6): Contexto del stack (actualizado en Fase C — fix de TZ ya aplicado), Faltantes respecto a portal-comercios-backend (evaluar antes de escribir lógica nueva de fechas), Helpers existentes hoy en `@common/helpers/date.helper.ts`, Lección del trigger de auditoría (ya aplicada en este proyecto, 2026-07-21), Prohibiciones (aplican ya, independientemente de la Fase C), Regla de fechas / zona horaria
 
+### Community 359 - "RefundPaymentDto"
+Cohesion: 0.29
+Nodes (7): RefundPaymentDto, ApiProperty, IsEnum, IsNumber, IsOptional, IsString, Min
+
 ### Community 361 - "Convención de IDs"
 Cohesion: 0.33
-Nodes (5): Al agregar `referenceId` a una tabla con datos existentes, Convención de IDs, Corrección (2026-08-08): la "excepción" de abajo ya no existe en el schema real, Fuera de alcance de esta convención, Regla para tablas nuevas
+Nodes (5): Al agregar `referenceId` a una tabla con datos existentes, Convención de IDs, Excepción ya existente y aceptada (no migrar sin decidirlo explícitamente), Fuera de alcance de esta convención, Regla para tablas nuevas
 
 ### Community 362 - "svg-pan-zoom.min.js"
 Cohesion: 0.60
@@ -1297,32 +1351,36 @@ Cohesion: 0.40
 Nodes (4): Formato, Paso 0 — Actualizar grafo (antes de commitear), Pasos, Reglas de escritura
 
 ### Community 365 - "pn"
-Cohesion: 0.16
-Nodes (19): de(), dn(), dr(), ei(), eu(), fi(), hr(), i() (+11 more)
+Cohesion: 0.40
+Nodes (4): dn(), dr(), pn(), yn()
+
+### Community 369 - "services.module.ts"
+Cohesion: 0.40
+Nodes (4): ServicesModule, Module, ServicesDbModule, Module
 
 ## Ambiguous Edges - Review These
 - `Golden rule: api/* never accesses Prisma directly, always via *-db module` → `Rating entity (TypeORM)`  [AMBIGUOUS]
   src/api/ratings/README.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **1041 isolated node(s):** `npx`, `@llmindset/mcp-engram`, `ENGRAM_DB_PATH`, `Template`, `Session` (+1036 more)
+- **1038 isolated node(s):** `npx`, `@llmindset/mcp-engram`, `ENGRAM_DB_PATH`, `Template`, `Session` (+1033 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **154 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **152 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What is the exact relationship between `Golden rule: api/* never accesses Prisma directly, always via *-db module` and `Rating entity (TypeORM)`?**
   _Edge tagged AMBIGUOUS (relation: conceptually_related_to) - confidence is low._
-- **Why does `t()` connect `AuthPasswordService` to `PrismaDatasource`, `config-loader.ts`, `users-api.service.ts`, `professionals.controller.ts`, `auth-api.controller.spec.ts`, `auth.service.spec.ts`, `PaginationResponseDTO`, `RatingsDbService`, `pagination.dto.ts`, `edit-context.response.dto.ts`, `ProfessionalDetailResponseDTO`, `RolesDBService`, `locations.controller.ts`, `basic-auth.guard.ts`, `report.service.ts`, `middleware.config.ts`, `t`, `UsersDBService`, `ServicesDbService`, `AuthApiService`, `PaymentDbService`, `uploads.controller.ts`, `users-db.service.spec.ts`, `JwtAuthGuard`, `custom-http-response-helper.helper.ts`, `PromotionsService`, `CategoriesService`, `CreateCategoryDto`, `NotExpiredConstraint`, `ratings.controller.ts`, `uploads.service.ts`, `payments.service.ts`, `RatingsController`, `categories.controller.ts`, `WebSocketConfig`, `roles-permission-db/services/user-roles-db.service.spec.ts`, `PromotionDetailResponseDTO`, `user-permissions-db.service.spec.ts`, `UsersRolesApiController`, `UpdateLocationRequestDTO`, `CreateRatingRequestDTO`, `roles-permission-api.service.spec.ts`, `countries.controller.ts`, `@prisma/client`, `LocationsService`, `languages.controller.ts`, `currencies.controller.ts`, `LocationsGateway`, `services.service.ts`, `file-uploader.decorator.ts`, `CreateProfessionalRequestDTO`?**
-  _High betweenness centrality (0.138) - this node is a cross-community bridge._
-- **Why does `@prisma/client` connect `PrismaDatasource` to `config-loader.ts`, `users-api.service.ts`, `professionals.controller.ts`, `PaginatedRequest`, `auth-api.controller.spec.ts`, `auth.service.spec.ts`, `role-permissions-db.service.spec.ts`, `package.json`, `payments.controller.spec.ts`, `pagination.dto.ts`, `edit-context.response.dto.ts`, `AuthPasswordService`, `locations.controller.ts`, `basic-auth.guard.ts`, `file-download.interceptor.ts`, `middleware.config.ts`, `UsersDBService`, `promotions.controller.ts`, `users.controller.spec.ts`, `auth-api.service.spec.ts`, `users-db.service.spec.ts`, `services.controller.spec.ts`, `JwtAuthGuard`, `notifications.service.spec.ts`, `PaymentListQueryDTO`, `payments.module.ts`, `services.service.spec.ts`, `payment-db.service.spec.ts`, `CreateCategoryDto`, `payments.service.spec.ts`, `services.controller.ts`, `ratings.service.spec.ts`, `payments.service.ts`, `categories.controller.ts`, `CreateUserRequestDTO`, `roles-permission-db/services/user-roles-db.service.spec.ts`, `services-db.service.spec.ts`, `PromotionDetailResponseDTO`, `promotions.service.spec.ts`, `notifications.controller.ts`, `seed-dummy.ts`, `CreatePaymentDto`, `CreateRatingRequestDTO`, `UserRolesDBService`, `roles-permission-api.service.spec.ts`, `users-api.service.spec.ts`, `categories.controller.spec.ts`, `SearchCategoriesQueryDTO`, `notifications.service.ts`, `services.service.ts`, `users-db.service.ts`?**
-  _High betweenness centrality (0.135) - this node is a cross-community bridge._
+- **Why does `@prisma/client` connect `@prisma/client` to `PrismaDatasource`, `config-loader.ts`, `users-api.service.ts`, `professionals.controller.ts`, `PaginatedRequest`, `auth-api.controller.spec.ts`, `permissions-db.service.spec.ts`, `promotions-db.service.spec.ts`, `auth.service.spec.ts`, `role-permissions-db.service.spec.ts`, `PaginationResponseDTO`, `package.json`, `payments.controller.spec.ts`, `pagination.dto.ts`, `edit-context.response.dto.ts`, `RolesDBService`, `locations.controller.ts`, `basic-auth.guard.ts`, `ServiceRequestDetailResponseDTO`, `UsersDBService`, `promotions.controller.ts`, `users.controller.spec.ts`, `auth-api.service.spec.ts`, `ratings.service.ts`, `users-db.service.spec.ts`, `services.controller.spec.ts`, `JwtAuthGuard`, `i18n.helper.ts`, `notifications.service.spec.ts`, `PaymentListQueryDTO`, `services.service.spec.ts`, `payment-db.service.spec.ts`, `CreateCategoryDto`, `payments.service.spec.ts`, `services.controller.ts`, `ratings.service.spec.ts`, `payments.service.ts`, `categories.controller.ts`, `CreateUserRequestDTO`, `roles-permission-db/services/user-roles-db.service.spec.ts`, `services-db.service.spec.ts`, `PromotionDetailResponseDTO`, `user-permissions-db.service.spec.ts`, `promotions.service.spec.ts`, `notifications.controller.ts`, `seed-dummy.ts`, `CreateRatingRequestDTO`, `ListUsersRequestDTO`, `roles-permission-api.service.spec.ts`, `users-api.service.spec.ts`, `categories.controller.spec.ts`, `UpdateEditContextRequestDTO`, `SearchCategoriesQueryDTO`, `notifications.service.ts`, `services.service.ts`, `users-db.service.ts`?**
+  _High betweenness centrality (0.133) - this node is a cross-community bridge._
+- **Why does `t()` connect `t` to `PrismaDatasource`, `config-loader.ts`, `users-api.service.ts`, `professionals.controller.ts`, `auth-api.controller.spec.ts`, `auth.service.spec.ts`, `PaginationResponseDTO`, `RatingsDbService`, `PaymentController`, `AuthPasswordService`, `ProfessionalDetailResponseDTO`, `RolesDBService`, `locations.controller.ts`, `basic-auth.guard.ts`, `report.service.ts`, `middleware.config.ts`, `date-range.validator.ts`, `file-download.interceptor.ts`, `UsersDBService`, `PermissionsDBService`, `ServicesDbService`, `AuthApiService`, `PaymentDbService`, `auth-api.service.spec.ts`, `ratings.service.ts`, `uploads.controller.ts`, `users-db.service.spec.ts`, `i18n.helper.ts`, `custom-http-response-helper.helper.ts`, `is-order-by-format.validator.ts`, `JwtAuthGuard`, `PromotionsService`, `CategoriesService`, `payment-db.service.spec.ts`, `NotExpiredConstraint`, `uploads.service.ts`, `payments.service.ts`, `RatingsController`, `categories.controller.ts`, `WebSocketConfig`, `PromotionDetailResponseDTO`, `UpdateLocationRequestDTO`, `UserRolesDBService`, `roles-permission-api.service.spec.ts`, `countries.controller.ts`, `LocationsService`, `UpdateEditContextRequestDTO`, `languages.controller.ts`, `WsAuthGuard`, `currencies.controller.ts`, `LocationsGateway`, `services.service.ts`, `file-uploader.decorator.ts`, `password-policy.helper.ts`, `users-db.service.ts`?**
+  _High betweenness centrality (0.120) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `nestjs-i18n`, `nestjs-pino`, `@nestjs/platform-express`, `@nestjs/passport`, `@nestjs/platform-socket.io`, `@nestjs/schedule`, `@nestjs/swagger`, `@nestjs/terminus`, `@nestjs/websockets`, `node-geocoder`, `nodemailer`, `passport`, `package.json`, `passport-jwt`, `passport-local`, `pdfmake`, `pino-pretty`, `@prisma/client`, `rate-limit-redis`, `read-pkg-up`, `rxjs`, `socket.io`, `stripe`, `uuid`, `write-file-atomic`, `web-push`, `auth.service.spec.ts`, `aws-sdk`, `@aws-sdk/s3-request-presigner`, `bcrypt`, `bcryptjs`, `HbsRenderService`, `class-transformer`, `class-validator`, `cookie-parser`, `cors`, `date-fns`, `date-fns-tz`, `@nestjs/cache-manager`, `exceljs`, `express`, `fast-glob`, `firebase-admin`, `@nestjs/common`, `google-maps`, `helmet`, `ioredis`, `joi`, `jsonwebtoken`, `mongodb`, `mongoose`, `multer`, `nanoid`, `@nestjs/axios`, `@aws-sdk/client-s3`, `bull`, `@nestjs/bull`, `compression`, `@nestjs/config`, `@nestjs/core`, `@nestjs/jwt`, `@nestjs/mapped-types`, `@nestjs/mongoose`, `jwks-rsa`?**
   _High betweenness centrality (0.042) - this node is a cross-community bridge._
 - **Are the 52 inferred relationships involving `i()` (e.g. with `E()` and `Ea()`) actually correct?**
   _`i()` has 52 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `npx`, `@llmindset/mcp-engram`, `ENGRAM_DB_PATH` to the rest of the system?**
-  _1041 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1038 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `PrismaDatasource` be split into smaller, more focused modules?**
-  _Cohesion score 0.02242674283296308 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03354430379746835 - nodes in this community are weakly interconnected._
