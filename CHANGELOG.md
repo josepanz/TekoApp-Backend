@@ -1,3 +1,8 @@
+## 1.0.0-develop.17 (2026-08-08)
+
+* fix: allow a second partial refund on the same payment ([8485f2b](https://github.com/josepanz/TekoApp-Backend/commit/8485f2b))
+* fix: allow a second partial refund on the same payment (#27) ([587457f](https://github.com/josepanz/TekoApp-Backend/commit/587457f)), closes [#27](https://github.com/josepanz/TekoApp-Backend/issues/27)
+
 ## 1.0.0-develop.16 (2026-08-08)
 
 * feat: add missing GET /payments/methods endpoint (#26) ([af07134](https://github.com/josepanz/TekoApp-Backend/commit/af07134)), closes [#26](https://github.com/josepanz/TekoApp-Backend/issues/26)
