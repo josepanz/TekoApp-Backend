@@ -20,6 +20,7 @@ const mockPaymentsAggregate = jest.fn();
 const mockPaymentsCount = jest.fn();
 
 const mockServicesFindUnique = jest.fn();
+const mockProfessionalsFindUnique = jest.fn();
 
 const mockPaymentMethodFindFirst = jest.fn();
 const mockPaymentMethodFindMany = jest.fn();
@@ -39,6 +40,9 @@ const mockPrisma = {
   extended: {
     services: {
       findUnique: mockServicesFindUnique,
+    },
+    professionals: {
+      findUnique: mockProfessionalsFindUnique,
     },
     payments: {
       findFirst: mockPaymentsFindFirst,
@@ -129,6 +133,35 @@ describe('PaymentDbService', () => {
         where: { referenceId: 'svc-uuid-1' },
         select: { id: true },
       });
+    });
+  });
+
+  // ── findProfessionalByReferenceId ─────────────────────────────────────────────
+  describe('findProfessionalByReferenceId', () => {
+    it('debe resolver el UUID público del profesional a su PK interna', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue({ id: 20 });
+
+      // Act
+      const result = await service.findProfessionalByReferenceId('prof-uuid-1');
+
+      // Assert
+      expect(result).toEqual({ id: 20 });
+      expect(mockProfessionalsFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'prof-uuid-1' },
+        select: { id: true },
+      });
+    });
+
+    it('debe retornar null cuando el profesional no existe', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findProfessionalByReferenceId('no-existe');
+
+      // Assert
+      expect(result).toBeNull();
     });
   });
 
@@ -325,20 +358,86 @@ describe('PaymentDbService', () => {
     });
   });
 
-  // ── clearDefaultPaymentMethods ───────────────────────────────────────────────
-  describe('clearDefaultPaymentMethods', () => {
-    it('debe desactivar todos los métodos de pago por defecto del usuario', async () => {
+  // ── setPaymentMethodAsDefault ─────────────────────────────────────────────────
+  describe('setPaymentMethodAsDefault', () => {
+    it('debe limpiar el default anterior y setear el nuevo dentro de la misma transacción', async () => {
       // Arrange
-      mockPaymentMethodUpdateMany.mockResolvedValue({ count: 2 });
+      const mockClear = jest.fn().mockResolvedValue({ count: 1 });
+      const mockUpdate = jest
+        .fn()
+        .mockResolvedValue({ ...fakePaymentMethod, isDefault: true });
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            paymentMethodEntity: { updateMany: mockClear, update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
 
       // Act
-      await service.clearDefaultPaymentMethods(10);
+      const result = await service.setPaymentMethodAsDefault(1, 10, {
+        isDefault: true,
+      });
 
       // Assert
-      expect(mockPaymentMethodUpdateMany).toHaveBeenCalledWith({
+      expect(mockClear).toHaveBeenCalledWith({
         where: { userId: 10, isDefault: true },
         data: { isDefault: false },
       });
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isDefault: true },
+      });
+      expect(result).toEqual({ ...fakePaymentMethod, isDefault: true });
+    });
+  });
+
+  // ── deactivatePaymentMethodIfNotLast ────────────────────────────────────────
+  describe('deactivatePaymentMethodIfNotLast', () => {
+    it('debe desactivar el método cuando el usuario tiene más de un método activo', async () => {
+      // Arrange
+      const mockUpdate = jest.fn().mockResolvedValue({});
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+            paymentMethodEntity: { update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act
+      const result = await service.deactivatePaymentMethodIfNotLast(1, 10);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isActive: false },
+      });
+    });
+
+    it('debe devolver false sin desactivar cuando es el único método activo', async () => {
+      // Arrange
+      const mockUpdate = jest.fn();
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: jest.fn().mockResolvedValue([{ id: 1 }]),
+            paymentMethodEntity: { update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act
+      const result = await service.deactivatePaymentMethodIfNotLast(1, 10);
+
+      // Assert
+      expect(result).toBe(false);
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
   });
 
