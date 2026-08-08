@@ -1,3 +1,10 @@
+## 1.0.0-develop.16 (2026-08-08)
+
+* feat: add missing GET /payments/methods endpoint (#26) ([af07134](https://github.com/josepanz/TekoApp-Backend/commit/af07134)), closes [#26](https://github.com/josepanz/TekoApp-Backend/issues/26)
+* feat(payments): add missing GET /payments/methods endpoint ([356ecd4](https://github.com/josepanz/TekoApp-Backend/commit/356ecd4))
+* chore: close phase-A backend audit — update context and knowledge graph ([76c0192](https://github.com/josepanz/TekoApp-Backend/commit/76c0192)), closes [#24](https://github.com/josepanz/TekoApp-Backend/issues/24)
+* chore: close phase-A backend audit (context + knowledge graph) (#25) ([66a19e0](https://github.com/josepanz/TekoApp-Backend/commit/66a19e0)), closes [#25](https://github.com/josepanz/TekoApp-Backend/issues/25) [#24](https://github.com/josepanz/TekoApp-Backend/issues/24)
+
 ## 1.0.0-develop.15 (2026-08-08)
 
 * fix: payments/ratings concurrency gaps and professionalId UUID bug (#24) ([2464b1f](https://github.com/josepanz/TekoApp-Backend/commit/2464b1f)), closes [#24](https://github.com/josepanz/TekoApp-Backend/issues/24)
