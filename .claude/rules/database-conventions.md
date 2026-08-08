@@ -13,18 +13,22 @@ API a TekoApp-Frontend-Web o TekoApp-Mobile) debe tener:
 Patrón ya aplicado en `Users`, `Professionals`, `Roles`, `Category` (ver
 `.claude/rules/typescript.md`).
 
-## Excepción ya existente y aceptada (no migrar sin decidirlo explícitamente)
+## Corrección (2026-08-08): la "excepción" de abajo ya no existe en el schema real
 
-`Services`, `ServiceRequests`, `PaymentMethodEntity`, `Payments`, `PaymentTransaction`, `Rating`
-usan **UUID como PK primaria** (`id String @id @default(uuid())`) en vez del patrón `id`
-secuencial + `referenceId` separado — decisión ya tomada, con FKs `String` en cascada sobre varias
-tablas (`serviceId`, `paymentId`, `paymentMethodId`, etc.). Comparado contra
-`portal-comercios-backend` (que sí sigue el patrón `id` secuencial + `referenceId` en toda su capa
-de negocio, incluyendo un caso de refactor real de UUID-como-PK a secuencial en `qr_payments`):
-UUID como PK fragmenta el índice B-tree en inserts aleatorios y mezcla el id interno con el
-público — pero **migrar esto ahora es un refactor grande** (toca FKs en cascada en múltiples
-tablas), no algo para hacer de forma incidental. Si se decide encarar, la ventana más barata es
-durante otra migración/squash grande, no aislado.
+Esta sección afirmaba que `Services`, `ServiceRequests`, `PaymentMethodEntity`, `Payments`,
+`PaymentTransaction` y `Rating` usaban UUID como PK primaria — **desactualizado**: se verificó
+`prisma/schema.prisma` línea por línea (2026-08-08) y los 6 modelos YA tienen
+`id Int @id @default(autoincrement())` + `referenceId String @unique @default(uuid())`, el mismo
+patrón que `Users`/`Professionals`/`Category`. No hay ninguna migración de PK pendiente — el
+schema ya está estandarizado. Lo que sí seguía siendo un problema real (y ya se corrigió en esta
+misma sesión): `CreatePaymentDto.professionalId` viaja como `referenceId` (UUID) pero
+`PaymentApiService.createPayment` lo convertía con `Number(...)` en vez de resolverlo contra la
+tabla `professionals` — daba `NaN`. Fix: `PaymentDbService.findProfessionalByReferenceId` +
+resolución explícita antes de crear el pago (ver `payments.service.ts`).
+
+Antes de confiar en cualquier afirmación de este archivo sobre el estado de una tabla puntual,
+grepear `model <Nombre>` en `schema.prisma` — este documento puede volver a quedar desactualizado
+si el schema cambia sin actualizar esta nota.
 
 ## Al agregar `referenceId` a una tabla con datos existentes
 
