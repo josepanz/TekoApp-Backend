@@ -130,6 +130,15 @@ export class AuthApiController {
     return await this.authApiService.generateNonce();
   }
 
+  @Get('public-key')
+  @Version('1')
+  @ApiBasicAuth()
+  @UseGuards(BasicAuthGuard)
+  @AuthDocs('publicKey')
+  publicKey(): DTO.PublicKeyResponseDTO {
+    return this.authApiService.publicKey();
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

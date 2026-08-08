@@ -3,3 +3,4 @@ export * from './user-scope.response.dto';
 export * from './password.dto.response';
 export * from './nonce.response.dto';
 export * from './me.response.dto';
+export * from './public-key.response.dto';
