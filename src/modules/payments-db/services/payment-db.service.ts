@@ -244,8 +244,9 @@ export class PaymentDbService {
    * dos reembolsos concurrentes sobre el mismo pago pueden leer el mismo `refundedAmount`
    * acumulado antes de que ninguno escriba, y el segundo en confirmar pisa (no suma) el
    * resultado del primero — riesgo real de doble reembolso o de perder el registro de uno de
-   * los dos. Mantiene el mismo comportamiento que antes (solo pagos COMPLETED son reembolsables)
-   * — la única diferencia es que ahora es seguro bajo concurrencia.
+   * los dos. Son reembolsables los pagos en COMPLETED o PARTIAL_REFUNDED (para permitir
+   * reembolsos parciales sucesivos sobre el mismo pago); cualquier otro estado (REFUNDED,
+   * PENDING, PROCESSING, FAILED, CANCELLED) se rechaza con el mismo mensaje.
    *
    * `paymentId` es la PK interna (Int) ya resuelta en la capa API; el `SELECT ... FOR UPDATE`
    * usa el valor directamente (sin cast `::uuid`, que rompería contra una columna integer).
@@ -269,7 +270,10 @@ export class PaymentDbService {
       if (!payment) {
         throw new NotFoundException(t('payments.NOT_FOUND'));
       }
-      if (payment.status !== PaymentStatus.COMPLETED) {
+      if (
+        payment.status !== PaymentStatus.COMPLETED &&
+        payment.status !== PaymentStatus.PARTIAL_REFUNDED
+      ) {
         throw new BadRequestException(
           t('payments.ONLY_COMPLETED_CAN_BE_REFUNDED'),
         );
