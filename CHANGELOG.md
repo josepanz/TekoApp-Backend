@@ -1,3 +1,10 @@
+## 1.0.0-develop.15 (2026-08-08)
+
+* fix: payments/ratings concurrency gaps and professionalId UUID bug (#24) ([2464b1f](https://github.com/josepanz/TekoApp-Backend/commit/2464b1f)), closes [#24](https://github.com/josepanz/TekoApp-Backend/issues/24)
+* fix(payments): resolve professionalId by UUID and close payment-method concurrency gaps ([a9eee2a](https://github.com/josepanz/TekoApp-Backend/commit/a9eee2a))
+* fix(ratings): translate unique-constraint collision to the same ALREADY_RATED error ([fbb8c21](https://github.com/josepanz/TekoApp-Backend/commit/fbb8c21))
+* docs: correct stale PK and TOCTOU backlog notes in backend rules ([f72bb73](https://github.com/josepanz/TekoApp-Backend/commit/f72bb73))
+
 ## 1.0.0-develop.14 (2026-08-08)
 
 * feat(auth): exponer GET /auth/public-key para clientes sin servidor propio ([8a1363e](https://github.com/josepanz/TekoApp-Backend/commit/8a1363e))
