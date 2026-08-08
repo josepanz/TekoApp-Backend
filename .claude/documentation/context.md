@@ -162,3 +162,39 @@ src/
 
 ### Pendientes
 - [ ] Frontend web (TekoApp-Web) — próximo foco de trabajo, backend queda como base estable
+
+## Estado actual — Sesión 2026-08-08 (auditoría de pagos/ratings, PR #24 mergeado)
+
+Disparada por el avance de la Fase 0004 de `TekoApp-Frontend-Mobile` (pagos y calificaciones) — se
+auditó el backend real antes de que mobile construya contra él, siguiendo el mismo criterio de
+"verificar contra el código, no contra el backlog documentado" de sesiones anteriores.
+
+**Corregido (PR #24, mergeado a `develop`)**:
+- `PaymentApiService.createPayment` resolvía `professionalId` con `Number(dto.professionalId)`
+  sobre un campo tipado `@IsUUID()` — daba `NaN`. Ahora resuelve por `referenceId` vía
+  `PaymentDbService.findProfessionalByReferenceId` (mismo patrón que `findServiceByReferenceId`).
+- Dos condiciones de carrera reales en métodos de pago, no documentadas antes: `deletePaymentMethod`
+  (dos bajas concurrentes de métodos distintos podían dejar 0 métodos activos) y "marcar como
+  default" (dos marcados concurrentes podían dejar 2 métodos `isDefault=true`). Ambos resueltos con
+  `SELECT ... FOR UPDATE`/transacción, mismo mecanismo que ya usaba `executeRefund`.
+- `ratings.service.ts` `create`/`createProfessionalToClientRating`: la ventana de carrera de
+  `findDuplicate`+`create` ahora traduce el `P2002` del `@@unique` a `ALREADY_RATED` (400) en vez
+  de dejar pasar el 409 genérico del filtro global de Prisma.
+
+**Documentación corregida por estar desactualizada** (no reflejaban el código real):
+- `database-conventions.md` decía que `Services`/`ServiceRequests`/`PaymentMethodEntity`/
+  `Payments`/`PaymentTransaction`/`Rating` usaban UUID como PK — **falso hoy**, los 6 ya tienen
+  `id` (Int) + `referenceId` (UUID) en `schema.prisma`. No hay ninguna migración de PK pendiente.
+- `typescript.md`: el backlog de TOCTOU de 2026-07-21 listaba `services.service.ts`,
+  `payments.service.ts` (cancel/refund) y `promotions.service.ts` (`applyPromotion`) como
+  pendientes — los 3 ya estaban resueltos (verificado leyendo el código), probablemente arreglados
+  en una sesión intermedia sin actualizar esa nota.
+
+**Lección de esta sesión**: antes de "corregir" algo señalado en un backlog o regla vieja, releer
+el código real — dos de tres hallazgos que parecían pendientes ya estaban resueltos, y el
+verdadero trabajo estaba en gaps sin documentar todavía (los 2 de `payment-db.service.ts`).
+
+**Próximo paso**: Fase 0004 de `TekoApp-Frontend-Mobile` (pagos y calificaciones) se construye
+contra este backend ya corregido. Pendiente explícito, no abordado en esta sesión: exponer `id`
+(Int) separado de `referenceId` (UUID) en la respuesta pública de los 6 modelos de arriba —
+hoy siguen exponiendo el UUID bajo la clave `id` (retrocompatible), igual que siempre.
