@@ -180,6 +180,13 @@ export class PaymentApiService {
 
   // ==================== MÉTODOS DE PAGO ====================
 
+  async getPaymentMethods(
+    userId: number,
+  ): Promise<PaymentMethodDetailResponseDTO[]> {
+    const methods = await this.dbService.findAllPaymentMethods(userId);
+    return methods.map((method) => mapPaymentMethodToResponse(method));
+  }
+
   async createPaymentMethod(
     userId: number,
     dto: CreatePaymentMethodRequestDTO,
