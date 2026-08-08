@@ -360,13 +360,31 @@ src/modules/<domain>-db/
 - **Transiciones de estado (`status`) SIEMPRE vía `updateMany({ where: { id, status: { in:
   [ESTADOS_VÁLIDOS] } }, data: {...} })` + chequear `count === 0` → `ConflictException`** — nunca
   `findUnique` + validar en código + `update()` plano incondicional (patrón TOCTOU: dos requests
-  concurrentes pueden pasar ambas la validación inicial antes de que la primera escriba). Gap real
-  confirmado hoy en `services.service.ts` (`acceptService`/`startService`/`completeService`/
-  `cancelService`/`respondToServiceRequest`), `payments.service.ts` (`cancelPayment`/
-  `refundPayment` — riesgo de doble reembolso si corre en paralelo con el webhook) y
-  `promotions.service.ts` (`applyPromotion`/`validatePromotion` — `maxUsage` puede excederse con
-  redenciones concurrentes). Retrofit pendiente, priorizar `payments.service.ts` primero (dinero
-  real en juego) — ver memoria de proyecto para el backlog completo.
+  concurrentes pueden pasar ambas la validación inicial antes de que la primera escriba).
+
+  **Actualizado 2026-08-08** — el gap de 2026-07-21 estaba desactualizado en la mayoría de los
+  puntos que listaba; re-auditado leyendo el código real, no el backlog viejo:
+  - `services.service.ts` (`acceptService`/`startService`/`completeService`/`cancelService`/
+    `respondToServiceRequest`): YA usa `updateMany` condicional. Resuelto.
+  - `payments.service.ts` (`cancelPayment` vía `updatePaymentConditional`, `refundPayment` vía
+    `SELECT ... FOR UPDATE` en `executeRefund`): YA es seguro. Resuelto.
+  - `promotions.service.ts` (`applyPromotion`): YA es atómico — `applyTransaction` hace un
+    `UPDATE ... WHERE (max_usage = -1 OR current_usage < max_usage) RETURNING id` dentro de una
+    transacción, así que una redención que agota el cupo entre la validación y el apply falla
+    limpio (`MAX_USES_REACHED`), no excede `maxUsage`. Resuelto.
+  - Gaps reales nuevos encontrados y corregidos en esta sesión (no estaban en el backlog de
+    2026-07-21): `PaymentDbService.deletePaymentMethod` (dos bajas concurrentes de métodos de pago
+    distintos podían dejar a un usuario con 0 métodos activos — fix:
+    `deactivatePaymentMethodIfNotLast` con `SELECT ... FOR UPDATE` sobre todos los métodos activos
+    del usuario) y "marcar método como default" (dos marcados concurrentes podían dejar dos
+    métodos con `isDefault=true` — fix: `setPaymentMethodAsDefault`, clear+set en una sola
+    transacción). También se blindó `ratings.service.ts` `create`/`createProfessionalToClientRating`
+    contra la ventana de carrera del chequeo `findDuplicate`+`create` atrapando el `P2002` del
+    `@@unique` de `Rating` y traduciéndolo al mismo `BadRequestException(ALREADY_RATED)` en vez de
+    dejar que el filtro genérico de Prisma devuelva un 409 distinto.
+
+  Lección: no confiar en un audit de backlog para decidir qué está roto — releer el código real
+  antes de "corregir" algo que ya se arregló en otra sesión.
 - **Nunca lanzar `NotFoundException` cuando un endpoint de listado/búsqueda da 0 resultados** —
   responder `200` con `data: []`. Un cliente HTTP no debería tratar "sin resultados" como error.
   Verificado 2026-07-22: el anti-patrón NO existe en ningún endpoint real de este proyecto hoy —
