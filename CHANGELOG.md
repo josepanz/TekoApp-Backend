@@ -1,3 +1,11 @@
+## 1.0.0-develop.18 (2026-08-09)
+
+* chore: add minio service for local S3-compatible storage ([5f56bcd](https://github.com/josepanz/TekoApp-Backend/commit/5f56bcd))
+* chore: entorno dev/demo local (mobile client, MinIO S3, guía) (#28) ([5699729](https://github.com/josepanz/TekoApp-Backend/commit/5699729)), closes [#28](https://github.com/josepanz/TekoApp-Backend/issues/28)
+* docs: close id/referenceId decision, add dev/demo environment guide ([e7df018](https://github.com/josepanz/TekoApp-Backend/commit/e7df018))
+* feat: support S3-compatible endpoints for local/demo storage ([a72eafa](https://github.com/josepanz/TekoApp-Backend/commit/a72eafa))
+* fix: register tekoapp-mobile basic-auth client in seed ([30f0032](https://github.com/josepanz/TekoApp-Backend/commit/30f0032))
+
 ## 1.0.0-develop.17 (2026-08-08)
 
 * fix: allow a second partial refund on the same payment ([8485f2b](https://github.com/josepanz/TekoApp-Backend/commit/8485f2b))
