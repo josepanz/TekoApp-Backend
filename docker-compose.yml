@@ -41,6 +41,24 @@ services:
     networks:
       - tekoapp-network
 
+  # Almacenamiento S3-compatible para dev/demo local (sin cuenta AWS, sin tarjeta) — el backend
+  # apunta acá seteando S3_ENDPOINT=http://localhost:9000 y S3_FORCE_PATH_STYLE=true en .env.
+  # Consola web de administración (crear el bucket manualmente la primera vez) en :9001.
+  minio:
+    image: minio/minio:latest
+    container_name: tekoapp-minio
+    environment:
+      MINIO_ROOT_USER: tekoapp
+      MINIO_ROOT_PASSWORD: tekoapp123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - tekoapp-network
+    command: server /data --console-address ":9001"
+
   # Backend de la aplicación
   backend:
     build:
@@ -74,6 +92,7 @@ volumes:
   postgres_data:
   mongodb_data:
   redis_data:
+  minio_data:
 
 networks:
   tekoapp-network:
