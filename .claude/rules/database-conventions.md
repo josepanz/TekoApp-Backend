@@ -47,3 +47,23 @@ Reemplazar `id` numérico por `referenceId` en parámetros de ruta (`GET /:id` �
 y en los DTOs de respuesta que hoy exponen el id numérico es un entregable separado — no se
 modifica el contrato público de la API al aplicar esta convención a una tabla nueva, solo el
 modelo de datos.
+
+## Decisión final (2026-08-08): exponer `id` + `referenceId` por separado en TODOS los dominios
+
+Ya no es una excepción pendiente de confirmar — José decidió ejecutarlo. Contrato estándar para
+TODA entidad de negocio, en detalle Y en listado:
+
+- `id` (Int secuencial): solo para ordenamiento en la UI — **nunca** se usa como clave de consulta
+  ni aparece en una ruta (`GET /:id` sigue resolviendo por `referenceId`, no cambia el parámetro).
+- `referenceId` (UUID): la única clave válida para consultar/rutear/deep-link, igual que hoy.
+
+Ejecutar esto AHORA, en desarrollo, es deliberadamente más barato que después de publicar: hoy no
+hay usuarios reales ni apps ya instaladas desde una tienda leyendo el contrato viejo, así que
+agregar el campo `id` a la respuesta de los 6 dominios que hoy solo devuelven el UUID bajo esa
+clave (`Services`, `ServiceRequests`, `PaymentMethodEntity`, `Payments`, `PaymentTransaction`,
+`Rating`) es un cambio aditivo sin breaking change real, coordinado con `TekoApp-Frontend-Mobile`/
+`TekoApp-Web` en el mismo ciclo (deben empezar a usar `id` solo para sort, nunca para navegar).
+Pendiente de implementación — ver backlog en `TekoApp-Frontend-Mobile/openspec/decisions.md`
+("Backlog — features grandes pedidas 2026-08-08", ítem 1) para el detalle y la razón de no
+haberlo ejecutado en la misma sesión que esta nota (tocar 6 dominios × 3 repos amerita su propia
+spec/fase, no un cambio ad-hoc).
