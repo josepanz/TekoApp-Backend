@@ -70,6 +70,10 @@ export const APP_CONFIG = registerAs('config', () => {
       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
       bucketName: process.env.S3_BUCKET_NAME,
       region: process.env.S3_REGION,
+      // Solo para proveedores S3-compatibles que no son AWS real (MinIO local, Cloudflare R2,
+      // etc.) — sin setear, el SDK resuelve el endpoint real de AWS por `region` como siempre.
+      endpoint: process.env.S3_ENDPOINT || undefined,
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
       maxConcurrency: process.env.S3_MAX_CONCURRENCY
         ? parseInt(process.env.S3_MAX_CONCURRENCY)
         : 5,
