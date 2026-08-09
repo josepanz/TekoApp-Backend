@@ -15,6 +15,12 @@ import { STORAGE_MODULE_OPTIONS } from './interfaces/storage.interface';
             accessKeyId: APP_CONFIG().s3.accessKeyId,
             secretAccessKey: APP_CONFIG().s3.secretAccessKey,
           },
+          ...(APP_CONFIG().s3.endpoint
+            ? {
+                endpoint: APP_CONFIG().s3.endpoint,
+                forcePathStyle: APP_CONFIG().s3.forcePathStyle,
+              }
+            : {}),
         }),
     },
     {
