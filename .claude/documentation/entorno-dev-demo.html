@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TekoApp — Entorno dev/demo</title>
+<style>
+  :root{
+    --bg:#F6FAF6; --surface:#FFFFFF; --surface-2:#EEF4EE; --border:#DCE7DD;
+    --ink:#132018; --ink-soft:#4C5C52; --ink-faint:#7C8C82;
+    --primary:#1E7A34; --primary-fill:#28A745; --primary-soft:#E4F4E8;
+    --accent:#0E9B98; --accent-soft:#E1F6F5;
+    --warn:#8A5A0B; --warn-soft:#FBEFD8;
+    --info:#4A5568; --info-soft:#EEF1F4;
+    --code-bg:#0F1712; --code-ink:#DCEFE1; --code-accent:#7FE0A9;
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0D130F; --surface:#131C16; --surface-2:#0F1712; --border:#213028;
+      --ink:#E7F0EA; --ink-soft:#A9BCB1; --ink-faint:#7C9084;
+      --primary:#4FCB74; --primary-fill:#28A745; --primary-soft:#132A1C;
+      --accent:#4CD9D4; --accent-soft:#0F2726;
+      --warn:#E3B968; --warn-soft:#2B2210;
+      --info:#B7C2CC; --info-soft:#1A2126;
+      --code-bg:#0A100C; --code-ink:#DCEFE1; --code-accent:#7FE0A9;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D130F; --surface:#131C16; --surface-2:#0F1712; --border:#213028;
+    --ink:#E7F0EA; --ink-soft:#A9BCB1; --ink-faint:#7C9084;
+    --primary:#4FCB74; --primary-fill:#28A745; --primary-soft:#132A1C;
+    --accent:#4CD9D4; --accent-soft:#0F2726;
+    --warn:#E3B968; --warn-soft:#2B2210;
+    --info:#B7C2CC; --info-soft:#1A2126;
+    --code-bg:#0A100C; --code-ink:#DCEFE1; --code-accent:#7FE0A9;
+  }
+
+  *{box-sizing:border-box}
+  html{background:var(--bg);}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  code, pre, kbd, .mono{
+    font-family:ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace;
+  }
+
+  .wrap{max-width:920px; margin:0 auto; padding:0 20px 96px;}
+
+  header.top{
+    padding:44px 20px 28px; text-align:left;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,var(--surface-2),var(--bg));
+  }
+  header.top .inner{max-width:920px; margin:0 auto;}
+  .eyebrow{
+    font-size:12.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--primary); margin:0 0 10px;
+  }
+  h1{
+    font-size:clamp(26px,4vw,36px); line-height:1.15; margin:0 0 10px;
+    letter-spacing:-.01em; text-wrap:balance; font-weight:700;
+  }
+  header.top p.sub{
+    margin:0; color:var(--ink-soft); font-size:16px; max-width:62ch; text-wrap:balance;
+  }
+
+  .legend{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600;
+    padding:5px 11px; border-radius:999px; border:1px solid transparent;
+  }
+  .chip .dot{width:7px; height:7px; border-radius:50%; flex:none;}
+  .chip.ok{background:var(--primary-soft); color:var(--primary); border-color:color-mix(in srgb, var(--primary) 25%, transparent);}
+  .chip.ok .dot{background:var(--primary-fill);}
+  .chip.warn{background:var(--warn-soft); color:var(--warn); border-color:color-mix(in srgb, var(--warn) 30%, transparent);}
+  .chip.warn .dot{background:var(--warn);}
+  .chip.info{background:var(--info-soft); color:var(--info); border-color:color-mix(in srgb, var(--info) 25%, transparent);}
+  .chip.info .dot{background:var(--info);}
+
+  nav.jump{
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    border-bottom:1px solid var(--border); padding:10px 20px;
+    overflow-x:auto; white-space:nowrap;
+  }
+  nav.jump .inner{max-width:920px; margin:0 auto; display:flex; gap:6px;}
+  nav.jump a{
+    flex:none; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    text-decoration:none; padding:6px 11px; border-radius:8px; border:1px solid var(--border);
+  }
+  nav.jump a:hover{color:var(--ink); border-color:var(--primary);}
+
+  section.phase{padding:40px 0; border-bottom:1px solid var(--border);}
+  section.phase:last-of-type{border-bottom:none;}
+  .phase-head{display:flex; align-items:baseline; gap:14px; margin-bottom:14px;}
+  .phase-num{
+    font-family:ui-monospace,Consolas,monospace; font-size:13px; font-weight:700;
+    color:var(--primary); background:var(--primary-soft); border-radius:7px;
+    padding:3px 8px; flex:none;
+  }
+  h2{font-size:21px; margin:0; letter-spacing:-.01em; text-wrap:balance;}
+  h3{font-size:15.5px; margin:26px 0 10px; color:var(--ink);}
+  p{margin:0 0 14px; color:var(--ink-soft); max-width:70ch;}
+  p.note{
+    font-size:13.5px; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:var(--radius); padding:10px 14px; color:var(--ink-soft);
+  }
+  strong{color:var(--ink); font-weight:650;}
+  a{color:var(--accent);}
+
+  ol.steps{margin:0 0 16px; padding-left:0; list-style:none; counter-reset:step;}
+  ol.steps > li{
+    counter-increment:step; position:relative; padding:2px 0 14px 34px; color:var(--ink-soft);
+  }
+  ol.steps > li::before{
+    content:counter(step); position:absolute; left:0; top:1px;
+    width:22px; height:22px; border-radius:50%; background:var(--surface-2);
+    border:1px solid var(--border); color:var(--ink); font-size:12px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  ul.plain{margin:0 0 14px; padding-left:20px; color:var(--ink-soft);}
+  ul.plain li{margin-bottom:6px;}
+
+  .codeblock{
+    background:var(--code-bg); border-radius:var(--radius); margin:0 0 16px;
+    border:1px solid color-mix(in srgb, var(--code-bg) 60%, white 8%);
+    overflow:hidden;
+  }
+  .codeblock .bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:7px 12px; font-size:11px; color:#82998C; letter-spacing:.04em;
+    text-transform:uppercase; font-weight:600; border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .codeblock pre{
+    margin:0; padding:14px 16px; overflow-x:auto; font-size:13px; color:var(--code-ink);
+    line-height:1.6;
+  }
+  .codeblock .c{color:#6E8A79;}
+
+  .table-scroll{overflow-x:auto; margin:0 0 16px; border:1px solid var(--border); border-radius:var(--radius);}
+  table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px;}
+  thead th{
+    text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-faint); background:var(--surface-2); padding:10px 14px;
+    border-bottom:1px solid var(--border); white-space:nowrap;
+  }
+  tbody td{padding:11px 14px; border-bottom:1px solid var(--border); color:var(--ink-soft); vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  td strong, td.name{color:var(--ink); font-weight:600;}
+  td code{background:var(--surface-2); padding:1px 6px; border-radius:5px; font-size:12.5px; color:var(--ink);}
+
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-bottom:16px;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px;}
+  .card h4{margin:0 0 6px; font-size:14px; color:var(--ink);}
+  .card p{margin:0; font-size:13px; color:var(--ink-soft);}
+
+  .changelog{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px;
+  }
+  .changelog ul{margin:0; padding-left:18px;}
+  .changelog li{color:var(--ink-soft); font-size:13.5px; margin-bottom:8px;}
+  .changelog code{background:var(--surface-2); padding:1px 6px; border-radius:5px; color:var(--ink);}
+
+  footer{padding:36px 20px 60px; text-align:center; color:var(--ink-faint); font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <p class="eyebrow">TekoApp · guía de entorno</p>
+    <h1>Corré la app en tu teléfono y armá el entorno demo, todo gratis</h1>
+    <p class="sub">Android por cable sin Android Studio, contra el backend en tu PC. Servicios externos en su capa gratuita. Nada de esto toca producción, tiendas ni tu dominio.</p>
+    <div class="legend">
+      <span class="chip ok"><span class="dot"></span>Gratis, sin tarjeta</span>
+      <span class="chip warn"><span class="dot"></span>Gratis, pide tarjeta</span>
+      <span class="chip info"><span class="dot"></span>Opcional / para más adelante</span>
+    </div>
+  </div>
+</header>
+
+<nav class="jump">
+  <div class="inner">
+    <a href="#mapa">Mapa</a>
+    <a href="#f1">1. SDK Android</a>
+    <a href="#f2">2. Conectar el cable</a>
+    <a href="#f3">3. Backend + servicios</a>
+    <a href="#f4">4. Usuarios de prueba</a>
+    <a href="#f5">5. Correr en tu Android</a>
+    <a href="#f6">6. iOS en la Mac</a>
+    <a href="#f7">7. Demo en internet</a>
+    <a href="#changelog">Qué se tocó</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<section class="phase" id="mapa">
+  <div class="phase-head"><h2>Mapa del entorno</h2></div>
+  <p>Dos modos, no los mezcles: <strong>Modo local</strong> (tu teléfono por cable, todo corriendo en tu PC) y <strong>Modo demo pública</strong> (opcional, un link que otra persona puede abrir sin tu PC prendida).</p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Pieza</th><th>Modo local (hoy)</th><th>Modo demo pública (opcional, Fase 7)</th></tr></thead>
+      <tbody>
+        <tr><td class="name">Backend</td><td>Tu PC, <code>pnpm run start:dev</code>, puerto 3000</td><td>Render.com (free web service)</td></tr>
+        <tr><td class="name">Base de datos</td><td>Docker Compose en tu PC (ya existe en el repo)</td><td>Neon (Postgres) + MongoDB Atlas</td></tr>
+        <tr><td class="name">Web</td><td>Tu PC, <code>npm run dev</code>, puerto 3001</td><td>Vercel (free)</td></tr>
+        <tr><td class="name">Mobile Android</td><td>Tu teléfono por USB, <code>adb reverse</code> hacia tu PC</td><td>— (no aplica, no hay tienda todavía)</td></tr>
+        <tr><td class="name">Mobile iOS</td><td>Mac + Simulator, misma WiFi que tu PC</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Las Fases 1 a 6 son <strong>Modo local</strong> — andá directo ahí si lo único que querés hoy es ver la app en tu teléfono. La Fase 7 es aparte y solo hace falta si en algún momento querés mandarle un link a alguien que no está en tu red.</p>
+</section>
+
+<section class="phase" id="f1">
+  <div class="phase-head"><span class="phase-num">01</span><h2>SDK de Android sin instalar Android Studio</h2></div>
+  <p>Flutter necesita el <strong>Android SDK</strong> para compilar, no el IDE completo. Se instalan solo las "command-line tools" (unos MB, no unos GB).</p>
+  <ol class="steps">
+    <li>Descargar <strong>"Command line tools only"</strong> para Windows desde la página oficial de Android Studio (sección "Command line tools only", más abajo que el instalador completo — no descargar ese).</li>
+    <li>Descomprimir el zip de forma que quede exactamente en esta ruta (Android exige el nombre de carpeta <code>latest</code>, si no se respeta <code>sdkmanager</code> no lo encuentra):
+      <div class="codeblock"><div class="bar">powershell</div><pre>%LOCALAPPDATA%\Android\sdk\cmdline-tools\latest\bin\sdkmanager.bat</pre></div>
+    </li>
+    <li>Configurar las variables de entorno (una vez, quedan permanentes):
+      <div class="codeblock"><div class="bar">powershell</div><pre>setx ANDROID_HOME "%LOCALAPPDATA%\Android\sdk"
+setx PATH "%PATH%;%LOCALAPPDATA%\Android\sdk\platform-tools;%LOCALAPPDATA%\Android\sdk\cmdline-tools\latest\bin"</pre></div>
+      Cerrar y volver a abrir la terminal para que tomen efecto.
+    </li>
+    <li>Aceptar licencias e instalar lo mínimo necesario:
+      <div class="codeblock"><div class="bar">powershell</div><pre>sdkmanager --licenses
+sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+flutter config --android-sdk "%ANDROID_HOME%"</pre></div>
+    </li>
+    <li>Verificar con <code>flutter doctor -v</code>. La línea de <strong>Android toolchain</strong> debe quedar en verde. La línea de <strong>Android Studio</strong> va a seguir en rojo/amarillo — <strong>ignorarla</strong>, no hace falta para <code>flutter run</code> en un dispositivo físico.</li>
+  </ol>
+</section>
+
+<section class="phase" id="f2">
+  <div class="phase-head"><span class="phase-num">02</span><h2>Conectar el teléfono al backend</h2></div>
+  <p>Como el teléfono va por <strong>cable</strong>, la forma más simple y confiable no es la WiFi — es <code>adb reverse</code>: el teléfono le pega a <code>localhost</code> y Android lo reenvía a la PC por el mismo USB. Cero configuración de firewall, cero IPs que cambian.</p>
+  <h3>Opción recomendada — USB con adb reverse</h3>
+  <ol class="steps">
+    <li>Conectar el cable. En el teléfono aparece un diálogo "¿Permitir depuración USB?" → aceptar (marcar "siempre desde esta compu" para no repetirlo).</li>
+    <li>Confirmar que Windows lo ve autorizado:
+      <div class="codeblock"><div class="bar">powershell</div><pre>adb devices
+<span class="c"># debe decir "device", no "unauthorized" ni "offline"</span></pre></div>
+    </li>
+    <li>Reenviar el puerto del backend (repetir cada vez que se desconecta/reconecta el cable o se reinicia la PC — no es persistente):
+      <div class="codeblock"><div class="bar">powershell</div><pre>adb reverse tcp:3000 tcp:3000</pre></div>
+    </li>
+    <li>Con esto, la URL del backend <em>desde el punto de vista del teléfono</em> es <code>http://127.0.0.1:3000</code> — se usa tal cual en la Fase 5.</li>
+  </ol>
+  <h3>Alternativa — misma red WiFi (sin cable, o para probar condiciones de red reales)</h3>
+  <ol class="steps">
+    <li>Sacar la IP LAN de la PC: <code>ipconfig</code> → buscar "Dirección IPv4" del adaptador WiFi (ej. <code>192.168.1.50</code>).</li>
+    <li>Abrir el puerto 3000 en el Firewall de Windows para conexiones entrantes desde la red (Panel de control → Firewall de Windows Defender → Configuración avanzada → Regla de entrada nueva → Puerto → TCP 3000 → Permitir).</li>
+    <li>Usar <code>http://192.168.1.50:3000</code> (IP real) como base URL.</li>
+  </ol>
+  <p class="note">
+    <span class="chip info"><span class="dot"></span>Solo si hace falta</span>
+    Si el teléfono y la PC alguna vez NO están en la misma red (datos móviles, WiFi de invitados que aísla dispositivos), <strong>Tailscale</strong> es gratis y arma una red privada entre ambos sin abrir puertos al público — se instala la app en el teléfono y un cliente en la PC, y se usa la IP <code>100.x.x.x</code> que asigna en vez de la LAN. No hace falta en el caso normal (misma WiFi), queda solo como plan B.
+  </p>
+</section>
+
+<section class="phase" id="f3">
+  <div class="phase-head"><span class="phase-num">03</span><h2>Backend local + cada servicio en su capa gratis</h2></div>
+  <p>El repo ya trae <code>docker-compose.yml</code> con Postgres, MongoDB y Redis. Se agregó un servicio <strong>MinIO</strong> (S3 compatible, corre en la PC, cero cuenta AWS) para que el almacenamiento de archivos también sea 100% local y gratis en este modo.</p>
+  <div class="codeblock"><div class="bar">powershell</div><pre>docker compose up -d postgres mongodb redis minio
+<span class="c"># backend corre nativo con hot-reload, no dentro del compose:</span>
+pnpm install
+pnpm run seed
+pnpm run start:dev</pre></div>
+  <p>Abrir <code>http://localhost:9001</code> (consola de MinIO, usuario/clave <code>tekoapp</code> / <code>tekoapp123</code>) y crear un bucket llamado <code>tekoapp-uploads</code> una sola vez.</p>
+
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Servicio</th><th>Para qué lo usa el backend</th><th>Qué hacer en Modo local</th><th></th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="name">PostgreSQL</td><td>Base principal (Prisma)</td>
+          <td>Ya viene en <code>docker-compose.yml</code> — <code>DATABASE_URL</code> del <code>.env</code> ya apunta ahí.</td>
+          <td><span class="chip ok"><span class="dot"></span>local</span></td>
+        </tr>
+        <tr>
+          <td class="name">MongoDB</td><td>Notificaciones, geolocalización histórica</td>
+          <td>Igual — ya está en el compose, <code>MONGODB_URI</code> por defecto sirve.</td>
+          <td><span class="chip ok"><span class="dot"></span>local</span></td>
+        </tr>
+        <tr>
+          <td class="name">Redis</td><td>Colas (Bull), caché</td>
+          <td>Igual — ya está en el compose.</td>
+          <td><span class="chip ok"><span class="dot"></span>local</span></td>
+        </tr>
+        <tr>
+          <td class="name">S3 (archivos)</td><td>Avatares, adjuntos de servicios</td>
+          <td>MinIO local. En <code>.env</code>: <code>S3_ENDPOINT=http://localhost:9000</code>, <code>S3_FORCE_PATH_STYLE=true</code>, <code>S3_ACCESS_KEY_ID=tekoapp</code>, <code>S3_SECRET_ACCESS_KEY=tekoapp123</code>, <code>S3_BUCKET_NAME=tekoapp-uploads</code> — ya cargado.</td>
+          <td><span class="chip ok"><span class="dot"></span>local</span></td>
+        </tr>
+        <tr>
+          <td class="name">Email (SMTP)</td><td>Recuperación de contraseña, avisos</td>
+          <td><a href="https://mailtrap.io">Mailtrap</a> plan Free — "inbox" de pruebas que captura todo, nunca manda un correo real. Copiar host/usuario/clave del inbox a <code>EMAIL_HOST</code>/<code>EMAIL_USER</code>/<code>EMAIL_PASSWORD</code>.</td>
+          <td><span class="chip ok"><span class="dot"></span>sin tarjeta</span></td>
+        </tr>
+        <tr>
+          <td class="name">Firebase (push)</td><td>Notificaciones FCM a mobile</td>
+          <td>Crear proyecto en <a href="https://console.firebase.google.com">Firebase Console</a>, plan <strong>Spark</strong> (gratis por defecto). Project Settings → Service accounts → "Generate new private key" → volcar <code>project_id</code>/<code>private_key</code>/<code>client_email</code> del JSON a las 3 variables <code>FIREBASE_*</code>.</td>
+          <td><span class="chip ok"><span class="dot"></span>sin tarjeta</span></td>
+        </tr>
+        <tr>
+          <td class="name">Web Push (VAPID)</td><td>Push del navegador (Web)</td>
+          <td>No es un servicio externo, ya generado localmente y cargado en <code>.env</code>: <code>node -e "console.log(require('web-push').generateVAPIDKeys())"</code>.</td>
+          <td><span class="chip ok"><span class="dot"></span>sin cuenta</span></td>
+        </tr>
+        <tr>
+          <td class="name">Stripe</td><td>Pagos, métodos de pago</td>
+          <td>Cuenta Stripe → <strong>modo Test</strong> (activo por defecto, sin activar cobros reales) → copiar <code>sk_test_...</code> a <code>STRIPE_SECRET_KEY</code>. Para probar webhooks localmente: Stripe CLI, <code>stripe listen --forward-to localhost:3000/tekoapp-backend/api/payments/webhook</code>, da el <code>whsec_...</code> al vuelo.</td>
+          <td><span class="chip ok"><span class="dot"></span>sin tarjeta para test keys</span></td>
+        </tr>
+        <tr>
+          <td class="name">Twilio</td><td>SMS de verificación</td>
+          <td>Trial gratis con crédito de prueba. <strong>Límite real</strong>: en trial solo se pueden mandar SMS a números verificados uno por uno en la consola de Twilio — para una demo con pocos usuarios de prueba alcanza.</td>
+          <td><span class="chip ok"><span class="dot"></span>sin tarjeta, con límite</span></td>
+        </tr>
+        <tr>
+          <td class="name">Google Maps</td><td>Geolocalización, radio de búsqueda</td>
+          <td>Google exige método de pago cargado para emitir <em>cualquier</em> API key, incluso las que se quedan dentro del crédito mensual gratuito de por vida — no hay forma de evitarlo sin cambiar de proveedor (fuera de alcance de esta guía). El volumen de una demo no llega a cobrar nada.</td>
+          <td><span class="chip warn"><span class="dot"></span>pide tarjeta</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="phase" id="f4">
+  <div class="phase-head"><span class="phase-num">04</span><h2>Usuarios y perfiles de prueba</h2></div>
+  <ol class="steps">
+    <li>
+      <div class="codeblock"><div class="bar">powershell</div><pre>pnpm run seed</pre></div>
+      Deja lo mínimo para que la app arranque: catálogo base, el cliente Basic Auth de Web, y el de <strong>Mobile</strong> (<code>tekoapp-mobile</code> — sin esto, el login desde la app falla siempre con <code>INVALID_CLIENT_ID</code>). Usuario admin: <code>admin@tekoapp.com.py</code> / <code>Tekoapp123!</code>.
+    </li>
+    <li>
+      <div class="codeblock"><div class="bar">powershell</div><pre>pnpm run seed:dummy</pre></div>
+      Puebla clientes, profesionales, servicios, pagos, calificaciones y promociones ficticios para navegar la app ya "cargada". <strong>Todos los usuarios dummy comparten la misma contraseña</strong>: <code>Tekoapp123!</code>. El script no es idempotente — correrlo una sola vez sobre una base limpia.
+    </li>
+    <li>
+      Para elegir con qué email loguearse (cliente o profesional específico), abrir <strong>Prisma Studio</strong> — ya viene con el proyecto, gratis, sin cuenta:
+      <div class="codeblock"><div class="bar">powershell</div><pre>pnpm exec prisma studio</pre></div>
+      Mirar la tabla <code>Users</code>, cualquier fila con <code>@example.com</code> es un dummy — password siempre <code>Tekoapp123!</code>.
+    </li>
+  </ol>
+</section>
+
+<section class="phase" id="f5">
+  <div class="phase-head"><span class="phase-num">05</span><h2>Correr la app en el Android</h2></div>
+  <p>Con el backend corriendo (Fase 3), el puerto reenviado (Fase 2) y usuarios sembrados (Fase 4):</p>
+  <ol class="steps">
+    <li>Confirmar que Flutter ve el teléfono: <code>flutter devices</code> — anotar el <code>device-id</code> que aparece.</li>
+    <li><code>TekoApp-Frontend-Mobile/dart_defines.local.json</code> (gitignored, ya creado) trae <code>API_BASE_URL</code>, <code>BASIC_AUTH_CLIENT_ID</code> y el mismo <code>BASIC_AUTH_CLIENT_SECRET</code> que <code>MOBILE_CLIENT_SECRET</code> en el <code>.env</code> del backend — si se cambia uno, cambiar el otro y volver a correr <code>pnpm run seed</code>.</li>
+    <li>Correr la app:
+      <div class="codeblock"><div class="bar">powershell — TekoApp-Frontend-Mobile</div><pre>flutter run --dart-define-from-file=dart_defines.local.json -d &lt;device-id&gt;</pre></div>
+      Si se usó la alternativa por WiFi de la Fase 2, editar la IP dentro de ese mismo archivo JSON en vez de <code>127.0.0.1</code>.
+    </li>
+  </ol>
+</section>
+
+<section class="phase" id="f6">
+  <div class="phase-head"><span class="phase-num">06</span><h2>iOS en la Mac (misma red)</h2></div>
+  <p>Distinto mecanismo al de Android: el Simulator de Xcode corre en la propia Mac y accede directo a la red — no hay alias <code>10.0.2.2</code> (eso es solo del emulador Android) ni hace falta <code>adb reverse</code> (eso es solo para USB/Android).</p>
+  <ol class="steps">
+    <li>La Mac tiene que estar en la <strong>misma WiFi</strong> que la PC del backend (no por cable a esta PC — no aplica el truco de la Fase 2).</li>
+    <li>Abrir el firewall del backend igual que en la alternativa WiFi de la Fase 2 (puerto 3000 entrante).</li>
+    <li>Desde la Mac: <code>flutter run --dart-define=API_BASE_URL=http://&lt;IP-LAN-de-la-PC&gt;:3000/tekoapp-backend/api --dart-define=BASIC_AUTH_CLIENT_ID=tekoapp-mobile --dart-define=BASIC_AUTH_CLIENT_SECRET=&lt;mismo valor que MOBILE_CLIENT_SECRET&gt;</code>.</li>
+  </ol>
+</section>
+
+<section class="phase" id="f7">
+  <div class="phase-head"><span class="phase-num">07</span><h2>Demo pública en internet <span class="chip info" style="margin-left:8px"><span class="dot"></span>opcional</span></h2></div>
+  <p>Solo si en algún momento hace falta mandar un link a alguien fuera de la red — no hace falta para nada de lo de arriba. Acá el backend deja de poder usar Docker local: todo tiene que ser alcanzable desde internet.</p>
+  <div class="cards">
+    <div class="card">
+      <h4>Backend → Render.com (free)</h4>
+      <p>Web Service gratis desde el <code>Dockerfile</code> del repo. Se "duerme" tras 15 min sin tráfico y tarda ~30-50s en despertar en el próximo request — normal en el plan free, no es un bug.</p>
+    </div>
+    <div class="card">
+      <h4>Postgres → Neon (free)</h4>
+      <p><strong>No usar el Postgres free de Render</strong> — se borra a los 30 días. Neon (o Supabase) no expira en su capa free.</p>
+    </div>
+    <div class="card">
+      <h4>MongoDB → Atlas M0 (free)</h4>
+      <p>512MB, no expira. <code>MONGODB_URI</code> con el connection string que da Atlas.</p>
+    </div>
+    <div class="card">
+      <h4>Redis → Upstash (free)</h4>
+      <p>Da un solo endpoint <code>rediss://usuario:clave@host:puerto</code> — separar en <code>REDIS_HOST</code>/<code>REDIS_PORT</code>/<code>REDIS_PASSWORD</code>.</p>
+    </div>
+    <div class="card">
+      <h4>Archivos → Cloudflare R2</h4>
+      <p>10GB gratis, sin cobro por egreso — a diferencia de MinIO, Cloudflare sí pide tarjeta para activar R2 aunque el uso se mantenga gratis.</p>
+    </div>
+    <div class="card">
+      <h4>Web → Vercel (free)</h4>
+      <p>Hecho a medida para Next.js. Variable de entorno apuntando a la URL pública del backend en Render; agregar esa misma URL de Vercel a <code>ALLOWED_ORIGINS</code>/<code>FRONTEND_URL</code> del backend.</p>
+    </div>
+  </div>
+  <p class="note">Mobile no entra en este modo — no hay build firmado ni tienda todavía, sigue siendo local por USB (Fase 5) o Mac+Simulator (Fase 6) contra el backend que se elija (local o el de Render).</p>
+</section>
+
+<section class="phase" id="changelog">
+  <div class="phase-head"><h2>Qué se tocó en el código para esto (2026-08-08)</h2></div>
+  <div class="changelog">
+    <ul>
+      <li><code>TekoApp-Backend/prisma/seed.ts</code> — faltaba registrar el cliente Basic Auth <code>tekoapp-mobile</code>; sin esto, el login desde la app fallaba siempre con <code>INVALID_CLIENT_ID</code>, sin importar qué tan bien configurado estuviera el resto.</li>
+      <li><code>TekoApp-Backend/src/modules/storage/storage.module.ts</code> + <code>config-loader.ts</code> — soporte opcional de <code>S3_ENDPOINT</code>/<code>S3_FORCE_PATH_STYLE</code> (aditivo, sin setear se comporta exactamente igual que antes) para poder usar MinIO/R2 en vez de forzar una cuenta AWS real.</li>
+      <li><code>TekoApp-Backend/docker-compose.yml</code> — servicio <code>minio</code> agregado.</li>
+      <li><code>TekoApp-Backend/.env</code> (real, esta máquina) y <code>.env.example</code> (template) — <code>MOBILE_CLIENT_SECRET</code>, <code>S3_ENDPOINT</code>, <code>S3_FORCE_PATH_STYLE</code> cargados; el <code>.env</code> real ya apunta a MinIO local para S3.</li>
+      <li><code>TekoApp-Frontend-Mobile/dart_defines.local.json</code> (gitignored) — valores listos para <code>flutter run --dart-define-from-file=</code>.</li>
+      <li><code>TekoApp-Backend/.claude/rules/database-conventions.md</code> y <code>TekoApp-Frontend-Mobile/openspec/decisions.md</code> — decisión final de <code>id</code>/<code>referenceId</code> (exponer ambos siempre, ejecutar antes de publicar) y backlog de las 5 features grandes pedidas (propinas, calificaciones anónimas + KPIs, marco legal/tributario, branding centralizado) — <strong>documentadas, ninguna implementada todavía</strong>, cada una necesita su propia fase dedicada.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<footer>TekoApp — documentación interna de desarrollo, no distribuir públicamente.</footer>
+</body>
+</html>
