@@ -44,10 +44,15 @@ export class LocationsController {
   })
   @ApiResponse({ status: 200, description: 'Ubicación actualizada con éxito.' })
   async updateLocation(
-    @Request() req: { user: IUserDataOnJwt & { professionalId?: number } },
+    @Request() req: { user: IUserDataOnJwt },
     @Body() updateLocationDto: UpdateLocationRequestDTO,
   ) {
-    const professionalId = req.user.professionalId;
+    // El JWT nunca trae `professionalId` (era un campo inexistente en el payload real, ver
+    // jwt.strategy.ts) — se resuelve contra la DB a partir del `referenceId` del User autenticado.
+    const professionalId =
+      await this.locationsService.resolveProfessionalIdByUserRef(
+        req.user.referenceId,
+      );
     return this.locationsService.updateLocation(
       professionalId,
       updateLocationDto,

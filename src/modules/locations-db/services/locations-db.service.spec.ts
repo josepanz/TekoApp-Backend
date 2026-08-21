@@ -5,6 +5,7 @@ import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-que
 
 // ── Mocks a nivel de módulo ────────────────────────────────────────────────
 const mockFindUnique = jest.fn();
+const mockFindFirst = jest.fn();
 const mockCount = jest.fn();
 const mockFindMany = jest.fn();
 const mockUpdate = jest.fn();
@@ -14,6 +15,7 @@ const mockPrisma = {
   extended: {
     professionals: {
       findUnique: mockFindUnique,
+      findFirst: mockFindFirst,
       count: mockCount,
       findMany: mockFindMany,
       update: mockUpdate,
@@ -292,6 +294,34 @@ describe('LocationsDbService', () => {
 
       // Assert
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('findByUserReferenceId', () => {
+    it('debe retornar el id del profesional asociado al referenceId del usuario', async () => {
+      // Arrange
+      mockFindFirst.mockResolvedValue({ id: 42 });
+
+      // Act
+      const result = await service.findByUserReferenceId('user-ref-1');
+
+      // Assert
+      expect(result).toEqual({ id: 42 });
+      expect(mockFindFirst).toHaveBeenCalledWith({
+        where: { user: { referenceId: 'user-ref-1' } },
+        select: { id: true },
+      });
+    });
+
+    it('debe retornar null si el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindFirst.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findByUserReferenceId('user-ref-1');
+
+      // Assert
+      expect(result).toBeNull();
     });
   });
 });
