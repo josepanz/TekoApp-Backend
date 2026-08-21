@@ -9,6 +9,7 @@ const mockUpdateLocation = jest.fn();
 const mockFindNearby = jest.fn();
 const mockCountOnline = jest.fn();
 const mockFindMany = jest.fn();
+const mockFindByUserReferenceId = jest.fn();
 const mockConfigGet = jest.fn();
 
 const mockProfessional = {
@@ -36,6 +37,7 @@ describe('LocationsService', () => {
             findNearby: mockFindNearby,
             countOnline: mockCountOnline,
             findMany: mockFindMany,
+            findByUserReferenceId: mockFindByUserReferenceId,
           },
         },
         {
@@ -280,6 +282,30 @@ describe('LocationsService', () => {
       // Assert — resultado debe ser un número finito positivo
       expect(Number.isFinite(result)).toBe(true);
       expect(result).toBeGreaterThan(0);
+    });
+  });
+
+  describe('resolveProfessionalIdByUserRef', () => {
+    it('debe retornar el id del profesional asociado al referenceId del usuario', async () => {
+      // Arrange
+      mockFindByUserReferenceId.mockResolvedValue({ id: 42 });
+
+      // Act
+      const result = await service.resolveProfessionalIdByUserRef('user-ref-1');
+
+      // Assert
+      expect(result).toBe(42);
+      expect(mockFindByUserReferenceId).toHaveBeenCalledWith('user-ref-1');
+    });
+
+    it('debe lanzar NotFoundException si el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindByUserReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.resolveProfessionalIdByUserRef('user-ref-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

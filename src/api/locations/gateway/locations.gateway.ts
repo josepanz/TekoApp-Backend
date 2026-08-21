@@ -44,18 +44,24 @@ export class LocationsGateway
         return;
       }
 
-      const payload = await this.jwtService.verifyAsync<{
-        sub: string;
-        professionalId?: string;
-      }>(token);
-      const professionalId = payload.professionalId || payload.sub;
+      const payload = await this.jwtService.verifyAsync<{ sub: string }>(token);
+      (client.data as Record<string, unknown>).user = payload;
 
-      if (professionalId) {
-        this.connectedClients.set(professionalId, client);
+      // El JWT nunca trae `professionalId` — se resuelve contra la DB. Un cliente (no
+      // profesional) también puede conectarse (ej. para ver profesionales cercanos en el mapa),
+      // así que no encontrar un Professional para este User no es motivo de desconexión.
+      try {
+        const professionalId =
+          await this.locationsService.resolveProfessionalIdByUserRef(
+            payload.sub,
+          );
+        this.connectedClients.set(String(professionalId), client);
+        (client.data as Record<string, unknown>).professionalId =
+          professionalId;
         await client.join(`professional:${professionalId}`);
-        (client.data as Record<string, unknown>).user = payload;
-      } else {
-        client.disconnect();
+      } catch {
+        // No es profesional (o sin perfil profesional todavía) — conexión válida igual, solo sin
+        // sala de emisión propia.
       }
     } catch {
       client.disconnect();
@@ -75,11 +81,19 @@ export class LocationsGateway
   @UseGuards(WsJwtGuard)
   async handleUpdateLocation(
     @MessageBody()
-    data: { professionalId: number; location: UpdateLocationRequestDTO },
+    data: { location: UpdateLocationRequestDTO },
     @ConnectedSocket() client: Socket,
   ) {
     try {
-      const { professionalId, location } = data;
+      // Nunca confiar en un `professionalId` mandado por el cliente (dejaba a cualquier
+      // profesional autenticado actualizar la ubicación de OTRO profesional) — se usa el
+      // resuelto en `handleConnection` a partir de su propio JWT.
+      const professionalId = (client.data as Record<string, unknown>)
+        .professionalId as number | undefined;
+      if (!professionalId) {
+        throw new Error(t('locations.PROFESSIONAL_NOT_FOUND'));
+      }
+      const { location } = data;
 
       const updatedProfessional = await this.locationsService.updateLocation(
         professionalId,
