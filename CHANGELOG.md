@@ -1,3 +1,8 @@
+## 1.0.0-develop.20 (2026-08-21)
+
+* fix: resolve locations professionalId from the authenticated user (#30) ([01b56df](https://github.com/josepanz/TekoApp-Backend/commit/01b56df)), closes [#30](https://github.com/josepanz/TekoApp-Backend/issues/30) [#29](https://github.com/josepanz/TekoApp-Backend/issues/29)
+* fix: resolve professionalId from the authenticated user, never trust the client ([f8874e9](https://github.com/josepanz/TekoApp-Backend/commit/f8874e9))
+
 ## 1.0.0-develop.19 (2026-08-21)
 
 * fix: /locations websocket JWT verification (#29) ([c0be35d](https://github.com/josepanz/TekoApp-Backend/commit/c0be35d)), closes [#29](https://github.com/josepanz/TekoApp-Backend/issues/29)
