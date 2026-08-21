@@ -31,6 +31,20 @@ export class LocationsService {
     );
   }
 
+  // Resuelve el `id` interno del Professional a partir del `referenceId` del User autenticado
+  // (el JWT nunca trae `professionalId` — ver LocationsController/LocationsGateway, que antes
+  // confiaban en un campo que jamás existe en el payload real).
+  async resolveProfessionalIdByUserRef(
+    userReferenceId: string,
+  ): Promise<number> {
+    const professional =
+      await this.locationsDb.findByUserReferenceId(userReferenceId);
+    if (!professional) {
+      throw new NotFoundException(t('locations.PROFESSIONAL_NOT_FOUND'));
+    }
+    return professional.id;
+  }
+
   async findNearbyProfessionals(
     dto: FindNearbyQueryDTO,
   ): Promise<(Professionals & { distance: number })[]> {

@@ -11,6 +11,15 @@ export class LocationsDbService {
     return this.prisma.extended.professionals.findUnique({ where: { id } });
   }
 
+  async findByUserReferenceId(
+    userReferenceId: string,
+  ): Promise<{ id: number } | null> {
+    return this.prisma.extended.professionals.findFirst({
+      where: { user: { referenceId: userReferenceId } },
+      select: { id: true },
+    });
+  }
+
   async countOnline(
     whereClause: Prisma.ProfessionalsWhereInput,
   ): Promise<number> {
