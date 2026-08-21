@@ -1,3 +1,8 @@
+## 1.0.0-develop.19 (2026-08-21)
+
+* fix: /locations websocket JWT verification (#29) ([c0be35d](https://github.com/josepanz/TekoApp-Backend/commit/c0be35d)), closes [#29](https://github.com/josepanz/TekoApp-Backend/issues/29)
+* fix: verify /locations websocket JWT with the real RS256 public key ([e063593](https://github.com/josepanz/TekoApp-Backend/commit/e063593))
+
 ## 1.0.0-develop.18 (2026-08-09)
 
 * chore: add minio service for local S3-compatible storage ([5f56bcd](https://github.com/josepanz/TekoApp-Backend/commit/5f56bcd))
