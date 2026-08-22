@@ -10,6 +10,7 @@ const mockFindNearby = jest.fn();
 const mockCountOnline = jest.fn();
 const mockFindMany = jest.fn();
 const mockFindByUserReferenceId = jest.fn();
+const mockSetOnlineStatus = jest.fn();
 const mockConfigGet = jest.fn();
 
 const mockProfessional = {
@@ -38,6 +39,7 @@ describe('LocationsService', () => {
             countOnline: mockCountOnline,
             findMany: mockFindMany,
             findByUserReferenceId: mockFindByUserReferenceId,
+            setOnlineStatus: mockSetOnlineStatus,
           },
         },
         {
@@ -282,6 +284,22 @@ describe('LocationsService', () => {
       // Assert — resultado debe ser un número finito positivo
       expect(Number.isFinite(result)).toBe(true);
       expect(result).toBeGreaterThan(0);
+    });
+  });
+
+  describe('setOnlineStatus', () => {
+    it('debe resolver el professionalId y actualizar su estado online', async () => {
+      // Arrange
+      mockFindByUserReferenceId.mockResolvedValue({ id: 42 });
+      const expected = { id: 42, isOnline: true };
+      mockSetOnlineStatus.mockResolvedValue(expected);
+
+      // Act
+      const result = await service.setOnlineStatus('user-ref-1', true);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockSetOnlineStatus).toHaveBeenCalledWith(42, true);
     });
   });
 

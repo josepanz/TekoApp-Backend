@@ -11,6 +11,7 @@ import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-qu
 
 const mockUpdateLocation = jest.fn();
 const mockResolveProfessionalIdByUserRef = jest.fn();
+const mockSetOnlineStatus = jest.fn();
 const mockFindNearbyProfessionals = jest.fn();
 const mockGetProfessionalLocation = jest.fn();
 const mockGetOnlineProfessionalsCount = jest.fn();
@@ -33,6 +34,7 @@ describe('LocationsController', () => {
           useValue: {
             updateLocation: mockUpdateLocation,
             resolveProfessionalIdByUserRef: mockResolveProfessionalIdByUserRef,
+            setOnlineStatus: mockSetOnlineStatus,
             findNearbyProfessionals: mockFindNearbyProfessionals,
             getProfessionalLocation: mockGetProfessionalLocation,
             getOnlineProfessionalsCount: mockGetOnlineProfessionalsCount,
@@ -71,6 +73,23 @@ describe('LocationsController', () => {
         'user-ref-1',
       );
       expect(mockUpdateLocation).toHaveBeenCalledWith(42, dto);
+    });
+  });
+
+  describe('setOnlineStatus', () => {
+    it('debe cambiar el estado online del profesional autenticado', async () => {
+      // Arrange
+      const expected = { id: 42, isOnline: true };
+      mockSetOnlineStatus.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.setOnlineStatus(mockReq, {
+        isOnline: true,
+      });
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockSetOnlineStatus).toHaveBeenCalledWith('user-ref-1', true);
     });
   });
 
