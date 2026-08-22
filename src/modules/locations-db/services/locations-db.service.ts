@@ -11,6 +11,13 @@ export class LocationsDbService {
     return this.prisma.extended.professionals.findUnique({ where: { id } });
   }
 
+  async setOnlineStatus(id: number, isOnline: boolean): Promise<Professionals> {
+    return this.prisma.extended.professionals.update({
+      where: { id },
+      data: { isOnline },
+    });
+  }
+
   async findByUserReferenceId(
     userReferenceId: string,
   ): Promise<{ id: number } | null> {

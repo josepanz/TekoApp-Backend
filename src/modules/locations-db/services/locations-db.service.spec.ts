@@ -297,6 +297,24 @@ describe('LocationsDbService', () => {
     });
   });
 
+  describe('setOnlineStatus', () => {
+    it('debe actualizar el estado online del profesional', async () => {
+      // Arrange
+      const expected = { id: 1, isOnline: true };
+      mockUpdate.mockResolvedValue(expected);
+
+      // Act
+      const result = await service.setOnlineStatus(1, true);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isOnline: true },
+      });
+    });
+  });
+
   describe('findByUserReferenceId', () => {
     it('debe retornar el id del profesional asociado al referenceId del usuario', async () => {
       // Arrange
