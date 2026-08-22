@@ -31,6 +31,15 @@ export class LocationsService {
     );
   }
 
+  async setOnlineStatus(
+    userReferenceId: string,
+    isOnline: boolean,
+  ): Promise<Professionals> {
+    const professionalId =
+      await this.resolveProfessionalIdByUserRef(userReferenceId);
+    return this.locationsDb.setOnlineStatus(professionalId, isOnline);
+  }
+
   // Resuelve el `id` interno del Professional a partir del `referenceId` del User autenticado
   // (el JWT nunca trae `professionalId` — ver LocationsController/LocationsGateway, que antes
   // confiaban en un campo que jamás existe en el payload real).
