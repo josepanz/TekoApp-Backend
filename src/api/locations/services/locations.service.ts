@@ -4,6 +4,8 @@ import { LocationsDbService } from '@/modules/locations-db/services/locations-db
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location-request.dto';
 import { FindNearbyQueryDTO } from '../dtos/request/find-nearby-query.dto';
 import { ProfessionalLocationResponseDTO } from '../dtos/response/professional-location-response.dto';
+import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professional-response.dto';
+import { mapNearbyProfessionalRow } from '../helpers/nearby-professional.helper';
 import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-area-query.dto';
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
 import { Professionals } from '@prisma/client';
@@ -56,14 +58,15 @@ export class LocationsService {
 
   async findNearbyProfessionals(
     dto: FindNearbyQueryDTO,
-  ): Promise<(Professionals & { distance: number })[]> {
+  ): Promise<NearbyProfessionalResponseDTO[]> {
     const maxConfigRadius = this.configService.get<number>('MAX_RADIUS_KM', 50);
     const checkedRadius = Math.min(dto.radius, maxConfigRadius);
 
-    return this.locationsDb.findNearby({
+    const rows = await this.locationsDb.findNearby({
       ...dto,
       radius: checkedRadius,
     });
+    return rows.map(mapNearbyProfessionalRow);
   }
 
   async getProfessionalLocation(

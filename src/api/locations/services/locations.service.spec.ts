@@ -93,12 +93,55 @@ describe('LocationsService', () => {
     });
   });
 
+  // Fila cruda de Postgres tal como la devuelve $queryRaw (snake_case, NUMERIC como string) —
+  // ver `NearbyProfessionalRow`. El service debe mapearla a `NearbyProfessionalResponseDTO`.
+  const rawNearbyRow = {
+    id: 1,
+    reference_id: 'prof-ref-1',
+    category_id: 3,
+    description: 'Plomero',
+    hourly_rate: '50000.00',
+    current_latitude: '-25.2867000',
+    current_longitude: '-57.6470000',
+    is_available: true,
+    is_online: true,
+    average_rating: '4.50',
+    distance: 1.234,
+  };
+
   describe('findNearbyProfessionals', () => {
+    it('debe mapear la fila cruda de Postgres a camelCase con números normalizados', async () => {
+      // Arrange
+      const dto = { latitude: -25.2867, longitude: -57.647, radius: 5 };
+      mockConfigGet.mockReturnValue(50);
+      mockFindNearby.mockResolvedValue([rawNearbyRow]);
+
+      // Act
+      const result = await service.findNearbyProfessionals(dto as never);
+
+      // Assert
+      expect(result).toEqual([
+        {
+          id: 1,
+          referenceId: 'prof-ref-1',
+          categoryId: 3,
+          description: 'Plomero',
+          hourlyRate: 50000,
+          latitude: -25.2867,
+          longitude: -57.647,
+          distanceKm: 1.23,
+          isAvailable: true,
+          isOnline: true,
+          averageRating: 4.5,
+        },
+      ]);
+    });
+
     it('debe usar el radio solicitado cuando es menor al máximo configurado', async () => {
       // Arrange
       const dto = { latitude: -25.2867, longitude: -57.647, radius: 5 };
       mockConfigGet.mockReturnValue(50);
-      mockFindNearby.mockResolvedValue([mockProfessional]);
+      mockFindNearby.mockResolvedValue([rawNearbyRow]);
 
       // Act
       const result = await service.findNearbyProfessionals(dto as never);
