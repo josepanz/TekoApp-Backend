@@ -1,3 +1,8 @@
+## 1.0.0-develop.21 (2026-08-22)
+
+* feat: add endpoint to toggle a professional's online status ([5946b21](https://github.com/josepanz/TekoApp-Backend/commit/5946b21))
+* feat: toggle professional online status (#31) ([f744e19](https://github.com/josepanz/TekoApp-Backend/commit/f744e19)), closes [#31](https://github.com/josepanz/TekoApp-Backend/issues/31)
+
 ## 1.0.0-develop.20 (2026-08-21)
 
 * fix: resolve locations professionalId from the authenticated user (#30) ([01b56df](https://github.com/josepanz/TekoApp-Backend/commit/01b56df)), closes [#30](https://github.com/josepanz/TekoApp-Backend/issues/30) [#29](https://github.com/josepanz/TekoApp-Backend/issues/29)
