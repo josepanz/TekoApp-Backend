@@ -27,6 +27,7 @@ import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
 import { SetOnlineStatusRequestDTO } from '../dtos/request/set-online-status-request.dto';
 import { ProfessionalLocationResponseDTO } from '../dtos/response/professional-location-response.dto';
+import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professional-response.dto';
 import { OnlineCountResponseDTO } from '../dtos/response/online-count-response.dto';
 import { DistanceResponseDTO } from '../dtos/response/distance-response.dto';
 
@@ -90,8 +91,11 @@ export class LocationsController {
   @ApiResponse({
     status: 200,
     description: 'Colección ordenada por proximidad.',
+    type: [NearbyProfessionalResponseDTO],
   })
-  async findNearbyProfessionals(@Query() query: FindNearbyQueryDTO) {
+  async findNearbyProfessionals(
+    @Query() query: FindNearbyQueryDTO,
+  ): Promise<NearbyProfessionalResponseDTO[]> {
     return this.locationsService.findNearbyProfessionals(query);
   }
 

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaDatasource } from '@/core/database/services/prisma.service';
 import { Prisma, Professionals } from '@prisma/client';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
+import { NearbyProfessionalRow } from '../interfaces/nearby-professional-row.interface';
 
 @Injectable()
 export class LocationsDbService {
@@ -54,9 +55,7 @@ export class LocationsDbService {
     });
   }
 
-  async findNearby(
-    dto: FindNearbyQueryDTO,
-  ): Promise<(Professionals & { distance: number })[]> {
+  async findNearby(dto: FindNearbyQueryDTO): Promise<NearbyProfessionalRow[]> {
     const {
       latitude,
       longitude,
@@ -79,9 +78,7 @@ export class LocationsDbService {
       : Prisma.empty;
 
     // SQL parametrizado (tagged template) usando Haversine Fórmula
-    return this.prisma.extended.$queryRaw<
-      (Professionals & { distance: number })[]
-    >`
+    return this.prisma.extended.$queryRaw<NearbyProfessionalRow[]>`
       SELECT *, (
         6371 * acos(
           cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +

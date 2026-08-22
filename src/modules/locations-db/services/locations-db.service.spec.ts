@@ -175,10 +175,26 @@ describe('LocationsDbService', () => {
           typeof v === 'object' && v !== null && 'text' in v,
       );
 
+  // $queryRaw nunca pasa por el `$extends` de Prisma — la fila real de Postgres llega con los
+  // nombres de columna crudos (snake_case) y los NUMERIC como string, no camelCase/number.
+  const rawNearbyRow = {
+    id: 1,
+    reference_id: 'prof-ref-1',
+    category_id: 3,
+    description: 'Plomero',
+    hourly_rate: '50000.00',
+    current_latitude: '-25.2867000',
+    current_longitude: '-57.6470000',
+    is_available: true,
+    is_online: true,
+    average_rating: '4.50',
+    distance: 1.2,
+  };
+
   describe('findNearby', () => {
     it('debe ejecutar la query raw y retornar los profesionales cercanos con distancia', async () => {
       // Arrange
-      const nearby = [{ ...baseProfessional, distance: 1.2 }];
+      const nearby = [rawNearbyRow];
       mockQueryRaw.mockResolvedValue(nearby);
 
       const dto: FindNearbyQueryDTO = {
