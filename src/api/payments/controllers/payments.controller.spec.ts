@@ -34,6 +34,7 @@ const mockGetPaymentById = jest.fn();
 const mockUpdatePayment = jest.fn();
 const mockCancelPayment = jest.fn();
 const mockRefundPayment = jest.fn();
+const mockGetPaymentMethods = jest.fn();
 const mockCreatePaymentMethod = jest.fn();
 const mockUpdatePaymentMethod = jest.fn();
 const mockDeletePaymentMethod = jest.fn();
@@ -70,6 +71,7 @@ describe('PaymentController', () => {
             updatePayment: mockUpdatePayment,
             cancelPayment: mockCancelPayment,
             refundPayment: mockRefundPayment,
+            getPaymentMethods: mockGetPaymentMethods,
             createPaymentMethod: mockCreatePaymentMethod,
             updatePaymentMethod: mockUpdatePaymentMethod,
             deletePaymentMethod: mockDeletePaymentMethod,
@@ -271,6 +273,24 @@ describe('PaymentController', () => {
 
       // Assert
       expect(mockRefundPayment).toHaveBeenCalledWith(param.id, dto);
+      expect(result).toBe(expected);
+    });
+  });
+
+  // ==================== findMethods ====================
+  describe('findMethods', () => {
+    it('debe retornar los métodos de pago del usuario autenticado', async () => {
+      // Arrange
+      const expected: PaymentMethodDetailResponseDTO[] = [
+        { id: 'method-1' } as unknown as PaymentMethodDetailResponseDTO,
+      ];
+      mockGetPaymentMethods.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.findMethods({ user: mockUser });
+
+      // Assert
+      expect(mockGetPaymentMethods).toHaveBeenCalledWith(mockUser.id);
       expect(result).toBe(expected);
     });
   });

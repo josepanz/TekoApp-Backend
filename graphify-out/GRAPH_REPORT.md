@@ -1116,7 +1116,7 @@ Nodes (6): ApiProperty, IsBoolean, IsOptional, IsString, MaxLength, UpdateRoleRe
 
 ### Community 175 - "CreateServiceRequestRequestDTO"
 Cohesion: 0.29
-Nodes (7): CreateServiceRequestRequestDTO, ApiPropertyOptional, IsNumber, IsOptional, IsString, Max, Min
+Nodes (6): GetRoleListQueryDTO, ApiPropertyOptional, IsBoolean, IsNotEmpty, IsOptional, IsString
 
 ### Community 176 - "i18n.helper.ts"
 Cohesion: 0.10
@@ -1128,7 +1128,7 @@ Nodes (3): CustomHttpResponseHelper, ApiErrorResponse, handleHttpErrors()
 
 ### Community 178 - "is-order-by-format.validator.ts"
 Cohesion: 0.29
-Nodes (3): IsOrderByFormat, SortDirection, ValidatorConstraint
+Nodes (6): Query, ApiSearchCategories(), SearchCategoriesQueryDTO, ApiProperty, IsNotEmpty, IsString
 
 ### Community 181 - "categories.module.ts"
 Cohesion: 0.40

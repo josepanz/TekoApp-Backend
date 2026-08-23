@@ -63,6 +63,13 @@ export class PaymentApiService {
     );
     if (!service) throw new NotFoundException(t('payments.SERVICE_NOT_FOUND'));
 
+    const professional = await this.dbService.findProfessionalByReferenceId(
+      dto.professionalId,
+    );
+    if (!professional) {
+      throw new NotFoundException(t('payments.PROFESSIONAL_NOT_FOUND'));
+    }
+
     const existingPayment = await this.dbService.findExistingPayment(
       userId,
       service.id,
@@ -83,7 +90,7 @@ export class PaymentApiService {
     const payment = await this.dbService.createPaymentWithTransaction(
       {
         userId,
-        professionalId: Number(dto.professionalId),
+        professionalId: professional.id,
         serviceId: service.id,
         currencyCode: dto.currencyCode,
         amount: dto.amount,
@@ -173,6 +180,13 @@ export class PaymentApiService {
 
   // ==================== MÉTODOS DE PAGO ====================
 
+  async getPaymentMethods(
+    userId: number,
+  ): Promise<PaymentMethodDetailResponseDTO[]> {
+    const methods = await this.dbService.findAllPaymentMethods(userId);
+    return methods.map((method) => mapPaymentMethodToResponse(method));
+  }
+
   async createPaymentMethod(
     userId: number,
     dto: CreatePaymentMethodRequestDTO,
@@ -200,13 +214,13 @@ export class PaymentApiService {
     );
     if (!method) throw new NotFoundException(t('payments.METHOD_NOT_FOUND'));
 
-    if (dto.isDefault) {
-      await this.dbService.clearDefaultPaymentMethods(userId);
-    }
-    const updated = await this.dbService.updatePaymentMethod(
-      method.id,
-      dto as unknown,
-    );
+    const updated = dto.isDefault
+      ? await this.dbService.setPaymentMethodAsDefault(
+          method.id,
+          userId,
+          dto as unknown,
+        )
+      : await this.dbService.updatePaymentMethod(method.id, dto as unknown);
     return mapPaymentMethodToResponse(updated);
   }
 
@@ -217,12 +231,13 @@ export class PaymentApiService {
     );
     if (!method) throw new NotFoundException(t('payments.METHOD_NOT_FOUND'));
 
-    const total = await this.dbService.countActivePaymentMethods(userId);
-    if (total <= 1) {
+    const deactivated = await this.dbService.deactivatePaymentMethodIfNotLast(
+      method.id,
+      userId,
+    );
+    if (!deactivated) {
       throw new BadRequestException(t('payments.CANNOT_DELETE_ONLY_METHOD'));
     }
-
-    await this.dbService.updatePaymentMethod(method.id, { isActive: false });
   }
 
   // ==================== WEBHOOKS ====================

@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Patch,
   Get,
   Body,
   Query,
@@ -24,7 +25,9 @@ import { FindNearbyQueryDTO } from '../dtos/request/find-nearby-query.dto'; // M
 import { GetProfessionalLocationParamDTO } from '../dtos/request/get-professional-location-param.dto';
 import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-area-query.dto';
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
+import { SetOnlineStatusRequestDTO } from '../dtos/request/set-online-status-request.dto';
 import { ProfessionalLocationResponseDTO } from '../dtos/response/professional-location-response.dto';
+import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professional-response.dto';
 import { OnlineCountResponseDTO } from '../dtos/response/online-count-response.dto';
 import { DistanceResponseDTO } from '../dtos/response/distance-response.dto';
 
@@ -44,13 +47,38 @@ export class LocationsController {
   })
   @ApiResponse({ status: 200, description: 'Ubicación actualizada con éxito.' })
   async updateLocation(
-    @Request() req: { user: IUserDataOnJwt & { professionalId?: number } },
+    @Request() req: { user: IUserDataOnJwt },
     @Body() updateLocationDto: UpdateLocationRequestDTO,
   ) {
-    const professionalId = req.user.professionalId;
+    // El JWT nunca trae `professionalId` (era un campo inexistente en el payload real, ver
+    // jwt.strategy.ts) — se resuelve contra la DB a partir del `referenceId` del User autenticado.
+    const professionalId =
+      await this.locationsService.resolveProfessionalIdByUserRef(
+        req.user.referenceId,
+      );
     return this.locationsService.updateLocation(
       professionalId,
       updateLocationDto,
+    );
+  }
+
+  @Patch('online')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cambiar el estado online del profesional autenticado',
+    description:
+      'true = empieza a poder emitir ubicación en vivo; false = deja de estar disponible para el mapa de cercanos.',
+  })
+  @ApiResponse({ status: 200, description: 'Estado online actualizado.' })
+  async setOnlineStatus(
+    @Request() req: { user: IUserDataOnJwt },
+    @Body() dto: SetOnlineStatusRequestDTO,
+  ) {
+    return this.locationsService.setOnlineStatus(
+      req.user.referenceId,
+      dto.isOnline,
     );
   }
 
@@ -63,8 +91,11 @@ export class LocationsController {
   @ApiResponse({
     status: 200,
     description: 'Colección ordenada por proximidad.',
+    type: [NearbyProfessionalResponseDTO],
   })
-  async findNearbyProfessionals(@Query() query: FindNearbyQueryDTO) {
+  async findNearbyProfessionals(
+    @Query() query: FindNearbyQueryDTO,
+  ): Promise<NearbyProfessionalResponseDTO[]> {
     return this.locationsService.findNearbyProfessionals(query);
   }
 

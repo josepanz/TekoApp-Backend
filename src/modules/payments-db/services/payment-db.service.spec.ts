@@ -20,6 +20,7 @@ const mockPaymentsAggregate = jest.fn();
 const mockPaymentsCount = jest.fn();
 
 const mockServicesFindUnique = jest.fn();
+const mockProfessionalsFindUnique = jest.fn();
 
 const mockPaymentMethodFindFirst = jest.fn();
 const mockPaymentMethodFindMany = jest.fn();
@@ -39,6 +40,9 @@ const mockPrisma = {
   extended: {
     services: {
       findUnique: mockServicesFindUnique,
+    },
+    professionals: {
+      findUnique: mockProfessionalsFindUnique,
     },
     payments: {
       findFirst: mockPaymentsFindFirst,
@@ -129,6 +133,35 @@ describe('PaymentDbService', () => {
         where: { referenceId: 'svc-uuid-1' },
         select: { id: true },
       });
+    });
+  });
+
+  // ── findProfessionalByReferenceId ─────────────────────────────────────────────
+  describe('findProfessionalByReferenceId', () => {
+    it('debe resolver el UUID público del profesional a su PK interna', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue({ id: 20 });
+
+      // Act
+      const result = await service.findProfessionalByReferenceId('prof-uuid-1');
+
+      // Assert
+      expect(result).toEqual({ id: 20 });
+      expect(mockProfessionalsFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'prof-uuid-1' },
+        select: { id: true },
+      });
+    });
+
+    it('debe retornar null cuando el profesional no existe', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findProfessionalByReferenceId('no-existe');
+
+      // Assert
+      expect(result).toBeNull();
     });
   });
 
@@ -325,20 +358,86 @@ describe('PaymentDbService', () => {
     });
   });
 
-  // ── clearDefaultPaymentMethods ───────────────────────────────────────────────
-  describe('clearDefaultPaymentMethods', () => {
-    it('debe desactivar todos los métodos de pago por defecto del usuario', async () => {
+  // ── setPaymentMethodAsDefault ─────────────────────────────────────────────────
+  describe('setPaymentMethodAsDefault', () => {
+    it('debe limpiar el default anterior y setear el nuevo dentro de la misma transacción', async () => {
       // Arrange
-      mockPaymentMethodUpdateMany.mockResolvedValue({ count: 2 });
+      const mockClear = jest.fn().mockResolvedValue({ count: 1 });
+      const mockUpdate = jest
+        .fn()
+        .mockResolvedValue({ ...fakePaymentMethod, isDefault: true });
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            paymentMethodEntity: { updateMany: mockClear, update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
 
       // Act
-      await service.clearDefaultPaymentMethods(10);
+      const result = await service.setPaymentMethodAsDefault(1, 10, {
+        isDefault: true,
+      });
 
       // Assert
-      expect(mockPaymentMethodUpdateMany).toHaveBeenCalledWith({
+      expect(mockClear).toHaveBeenCalledWith({
         where: { userId: 10, isDefault: true },
         data: { isDefault: false },
       });
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isDefault: true },
+      });
+      expect(result).toEqual({ ...fakePaymentMethod, isDefault: true });
+    });
+  });
+
+  // ── deactivatePaymentMethodIfNotLast ────────────────────────────────────────
+  describe('deactivatePaymentMethodIfNotLast', () => {
+    it('debe desactivar el método cuando el usuario tiene más de un método activo', async () => {
+      // Arrange
+      const mockUpdate = jest.fn().mockResolvedValue({});
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+            paymentMethodEntity: { update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act
+      const result = await service.deactivatePaymentMethodIfNotLast(1, 10);
+
+      // Assert
+      expect(result).toBe(true);
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isActive: false },
+      });
+    });
+
+    it('debe devolver false sin desactivar cuando es el único método activo', async () => {
+      // Arrange
+      const mockUpdate = jest.fn();
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: jest.fn().mockResolvedValue([{ id: 1 }]),
+            paymentMethodEntity: { update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act
+      const result = await service.deactivatePaymentMethodIfNotLast(1, 10);
+
+      // Assert
+      expect(result).toBe(false);
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -593,6 +692,81 @@ describe('PaymentDbService', () => {
       await expect(service.executeRefund(1, 100, 'tarde')).rejects.toThrow(
         'Solo se pueden reembolsar pagos completados',
       );
+    });
+
+    it('debe permitir un segundo reembolso parcial sobre el mismo pago (PARTIAL_REFUNDED sigue siendo reembolsable)', async () => {
+      // Arrange — primer reembolso: pago COMPLETED de 1000, se reembolsan 300
+      const firstPartialPayment = {
+        ...fakePayment,
+        status: PaymentStatus.PARTIAL_REFUNDED,
+      };
+      mockTransaction.mockImplementationOnce(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.COMPLETED,
+              total_amount: 1000,
+            }),
+            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+            payments: {
+              update: jest.fn().mockResolvedValue(firstPartialPayment),
+            },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act — primer reembolso parcial
+      const firstResult = await service.executeRefund(1, 300, 'parcial 1');
+
+      // Assert — primer reembolso exitoso, pago queda PARTIAL_REFUNDED
+      expect(firstResult).toEqual(firstPartialPayment);
+
+      // Arrange — segundo reembolso: la fila bloqueada ahora refleja el estado dejado por el
+      // primer reembolso (PARTIAL_REFUNDED, con los 300 ya acumulados en refund_details)
+      const secondPartialPayment = {
+        ...fakePayment,
+        status: PaymentStatus.PARTIAL_REFUNDED,
+      };
+      let secondUpdateData:
+        | { status: PaymentStatus; refundDetails: { refundedAmount: number } }
+        | undefined;
+      mockTransaction.mockImplementationOnce(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.PARTIAL_REFUNDED,
+              total_amount: 1000,
+              refund_details: { refundedAmount: 300 },
+            }),
+            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+            payments: {
+              update: jest.fn().mockImplementation(
+                ({
+                  data,
+                }: {
+                  data: {
+                    status: PaymentStatus;
+                    refundDetails: { refundedAmount: number };
+                  };
+                }) => {
+                  secondUpdateData = data;
+                  return Promise.resolve(secondPartialPayment);
+                },
+              ),
+            },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act — segundo reembolso parcial sobre el mismo pago (no debe lanzar)
+      const secondResult = await service.executeRefund(1, 200, 'parcial 2');
+
+      // Assert — segundo reembolso exitoso y monto acumulado correcto (300 + 200 = 500)
+      expect(secondResult).toEqual(secondPartialPayment);
+      expect(secondUpdateData?.status).toBe(PaymentStatus.PARTIAL_REFUNDED);
+      expect(secondUpdateData?.refundDetails.refundedAmount).toBe(500);
     });
   });
 

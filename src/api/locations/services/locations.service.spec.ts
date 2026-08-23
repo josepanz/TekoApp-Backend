@@ -9,6 +9,8 @@ const mockUpdateLocation = jest.fn();
 const mockFindNearby = jest.fn();
 const mockCountOnline = jest.fn();
 const mockFindMany = jest.fn();
+const mockFindByUserReferenceId = jest.fn();
+const mockSetOnlineStatus = jest.fn();
 const mockConfigGet = jest.fn();
 
 const mockProfessional = {
@@ -36,6 +38,8 @@ describe('LocationsService', () => {
             findNearby: mockFindNearby,
             countOnline: mockCountOnline,
             findMany: mockFindMany,
+            findByUserReferenceId: mockFindByUserReferenceId,
+            setOnlineStatus: mockSetOnlineStatus,
           },
         },
         {
@@ -89,12 +93,55 @@ describe('LocationsService', () => {
     });
   });
 
+  // Fila cruda de Postgres tal como la devuelve $queryRaw (snake_case, NUMERIC como string) —
+  // ver `NearbyProfessionalRow`. El service debe mapearla a `NearbyProfessionalResponseDTO`.
+  const rawNearbyRow = {
+    id: 1,
+    reference_id: 'prof-ref-1',
+    category_id: 3,
+    description: 'Plomero',
+    hourly_rate: '50000.00',
+    current_latitude: '-25.2867000',
+    current_longitude: '-57.6470000',
+    is_available: true,
+    is_online: true,
+    average_rating: '4.50',
+    distance: 1.234,
+  };
+
   describe('findNearbyProfessionals', () => {
+    it('debe mapear la fila cruda de Postgres a camelCase con números normalizados', async () => {
+      // Arrange
+      const dto = { latitude: -25.2867, longitude: -57.647, radius: 5 };
+      mockConfigGet.mockReturnValue(50);
+      mockFindNearby.mockResolvedValue([rawNearbyRow]);
+
+      // Act
+      const result = await service.findNearbyProfessionals(dto as never);
+
+      // Assert
+      expect(result).toEqual([
+        {
+          id: 1,
+          referenceId: 'prof-ref-1',
+          categoryId: 3,
+          description: 'Plomero',
+          hourlyRate: 50000,
+          latitude: -25.2867,
+          longitude: -57.647,
+          distanceKm: 1.23,
+          isAvailable: true,
+          isOnline: true,
+          averageRating: 4.5,
+        },
+      ]);
+    });
+
     it('debe usar el radio solicitado cuando es menor al máximo configurado', async () => {
       // Arrange
       const dto = { latitude: -25.2867, longitude: -57.647, radius: 5 };
       mockConfigGet.mockReturnValue(50);
-      mockFindNearby.mockResolvedValue([mockProfessional]);
+      mockFindNearby.mockResolvedValue([rawNearbyRow]);
 
       // Act
       const result = await service.findNearbyProfessionals(dto as never);
@@ -280,6 +327,46 @@ describe('LocationsService', () => {
       // Assert — resultado debe ser un número finito positivo
       expect(Number.isFinite(result)).toBe(true);
       expect(result).toBeGreaterThan(0);
+    });
+  });
+
+  describe('setOnlineStatus', () => {
+    it('debe resolver el professionalId y actualizar su estado online', async () => {
+      // Arrange
+      mockFindByUserReferenceId.mockResolvedValue({ id: 42 });
+      const expected = { id: 42, isOnline: true };
+      mockSetOnlineStatus.mockResolvedValue(expected);
+
+      // Act
+      const result = await service.setOnlineStatus('user-ref-1', true);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockSetOnlineStatus).toHaveBeenCalledWith(42, true);
+    });
+  });
+
+  describe('resolveProfessionalIdByUserRef', () => {
+    it('debe retornar el id del profesional asociado al referenceId del usuario', async () => {
+      // Arrange
+      mockFindByUserReferenceId.mockResolvedValue({ id: 42 });
+
+      // Act
+      const result = await service.resolveProfessionalIdByUserRef('user-ref-1');
+
+      // Assert
+      expect(result).toBe(42);
+      expect(mockFindByUserReferenceId).toHaveBeenCalledWith('user-ref-1');
+    });
+
+    it('debe lanzar NotFoundException si el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindByUserReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.resolveProfessionalIdByUserRef('user-ref-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
