@@ -5,6 +5,7 @@ import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-que
 
 // ── Mocks a nivel de módulo ────────────────────────────────────────────────
 const mockFindUnique = jest.fn();
+const mockFindFirst = jest.fn();
 const mockCount = jest.fn();
 const mockFindMany = jest.fn();
 const mockUpdate = jest.fn();
@@ -14,6 +15,7 @@ const mockPrisma = {
   extended: {
     professionals: {
       findUnique: mockFindUnique,
+      findFirst: mockFindFirst,
       count: mockCount,
       findMany: mockFindMany,
       update: mockUpdate,
@@ -173,10 +175,26 @@ describe('LocationsDbService', () => {
           typeof v === 'object' && v !== null && 'text' in v,
       );
 
+  // $queryRaw nunca pasa por el `$extends` de Prisma — la fila real de Postgres llega con los
+  // nombres de columna crudos (snake_case) y los NUMERIC como string, no camelCase/number.
+  const rawNearbyRow = {
+    id: 1,
+    reference_id: 'prof-ref-1',
+    category_id: 3,
+    description: 'Plomero',
+    hourly_rate: '50000.00',
+    current_latitude: '-25.2867000',
+    current_longitude: '-57.6470000',
+    is_available: true,
+    is_online: true,
+    average_rating: '4.50',
+    distance: 1.2,
+  };
+
   describe('findNearby', () => {
     it('debe ejecutar la query raw y retornar los profesionales cercanos con distancia', async () => {
       // Arrange
-      const nearby = [{ ...baseProfessional, distance: 1.2 }];
+      const nearby = [rawNearbyRow];
       mockQueryRaw.mockResolvedValue(nearby);
 
       const dto: FindNearbyQueryDTO = {
@@ -292,6 +310,52 @@ describe('LocationsDbService', () => {
 
       // Assert
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('setOnlineStatus', () => {
+    it('debe actualizar el estado online del profesional', async () => {
+      // Arrange
+      const expected = { id: 1, isOnline: true };
+      mockUpdate.mockResolvedValue(expected);
+
+      // Act
+      const result = await service.setOnlineStatus(1, true);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: { isOnline: true },
+      });
+    });
+  });
+
+  describe('findByUserReferenceId', () => {
+    it('debe retornar el id del profesional asociado al referenceId del usuario', async () => {
+      // Arrange
+      mockFindFirst.mockResolvedValue({ id: 42 });
+
+      // Act
+      const result = await service.findByUserReferenceId('user-ref-1');
+
+      // Assert
+      expect(result).toEqual({ id: 42 });
+      expect(mockFindFirst).toHaveBeenCalledWith({
+        where: { user: { referenceId: 'user-ref-1' } },
+        select: { id: true },
+      });
+    });
+
+    it('debe retornar null si el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindFirst.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findByUserReferenceId('user-ref-1');
+
+      // Assert
+      expect(result).toBeNull();
     });
   });
 });

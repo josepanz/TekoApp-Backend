@@ -13,18 +13,22 @@ API a TekoApp-Frontend-Web o TekoApp-Mobile) debe tener:
 Patrón ya aplicado en `Users`, `Professionals`, `Roles`, `Category` (ver
 `.claude/rules/typescript.md`).
 
-## Excepción ya existente y aceptada (no migrar sin decidirlo explícitamente)
+## Corrección (2026-08-08): la "excepción" de abajo ya no existe en el schema real
 
-`Services`, `ServiceRequests`, `PaymentMethodEntity`, `Payments`, `PaymentTransaction`, `Rating`
-usan **UUID como PK primaria** (`id String @id @default(uuid())`) en vez del patrón `id`
-secuencial + `referenceId` separado — decisión ya tomada, con FKs `String` en cascada sobre varias
-tablas (`serviceId`, `paymentId`, `paymentMethodId`, etc.). Comparado contra
-`portal-comercios-backend` (que sí sigue el patrón `id` secuencial + `referenceId` en toda su capa
-de negocio, incluyendo un caso de refactor real de UUID-como-PK a secuencial en `qr_payments`):
-UUID como PK fragmenta el índice B-tree en inserts aleatorios y mezcla el id interno con el
-público — pero **migrar esto ahora es un refactor grande** (toca FKs en cascada en múltiples
-tablas), no algo para hacer de forma incidental. Si se decide encarar, la ventana más barata es
-durante otra migración/squash grande, no aislado.
+Esta sección afirmaba que `Services`, `ServiceRequests`, `PaymentMethodEntity`, `Payments`,
+`PaymentTransaction` y `Rating` usaban UUID como PK primaria — **desactualizado**: se verificó
+`prisma/schema.prisma` línea por línea (2026-08-08) y los 6 modelos YA tienen
+`id Int @id @default(autoincrement())` + `referenceId String @unique @default(uuid())`, el mismo
+patrón que `Users`/`Professionals`/`Category`. No hay ninguna migración de PK pendiente — el
+schema ya está estandarizado. Lo que sí seguía siendo un problema real (y ya se corrigió en esta
+misma sesión): `CreatePaymentDto.professionalId` viaja como `referenceId` (UUID) pero
+`PaymentApiService.createPayment` lo convertía con `Number(...)` en vez de resolverlo contra la
+tabla `professionals` — daba `NaN`. Fix: `PaymentDbService.findProfessionalByReferenceId` +
+resolución explícita antes de crear el pago (ver `payments.service.ts`).
+
+Antes de confiar en cualquier afirmación de este archivo sobre el estado de una tabla puntual,
+grepear `model <Nombre>` en `schema.prisma` — este documento puede volver a quedar desactualizado
+si el schema cambia sin actualizar esta nota.
 
 ## Al agregar `referenceId` a una tabla con datos existentes
 
@@ -43,3 +47,23 @@ Reemplazar `id` numérico por `referenceId` en parámetros de ruta (`GET /:id` �
 y en los DTOs de respuesta que hoy exponen el id numérico es un entregable separado — no se
 modifica el contrato público de la API al aplicar esta convención a una tabla nueva, solo el
 modelo de datos.
+
+## Decisión final (2026-08-08): exponer `id` + `referenceId` por separado en TODOS los dominios
+
+Ya no es una excepción pendiente de confirmar — José decidió ejecutarlo. Contrato estándar para
+TODA entidad de negocio, en detalle Y en listado:
+
+- `id` (Int secuencial): solo para ordenamiento en la UI — **nunca** se usa como clave de consulta
+  ni aparece en una ruta (`GET /:id` sigue resolviendo por `referenceId`, no cambia el parámetro).
+- `referenceId` (UUID): la única clave válida para consultar/rutear/deep-link, igual que hoy.
+
+Ejecutar esto AHORA, en desarrollo, es deliberadamente más barato que después de publicar: hoy no
+hay usuarios reales ni apps ya instaladas desde una tienda leyendo el contrato viejo, así que
+agregar el campo `id` a la respuesta de los 6 dominios que hoy solo devuelven el UUID bajo esa
+clave (`Services`, `ServiceRequests`, `PaymentMethodEntity`, `Payments`, `PaymentTransaction`,
+`Rating`) es un cambio aditivo sin breaking change real, coordinado con `TekoApp-Frontend-Mobile`/
+`TekoApp-Web` en el mismo ciclo (deben empezar a usar `id` solo para sort, nunca para navegar).
+Pendiente de implementación — ver backlog en `TekoApp-Frontend-Mobile/openspec/decisions.md`
+("Backlog — features grandes pedidas 2026-08-08", ítem 1) para el detalle y la razón de no
+haberlo ejecutado en la misma sesión que esta nota (tocar 6 dominios × 3 repos amerita su propia
+spec/fase, no un cambio ad-hoc).

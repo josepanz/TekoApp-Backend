@@ -32,6 +32,27 @@ async function main() {
     },
   });
 
+  // Cliente móvil (Basic Auth) — TekoApp-Frontend-Mobile no tiene BFF, así que este secreto vive
+  // embebido en el binario/config de la app (ver TekoApp-Frontend-Mobile/.claude/rules/auth.md,
+  // "Qué NO replicar del BFF de TekoApp-Web"). Faltaba: sin este registro, `POST /auth/nonce` y
+  // `/auth/login` rechazan a mobile con INVALID_CLIENT_ID pese a que el código Flutter ya lee
+  // BASIC_AUTH_CLIENT_ID/SECRET vía --dart-define desde la Fase 0002.
+  const mobileClientSecretHash = bcrypt.hashSync(
+    process.env.MOBILE_CLIENT_SECRET ?? 'dev-only-change-me',
+    bcrypt.genSaltSync(),
+  );
+  await prisma.apiClientCredential.upsert({
+    where: { clientId: 'tekoapp-mobile' },
+    update: { secretKey: mobileClientSecretHash, isActive: true },
+    create: {
+      clientId: 'tekoapp-mobile',
+      clientName: 'TekoApp-Frontend-Mobile',
+      secretKey: mobileClientSecretHash,
+      isActive: true,
+      createdBy: 'seed',
+    },
+  });
+
   // ─── Tablas de referencia ───────────────────────────────────────────────────
   // `documents_type` id=1 es un bloqueante duro: todo el código de creación de usuarios
   // (onboarding, admin) asume que existe (ver users-db.service.ts, onboarding.service.ts).

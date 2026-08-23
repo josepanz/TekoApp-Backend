@@ -89,6 +89,19 @@ export const AuthApiDocs = {
     }),
   ),
 
+  publicKey: applyDecorators(
+    HttpCode(200),
+    ApiOperation({
+      summary: 'Clave pública RSA para cifrar el login (pre-login).',
+      description:
+        'Devuelve la clave pública (PEM) usada para cifrar {password, nonce} con OAEP-SHA256 antes de POST /auth/login. Pensado para clientes sin servidor propio (ej. mobile) que no pueden llevar la clave hardcodeada.',
+    }),
+    ApiOkResponse({
+      description: 'Clave pública obtenida correctamente.',
+      type: DTO.PublicKeyResponseDTO,
+    }),
+  ),
+
   me: applyDecorators(
     HttpCode(200),
     ApiOperation({

@@ -44,6 +44,7 @@ import {
   ApiUpdatePayment,
   ApiCancelPayment,
   ApiRefundPayment,
+  ApiGetPaymentMethods,
   ApiCreatePaymentMethod,
   ApiUpdatePaymentMethod,
   ApiDeletePaymentMethod,
@@ -95,6 +96,16 @@ export class PaymentController {
     @Query() query: PaymentTrendsQueryDTO,
   ): Promise<PaymentTrendsResponseDTO> {
     return this.apiService.getMetricsTrends(query.days, query.userId);
+  }
+
+  // `methods` DEBE ir antes de `:id` — de lo contrario `GET /payments/methods` matchea
+  // `findOne(:id='methods')` primero (Express/Nest registran rutas GET en orden de declaración).
+  @Get('methods')
+  @ApiGetPaymentMethods()
+  async findMethods(
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise<PaymentMethodDetailResponseDTO[]> {
+    return this.apiService.getPaymentMethods(req.user.id);
   }
 
   @Get(':id')

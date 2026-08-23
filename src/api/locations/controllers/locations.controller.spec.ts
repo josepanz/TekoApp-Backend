@@ -10,6 +10,8 @@ import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
 
 const mockUpdateLocation = jest.fn();
+const mockResolveProfessionalIdByUserRef = jest.fn();
+const mockSetOnlineStatus = jest.fn();
 const mockFindNearbyProfessionals = jest.fn();
 const mockGetProfessionalLocation = jest.fn();
 const mockGetOnlineProfessionalsCount = jest.fn();
@@ -17,9 +19,7 @@ const mockGetProfessionalsByArea = jest.fn();
 const mockCalculateDistance = jest.fn();
 
 const mockReq = {
-  user: { id: 1, professionalId: 42 } as unknown as IUserDataOnJwt & {
-    professionalId?: number;
-  },
+  user: { id: 1, referenceId: 'user-ref-1' } as unknown as IUserDataOnJwt,
 };
 
 describe('LocationsController', () => {
@@ -33,6 +33,8 @@ describe('LocationsController', () => {
           provide: LocationsService,
           useValue: {
             updateLocation: mockUpdateLocation,
+            resolveProfessionalIdByUserRef: mockResolveProfessionalIdByUserRef,
+            setOnlineStatus: mockSetOnlineStatus,
             findNearbyProfessionals: mockFindNearbyProfessionals,
             getProfessionalLocation: mockGetProfessionalLocation,
             getOnlineProfessionalsCount: mockGetOnlineProfessionalsCount,
@@ -52,13 +54,14 @@ describe('LocationsController', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('updateLocation', () => {
-    it('debe actualizar la ubicación extrayendo el professionalId del token JWT', async () => {
+    it('debe actualizar la ubicación resolviendo el professionalId desde el referenceId del usuario', async () => {
       // Arrange
       const dto = {
         latitude: -25.3,
         longitude: -57.6,
       } as UpdateLocationRequestDTO;
       const expected = { updated: true };
+      mockResolveProfessionalIdByUserRef.mockResolvedValue(42);
       mockUpdateLocation.mockResolvedValue(expected);
 
       // Act
@@ -66,7 +69,27 @@ describe('LocationsController', () => {
 
       // Assert
       expect(result).toEqual(expected);
+      expect(mockResolveProfessionalIdByUserRef).toHaveBeenCalledWith(
+        'user-ref-1',
+      );
       expect(mockUpdateLocation).toHaveBeenCalledWith(42, dto);
+    });
+  });
+
+  describe('setOnlineStatus', () => {
+    it('debe cambiar el estado online del profesional autenticado', async () => {
+      // Arrange
+      const expected = { id: 42, isOnline: true };
+      mockSetOnlineStatus.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.setOnlineStatus(mockReq, {
+        isOnline: true,
+      });
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockSetOnlineStatus).toHaveBeenCalledWith('user-ref-1', true);
     });
   });
 

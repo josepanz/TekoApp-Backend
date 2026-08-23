@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
 import { Users } from '@prisma/client';
 
 import * as DTO from '@api/auth/dtos';
+import { APP_CONFIG, AppConfigType } from '@core/config/config-loader';
 import { UsersDBService } from '@modules/users-db/services/users-db.service';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { EmailService } from '@modules/email/services/email.service';
@@ -18,7 +20,17 @@ export class AuthApiService {
     private readonly emailService: EmailService,
     private readonly authMigrationService: AuthMigrationService,
     private readonly uploadsService: UploadsService,
+    @Inject(APP_CONFIG.KEY)
+    private readonly configService: ConfigType<AppConfigType>,
   ) {}
+
+  /**
+   * Clave pública RSA (PEM) para que un cliente sin servidor propio (mobile) pueda cifrar el
+   * login sin llevarla hardcodeada — ver `PublicKeyResponseDTO`.
+   */
+  publicKey(): DTO.PublicKeyResponseDTO {
+    return { publicKeyPem: this.configService.authentication.publicKey };
+  }
 
   /**
    * `avatarKey` es la key de S3 (permanente); acá se resuelve a una URL presignada fresca (expira
