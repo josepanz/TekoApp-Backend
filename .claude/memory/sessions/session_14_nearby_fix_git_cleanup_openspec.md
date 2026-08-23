@@ -56,3 +56,20 @@ momento de escribir esto.
   infraestructura está lista pero nada la usa (encontrado desde el lado mobile de la Fase 0005).
 - Implementar las 6 features documentadas en `openspec/changes/0001`-`0006` cuando se priorice.
 - Promoción `develop → qa → master` pedida por José en esta misma sesión, en curso.
+
+## Adenda — promoción develop → qa → master (misma sesión)
+
+Al promover, el pipeline de `develop` venía fallando desde el 2026-08-22 (antes de esta sesión,
+no causado por el rewrite) por la misma familia de bug: semantic-release dejó de reconocer tags
+`v1.0.0-develop.N` recientes como "última release" y chocaba al recrearlos. Se limpiaron del
+remoto (autorizado por José) y quedó verde. Mismo patrón repetido en `qa` (`v1.0.0-qa.4`) y
+`master` (`v1.0.0`/`v1.0.1`/`v1.0.2`) al promoverlos — mismo fix.
+
+`qa` se sincronizó con `develop` vía merge normal (`chore/sync-qa-with-develop`, PR #34) — este
+repo conservó ancestro común entre ramas (ya tenía un rewrite de julio, no el primero). `master`,
+en cambio, estaba congelado en el scaffolding inicial del proyecto (#3/#14) y generaba conflictos
+"add/add" en ~35 archivos reales al mergear — sin nada de valor real en sus 10 commits propios, se
+resolvió con un **reset duro de `master` a `qa`** (autorizado explícitamente por José, no un
+merge).
+
+**Estado final**: `develop`/`qa`/`master` en verde (Pipeline completo) al cierre de la sesión.
