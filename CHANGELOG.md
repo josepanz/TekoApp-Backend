@@ -1,3 +1,7 @@
+## 1.0.0-develop.13 (2026-08-23)
+
+* docs: add promotion addendum to session 14 (#35) ([e6d872e](https://github.com/josepanz/TekoApp-Backend/commit/e6d872e)), closes [#35](https://github.com/josepanz/TekoApp-Backend/issues/35)
+
 ## 1.0.0-develop.12 (2026-08-23)
 
 * chore: add minio service for local S3-compatible storage ([3d62d0c](https://github.com/josepanz/TekoApp-Backend/commit/3d62d0c))
