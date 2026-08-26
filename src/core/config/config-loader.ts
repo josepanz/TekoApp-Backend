@@ -1,6 +1,7 @@
 // src/config/config-loader.ts
 import { registerAs } from '@nestjs/config';
 import * as path from 'path';
+import { AiDisclosureEntityType } from '@prisma/client';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pkg = require(path.join(process.cwd(), 'package.json')) as {
@@ -121,6 +122,15 @@ export const APP_CONFIG = registerAs('config', () => {
       accountSid: process.env.TWILIO_ACCOUNT_SID,
       authToken: process.env.TWILIO_AUTH_TOKEN,
       phoneNumber: process.env.TWILIO_PHONE_NUMBER,
+    },
+    // Qué tipos de contenido admiten auto-declaración de IA por parte del usuario dueño — agregar
+    // un tipo nuevo acá es config, no código (ver openspec/specs/ai-content-disclosure.md). Lista
+    // fija (no viene de env var): son valores de negocio, no secretos de infraestructura.
+    aiDisclosure: {
+      userDeclarableTypes: [
+        AiDisclosureEntityType.SERVICE_DESCRIPTION,
+        AiDisclosureEntityType.PROFESSIONAL_DESCRIPTION,
+      ] as AiDisclosureEntityType[],
     },
   };
 });

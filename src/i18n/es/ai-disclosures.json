@@ -1,0 +1,6 @@
+{
+  "ENTITY_TYPE_NOT_DECLARABLE": "Este tipo de contenido no admite autodeclaración de IA",
+  "ENTITY_NOT_FOUND": "No se encontró el contenido referenciado",
+  "NOT_CONTENT_OWNER": "No podés declarar IA sobre un contenido que no te pertenece",
+  "DISCLOSURE_NOT_FOUND": "No se encontró una declaración de IA para este contenido"
+}

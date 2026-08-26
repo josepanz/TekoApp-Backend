@@ -1,0 +1,6 @@
+{
+  "ENTITY_TYPE_NOT_DECLARABLE": "This content type does not support self-declared AI disclosure",
+  "ENTITY_NOT_FOUND": "The referenced content was not found",
+  "NOT_CONTENT_OWNER": "You cannot declare AI usage on content you do not own",
+  "DISCLOSURE_NOT_FOUND": "No AI disclosure was found for this content"
+}
