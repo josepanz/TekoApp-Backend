@@ -112,6 +112,9 @@ model Users {
   promotionUsages       PromotionUsage[]
   pushSubscriptions     PushSubscriptions[]
   fcmTokens             FcmTokens[]
+  legalConsents         UserConsents[]
+  contentConsentGrants  ContentConsentGrants[]
+  aiContentDisclosures  AiContentDisclosures[]
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -671,7 +674,9 @@ model Country {
   checksum        String?   @map("checksum")
   changeSignature String?   @map("change_signature")
 
-  currencies Currency[] // Relación con monedas
+  currencies             Currency[] // Relación con monedas
+  legalDocumentVersions  LegalDocumentVersions[]
+  dataRetentionPolicies  DataRetentionPolicies[]
 
   @@index([isActive])
   @@map("countries")
@@ -982,4 +987,137 @@ model PlatformCommissionConfig {
 
   @@index([isDefault, isActive])
   @@map("platform_commission_config")
+}
+
+// =====================================================================================================================
+// PROTECCIÓN DE DATOS, IMÁGENES Y SU USO (Fase 0006 — ver openspec/specs/data-and-media-consent.md)
+// =====================================================================================================================
+
+enum LegalDocumentType {
+  TERMS_OF_SERVICE
+  PRIVACY_POLICY
+  DATA_PROCESSING_CONSENT
+  IMAGE_USAGE_CONSENT
+}
+
+enum ContentUsageScope {
+  APP_INTERNAL_ONLY
+  PUBLIC_PROFILE_DISPLAY
+  MARKETING
+}
+
+/// Introducido acá (Fase 0006) en vez de en la Fase 0005 (ai-content-disclosure.md, que es donde
+/// "pertenece" conceptualmente) porque `ContentConsentGrants`/`DataRetentionPolicies` ya lo
+/// necesitan como tipo de columna y los enums de Postgres deben existir antes de usarse. La Fase
+/// 0005 reusa este mismo enum al agregar `AiContentDisclosures` — no se duplica.
+enum AiDisclosureEntityType {
+  SERVICE_DESCRIPTION
+  BUDGET_OPTION
+  PROGRESS_NOTE
+  PROFESSIONAL_DESCRIPTION
+  IMAGE
+  OTHER // catch-all extensible sin migración para tipos de contenido que todavía no existen
+}
+
+/// Catálogo versionado, editable sin deploy por staff.
+model LegalDocumentVersions {
+  id           Int               @id @default(autoincrement())
+  referenceId  String            @unique @default(uuid()) @map("reference_id")
+  documentType LegalDocumentType @map("document_type")
+  countryId    Int?              @map("country_id") // null = versión internacional/paraguas
+  version      String            @db.VarChar(20)
+  contentUrl   String            @db.VarChar(500) @map("content_url")
+  publishedAt  DateTime          @map("published_at")
+  isActive     Boolean           @default(true) @map("is_active")
+
+  country  Country?       @relation(fields: [countryId], references: [id])
+  consents UserConsents[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String?   @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+
+  @@map("legal_document_versions")
+  @@index([documentType, countryId, isActive])
+}
+
+model UserConsents {
+  id                     Int      @id @default(autoincrement())
+  referenceId            String   @unique @default(uuid()) @map("reference_id")
+  userId                 Int      @map("user_id")
+  legalDocumentVersionId Int      @map("legal_document_version_id")
+  acceptedAt             DateTime @default(now()) @map("accepted_at")
+  ipAddress              String?  @db.VarChar(45) @map("ip_address")
+  userAgent              String?  @db.VarChar(255) @map("user_agent")
+  acceptanceHash         String   @db.VarChar(128) @map("acceptance_hash")
+
+  user                 Users                 @relation(fields: [userId], references: [id])
+  legalDocumentVersion LegalDocumentVersions @relation(fields: [legalDocumentVersionId], references: [id])
+
+  @@unique([userId, legalDocumentVersionId])
+  @@map("user_consents")
+}
+
+/// Consentimiento de USO por contenido puntual — más fino que la aceptación general de ToS. No
+/// tiene `@@unique` sobre (contentType, contentReferenceId): revocar y volver a otorgar crea una
+/// fila nueva (historial completo), la fila "vigente" es la que tiene `revokedAt: null`.
+model ContentConsentGrants {
+  id                 Int                    @id @default(autoincrement())
+  referenceId        String                 @unique @default(uuid()) @map("reference_id")
+  contentType        AiDisclosureEntityType @map("content_type")
+  contentReferenceId String                 @map("content_reference_id")
+  uploaderUserId     Int                    @map("uploader_user_id")
+  usageScope         ContentUsageScope      @default(APP_INTERNAL_ONLY) @map("usage_scope")
+  grantedAt          DateTime               @default(now()) @map("granted_at")
+  revokedAt          DateTime?              @map("revoked_at")
+
+  uploader Users @relation(fields: [uploaderUserId], references: [id])
+
+  @@index([contentType, contentReferenceId])
+  @@map("content_consent_grants")
+}
+
+/// Cuánto tiempo se retiene cada tipo de contenido y si el usuario puede pedir su baja.
+model DataRetentionPolicies {
+  id                 Int                    @id @default(autoincrement())
+  referenceId        String                 @unique @default(uuid()) @map("reference_id")
+  countryId          Int?                   @map("country_id")
+  contentType        AiDisclosureEntityType @map("content_type")
+  retentionDays      Int?                   @map("retention_days")
+  allowsUserDeletion Boolean                @default(true) @map("allows_user_deletion")
+  requiresLegalHold  Boolean                @default(false) @map("requires_legal_hold")
+
+  country Country? @relation(fields: [countryId], references: [id])
+
+  @@unique([countryId, contentType])
+  @@map("data_retention_policies")
+}
+
+enum AiDisclosureSource {
+  PLATFORM_AI // generado por una feature de IA de la propia plataforma
+  USER_DECLARED_AI // el usuario marcó voluntariamente su contenido como asistido por IA
+}
+
+/// Tabla polimórfica deliberada — `entityReferenceId` no es una FK real de Postgres (apunta al
+/// `referenceId` de cualquier tabla futura), para no requerir una migración por cada tipo de
+/// contenido nuevo que empiece a soportar disclosure. Ver `openspec/specs/ai-content-disclosure.md`.
+model AiContentDisclosures {
+  id                Int                    @id @default(autoincrement())
+  referenceId       String                 @unique @default(uuid()) @map("reference_id")
+  entityType        AiDisclosureEntityType @map("entity_type")
+  entityReferenceId String                 @map("entity_reference_id")
+  source            AiDisclosureSource
+  aiProvider        String?                @db.VarChar(60) @map("ai_provider")
+  declaredByUserId  Int?                   @map("declared_by_user_id")
+  note              String?                @db.Text
+
+  declaredByUser Users? @relation(fields: [declaredByUserId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String?  @map("created_by")
+
+  @@unique([entityType, entityReferenceId])
+  @@map("ai_content_disclosures")
 }
