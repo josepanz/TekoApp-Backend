@@ -17,6 +17,8 @@ import { UsersApiModule } from '@/api/users/users-api.module';
 import { CountriesModule } from '@/api/countries/countries.module';
 import { CurrenciesModule } from '@/api/currencies/currencies.module';
 import { LanguagesModule } from '@/api/languages/languages.module';
+import { LegalConsentsModule } from '@/api/legal-consents/legal-consents.module';
+import { AiDisclosuresModule } from '@/api/ai-disclosures/ai-disclosures.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { LanguagesModule } from '@/api/languages/languages.module';
     CountriesModule,
     CurrenciesModule,
     LanguagesModule,
+    LegalConsentsModule,
+    AiDisclosuresModule,
   ],
 })
 export class ApiModule {}
