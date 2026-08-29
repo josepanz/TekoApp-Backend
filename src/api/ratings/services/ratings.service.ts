@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { Prisma, RatingType } from '@prisma/client';
 import { PrismaErrorCodes } from '@common/enum/prisma-error-codes.enum';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { RatingsDbService } from '@modules/ratings-db/services/ratings-db.service';
 import { CreateRatingRequestDTO } from '../dtos/request/create-rating.request.dto';
 import { CreateProfessionalToClientRatingRequestDTO } from '../dtos/request/create-professional-to-client-rating.request.dto';
@@ -17,6 +19,8 @@ import {
   RatingDetailResponseDTO,
 } from '../dtos/response';
 import {
+  RatingViewerContext,
+  isAuthor,
   mapRatingToResponse,
   mapRatingsToResponse,
 } from '../helpers/ratings-response.helper';
@@ -27,6 +31,25 @@ const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 @Injectable()
 export class RatingsService {
   constructor(private readonly db: RatingsDbService) {}
+
+  /**
+   * Resuelve la identidad de quien consulta para decidir si hay que ocultar al autor de una
+   * calificación anónima (ver `RatingViewerContext`) — nunca se le oculta nada a admin/staff
+   * (`ratings.audit:read`/`admin:all`).
+   */
+  private async buildViewerContext(
+    user: IUserDataOnJwt,
+  ): Promise<RatingViewerContext> {
+    const isPrivileged =
+      user.permissions.includes(PERMISSIONS.RATINGS.AUDIT_VIEW) ||
+      user.permissions.includes(PERMISSIONS.ADMIN.ALL);
+    const professional = await this.db.findProfessionalByUserId(user.id);
+    return {
+      userId: user.id,
+      professionalId: professional?.id ?? null,
+      isPrivileged,
+    };
+  }
 
   /**
    * Resuelve el UUID público de un servicio (recibido en el DTO) a su PK interna (Int). Devuelve
@@ -110,7 +133,12 @@ export class RatingsService {
       isAnonymous: dto.isAnonymous ?? false,
       createdBy: String(userId),
     });
-    return mapRatingToResponse(created);
+    // El caller siempre es el autor de lo que acaba de crear — nunca se le oculta a sí mismo.
+    return mapRatingToResponse(created, {
+      userId,
+      professionalId: null,
+      isPrivileged: false,
+    });
   }
 
   // Contraparte de `create()` para el sentido inverso: acá el profesional autenticado (rater)
@@ -154,49 +182,91 @@ export class RatingsService {
       isAnonymous: dto.isAnonymous ?? false,
       createdBy: String(raterUserId),
     });
-    return mapRatingToResponse(created);
+    return mapRatingToResponse(created, {
+      userId: raterUserId,
+      professionalId: professional.id,
+      isPrivileged: false,
+    });
   }
 
+  /** Sin masking — solo alcanzable con `ratings.audit:read`/`admin:all` (ver guard del controller). */
   async findAll(): Promise<RatingDetailResponseDTO[]> {
-    return mapRatingsToResponse(await this.db.findAll());
+    return mapRatingsToResponse(await this.db.findAll(), {
+      userId: 0,
+      professionalId: null,
+      isPrivileged: true,
+    });
   }
 
-  async findOne(id: string): Promise<RatingDetailResponseDTO> {
-    return mapRatingToResponse(await this.getRatingEntityByRef(id));
+  async findOne(
+    id: string,
+    user: IUserDataOnJwt,
+  ): Promise<RatingDetailResponseDTO> {
+    const [rating, viewer] = await Promise.all([
+      this.getRatingEntityByRef(id),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingToResponse(rating, viewer);
   }
 
-  async findByUser(userId: number): Promise<RatingDetailResponseDTO[]> {
-    return mapRatingsToResponse(await this.db.findByUser(userId));
+  async findByUser(
+    userId: number,
+    user: IUserDataOnJwt,
+  ): Promise<RatingDetailResponseDTO[]> {
+    const [ratings, viewer] = await Promise.all([
+      this.db.findByUser(userId),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingsToResponse(ratings, viewer);
   }
 
   async findByProfessional(
     professionalId: number,
+    user: IUserDataOnJwt,
   ): Promise<RatingDetailResponseDTO[]> {
-    return mapRatingsToResponse(
-      await this.db.findByProfessional(professionalId),
-    );
+    const [ratings, viewer] = await Promise.all([
+      this.db.findByProfessional(professionalId),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingsToResponse(ratings, viewer);
   }
 
+  // `findClientRatings`/`findProfessionalRatings` ya excluyen `isAnonymous` a nivel de query
+  // (`ratings-db.service.ts`) — no hay nada que enmascarar, pero igual se resuelve el viewer real
+  // para no depender de que ese filtro nunca cambie.
   async findClientRatings(
     professionalId: number,
+    user: IUserDataOnJwt,
   ): Promise<RatingDetailResponseDTO[]> {
-    return mapRatingsToResponse(
-      await this.db.findClientRatings(professionalId),
-    );
+    const [ratings, viewer] = await Promise.all([
+      this.db.findClientRatings(professionalId),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingsToResponse(ratings, viewer);
   }
 
   async findProfessionalRatings(
     userId: number,
+    user: IUserDataOnJwt,
   ): Promise<RatingDetailResponseDTO[]> {
-    return mapRatingsToResponse(await this.db.findProfessionalRatings(userId));
+    const [ratings, viewer] = await Promise.all([
+      this.db.findProfessionalRatings(userId),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingsToResponse(ratings, viewer);
   }
 
   async findByServiceRequest(
     serviceRef: string,
+    user: IUserDataOnJwt,
   ): Promise<RatingDetailResponseDTO[]> {
     const service = await this.db.findServiceByReferenceId(serviceRef);
     if (!service) throw new NotFoundException(t('ratings.SERVICE_NOT_FOUND'));
-    return mapRatingsToResponse(await this.db.findByServiceId(service.id));
+    const [ratings, viewer] = await Promise.all([
+      this.db.findByServiceId(service.id),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingsToResponse(ratings, viewer);
   }
 
   async getUserRatingStats(
@@ -216,11 +286,14 @@ export class RatingsService {
 
   async update(
     id: string,
-    userId: number,
+    user: IUserDataOnJwt,
     dto: UpdateRatingRequestDTO | Partial<Prisma.RatingUpdateInput>,
   ): Promise<RatingDetailResponseDTO> {
-    const rating = await this.getRatingEntityByRef(id);
-    if (rating.userId !== userId) {
+    const [rating, viewer] = await Promise.all([
+      this.getRatingEntityByRef(id),
+      this.buildViewerContext(user),
+    ]);
+    if (!isAuthor(rating, viewer)) {
       throw new ForbiddenException(t('ratings.UNAUTHORIZED_EDIT'));
     }
     const age = Date.now() - rating.createdAt.getTime();
@@ -231,12 +304,15 @@ export class RatingsService {
       rating.id,
       dto as Prisma.RatingUpdateInput,
     );
-    return mapRatingToResponse(updated);
+    return mapRatingToResponse(updated, viewer);
   }
 
-  async remove(id: string, userId: number): Promise<void> {
-    const rating = await this.getRatingEntityByRef(id);
-    if (rating.userId !== userId) {
+  async remove(id: string, user: IUserDataOnJwt): Promise<void> {
+    const [rating, viewer] = await Promise.all([
+      this.getRatingEntityByRef(id),
+      this.buildViewerContext(user),
+    ]);
+    if (!isAuthor(rating, viewer)) {
       throw new ForbiddenException(t('ratings.UNAUTHORIZED_DELETE'));
     }
     const age = Date.now() - rating.createdAt.getTime();
@@ -248,14 +324,17 @@ export class RatingsService {
 
   async reportRating(
     id: string,
-    userId: number,
+    user: IUserDataOnJwt,
     reason: string,
   ): Promise<RatingDetailResponseDTO> {
-    const rating = await this.getRatingEntityByRef(id);
-    if (rating.userId === userId) {
+    const [rating, viewer] = await Promise.all([
+      this.getRatingEntityByRef(id),
+      this.buildViewerContext(user),
+    ]);
+    if (isAuthor(rating, viewer)) {
       throw new BadRequestException(t('ratings.CANNOT_REPORT_OWN'));
     }
-    return mapRatingToResponse(await this.db.report(rating.id, reason));
+    return mapRatingToResponse(await this.db.report(rating.id, reason), viewer);
   }
 
   async getAverageRating(
@@ -330,7 +409,14 @@ export class RatingsService {
     }));
   }
 
-  async getRecentRatings(limit = 20): Promise<RatingDetailResponseDTO[]> {
-    return mapRatingsToResponse(await this.db.findRecent(limit));
+  async getRecentRatings(
+    limit: number,
+    user: IUserDataOnJwt,
+  ): Promise<RatingDetailResponseDTO[]> {
+    const [ratings, viewer] = await Promise.all([
+      this.db.findRecent(limit),
+      this.buildViewerContext(user),
+    ]);
+    return mapRatingsToResponse(ratings, viewer);
   }
 }

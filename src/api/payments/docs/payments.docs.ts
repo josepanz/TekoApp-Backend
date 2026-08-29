@@ -33,6 +33,19 @@ export const ApiGetPayments = () =>
     }),
   );
 
+export const ApiGetMyPayments = () =>
+  applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: 'Obtener los pagos propios del usuario autenticado',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Lista de pagos del usuario autenticado',
+      type: [PaymentDetailResponseDTO],
+    }),
+  );
+
 export const ApiGetPaymentSummary = () =>
   applyDecorators(
     ApiBearerAuth(),

@@ -50,7 +50,7 @@ enum DocumentReviewStatus {
 
 /// Catálogo parametrizable — qué documento se pide, a quién, y con qué reglas.
 /// countryId/professionalCategoryId NULL = aplica globalmente (sin scoping).
-model DocumentTypes {
+model ProfessionalDocumentTypes {
   id                     Int              @id @default(autoincrement())
   referenceId            String           @unique @default(uuid()) @map("reference_id")
   code                   String           @unique @db.VarChar(60) // ej. "BG_CHECK_CRIMINAL_PY"
@@ -76,25 +76,25 @@ model DocumentTypes {
   lastChangedBy String?   @map("last_changed_by")
   changedReason String?   @map("changed_reason")
 
-  @@map("document_types")
+  @@map("professional_document_types")
 }
 
 model ProfessionalDocuments {
-  id             Int                   @id @default(autoincrement())
-  referenceId    String                @unique @default(uuid()) @map("reference_id")
-  professionalId Int                   @map("professional_id")
-  documentTypeId Int                   @map("document_type_id")
-  fileKey        String                @map("file_key") // S3 key, mismo patrón que Users.avatarKey
-  status         DocumentReviewStatus  @default(PENDING)
-  issuedAt       DateTime?             @map("issued_at")   // fecha de emisión declarada
-  expiresAt      DateTime?             @map("expires_at")  // calculada: issuedAt + validityDays, o null
-  reviewedAt     DateTime?             @map("reviewed_at")
-  reviewedBy     String?               @map("reviewed_by") // referenceId del usuario staff
-  rejectionReason String?              @db.Text @map("rejection_reason")
-  metadata       Json?                 @db.JsonB // campos libres por tipo (ej. nro. de matrícula)
+  id                         Int                  @id @default(autoincrement())
+  referenceId                String               @unique @default(uuid()) @map("reference_id")
+  professionalId             Int                  @map("professional_id")
+  professionalDocumentTypeId Int                  @map("professional_document_type_id")
+  fileKey                    String               @map("file_key") // S3 key, mismo patrón que Users.avatarKey
+  status                     DocumentReviewStatus @default(PENDING)
+  issuedAt                   DateTime?            @map("issued_at")   // fecha de emisión declarada
+  expiresAt                  DateTime?            @map("expires_at")  // calculada: issuedAt + validityDays, o null
+  reviewedAt                 DateTime?            @map("reviewed_at")
+  reviewedBy                 String?              @map("reviewed_by") // referenceId del usuario staff
+  rejectionReason            String?              @db.Text @map("rejection_reason")
+  metadata                   Json?                @db.JsonB // campos libres por tipo (ej. nro. de matrícula)
 
-  professional Professionals @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  documentType DocumentTypes @relation(fields: [documentTypeId], references: [id])
+  professional         Professionals             @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professionalDocumentType ProfessionalDocumentTypes @relation(fields: [professionalDocumentTypeId], references: [id])
 
   createdAt     DateTime  @default(now()) @map("created_at")
   createdBy     String?   @map("created_by")
@@ -111,14 +111,14 @@ model ProfessionalDocuments {
 ```
 
 `Professionals.verificationStatus` (ya existe, `String @default("unverified")`) se mantiene como
-campo agregado/derivado, no se elimina: pasa a `"verified"` cuando todos los `DocumentTypes` con
+campo agregado/derivado, no se elimina: pasa a `"verified"` cuando todos los `ProfessionalDocumentTypes` con
 `isRequired=true` que aplican al país+categoría del profesional tienen un `ProfessionalDocuments`
 en estado `APPROVED` y sin vencer. Se recalcula en cada `review`/expiración, vía un helper
 `ProfessionalVerificationHelper.recompute(professionalId)`.
 
 ## Qué es parametrizable/configurable
 
-- **Catálogo completo de `DocumentTypes` editable sin deploy** — vía CRUD de staff (ver spec de
+- **Catálogo completo de `ProfessionalDocumentTypes` editable sin deploy** — vía CRUD de staff (ver spec de
   Web). Agregar un país o categoría nuevos con sus propios requisitos es insertar filas, no código.
 - **Obligatorio/opcional** por combinación país+categoría (`isRequired`, con `countryId`/
   `professionalCategoryId` nulos como comodín "aplica a todos").
@@ -132,17 +132,17 @@ en estado `APPROVED` y sin vencer. Se recalcula en cada `review`/expiración, v�
 ## Endpoints (contrato)
 
 Estructura de carpetas según `.claude/rules/typescript.md`: `src/api/professional-documents/` +
-`src/modules/professional-documents-db/`, más `src/api/document-types/` (catálogo, CRUD staff) +
-`src/modules/document-types-db/`.
+`src/modules/professional-documents-db/`, más `src/api/professional-document-types/` (catálogo, CRUD staff) +
+`src/modules/professional-document-types-db/`.
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
-| GET | `/document-types` | público/autenticado | Catálogo filtrable por `countryId`/`professionalCategoryId`, `GetDocumentTypesListQueryDTO` |
-| POST | `/admin/document-types` | staff (permiso dedicado) | `CreateDocumentTypeRequestDTO` |
-| PATCH | `/admin/document-types/:referenceId` | staff | `UpdateDocumentTypeRequestDTO` |
-| POST | `/professionals/me/documents` | profesional | multipart, `CreateProfessionalDocumentRequestDTO { documentTypeId, issuedAt? }` — reutiliza `modules/storage` igual que `uploads.service.ts` |
+| GET | `/professional-document-types` | público/autenticado | Catálogo filtrable por `countryId`/`professionalCategoryId`, `GetProfessionalDocumentTypesListQueryDTO` |
+| POST | `/admin/professional-document-types` | staff (permiso dedicado) | `CreateProfessionalDocumentTypeRequestDTO` |
+| PATCH | `/admin/professional-document-types/:referenceId` | staff | `UpdateProfessionalDocumentTypeRequestDTO` |
+| POST | `/professionals/me/documents` | profesional | multipart, `CreateProfessionalDocumentRequestDTO { professionalDocumentTypeId, issuedAt? }` — reutiliza `modules/storage` igual que `uploads.service.ts` |
 | GET | `/professionals/me/documents` | profesional | Estado propio de cada tipo requerido + cargado |
-| GET | `/professionals/:referenceId/documents/public` | cualquiera autenticado | Solo `APPROVED` + `isVisibleToClient=true` de `DocumentTypes` |
+| GET | `/professionals/:referenceId/documents/public` | cualquiera autenticado | Solo `APPROVED` + `isVisibleToClient=true` de `ProfessionalDocumentTypes` |
 | GET | `/admin/professionals/:referenceId/documents` | staff | Todo, incluidos `PENDING`/`REJECTED`/`EXPIRED` |
 | PATCH | `/admin/professional-documents/:referenceId/review` | staff | `ReviewProfessionalDocumentRequestDTO { status: APPROVED|REJECTED, rejectionReason? }` |
 
@@ -154,7 +154,7 @@ dispara notificación al profesional + recomputa `verificationStatus`.
 
 - `403 CONSENT_REQUIRED` — falta consentimiento vigente (ver `data-and-media-consent.md`), bloquea
   la subida antes de llegar a crear el registro.
-- `404` en `POST /professionals/me/documents` si `documentTypeId` no existe o no aplica al
+- `404` en `POST /professionals/me/documents` si `professionalDocumentTypeId` no existe o no aplica al
   país/categoría del profesional (nunca crear un `ProfessionalDocuments` de un tipo que no le
   corresponde).
 - `409` en `review` si el documento ya no está `PENDING` (revisado por otro admin en simultáneo) —

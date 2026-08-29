@@ -204,8 +204,13 @@ export class ProfessionalsController {
   async getProfessionalReviews(
     @Param() param: ProfessionalIdParamDTO,
     @Query() query: GetProfessionalReviewsQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalReviewsListResponseDTO> {
-    return this.professionalsService.getProfessionalReviews(param.id, query);
+    return this.professionalsService.getProfessionalReviews(
+      param.id,
+      query,
+      req.user,
+    );
   }
 
   @Get(':id/stats')

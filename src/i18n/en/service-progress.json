@@ -1,0 +1,11 @@
+{
+  "SERVICE_NOT_FOUND": "Service not found",
+  "ONLY_ASSIGNED_PROFESSIONAL_CAN_ADD": "Only the assigned professional can add a progress entry",
+  "SERVICE_NOT_IN_PROGRESS": "Entries can only be added while the service is accepted or in progress",
+  "NOTE_OR_IMAGE_REQUIRED": "The entry must have at least a note or a photo",
+  "TOO_MANY_IMAGES": "You exceeded the maximum number of photos per entry",
+  "ENTRY_NOT_FOUND": "Progress entry not found",
+  "NOT_ENTRY_AUTHOR": "Only whoever created the entry can delete it",
+  "EDIT_WINDOW_EXPIRED": "The correction window for this entry has already expired",
+  "NOT_AUTHORIZED_TO_VIEW": "You do not have permission to view this service's progress log"
+}

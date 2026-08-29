@@ -3,16 +3,37 @@ import { RatingType } from '@prisma/client';
 
 export class RatingDetailResponseDTO {
   @ApiProperty({
-    description: 'ID único de la calificación',
+    description:
+      'ID interno secuencial — solo para ordenamiento, nunca para consultar/rutear',
+    example: 42,
+  })
+  id!: number;
+
+  @ApiProperty({
+    description: 'ID único (UUID público) de la calificación',
     example: 'a63b5212-db5e-4ef5-9614-726614174000',
   })
-  id!: string;
+  referenceId!: string;
 
-  @ApiProperty({ description: 'ID del usuario que calificó', example: 1 })
-  userId!: number;
+  @ApiProperty({
+    description:
+      'ID del usuario involucrado (autor si type=CLIENT_TO_PROFESSIONAL, calificado si ' +
+      'type=PROFESSIONAL_TO_CLIENT). null cuando isAnonymous=true y quien consulta no es el ' +
+      'autor ni tiene permiso de auditoría — nunca null para admin/staff.',
+    example: 1,
+    nullable: true,
+  })
+  userId!: number | null;
 
-  @ApiProperty({ description: 'ID del profesional calificado', example: 1 })
-  professionalId!: number;
+  @ApiProperty({
+    description:
+      'ID del profesional involucrado (calificado si type=CLIENT_TO_PROFESSIONAL, autor si ' +
+      'type=PROFESSIONAL_TO_CLIENT). null cuando isAnonymous=true y quien consulta no es el ' +
+      'autor ni tiene permiso de auditoría — nunca null para admin/staff.',
+    example: 1,
+    nullable: true,
+  })
+  professionalId!: number | null;
 
   @ApiProperty({
     description: 'ID de la solicitud de servicio asociada',

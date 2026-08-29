@@ -1,0 +1,9 @@
+{
+  "CONSENT_REQUIRED": "Necesitás aceptar el documento legal vigente antes de continuar",
+  "LEGAL_HOLD_ACTIVE": "Este contenido tiene una retención legal obligatoria y no puede revocarse",
+  "DOCUMENT_VERSION_NOT_FOUND": "No se encontró la versión del documento legal",
+  "DOCUMENT_VERSION_ALREADY_ACCEPTED": "Ya aceptaste esta versión del documento",
+  "RETENTION_POLICY_NOT_FOUND": "No se encontró la política de retención",
+  "CONTENT_CONSENT_NOT_FOUND": "No se encontró un consentimiento de uso vigente para este contenido",
+  "NOT_CONTENT_OWNER": "No podés modificar el consentimiento de un contenido que no te pertenece"
+}

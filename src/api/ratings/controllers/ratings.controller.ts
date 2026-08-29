@@ -15,6 +15,10 @@ import {
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { RatingsService } from '../services/ratings.service';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@auth/guards/permissions.guard';
+import { Permissions } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { IUserDataOnJwt } from '@auth/interfaces/user-data-on-jwt.interface';
 import {
   CreateRatingRequestDTO,
   CreateProfessionalToClientRatingRequestDTO,
@@ -41,6 +45,7 @@ import {
   GetTopRatedProfessionalsDocs,
   FindByUserDocs,
   GetUserRatingStatsDocs,
+  GetMyRatingStatsDocs,
   FindByProfessionalDocs,
   GetClientRatingsDocs,
   GetAverageRatingDocs,
@@ -50,6 +55,10 @@ import {
   RemoveRatingDocs,
   ReportRatingDocs,
 } from '../docs/ratings.docs';
+
+interface RequestWithUser {
+  user: IUserDataOnJwt;
+}
 
 @ApiTags('Ratings - Sistema de Calificaciones')
 @Controller('ratings')
@@ -79,7 +88,11 @@ export class RatingsController {
     );
   }
 
+  // Único endpoint sin masking de identidad — ve TODO (trazabilidad legal/disputas), por eso
+  // requiere un permiso de auditoría explícito, no solo estar logueado.
   @Get()
+  @UseGuards(PermissionsGuard)
+  @Permissions(PERMISSIONS.RATINGS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)
   @FindAllRatingsDocs()
   async findAll(): Promise<RatingDetailResponseDTO[]> {
     return this.ratingsService.findAll();
@@ -88,9 +101,10 @@ export class RatingsController {
   @Get('recent')
   @GetRecentRatingsDocs()
   async getRecentRatings(
+    @Request() req: RequestWithUser,
     @Query() query: GetRecentRatingsQueryDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.getRecentRatings(query.limit);
+    return this.ratingsService.getRecentRatings(query.limit, req.user);
   }
 
   @Get('top-professionals')
@@ -104,9 +118,10 @@ export class RatingsController {
   @Get('user/:userId')
   @FindByUserDocs()
   async findByUser(
+    @Request() req: RequestWithUser,
     @Param() param: UserIdParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findByUser(param.userId);
+    return this.ratingsService.findByUser(param.userId, req.user);
   }
 
   @Get('user/:userId/stats')
@@ -117,20 +132,39 @@ export class RatingsController {
     return this.ratingsService.getUserRatingStats(String(param.userId));
   }
 
+  // Antes de `user/:userId`/`professional/:professionalId` a propósito — `me/stats` es un
+  // segmento fijo de 2 partes, no colisiona con esas rutas param, pero se agrupa acá por
+  // legibilidad (mismo dato que `getUserRatingStats`, sin necesitar el id interno del cliente).
+  @Get('me/stats')
+  @GetMyRatingStatsDocs()
+  async getMyRatingStats(
+    @Request() req: RequestWithUser,
+  ): Promise<UserRatingStatsResponseDTO> {
+    return this.ratingsService.getUserRatingStats(req.user.id);
+  }
+
   @Get('professional/:professionalId')
   @FindByProfessionalDocs()
   async findByProfessional(
+    @Request() req: RequestWithUser,
     @Param() param: ProfessionalIdRatingParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findByProfessional(param.professionalId);
+    return this.ratingsService.findByProfessional(
+      param.professionalId,
+      req.user,
+    );
   }
 
   @Get('professional/:professionalId/client-ratings')
   @GetClientRatingsDocs()
   async getClientRatings(
+    @Request() req: RequestWithUser,
     @Param() param: ProfessionalIdRatingParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findClientRatings(param.professionalId);
+    return this.ratingsService.findClientRatings(
+      param.professionalId,
+      req.user,
+    );
   }
 
   @Get('professional/:professionalId/average')
@@ -144,27 +178,32 @@ export class RatingsController {
   @Get('service/:serviceRequestId')
   @FindByServiceRequestDocs()
   async findByServiceRequest(
+    @Request() req: RequestWithUser,
     @Param() param: ServiceRequestIdParamDTO,
   ): Promise<RatingDetailResponseDTO[]> {
-    return this.ratingsService.findByServiceRequest(param.serviceRequestId);
+    return this.ratingsService.findByServiceRequest(
+      param.serviceRequestId,
+      req.user,
+    );
   }
 
   @Get(':id')
   @FindOneRatingDocs()
   async findOne(
+    @Request() req: RequestWithUser,
     @Param() param: RatingIdParamDTO,
   ): Promise<RatingDetailResponseDTO> {
-    return this.ratingsService.findOne(param.id);
+    return this.ratingsService.findOne(param.id, req.user);
   }
 
   @Patch(':id')
   @UpdateRatingDocs()
   async update(
     @Param() param: RatingIdParamDTO,
-    @Request() req: { user: { id: number } },
+    @Request() req: RequestWithUser,
     @Body() updateRatingDto: UpdateRatingRequestDTO,
   ): Promise<RatingDetailResponseDTO> {
-    return this.ratingsService.update(param.id, req.user.id, updateRatingDto);
+    return this.ratingsService.update(param.id, req.user, updateRatingDto);
   }
 
   @Delete(':id')
@@ -172,21 +211,21 @@ export class RatingsController {
   @RemoveRatingDocs()
   async remove(
     @Param() param: RatingIdParamDTO,
-    @Request() req: { user: { id: number } },
+    @Request() req: RequestWithUser,
   ): Promise<void> {
-    await this.ratingsService.remove(param.id, req.user.id);
+    await this.ratingsService.remove(param.id, req.user);
   }
 
   @Post(':id/report')
   @ReportRatingDocs()
   async reportRating(
     @Param() param: RatingIdParamDTO,
-    @Request() req: { user: { id: number } },
+    @Request() req: RequestWithUser,
     @Body() reportRatingDto: ReportRatingRequestDTO,
   ): Promise<RatingDetailResponseDTO> {
     return this.ratingsService.reportRating(
       param.id,
-      req.user.id,
+      req.user,
       reportRatingDto.reason,
     );
   }

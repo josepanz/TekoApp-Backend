@@ -341,6 +341,34 @@ describe('ProfessionalsDbService', () => {
     });
   });
 
+  describe('findProfessionalIdByUserId', () => {
+    it('debe retornar el id del profesional cuando el usuario tiene perfil profesional', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue({ id: 7 });
+
+      // Act
+      const result = await service.findProfessionalIdByUserId(5);
+
+      // Assert
+      expect(result).toBe(7);
+      expect(mockProfessionalsFindUnique).toHaveBeenCalledWith({
+        where: { userId: 5 },
+        select: { id: true },
+      });
+    });
+
+    it('debe retornar null (sin lanzar) cuando el usuario no tiene perfil profesional', async () => {
+      // Arrange
+      mockProfessionalsFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findProfessionalIdByUserId(999);
+
+      // Assert
+      expect(result).toBeNull();
+    });
+  });
+
   // ─── findByReferenceId / findProfessionalByReferenceId ──────────────────
   describe('findByReferenceId', () => {
     it('debe retornar el profesional cuando el referenceId existe', async () => {

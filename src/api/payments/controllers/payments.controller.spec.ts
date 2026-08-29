@@ -31,6 +31,7 @@ const mockGetPayments = jest.fn();
 const mockGetMetricsSummary = jest.fn();
 const mockGetMetricsTrends = jest.fn();
 const mockGetPaymentById = jest.fn();
+const mockGetPaymentByIdForViewer = jest.fn();
 const mockUpdatePayment = jest.fn();
 const mockCancelPayment = jest.fn();
 const mockRefundPayment = jest.fn();
@@ -68,6 +69,7 @@ describe('PaymentController', () => {
             getMetricsSummary: mockGetMetricsSummary,
             getMetricsTrends: mockGetMetricsTrends,
             getPaymentById: mockGetPaymentById,
+            getPaymentByIdForViewer: mockGetPaymentByIdForViewer,
             updatePayment: mockUpdatePayment,
             cancelPayment: mockCancelPayment,
             refundPayment: mockRefundPayment,
@@ -194,19 +196,40 @@ describe('PaymentController', () => {
 
   // ==================== findOne ====================
   describe('findOne', () => {
-    it('debe retornar el detalle de un pago por ID', async () => {
+    it('debe retornar el detalle de un pago por ID, resolviendo el viewer autenticado', async () => {
       // Arrange
       const param: PaymentIdParamDTO = { id: 'pay-1' };
       const expected: PaymentDetailResponseDTO = {
         id: 'pay-1',
       } as unknown as PaymentDetailResponseDTO;
-      mockGetPaymentById.mockResolvedValue(expected);
+      mockGetPaymentByIdForViewer.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.findOne(param);
+      const result = await controller.findOne(param, { user: mockUser });
 
       // Assert
-      expect(mockGetPaymentById).toHaveBeenCalledWith(param.id);
+      expect(mockGetPaymentByIdForViewer).toHaveBeenCalledWith(
+        param.id,
+        mockUser,
+      );
+      expect(result).toBe(expected);
+    });
+  });
+
+  // ==================== findMine ====================
+  describe('findMine', () => {
+    it('debe retornar los pagos propios del usuario autenticado', async () => {
+      // Arrange
+      const expected: PaymentDetailResponseDTO[] = [
+        { id: 'pay-1' },
+      ] as unknown as PaymentDetailResponseDTO[];
+      mockGetPayments.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.findMine({ user: mockUser });
+
+      // Assert
+      expect(mockGetPayments).toHaveBeenCalledWith(mockUser.id);
       expect(result).toBe(expected);
     });
   });

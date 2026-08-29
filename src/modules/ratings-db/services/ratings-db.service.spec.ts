@@ -464,12 +464,12 @@ describe('RatingsDbService', () => {
       expect(result).toEqual([givenAggregate, receivedAggregate]);
       expect(mockRatingAggregate).toHaveBeenCalledTimes(2);
       expect(mockRatingAggregate).toHaveBeenNthCalledWith(1, {
-        where: { userId: 10 },
+        where: { userId: 10, type: RatingType.CLIENT_TO_PROFESSIONAL },
         _count: { id: true },
         _avg: { rating: true },
       });
       expect(mockRatingAggregate).toHaveBeenNthCalledWith(2, {
-        where: { professionalId: 10 },
+        where: { userId: 10, type: RatingType.PROFESSIONAL_TO_CLIENT },
         _count: { id: true },
         _avg: { rating: true },
       });

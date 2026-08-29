@@ -71,9 +71,24 @@ model Category {
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
-| POST | `/services/:referenceId/progress` | profesional asignado | multipart, `CreateServiceProgressEntryRequestDTO { note?, images[] }` — 409 si el `Service` no está `ACCEPTED`/`IN_PROGRESS` o si el profesional no es el asignado |
-| GET | `/services/:referenceId/progress` | cliente dueño, profesional asignado | Listado ordenado por `entryOrder` |
-| DELETE | `/services/:referenceId/progress/:entryReferenceId` | profesional autor | Soft-delete (`isActive:false`) solo dentro de `editWindowMinutes` desde `createdAt` |
+| POST | `/services/:id/progress` | profesional asignado | JSON (no multipart — corregido tras implementar, ver nota abajo), `CreateServiceProgressEntryRequestDTO { note?, images?: string[] }` — 409 si el `Service` no está `ACCEPTED`/`IN_PROGRESS`, 403 si el profesional no es el asignado |
+| GET | `/services/:id/progress` | cliente dueño, profesional asignado, o staff con permiso `service-progress.audit:read`/`admin:all` | Listado ordenado por `entryOrder` |
+| DELETE | `/services/:id/progress/:entryId` | profesional autor | Soft-delete (`isActive:false`) solo dentro de `editWindowMinutes` desde `createdAt` |
+
+**Corrección tras implementar (2026-08-27)**: la spec original decía "multipart" para el POST — se
+verificó contra el código real (`uploads.controller.ts`) y el patrón ya establecido en este backend
+para CUALQUIER dominio con imágenes (`Services.images`, etc.) es: las fotos se suben antes, una por
+una, vía `POST /uploads/image` (ya existente, devuelve la key de S3), y el endpoint de dominio solo
+recibe el array de keys ya subidas en el body JSON — nunca multipart directo en el endpoint de
+creación de la entidad de negocio. Se implementó así, no como decía la spec original.
+
+**Consentimiento de imagen — condicional, no un guard estático**: `RequiresActiveConsentGuard` (el
+guard reusable) es un decorator estático por ruta, sin acceso al body — no puede distinguir "esta
+llamada trae fotos" de "esta llamada es solo texto". Como el endpoint acepta `note` sin `images`,
+aplicar el guard a TODA la ruta bloquearía también las entradas solo-texto. Se implementó el mismo
+chequeo (`LegalConsentsDbService.hasActiveConsent(userId, IMAGE_USAGE_CONSENT)`, mismo 403
+`CONSENT_REQUIRED`) inline en `ServiceProgressService.createEntry`, condicionado a
+`images.length > 0` — no como guard.
 
 `completeService` (ya existente en `services.service.ts`) se extiende: si
 `category.requiresProgressLog` y no existe ninguna `ServiceProgressEntries` activa para el
@@ -96,10 +111,11 @@ opt-in explícito del profesional — no implementado acá.
 
 - Pasada la ventana de corrección, una entrada es inmutable — es intencional (integridad de
   registro, potencial evidencia ante disputas).
-- **Decisión de alcance abierta para José**: si el staff de `TekoApp-Frontend-Web` debe poder ver
-  la bitácora de un servicio para resolver disputas (mismo criterio de "admins ven todo" ya
-  aplicado a calificaciones, backlog 2026-08-08 ítem 3). Se puede resolver más barato agregando una
-  pestaña a la vista de detalle de servicio que ya existe en `TekoApp-Frontend-Web`
-  (`src/app/admin/services`) reusando el mismo GET, sin necesitar una spec de Web nueva. Por eso
-  esta feature no tiene una spec dedicada de Web en `TekoApp-Frontend-Web/openspec/specs/` —
-  confirmar con José si eso alcanza antes de implementar.
+- **Decisión de alcance — confirmada con José (2026-08-27)**: sí, el staff de `TekoApp-Frontend-Web`
+  puede ver la bitácora de un servicio (para resolver disputas, mismo criterio de "admins ven
+  todo" ya aplicado a calificaciones, backlog 2026-08-08 ítem 3). El `GET
+  /services/:referenceId/progress` de arriba debe autorizar tanto a los 2 participantes (cliente
+  dueño, profesional asignado) COMO al rol admin/staff — no queda restringido a los participantes.
+  Se resuelve agregando una pestaña a la vista de detalle de servicio que ya existe en
+  `TekoApp-Frontend-Web` (`src/app/admin/services`), reusando este mismo GET — no hace falta una
+  spec de Web dedicada para esto.
