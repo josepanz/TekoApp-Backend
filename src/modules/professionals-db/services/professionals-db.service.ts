@@ -165,6 +165,20 @@ export class ProfessionalsDbService {
     return professional;
   }
 
+  /**
+   * A diferencia de `findByUserId`, nunca lanza — devuelve `null` cuando el usuario no tiene
+   * perfil profesional (ej. un cliente puro). Uso: resolver "¿este viewer es el autor de una
+   * reseña PROFESSIONAL_TO_CLIENT?" sin forzar un try/catch en el caller (ver
+   * `ProfessionalsService.buildReviewViewerContext`).
+   */
+  async findProfessionalIdByUserId(userId: number): Promise<number | null> {
+    const professional = await this.prisma.extended.professionals.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    return professional?.id ?? null;
+  }
+
   async findByReferenceId(
     referenceId: string,
   ): Promise<ProfessionalWithRelations | null> {

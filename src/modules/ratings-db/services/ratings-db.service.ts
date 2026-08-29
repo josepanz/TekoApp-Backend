@@ -164,15 +164,22 @@ export class RatingsDbService {
     });
   }
 
+  /**
+   * "Dadas" = calificaciones que este usuario escribió como cliente (`CLIENT_TO_PROFESSIONAL`,
+   * `userId` = autor). "Recibidas" = calificaciones que le llegaron como cliente
+   * (`PROFESSIONAL_TO_CLIENT`, `userId` = calificado — NUNCA `professionalId`, que es la PK de
+   * `Professionals`, no de `Users`; comparar `professionalId` contra un `Users.id` crudo era un
+   * bug real que siempre daba 0 salvo coincidencia numérica accidental).
+   */
   async aggregateUserStats(userId: number) {
     return Promise.all([
       this.prisma.extended.rating.aggregate({
-        where: { userId },
+        where: { userId, type: RatingType.CLIENT_TO_PROFESSIONAL },
         _count: { id: true },
         _avg: { rating: true },
       }),
       this.prisma.extended.rating.aggregate({
-        where: { professionalId: userId },
+        where: { userId, type: RatingType.PROFESSIONAL_TO_CLIENT },
         _count: { id: true },
         _avg: { rating: true },
       }),
