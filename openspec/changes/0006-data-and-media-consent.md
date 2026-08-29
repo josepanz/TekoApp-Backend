@@ -56,3 +56,37 @@ Implementar el modelo y los endpoints de `openspec/specs/data-and-media-consent.
       `LegalDocumentVersions` vía `POST /admin/legal/document-versions`, aceptarla como usuario real,
       confirmar que desaparece de "pendientes") — la migración ya corrió contra esa DB, pero nadie
       probó el flujo HTTP completo con datos reales todavía.
+
+## Extensión (2026-08-27) — para habilitar el punto 7 del roadmap (Web: auditoría de consentimiento)
+
+Al verificar la spec de Web (`TekoApp-Frontend-Web/openspec/specs/data-and-media-consent-admin.md`)
+contra este código real, se encontraron 2 brechas reales (no en la spec original de esta Fase):
+
+- **`GET /admin/legal/consents` no tenía filtros** (solo paginación) pese a que la spec de Web pedía
+  "filtrable por usuario, tipo de documento, país, rango de fecha" — se agregaron `documentType`,
+  `countryId`, `userReferenceId` a `GetLegalConsentsAuditQueryDTO`, más filtro de rango de fecha
+  sobre `acceptedAt` (ver nota abajo sobre `createdAt`).
+- **No existía ningún endpoint admin para auditar `ContentConsentGrants`** (la 2da pestaña que pide
+  Web) — solo había un endpoint self-service (`GET /users/me/data-consents`). Se agregó
+  `GET /admin/legal/content-consents`, mismo permiso (`LEGAL.CONSENT_AUDIT_VIEW`/`ADMIN.ALL`) que el
+  endpoint de `UserConsents`, filtrable por `contentType`/`usageScope`/`revoked`/`uploaderReferenceId`.
+- **`UserConsentResponseDTO` no exponía `ipAddress`/`userAgent`/`acceptanceHash` ni el usuario** —
+  el endpoint funcionaba en runtime (el cast crudo no los stripeaba, ver
+  `ClassSerializerInterceptor`), pero el Swagger generado (y por lo tanto `pnpm generate:api-types`
+  de Web) no los tenía tipados. Se creó `UserConsentAuditResponseDTO` (extiende el DTO base, no lo
+  reemplaza — `POST .../accept` sigue devolviendo el DTO original sin cambios de contrato) con
+  mapeo explícito en `helpers/legal-consents-response.helper.ts` en vez de cast crudo, porque estos
+  campos son sensibles (ver `openspec/specs/data-and-media-consent.md`, Riesgos).
+- **`PrismaPaginationUtil` aplica cualquier `startDate`/`endDate` incondicionalmente sobre una
+  columna `createdAt`** — ni `UserConsents` ni `ContentConsentGrants` tienen esa columna (solo
+  `acceptedAt`/`grantedAt`). Se resolvió sin tocar el util compartido: los 2 métodos nuevos de
+  `LegalConsentsDbService` arman su propio `where` con el rango de fecha sobre el campo correcto, y
+  eliminan `startDate`/`endDate`/los demás filtros anidados del objeto que recibe `paginate` (para
+  que no intente aplicarlos de nuevo sobre `createdAt`).
+- Rol "compliance": José confirmó (roadmap, punto 7) que los permisos `LEGAL.CONFIG_MANAGE`/
+  `LEGAL.CONSENT_AUDIT_VIEW` van tanto al rol `admin` existente como a un rol `compliance` nuevo —
+  **tarea de datos/seed pendiente, no de código** (mismo tratamiento que
+  `service-progress.audit:read` en la Fase 0002).
+- Tests: 8 tests nuevos (4 en `legal-consents-db.service.spec.ts`, 4 en `legal-consents.service.spec.ts`)
+  cubriendo el armado del `where` anidado y el mapeo explícito. `pnpm run lint`/`pnpm run build`/
+  `pnpm run test` en 0 errores/warnings (96 suites, 1161 tests).
