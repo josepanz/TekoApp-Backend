@@ -7,4 +7,5 @@ export enum NotificationType {
   RATING_RECEIVED = 'rating_received',
   PROMOTION = 'promotion',
   SYSTEM = 'system',
+  DOCUMENT_EXPIRED = 'document_expired',
 }

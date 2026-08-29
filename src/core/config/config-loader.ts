@@ -132,6 +132,16 @@ export const APP_CONFIG = registerAs('config', () => {
         AiDisclosureEntityType.PROFESSIONAL_DESCRIPTION,
       ] as AiDisclosureEntityType[],
     },
+    progressLog: {
+      maxImagesPerEntry: process.env.PROGRESS_LOG_MAX_IMAGES_PER_ENTRY
+        ? parseInt(process.env.PROGRESS_LOG_MAX_IMAGES_PER_ENTRY)
+        : 6,
+      editWindowMinutes: process.env.PROGRESS_LOG_EDIT_WINDOW_MINUTES
+        ? parseInt(process.env.PROGRESS_LOG_EDIT_WINDOW_MINUTES)
+        : 15,
+      requireNoteOrImage:
+        process.env.PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE !== 'false',
+    },
   };
 });
 
