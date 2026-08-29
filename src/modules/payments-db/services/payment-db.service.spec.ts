@@ -8,7 +8,10 @@ import {
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { PaymentDbService } from './payment-db.service';
 
-const serviceRefInclude = { service: { select: { referenceId: true } } };
+const serviceRefInclude = {
+  service: { select: { referenceId: true } },
+  tip: true,
+};
 
 // ── Mock functions ─────────────────────────────────────────────────────────────
 const mockPaymentsFindFirst = jest.fn();

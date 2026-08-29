@@ -16,10 +16,12 @@ import {
 } from '@prisma/client';
 
 import { t } from '@common/i18n/i18n.helper';
-// Include que trae el referenceId (UUID público) del servicio para exponerlo en las respuestas
-// de pagos sin filtrar la PK interna (Int).
+// Include que trae el referenceId (UUID público) del servicio, y la propina (si existe) para
+// exponerla en detalle/listado — ver openspec/changes/0010-tips.md. Nunca filtra la PK interna
+// (Int) de ninguna relación.
 const serviceRefInclude = {
   service: { select: { referenceId: true } },
+  tip: true,
 } satisfies Prisma.PaymentsInclude;
 
 @Injectable()
@@ -99,7 +101,7 @@ export class PaymentDbService {
         ...(status && { status }),
       },
       orderBy: { createdAt: 'desc' },
-      include: { users: true, professionals: true, service: true },
+      include: { users: true, professionals: true, service: true, tip: true },
     });
   }
 

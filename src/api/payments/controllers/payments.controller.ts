@@ -14,6 +14,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@auth/guards/permissions.guard';
+import { Permissions } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PaymentApiService } from '../services/payments.service';
 import {
@@ -38,6 +41,7 @@ import {
 import {
   ApiCreatePayment,
   ApiGetPayments,
+  ApiGetMyPayments,
   ApiGetPaymentSummary,
   ApiGetPaymentTrends,
   ApiGetPaymentById,
@@ -67,7 +71,12 @@ export class PaymentController {
     return this.apiService.createPayment(req.user.id, dto);
   }
 
+  // Listado sin scope (acepta cualquier userId/professionalId por query) — solo staff con
+  // permiso de auditoría, mismo criterio que `RatingsController.findAll`. El listado propio del
+  // usuario autenticado es `GET /payments/me`, más abajo.
   @Get()
+  @UseGuards(PermissionsGuard)
+  @Permissions(PERMISSIONS.PAYMENTS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)
   @ApiGetPayments()
   async findAll(
     @Query() query: PaymentListQueryDTO,
@@ -80,6 +89,8 @@ export class PaymentController {
   }
 
   @Get('summary')
+  @UseGuards(PermissionsGuard)
+  @Permissions(PERMISSIONS.PAYMENTS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)
   @ApiGetPaymentSummary()
   async getSummary(
     @Query() query: PaymentSummaryQueryDTO,
@@ -91,6 +102,8 @@ export class PaymentController {
   }
 
   @Get('trends')
+  @UseGuards(PermissionsGuard)
+  @Permissions(PERMISSIONS.PAYMENTS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)
   @ApiGetPaymentTrends()
   async getTrends(
     @Query() query: PaymentTrendsQueryDTO,
@@ -98,8 +111,9 @@ export class PaymentController {
     return this.apiService.getMetricsTrends(query.days, query.userId);
   }
 
-  // `methods` DEBE ir antes de `:id` — de lo contrario `GET /payments/methods` matchea
-  // `findOne(:id='methods')` primero (Express/Nest registran rutas GET en orden de declaración).
+  // `methods`/`me` DEBEN ir antes de `:id` — de lo contrario `GET /payments/methods` o
+  // `GET /payments/me` matchean `findOne(:id='methods'|'me')` primero (Express/Nest registran
+  // rutas GET en orden de declaración).
   @Get('methods')
   @ApiGetPaymentMethods()
   async findMethods(
@@ -108,12 +122,21 @@ export class PaymentController {
     return this.apiService.getPaymentMethods(req.user.id);
   }
 
+  @Get('me')
+  @ApiGetMyPayments()
+  async findMine(
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise<PaymentDetailResponseDTO[]> {
+    return this.apiService.getPayments(req.user.id);
+  }
+
   @Get(':id')
   @ApiGetPaymentById()
   async findOne(
     @Param() param: PaymentIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.getPaymentById(param.id);
+    return this.apiService.getPaymentByIdForViewer(param.id, req.user);
   }
 
   @Put(':id')
