@@ -56,6 +56,7 @@ export class CategoriesService {
       status: dto.status,
       isVisible: dto.isVisible,
       requiresVerification: dto.requiresVerification,
+      maxBudgetOptionsPerRequest: dto.maxBudgetOptionsPerRequest,
       metadata: (dto.metadata as Prisma.InputJsonValue) ?? undefined,
       parentCategory: dto.parentCategoryId
         ? { connect: { id: dto.parentCategoryId } }

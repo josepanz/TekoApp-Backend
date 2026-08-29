@@ -81,6 +81,15 @@ export class ProfessionalDetailResponseDTO {
   @ApiProperty({ example: 'verified' })
   verificationStatus!: string;
 
+  @ApiProperty({
+    example: true,
+    description:
+      'Derivado automáticamente: todos los documentos obligatorios (antecedentes/habilitación) ' +
+      'están aprobados y sin vencer. Distinto de verificationStatus (aprobación manual de staff ' +
+      'sobre la cuenta) — ver openspec/specs/professional-documents.md.',
+  })
+  requiredDocumentsVerified!: boolean;
+
   @ApiPropertyOptional({ example: -25.2637 })
   currentLatitude?: number | null;
 

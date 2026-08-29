@@ -69,6 +69,13 @@ export class CategoryDetailResponseDTO {
   })
   requiresVerification!: boolean;
 
+  @ApiProperty({
+    description:
+      'Cuántas opciones de presupuesto puede armar un profesional por propuesta en esta categoría',
+    example: 3,
+  })
+  maxBudgetOptionsPerRequest!: number;
+
   @ApiPropertyOptional({
     description: 'Metadata dinámica JSONb',
     example: { taxRate: 10, minFee: 50000 },

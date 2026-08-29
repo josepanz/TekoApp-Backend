@@ -382,11 +382,19 @@ describe('ProfessionalsController', () => {
       mockGetProfessionalReviews.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getProfessionalReviews(mockParam, query);
+      const result = await controller.getProfessionalReviews(
+        mockParam,
+        query,
+        mockReq,
+      );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetProfessionalReviews).toHaveBeenCalledWith(10, query);
+      expect(mockGetProfessionalReviews).toHaveBeenCalledWith(
+        10,
+        query,
+        mockUser,
+      );
     });
   });
 

@@ -93,11 +93,12 @@ model Contracts {
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
-| POST | `/budget-options/:referenceId/generate-contract` | cliente o automático desde `select` de `multi-option-quotes.md` | Crea `Contracts` en `DRAFT` con el snapshot armado server-side, pasa a `PENDING_CLIENT_SIGNATURE` |
-| GET | `/contracts/:referenceId` | cliente o profesional del contrato | Devuelve `contentSnapshot` + estado de firmas |
+| POST | `/budget-options/:referenceId/generate-contract` | cliente dueño del servicio | Crea el contrato directo en `PENDING_CLIENT_SIGNATURE` con el snapshot armado server-side. Idempotente: si ya existe uno para esa opción, lo devuelve en vez de fallar |
+| GET | `/contracts` | usuario autenticado | Listado propio (contratos donde es cliente o profesional), sin paginar — agregado durante la implementación, no estaba en la spec original (ver `openspec/decisions.md`) |
+| GET | `/contracts/:referenceId` | cliente o profesional del contrato | Devuelve `contentSnapshot` + estado de firmas + `viewerRole` (`CLIENT`/`PROFESSIONAL`, agregado durante la implementación para que mobile/web puedan mostrar "pendiente de tu firma" vs. "de la otra parte" sin exponer `clientUserId`/`professionalId`) |
 | POST | `/contracts/:referenceId/sign` | cliente o profesional (según a quién le toca) | `SignContractRequestDTO { fullName, accepted: true }` — hash generado server-side |
 | GET | `/contracts/:referenceId/pdf` | cliente, profesional, staff | URL presignada al `pdfKey`, solo si `status = SIGNED` |
-| GET | `/admin/contracts` | staff | Listado completo para soporte/disputas legales |
+| GET | `/admin/contracts` | staff (`contracts.audit:read`/`admin:all`) | Listado completo paginado, para soporte/disputas legales |
 
 ## Casos de error
 

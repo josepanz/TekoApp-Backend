@@ -11,5 +11,6 @@
   "REFUND_EXCEEDS_AVAILABLE": "El monto del reembolso excede el monto disponible",
   "SERVICE_NOT_FOUND": "Servicio no encontrado",
   "STATUS_CHANGED_BEFORE_CANCEL": "El pago cambió de estado antes de poder cancelarlo",
-  "UNAUTHORIZED_CANCEL": "No tienes permisos para cancelar este pago"
+  "UNAUTHORIZED_CANCEL": "No tienes permisos para cancelar este pago",
+  "UNAUTHORIZED_VIEW": "No tienes permisos para ver este pago"
 }

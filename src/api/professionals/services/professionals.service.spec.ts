@@ -8,6 +8,7 @@ const mockFindMany = jest.fn();
 const mockFindNearby = jest.fn();
 const mockFindById = jest.fn();
 const mockFindByUserId = jest.fn();
+const mockFindProfessionalIdByUserId = jest.fn();
 const mockFindProfessionalByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
 const mockFindServices = jest.fn();
@@ -26,6 +27,13 @@ const mockProfessional = {
   verificationStatus: 'verified',
 };
 
+function fakeUser(overrides: { id?: number; permissions?: string[] } = {}) {
+  return {
+    id: overrides.id ?? 1,
+    permissions: overrides.permissions ?? [],
+  } as never;
+}
+
 describe('ProfessionalsService', () => {
   let service: ProfessionalsService;
 
@@ -41,6 +49,7 @@ describe('ProfessionalsService', () => {
             findNearby: mockFindNearby,
             findById: mockFindById,
             findByUserId: mockFindByUserId,
+            findProfessionalIdByUserId: mockFindProfessionalIdByUserId,
             findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             update: mockUpdate,
             findServices: mockFindServices,
@@ -320,18 +329,137 @@ describe('ProfessionalsService', () => {
   });
 
   describe('getProfessionalReviews', () => {
-    it('debe retornar las reseñas del profesional', async () => {
+    const pagination = { total: 0, page: 1, pageSize: 5, totalPages: 0 };
+
+    it('debe retornar las reseñas del profesional mapeadas (sin exponer la fila cruda de Users)', async () => {
       // Arrange
       const query = { page: 1, pageSize: 5 } as never;
-      const mockResult = { data: [] };
-      mockFindReviews.mockResolvedValue(mockResult);
+      mockFindReviews.mockResolvedValue({
+        data: [
+          {
+            referenceId: 'rating-uuid-1',
+            userId: 3,
+            professionalId: 1,
+            type: 'CLIENT_TO_PROFESSIONAL',
+            rating: 4.5,
+            review: 'Excelente',
+            isAnonymous: false,
+            createdAt: new Date('2026-01-01'),
+            user: {
+              id: 3,
+              email: 'cliente@example.com',
+              firstName: 'Juan',
+              lastName: 'Pérez',
+              phoneNumber: null,
+              password: 'nunca-deberia-salir',
+            },
+          },
+        ],
+        pagination,
+      });
+      mockFindProfessionalIdByUserId.mockResolvedValue(null);
 
       // Act
-      const result = await service.getProfessionalReviews(1, query);
+      const result = await service.getProfessionalReviews(
+        1,
+        query,
+        fakeUser({ id: 99 }),
+      );
 
       // Assert
       expect(mockFindReviews).toHaveBeenCalledWith(1, query);
-      expect(result).toEqual(mockResult);
+      expect(result.pagination).toEqual(pagination);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toEqual({
+        id: 'rating-uuid-1',
+        userId: 3,
+        rating: 4.5,
+        review: 'Excelente',
+        type: 'CLIENT_TO_PROFESSIONAL',
+        isAnonymous: false,
+        createdAt: new Date('2026-01-01'),
+        user: {
+          id: 3,
+          email: 'cliente@example.com',
+          firstName: 'Juan',
+          lastName: 'Pérez',
+          phoneNumber: null,
+        },
+      });
+    });
+
+    it('debe ocultar el usuario cuando la reseña es anónima y quien consulta no es el autor ni tiene permiso de auditoría', async () => {
+      // Arrange
+      mockFindReviews.mockResolvedValue({
+        data: [
+          {
+            referenceId: 'rating-uuid-2',
+            userId: 3,
+            professionalId: 1,
+            type: 'CLIENT_TO_PROFESSIONAL',
+            rating: 5,
+            review: null,
+            isAnonymous: true,
+            createdAt: new Date('2026-01-01'),
+            user: {
+              id: 3,
+              email: 'cliente@example.com',
+              firstName: 'Juan',
+              lastName: 'Pérez',
+              phoneNumber: null,
+            },
+          },
+        ],
+        pagination,
+      });
+      mockFindProfessionalIdByUserId.mockResolvedValue(null);
+
+      // Act — viewer id=99, sin permiso de auditoría, no es el autor (autor es userId=3)
+      const result = await service.getProfessionalReviews(
+        1,
+        {} as never,
+        fakeUser({ id: 99 }),
+      );
+
+      // Assert
+      expect(result.data[0].user).toBeNull();
+    });
+
+    it('NO debe ocultar el usuario cuando quien consulta tiene permiso de auditoría de ratings', async () => {
+      // Arrange
+      mockFindReviews.mockResolvedValue({
+        data: [
+          {
+            referenceId: 'rating-uuid-3',
+            userId: 3,
+            professionalId: 1,
+            type: 'CLIENT_TO_PROFESSIONAL',
+            rating: 3,
+            review: null,
+            isAnonymous: true,
+            createdAt: new Date('2026-01-01'),
+            user: {
+              id: 3,
+              email: 'cliente@example.com',
+              firstName: 'Juan',
+              lastName: 'Pérez',
+              phoneNumber: null,
+            },
+          },
+        ],
+        pagination,
+      });
+      mockFindProfessionalIdByUserId.mockResolvedValue(null);
+
+      // Act
+      const result = await service.getProfessionalReviews(
+        1,
+        {} as never,
+        fakeUser({ id: 99, permissions: ['ratings.audit:read'] }),
+      );
+
+      // Assert
+      expect(result.data[0].user).not.toBeNull();
     });
   });
 

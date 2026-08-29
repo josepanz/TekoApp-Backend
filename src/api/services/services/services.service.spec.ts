@@ -8,6 +8,8 @@ import {
 import { ServiceStatus, RequestStatus } from '@prisma/client';
 import { ServicesService } from './services.service';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
+import { ServiceProgressDbService } from '@modules/service-progress-db/services/service-progress-db.service';
+import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
 
 const mockFindCategoryById = jest.fn();
 const mockCreateService = jest.fn();
@@ -28,6 +30,8 @@ const mockFindServiceRequestByReferenceId = jest.fn();
 const mockFindServiceRequestById = jest.fn();
 const mockUpdateServiceRequest = jest.fn();
 const mockAcceptRequestTransaction = jest.fn();
+const mockCountActiveByServiceId = jest.fn();
+const mockFindSelectedOptionForService = jest.fn();
 
 // PK interna (Int) = 100; UUID público (referenceId) = 'svc-001' (el valor que viaja en la URL).
 const SERVICE_REF = 'svc-001';
@@ -42,6 +46,7 @@ const mockService = {
   status: ServiceStatus.PENDING,
   hourlyRate: null,
   startedAt: null,
+  category: { requiresProgressLog: false },
 };
 
 const mockProfessional = { id: 5, userId: 10 };
@@ -79,6 +84,16 @@ describe('ServicesService', () => {
             acceptRequestTransaction: mockAcceptRequestTransaction,
           },
         },
+        {
+          provide: ServiceProgressDbService,
+          useValue: { countActiveByServiceId: mockCountActiveByServiceId },
+        },
+        {
+          provide: BudgetsDbService,
+          useValue: {
+            findSelectedOptionForService: mockFindSelectedOptionForService,
+          },
+        },
       ],
     }).compile();
 
@@ -88,7 +103,7 @@ describe('ServicesService', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('createService', () => {
-    it('debe crear el servicio y exponer el referenceId como id cuando la categoría existe', async () => {
+    it('debe crear el servicio y exponer id (PK) y referenceId (UUID) por separado cuando la categoría existe', async () => {
       // Arrange
       const dto = {
         categoryId: 2,
@@ -105,7 +120,8 @@ describe('ServicesService', () => {
       // Assert
       expect(mockFindCategoryById).toHaveBeenCalledWith(2);
       expect(mockCreateService).toHaveBeenCalled();
-      expect(result.id).toBe(SERVICE_REF);
+      expect(result.id).toBe(SERVICE_PK);
+      expect(result.referenceId).toBe(SERVICE_REF);
     });
 
     it('debe lanzar NotFoundException cuando la categoría no existe', async () => {
@@ -131,7 +147,8 @@ describe('ServicesService', () => {
 
       // Assert
       expect(result.data).toHaveLength(1);
-      expect(result.data[0].id).toBe(SERVICE_REF);
+      expect(result.data[0].id).toBe(SERVICE_PK);
+      expect(result.data[0].referenceId).toBe(SERVICE_REF);
       expect(result.pagination.total).toBe(1);
       expect(result.pagination.page).toBe(1);
       expect(result.pagination.pageSize).toBe(10);
@@ -179,7 +196,7 @@ describe('ServicesService', () => {
   });
 
   describe('getServiceById', () => {
-    it('debe resolver el servicio por su referenceId y exponerlo bajo la clave id', async () => {
+    it('debe resolver el servicio por su referenceId y exponer id (PK) y referenceId (UUID) por separado', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue(mockService);
 
@@ -187,7 +204,8 @@ describe('ServicesService', () => {
       const result = await service.getServiceById(SERVICE_REF);
 
       // Assert
-      expect(result.id).toBe(SERVICE_REF);
+      expect(result.id).toBe(SERVICE_PK);
+      expect(result.referenceId).toBe(SERVICE_REF);
       expect(mockFindServiceByReferenceId).toHaveBeenCalledWith(SERVICE_REF);
     });
 
@@ -497,6 +515,62 @@ describe('ServicesService', () => {
       );
     });
 
+    it('debe usar el totalPrice de la opción de presupuesto seleccionada cuando el servicio no tiene tarifa por hora', async () => {
+      // Arrange
+      const svcInProgress = {
+        ...mockService,
+        status: ServiceStatus.IN_PROGRESS,
+        professionalId: 5,
+        hourlyRate: null,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svcInProgress);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockFindSelectedOptionForService.mockResolvedValue({
+        id: 1,
+        totalPrice: 150000,
+      });
+      mockUpdateServiceConditional.mockResolvedValue(1);
+
+      // Act
+      await service.completeService(SERVICE_REF, 10);
+
+      // Assert
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.IN_PROGRESS],
+        expect.objectContaining({
+          status: ServiceStatus.COMPLETED,
+          finalAmount: 150000,
+        }),
+      );
+    });
+
+    it('no debe setear finalAmount si el servicio no tiene tarifa por hora ni una opción de presupuesto seleccionada', async () => {
+      // Arrange
+      const svcInProgress = {
+        ...mockService,
+        status: ServiceStatus.IN_PROGRESS,
+        professionalId: 5,
+        hourlyRate: null,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svcInProgress);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockFindSelectedOptionForService.mockResolvedValue(null);
+      mockUpdateServiceConditional.mockResolvedValue(1);
+
+      // Act
+      await service.completeService(SERVICE_REF, 10);
+
+      // Assert
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.IN_PROGRESS],
+        expect.not.objectContaining({
+          finalAmount: expect.anything() as number,
+        }),
+      );
+    });
+
     it('debe lanzar ConflictException cuando el estado cambió antes de poder completarlo', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
@@ -542,6 +616,47 @@ describe('ServicesService', () => {
         BadRequestException,
       );
     });
+
+    it('debe lanzar BadRequestException si la categoría exige bitácora y no hay ninguna entrada activa', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        status: ServiceStatus.IN_PROGRESS,
+        professionalId: 5,
+        category: { requiresProgressLog: true },
+      });
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockCountActiveByServiceId.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.completeService(SERVICE_REF, 10)).rejects.toThrow(
+        BadRequestException,
+      );
+      expect(mockUpdateServiceConditional).not.toHaveBeenCalled();
+    });
+
+    it('debe completar el servicio si la categoría exige bitácora y existe al menos una entrada activa', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        status: ServiceStatus.IN_PROGRESS,
+        professionalId: 5,
+        category: { requiresProgressLog: true },
+      });
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockCountActiveByServiceId.mockResolvedValue(1);
+      mockUpdateServiceConditional.mockResolvedValue(1);
+
+      // Act
+      await service.completeService(SERVICE_REF, 10);
+
+      // Assert
+      expect(mockUpdateServiceConditional).toHaveBeenCalledWith(
+        SERVICE_PK,
+        [ServiceStatus.IN_PROGRESS],
+        expect.objectContaining({ status: ServiceStatus.COMPLETED }),
+      );
+    });
   });
 
   describe('createServiceRequest', () => {
@@ -566,7 +681,8 @@ describe('ServicesService', () => {
       expect(mockCreateServiceRequest).toHaveBeenCalledWith(
         expect.objectContaining({ serviceId: SERVICE_PK, professionalId: 5 }),
       );
-      expect(result.id).toBe('req-001');
+      expect(result.id).toBe(200);
+      expect(result.referenceId).toBe('req-001');
       expect(result.serviceId).toBe(SERVICE_REF);
     });
 
@@ -625,7 +741,8 @@ describe('ServicesService', () => {
 
       // Assert
       expect(result.data).toHaveLength(1);
-      expect(result.data[0].id).toBe('req-001');
+      expect(result.data[0].id).toBe(200);
+      expect(result.data[0].referenceId).toBe('req-001');
       expect(result.data[0].serviceId).toBe(SERVICE_REF);
       expect(mockFindServiceRequests).toHaveBeenCalledWith(SERVICE_PK);
     });
@@ -671,7 +788,8 @@ describe('ServicesService', () => {
         SERVICE_PK,
         5,
       );
-      expect(result.id).toBe('req-001');
+      expect(result.id).toBe(200);
+      expect(result.referenceId).toBe('req-001');
     });
 
     it('debe lanzar ConflictException cuando el servicio ya no está disponible para aceptar la solicitud', async () => {

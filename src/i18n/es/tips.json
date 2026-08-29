@@ -1,0 +1,8 @@
+{
+  "PAYMENT_NOT_FOUND": "Pago no encontrado",
+  "UNAUTHORIZED": "Solo quien pagó el servicio puede dejar una propina",
+  "PAYMENT_NOT_ELIGIBLE": "Todavía no se puede dejar propina para este pago",
+  "ALREADY_TIPPED": "Ya dejaste una propina para este pago",
+  "TIPS_DISABLED": "Las propinas no están habilitadas",
+  "FREE_AMOUNT_NOT_ALLOWED": "No se permite un monto libre de propina"
+}

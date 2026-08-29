@@ -8,6 +8,9 @@ import {
 } from '@nestjs/common';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
+import { TaxService } from '@api/tax/services/tax.service';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import {
   PaymentProvider,
   PaymentStatus,
@@ -40,6 +43,7 @@ export class PaymentApiService {
   constructor(
     private readonly dbService: PaymentDbService,
     private readonly feeCalculator: FeeCalculatorService,
+    private readonly taxService: TaxService,
   ) {}
 
   // ==================== PAGOS ====================
@@ -82,8 +86,14 @@ export class PaymentApiService {
       dto.amount,
       dto.paymentProvider,
     );
-    const tax = await this.feeCalculator.calculatePlatformFee(dto.amount + fee);
-    const totalAmount = dto.amount + fee + tax;
+    // `platformFee` es la comisión de la plataforma (antes se guardaba, mal nombrada, en el campo
+    // `tax`) — `tax` ahora es el IVA real (`TaxService`), deshabilitado por default hasta contar
+    // con una tasa real de asesoría fiscal (ver openspec/decisions.md, Fase 0011).
+    const platformFee = await this.feeCalculator.calculatePlatformFee(
+      dto.amount + fee,
+    );
+    const tax = await this.taxService.calculateTax(platformFee);
+    const totalAmount = dto.amount + fee + platformFee + tax;
 
     const transactionId = uuidv4();
 
@@ -98,6 +108,7 @@ export class PaymentApiService {
         paymentProvider: dto.paymentProvider,
         fee,
         tax,
+        platformFee,
         totalAmount,
         transactionId,
         status: PaymentStatus.PENDING,
@@ -122,6 +133,28 @@ export class PaymentApiService {
 
   async getPaymentById(id: string): Promise<PaymentDetailResponseDTO> {
     const payment = await this.getPaymentEntityByRef(id);
+    return mapPaymentToResponse(payment);
+  }
+
+  /**
+   * Variante de `getPaymentById` para el endpoint expuesto a cualquier usuario autenticado
+   * (`GET /payments/:id`) — a diferencia de `getPaymentById` (usado internamente por
+   * cancel/refund/update, ya validados por sus propios checks o por ser admin-only), acá hay que
+   * verificar que quien pide el pago sea su dueño (`Payments.userId`) o tenga
+   * `payments.audit:read`/`admin:all` — sin esto, cualquier usuario logueado podía leer el detalle
+   * financiero de un pago ajeno solo conociendo su `referenceId`.
+   */
+  async getPaymentByIdForViewer(
+    id: string,
+    user: IUserDataOnJwt,
+  ): Promise<PaymentDetailResponseDTO> {
+    const payment = await this.getPaymentEntityByRef(id);
+    const isPrivileged =
+      user.permissions.includes(PERMISSIONS.PAYMENTS.AUDIT_VIEW) ||
+      user.permissions.includes(PERMISSIONS.ADMIN.ALL);
+    if (!isPrivileged && payment.userId !== user.id) {
+      throw new ForbiddenException(t('payments.UNAUTHORIZED_VIEW'));
+    }
     return mapPaymentToResponse(payment);
   }
 

@@ -30,6 +30,8 @@ const mockRemove = jest.fn();
 const mockReportRating = jest.fn();
 
 const mockReq = { user: { id: 1 } };
+const mockFullUser = { id: 1, permissions: [] as string[] };
+const mockReqFull = { user: mockFullUser };
 const mockRatingIdParam = { id: 'rating-uuid-001' };
 const mockUserIdParam = { userId: 5 };
 const mockProfessionalIdParam = {
@@ -172,11 +174,11 @@ describe('RatingsController', () => {
       mockGetRecentRatings.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getRecentRatings(query);
+      const result = await controller.getRecentRatings(mockReqFull, query);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetRecentRatings).toHaveBeenCalledWith(10);
+      expect(mockGetRecentRatings).toHaveBeenCalledWith(10, mockFullUser);
     });
   });
 
@@ -205,11 +207,11 @@ describe('RatingsController', () => {
       mockFindByUser.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.findByUser(mockUserIdParam);
+      const result = await controller.findByUser(mockReqFull, mockUserIdParam);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindByUser).toHaveBeenCalledWith(5);
+      expect(mockFindByUser).toHaveBeenCalledWith(5, mockFullUser);
     });
   });
 
@@ -233,6 +235,26 @@ describe('RatingsController', () => {
     });
   });
 
+  describe('getMyRatingStats', () => {
+    it('debe retornar mis propias estadísticas resolviendo el userId del token', async () => {
+      // Arrange
+      const expected = {
+        givenRatings: 3,
+        receivedRatings: 1,
+        averageGivenRating: 5,
+        averageReceivedRating: 4,
+      };
+      mockGetUserRatingStats.mockResolvedValue(expected);
+
+      // Act
+      const result = await controller.getMyRatingStats(mockReqFull);
+
+      // Assert
+      expect(result).toEqual(expected);
+      expect(mockGetUserRatingStats).toHaveBeenCalledWith(1);
+    });
+  });
+
   describe('findByProfessional', () => {
     it('debe retornar las calificaciones del profesional indicado', async () => {
       // Arrange
@@ -241,12 +263,13 @@ describe('RatingsController', () => {
 
       // Act
       const result = await controller.findByProfessional(
+        mockReqFull,
         mockProfessionalIdParam,
       );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindByProfessional).toHaveBeenCalledWith(10);
+      expect(mockFindByProfessional).toHaveBeenCalledWith(10, mockFullUser);
     });
   });
 
@@ -257,11 +280,14 @@ describe('RatingsController', () => {
       mockFindClientRatings.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getClientRatings(mockProfessionalIdParam);
+      const result = await controller.getClientRatings(
+        mockReqFull,
+        mockProfessionalIdParam,
+      );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindClientRatings).toHaveBeenCalledWith(10);
+      expect(mockFindClientRatings).toHaveBeenCalledWith(10, mockFullUser);
     });
   });
 
@@ -293,12 +319,16 @@ describe('RatingsController', () => {
 
       // Act
       const result = await controller.findByServiceRequest(
+        mockReqFull,
         mockServiceRequestIdParam,
       );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindByServiceRequest).toHaveBeenCalledWith('service-uuid-001');
+      expect(mockFindByServiceRequest).toHaveBeenCalledWith(
+        'service-uuid-001',
+        mockFullUser,
+      );
     });
   });
 
@@ -309,11 +339,11 @@ describe('RatingsController', () => {
       mockFindOne.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.findOne(mockRatingIdParam);
+      const result = await controller.findOne(mockReqFull, mockRatingIdParam);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindOne).toHaveBeenCalledWith('rating-uuid-001');
+      expect(mockFindOne).toHaveBeenCalledWith('rating-uuid-001', mockFullUser);
     });
 
     it('debe propagar NotFoundException si la calificación no existe', async () => {
@@ -323,9 +353,9 @@ describe('RatingsController', () => {
       );
 
       // Act & Assert
-      await expect(controller.findOne(mockRatingIdParam)).rejects.toThrow(
-        'Calificación no encontrada',
-      );
+      await expect(
+        controller.findOne(mockReqFull, mockRatingIdParam),
+      ).rejects.toThrow('Calificación no encontrada');
     });
   });
 
@@ -337,11 +367,19 @@ describe('RatingsController', () => {
       mockUpdate.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.update(mockRatingIdParam, mockReq, dto);
+      const result = await controller.update(
+        mockRatingIdParam,
+        mockReqFull,
+        dto,
+      );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockUpdate).toHaveBeenCalledWith('rating-uuid-001', 1, dto);
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'rating-uuid-001',
+        mockFullUser,
+        dto,
+      );
     });
 
     it('debe propagar ForbiddenException si el usuario no es el propietario', async () => {
@@ -352,7 +390,7 @@ describe('RatingsController', () => {
 
       // Act & Assert
       await expect(
-        controller.update(mockRatingIdParam, mockReq, {}),
+        controller.update(mockRatingIdParam, mockReqFull, {}),
       ).rejects.toThrow('No puedes editar esta calificación');
     });
   });
@@ -363,10 +401,10 @@ describe('RatingsController', () => {
       mockRemove.mockResolvedValue(undefined);
 
       // Act
-      await controller.remove(mockRatingIdParam, mockReq);
+      await controller.remove(mockRatingIdParam, mockReqFull);
 
       // Assert
-      expect(mockRemove).toHaveBeenCalledWith('rating-uuid-001', 1);
+      expect(mockRemove).toHaveBeenCalledWith('rating-uuid-001', mockFullUser);
     });
 
     it('debe propagar BadRequestException si el período de edición expiró', async () => {
@@ -377,7 +415,7 @@ describe('RatingsController', () => {
 
       // Act & Assert
       await expect(
-        controller.remove(mockRatingIdParam, mockReq),
+        controller.remove(mockRatingIdParam, mockReqFull),
       ).rejects.toThrow('No se puede eliminar esta calificación');
     });
   });
@@ -392,7 +430,7 @@ describe('RatingsController', () => {
       // Act
       const result = await controller.reportRating(
         mockRatingIdParam,
-        mockReq,
+        mockReqFull,
         dto,
       );
 
@@ -400,7 +438,7 @@ describe('RatingsController', () => {
       expect(result).toEqual(expected);
       expect(mockReportRating).toHaveBeenCalledWith(
         'rating-uuid-001',
-        1,
+        mockFullUser,
         'Contenido inapropiado',
       );
     });

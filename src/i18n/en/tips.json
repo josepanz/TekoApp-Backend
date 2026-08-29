@@ -1,0 +1,8 @@
+{
+  "PAYMENT_NOT_FOUND": "Payment not found",
+  "UNAUTHORIZED": "Only the client who paid for the service can leave a tip",
+  "PAYMENT_NOT_ELIGIBLE": "This payment isn't eligible for a tip yet",
+  "ALREADY_TIPPED": "You already left a tip for this payment",
+  "TIPS_DISABLED": "Tips aren't enabled",
+  "FREE_AMOUNT_NOT_ALLOWED": "A free tip amount isn't allowed"
+}

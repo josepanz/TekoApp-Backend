@@ -11,5 +11,6 @@
   "REFUND_EXCEEDS_AVAILABLE": "The refund amount exceeds the available amount",
   "SERVICE_NOT_FOUND": "Service not found",
   "STATUS_CHANGED_BEFORE_CANCEL": "The payment changed status before it could be cancelled",
-  "UNAUTHORIZED_CANCEL": "You do not have permission to cancel this payment"
+  "UNAUTHORIZED_CANCEL": "You do not have permission to cancel this payment",
+  "UNAUTHORIZED_VIEW": "You do not have permission to view this payment"
 }
