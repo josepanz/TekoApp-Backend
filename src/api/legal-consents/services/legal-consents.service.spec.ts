@@ -11,6 +11,8 @@ const mockFindActiveContentGrantByReferenceId = jest.fn();
 const mockFindRetentionPolicy = jest.fn();
 const mockRevokeContentGrant = jest.fn();
 const mockFindPendingVersionsForUser = jest.fn();
+const mockFindConsentsAuditPaginated = jest.fn();
+const mockFindContentConsentGrantsAuditPaginated = jest.fn();
 
 describe('LegalConsentsService', () => {
   let service: LegalConsentsService;
@@ -30,6 +32,9 @@ describe('LegalConsentsService', () => {
             findRetentionPolicy: mockFindRetentionPolicy,
             revokeContentGrant: mockRevokeContentGrant,
             findPendingVersionsForUser: mockFindPendingVersionsForUser,
+            findConsentsAuditPaginated: mockFindConsentsAuditPaginated,
+            findContentConsentGrantsAuditPaginated:
+              mockFindContentConsentGrantsAuditPaginated,
           },
         },
       ],
@@ -165,6 +170,96 @@ describe('LegalConsentsService', () => {
         service.revokeContentConsent(5, 'content-ref'),
       ).rejects.toThrow(ConflictException);
       expect(mockRevokeContentGrant).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findConsentsAuditPaginated', () => {
+    it('debe mapear cada fila cruda al DTO de auditoría (con IP/hash/usuario)', async () => {
+      // Arrange
+      mockFindConsentsAuditPaginated.mockResolvedValue({
+        data: [
+          {
+            referenceId: 'consent-1',
+            acceptedAt: new Date('2026-01-01'),
+            ipAddress: '127.0.0.1',
+            userAgent: 'jest',
+            acceptanceHash: 'hash',
+            legalDocumentVersion: {
+              referenceId: 'version-1',
+              documentType: LegalDocumentType.TERMS_OF_SERVICE,
+              countryId: null,
+              version: '1.0.0',
+              contentUrl: 'https://example.com/tos.pdf',
+              publishedAt: new Date('2025-12-01'),
+              isActive: true,
+            },
+            user: {
+              referenceId: 'user-1',
+              firstName: 'Ana',
+              lastName: 'Gómez',
+            },
+          },
+        ],
+        pagination: { total: 1, page: 1, pageSize: 10, totalPages: 1 },
+      });
+
+      // Act
+      const result = await service.findConsentsAuditPaginated({
+        page: 1,
+        pageSize: 10,
+      });
+
+      // Assert
+      expect(result.data[0]).toEqual(
+        expect.objectContaining({
+          referenceId: 'consent-1',
+          ipAddress: '127.0.0.1',
+          acceptanceHash: 'hash',
+          user: { referenceId: 'user-1', firstName: 'Ana', lastName: 'Gómez' },
+        }),
+      );
+    });
+  });
+
+  describe('findContentConsentGrantsAuditPaginated', () => {
+    it('debe mapear cada fila cruda al DTO de auditoría (con quién lo subió)', async () => {
+      // Arrange
+      mockFindContentConsentGrantsAuditPaginated.mockResolvedValue({
+        data: [
+          {
+            referenceId: 'grant-1',
+            contentType: AiDisclosureEntityType.IMAGE,
+            contentReferenceId: 'content-1',
+            usageScope: 'APP_INTERNAL_ONLY',
+            grantedAt: new Date('2026-01-01'),
+            revokedAt: null,
+            uploader: {
+              referenceId: 'user-1',
+              firstName: 'Ana',
+              lastName: 'Gómez',
+            },
+          },
+        ],
+        pagination: { total: 1, page: 1, pageSize: 10, totalPages: 1 },
+      });
+
+      // Act
+      const result = await service.findContentConsentGrantsAuditPaginated({
+        page: 1,
+        pageSize: 10,
+      });
+
+      // Assert
+      expect(result.data[0]).toEqual(
+        expect.objectContaining({
+          referenceId: 'grant-1',
+          uploader: {
+            referenceId: 'user-1',
+            firstName: 'Ana',
+            lastName: 'Gómez',
+          },
+        }),
+      );
     });
   });
 });

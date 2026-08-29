@@ -18,6 +18,7 @@ import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interf
 import { LegalConsentsService } from '../services/legal-consents.service';
 import {
   CreateLegalDocumentVersionRequestDTO,
+  GetContentConsentGrantsAuditQueryDTO,
   GetLegalConsentsAuditQueryDTO,
   GetLegalDocumentVersionsQueryDTO,
   LegalDocumentVersionIdParamDTO,
@@ -25,12 +26,14 @@ import {
   UpsertRetentionPolicyRequestDTO,
 } from '../dtos/request';
 import {
+  ContentConsentGrantsAuditListResponseDTO,
   LegalConsentsAuditListResponseDTO,
   LegalDocumentVersionResponseDTO,
   RetentionPolicyResponseDTO,
 } from '../dtos/response';
 import {
   ApiCreateLegalDocumentVersion,
+  ApiGetContentConsentGrantsAudit,
   ApiGetLegalConsentsAudit,
   ApiGetLegalDocumentVersions,
   ApiGetRetentionPolicies,
@@ -104,5 +107,16 @@ export class AdminLegalConsentsController {
     @Query() query: GetLegalConsentsAuditQueryDTO,
   ): Promise<LegalConsentsAuditListResponseDTO> {
     return this.legalConsentsService.findConsentsAuditPaginated(query);
+  }
+
+  @Get('content-consents')
+  @Permissions(PERMISSIONS.LEGAL.CONSENT_AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)
+  @ApiGetContentConsentGrantsAudit()
+  async getContentConsentGrantsAudit(
+    @Query() query: GetContentConsentGrantsAuditQueryDTO,
+  ): Promise<ContentConsentGrantsAuditListResponseDTO> {
+    return this.legalConsentsService.findContentConsentGrantsAuditPaginated(
+      query,
+    );
   }
 }

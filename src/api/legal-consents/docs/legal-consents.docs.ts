@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
+  ContentConsentGrantsAuditListResponseDTO,
   DataConsentsHistoryResponseDTO,
   LegalConsentsAuditListResponseDTO,
   LegalDocumentVersionResponseDTO,
@@ -121,5 +122,20 @@ export function ApiGetLegalConsentsAudit() {
       description: 'Quién aceptó qué, cuándo, con qué IP — paginado.',
     }),
     ApiResponse({ status: 200, type: LegalConsentsAuditListResponseDTO }),
+  );
+}
+
+export function ApiGetContentConsentGrantsAudit() {
+  return applyDecorators(
+    ApiBearerAuth('JWT-auth'),
+    ApiOperation({
+      summary: '[Staff] Auditoría de consentimiento de uso de contenido',
+      description:
+        'Quién subió qué contenido, con qué alcance de uso, vigente o revocado — paginado.',
+    }),
+    ApiResponse({
+      status: 200,
+      type: ContentConsentGrantsAuditListResponseDTO,
+    }),
   );
 }

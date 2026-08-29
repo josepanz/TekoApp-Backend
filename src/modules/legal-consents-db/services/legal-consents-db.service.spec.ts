@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiDisclosureEntityType, LegalDocumentType } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
+import { PrismaPaginationUtil } from '@common/utils/prisma-pagination.util';
 import { LegalConsentsDbService } from './legal-consents-db.service';
+
+jest.mock('@common/utils/prisma-pagination.util');
+// eslint-disable-next-line @typescript-eslint/unbound-method -- static method mockeado por jest.mock, nunca se invoca desatado de la clase
+const mockPaginate = jest.mocked(PrismaPaginationUtil.paginate);
 
 const mockLegalDocumentVersionsFindMany = jest.fn();
 const mockLegalDocumentVersionsFindUnique = jest.fn();
@@ -10,6 +15,7 @@ const mockUserConsentsFindUnique = jest.fn();
 const mockUserConsentsCreate = jest.fn();
 const mockContentConsentGrantsFindFirst = jest.fn();
 const mockContentConsentGrantsUpdate = jest.fn();
+const mockContentConsentGrantsFindMany = jest.fn();
 const mockDataRetentionPoliciesFindUnique = jest.fn();
 
 const mockPrisma = {
@@ -26,6 +32,7 @@ const mockPrisma = {
     contentConsentGrants: {
       findFirst: mockContentConsentGrantsFindFirst,
       update: mockContentConsentGrantsUpdate,
+      findMany: mockContentConsentGrantsFindMany,
     },
     dataRetentionPolicies: {
       findUnique: mockDataRetentionPoliciesFindUnique,
@@ -168,6 +175,81 @@ describe('LegalConsentsDbService', () => {
           },
         },
       });
+    });
+  });
+
+  describe('findConsentsAuditPaginated', () => {
+    it('arma el where anidado a partir de los filtros y excluye createdAt (la tabla no lo tiene)', async () => {
+      // Arrange
+      mockPaginate.mockResolvedValue({
+        data: [],
+        pagination: { total: 0, page: 1, pageSize: 10, totalPages: 0 },
+      });
+      const startDate = new Date('2026-01-01');
+      const endDate = new Date('2026-01-31');
+
+      // Act
+      await service.findConsentsAuditPaginated(
+        {
+          documentType: LegalDocumentType.TERMS_OF_SERVICE,
+          countryId: 1,
+          userReferenceId: 'user-ref-1',
+          startDate,
+          endDate,
+        },
+        { page: 1, pageSize: 10, startDate, endDate },
+      );
+
+      // Assert
+      expect(mockPaginate).toHaveBeenCalledWith(
+        mockPrisma.extended.userConsents,
+        { page: 1, pageSize: 10 },
+        expect.objectContaining({
+          where: {
+            legalDocumentVersion: {
+              documentType: LegalDocumentType.TERMS_OF_SERVICE,
+              countryId: 1,
+            },
+            user: { referenceId: 'user-ref-1' },
+            acceptedAt: { gte: startDate, lte: endDate },
+          },
+          defaultOrderByField: 'acceptedAt',
+        }),
+      );
+    });
+  });
+
+  describe('findContentConsentGrantsAuditPaginated', () => {
+    it('arma el where anidado a partir de los filtros (incluyendo revoked como filtro de revokedAt)', async () => {
+      // Arrange
+      mockPaginate.mockResolvedValue({
+        data: [],
+        pagination: { total: 0, page: 1, pageSize: 10, totalPages: 0 },
+      });
+
+      // Act
+      await service.findContentConsentGrantsAuditPaginated(
+        {
+          contentType: AiDisclosureEntityType.IMAGE,
+          revoked: false,
+          uploaderReferenceId: 'user-ref-2',
+        },
+        { page: 1, pageSize: 10 },
+      );
+
+      // Assert
+      expect(mockPaginate).toHaveBeenCalledWith(
+        mockPrisma.extended.contentConsentGrants,
+        { page: 1, pageSize: 10 },
+        expect.objectContaining({
+          where: {
+            contentType: AiDisclosureEntityType.IMAGE,
+            revokedAt: null,
+            uploader: { referenceId: 'user-ref-2' },
+          },
+          defaultOrderByField: 'grantedAt',
+        }),
+      );
     });
   });
 });

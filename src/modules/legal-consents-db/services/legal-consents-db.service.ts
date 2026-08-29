@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import {
   AiDisclosureEntityType,
   ContentConsentGrants,
+  ContentUsageScope,
   DataRetentionPolicies,
   LegalDocumentType,
   LegalDocumentVersions,
   Prisma,
   UserConsents,
+  Users,
 } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { PrismaPaginationUtil } from '@common/utils/prisma-pagination.util';
@@ -15,9 +17,42 @@ import {
   PaginationResponseDTO,
 } from '@common/dtos/pagination.dto';
 
+type UserSummary = Pick<Users, 'referenceId' | 'firstName' | 'lastName'>;
+const userSummarySelect = {
+  referenceId: true,
+  firstName: true,
+  lastName: true,
+} as const;
+
 type UserConsentWithVersion = UserConsents & {
   legalDocumentVersion: LegalDocumentVersions;
 };
+
+type UserConsentAuditRow = UserConsents & {
+  legalDocumentVersion: LegalDocumentVersions;
+  user: UserSummary;
+};
+
+type ContentConsentGrantAuditRow = ContentConsentGrants & {
+  uploader: UserSummary;
+};
+
+export interface ConsentsAuditFilters {
+  documentType?: LegalDocumentType;
+  countryId?: number;
+  userReferenceId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface ContentConsentGrantsAuditFilters {
+  contentType?: AiDisclosureEntityType;
+  usageScope?: ContentUsageScope;
+  revoked?: boolean;
+  uploaderReferenceId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
 
 @Injectable()
 export class LegalConsentsDbService {
@@ -73,6 +108,21 @@ export class LegalConsentsDbService {
       },
     });
     return count > 0;
+  }
+
+  /**
+   * Usado por `ContractsService.generateContract()` para resolver `legalTermsVersionId` — misma
+   * limitación de país que `findPendingVersionsForUser`/`hasActiveConsent` (siempre
+   * `countryId: null` hasta que exista país por Service/User). `null` si todavía no se publicó
+   * ninguna versión de este tipo — no bloquea la generación del contrato.
+   */
+  async findActiveVersionByType(
+    documentType: LegalDocumentType,
+  ): Promise<LegalDocumentVersions | null> {
+    return this.prisma.extended.legalDocumentVersions.findFirst({
+      where: { documentType, isActive: true, countryId: null },
+      orderBy: { publishedAt: 'desc' },
+    });
   }
 
   async findConsentByUserAndVersion(
@@ -234,18 +284,98 @@ export class LegalConsentsDbService {
     });
   }
 
+  /**
+   * `UserConsents` no tiene columna `createdAt` (solo `acceptedAt`) — `PrismaPaginationUtil`
+   * aplica cualquier `startDate`/`endDate` incondicionalmente sobre `createdAt`, así que ese rango
+   * se resuelve acá a mano sobre `acceptedAt` y se lo excluye del objeto que recibe `paginate` (lo
+   * mismo que los demás filtros anidados, que tampoco son columnas directas de la tabla).
+   */
   async findConsentsAuditPaginated(
+    filters: ConsentsAuditFilters,
     query: PaginationQueryDTO & Record<string, unknown>,
   ): Promise<{
-    data: UserConsentWithVersion[];
+    data: UserConsentAuditRow[];
     pagination: PaginationResponseDTO;
   }> {
-    return PrismaPaginationUtil.paginate<UserConsentWithVersion>(
+    const where: Prisma.UserConsentsWhereInput = {};
+    if (filters.documentType || filters.countryId !== undefined) {
+      where.legalDocumentVersion = {
+        ...(filters.documentType && { documentType: filters.documentType }),
+        ...(filters.countryId !== undefined && {
+          countryId: filters.countryId,
+        }),
+      };
+    }
+    if (filters.userReferenceId) {
+      where.user = { referenceId: filters.userReferenceId };
+    }
+    if (filters.startDate || filters.endDate) {
+      where.acceptedAt = {
+        ...(filters.startDate && { gte: filters.startDate }),
+        ...(filters.endDate && { lte: filters.endDate }),
+      };
+    }
+
+    const sanitizedQuery = { ...query };
+    delete sanitizedQuery.documentType;
+    delete sanitizedQuery.countryId;
+    delete sanitizedQuery.userReferenceId;
+    delete sanitizedQuery.startDate;
+    delete sanitizedQuery.endDate;
+
+    return PrismaPaginationUtil.paginate<UserConsentAuditRow>(
       this.prisma.extended.userConsents,
-      query,
+      sanitizedQuery,
       {
-        include: { legalDocumentVersion: true },
+        where,
+        include: {
+          legalDocumentVersion: true,
+          user: { select: userSummarySelect },
+        },
         defaultOrderByField: 'acceptedAt',
+      },
+    );
+  }
+
+  /** Ver nota de `findConsentsAuditPaginated` — `ContentConsentGrants` tampoco tiene `createdAt`. */
+  async findContentConsentGrantsAuditPaginated(
+    filters: ContentConsentGrantsAuditFilters,
+    query: PaginationQueryDTO & Record<string, unknown>,
+  ): Promise<{
+    data: ContentConsentGrantAuditRow[];
+    pagination: PaginationResponseDTO;
+  }> {
+    const where: Prisma.ContentConsentGrantsWhereInput = {};
+    if (filters.contentType) where.contentType = filters.contentType;
+    if (filters.usageScope) where.usageScope = filters.usageScope;
+    if (filters.revoked !== undefined) {
+      where.revokedAt = filters.revoked ? { not: null } : null;
+    }
+    if (filters.uploaderReferenceId) {
+      where.uploader = { referenceId: filters.uploaderReferenceId };
+    }
+    if (filters.startDate || filters.endDate) {
+      where.grantedAt = {
+        ...(filters.startDate && { gte: filters.startDate }),
+        ...(filters.endDate && { lte: filters.endDate }),
+      };
+    }
+
+    const sanitizedQuery = { ...query };
+    delete sanitizedQuery.contentType;
+    delete sanitizedQuery.usageScope;
+    delete sanitizedQuery.revoked;
+    delete sanitizedQuery.uploaderReferenceId;
+    delete sanitizedQuery.startDate;
+    delete sanitizedQuery.endDate;
+
+    return PrismaPaginationUtil.paginate<ContentConsentGrantAuditRow>(
+      this.prisma.extended.contentConsentGrants,
+      sanitizedQuery,
+      {
+        where,
+        include: { uploader: { select: userSummarySelect } },
+        defaultOrderByField: 'grantedAt',
       },
     );
   }

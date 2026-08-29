@@ -16,10 +16,17 @@ import { UpdateLegalDocumentVersionRequestDTO } from '../dtos/request/update-leg
 import { GetLegalDocumentVersionsQueryDTO } from '../dtos/request/get-legal-document-versions.query.dto';
 import { UpsertRetentionPolicyRequestDTO } from '../dtos/request/upsert-retention-policy.request.dto';
 import { GetLegalConsentsAuditQueryDTO } from '../dtos/request/get-legal-consents-audit.query.dto';
+import { GetContentConsentGrantsAuditQueryDTO } from '../dtos/request/get-content-consent-grants-audit.query.dto';
 import {
   PaginationQueryDTO,
   PaginationResponseDTO,
 } from '@common/dtos/pagination.dto';
+import { UserConsentAuditResponseDTO } from '../dtos/response/user-consent-audit.response.dto';
+import { ContentConsentGrantAuditResponseDTO } from '../dtos/response/content-consent-grant-audit.response.dto';
+import {
+  mapContentConsentGrantsAuditToResponse,
+  mapUserConsentsAuditToResponse,
+} from '../helpers/legal-consents-response.helper';
 
 import { t } from '@common/i18n/i18n.helper';
 
@@ -182,13 +189,41 @@ export class LegalConsentsService {
   async findConsentsAuditPaginated(
     query: GetLegalConsentsAuditQueryDTO,
   ): Promise<{
-    data: Awaited<
-      ReturnType<LegalConsentsDbService['findConsentsAuditPaginated']>
-    >['data'];
+    data: UserConsentAuditResponseDTO[];
     pagination: PaginationResponseDTO;
   }> {
-    return this.legalConsentsDb.findConsentsAuditPaginated(
-      query as unknown as PaginationQueryDTO & Record<string, unknown>,
-    );
+    const { data, pagination } =
+      await this.legalConsentsDb.findConsentsAuditPaginated(
+        {
+          documentType: query.documentType,
+          countryId: query.countryId,
+          userReferenceId: query.userReferenceId,
+          startDate: query.startDate,
+          endDate: query.endDate,
+        },
+        query as unknown as PaginationQueryDTO & Record<string, unknown>,
+      );
+    return { data: mapUserConsentsAuditToResponse(data), pagination };
+  }
+
+  async findContentConsentGrantsAuditPaginated(
+    query: GetContentConsentGrantsAuditQueryDTO,
+  ): Promise<{
+    data: ContentConsentGrantAuditResponseDTO[];
+    pagination: PaginationResponseDTO;
+  }> {
+    const { data, pagination } =
+      await this.legalConsentsDb.findContentConsentGrantsAuditPaginated(
+        {
+          contentType: query.contentType,
+          usageScope: query.usageScope,
+          revoked: query.revoked,
+          uploaderReferenceId: query.uploaderReferenceId,
+          startDate: query.startDate,
+          endDate: query.endDate,
+        },
+        query as unknown as PaginationQueryDTO & Record<string, unknown>,
+      );
+    return { data: mapContentConsentGrantsAuditToResponse(data), pagination };
   }
 }
