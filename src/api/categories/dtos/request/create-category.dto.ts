@@ -105,4 +105,15 @@ export class CreateCategoryDto {
   })
   @IsOptional()
   metadata?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    description:
+      'Cuántas opciones de presupuesto puede armar un profesional por propuesta en esta categoría',
+    default: 3,
+    example: 3,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  maxBudgetOptionsPerRequest?: number;
 }

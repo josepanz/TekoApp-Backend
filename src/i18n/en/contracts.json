@@ -1,0 +1,10 @@
+{
+  "OPTION_NOT_FOUND": "Budget option not found",
+  "ONLY_CLIENT_CAN_GENERATE": "Only the client who owns the service can generate the contract",
+  "OPTION_NOT_SELECTED": "This budget option has not been selected yet",
+  "CONTRACT_NOT_FOUND": "Contract not found",
+  "NOT_A_PARTY": "You are not a party to this contract",
+  "MUST_ACCEPT": "You must check the acceptance checkbox to sign",
+  "SIGNATURE_OUT_OF_TURN": "This contract was already signed by you, or it is not your turn yet",
+  "PDF_NOT_READY": "The contract is not yet signed by both parties"
+}

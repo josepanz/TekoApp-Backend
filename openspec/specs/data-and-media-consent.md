@@ -142,7 +142,8 @@ model DataRetentionPolicies {
 | DELETE | `/users/me/content/:contentReferenceId/consent` | uploader dueño | Revoca; dispara ocultamiento si `allowsUserDeletion=true`; 409 `LEGAL_HOLD_ACTIVE` si `requiresLegalHold=true` |
 | GET/POST/PATCH | `/admin/legal/document-versions` | staff | CRUD del catálogo versionado |
 | GET/PATCH | `/admin/legal/retention-policies` | staff | CRUD de políticas de retención |
-| GET | `/admin/legal/consents` | staff | Auditoría completa (quién aceptó qué, cuándo, IP) |
+| GET | `/admin/legal/consents` | staff | Auditoría de `UserConsents` (quién aceptó qué, cuándo, IP/hash) — paginada, filtrable por `documentType`/`countryId`/`userReferenceId`/rango de fecha |
+| GET | `/admin/legal/content-consents` | staff | Auditoría de `ContentConsentGrants` (quién subió qué, alcance de uso, vigente/revocado) — paginada, filtrable por `contentType`/`usageScope`/`revoked`/`uploaderReferenceId`/rango de fecha. Agregado en la extensión de Web Fase 0004 (2026-08-27) — la spec original solo contemplaba la auditoría de `UserConsents`, y Web necesitaba las 2 pestañas. |
 
 **Guard reusable**: `RequiresActiveConsentGuard(documentType)` — se aplica a los controllers de
 `professional-documents.md` (subida de documentos), `work-progress-log.md` (subida de fotos de

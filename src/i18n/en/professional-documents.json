@@ -1,0 +1,10 @@
+{
+  "NO_FILE_UPLOADED": "No file was received",
+  "DOCUMENT_TYPE_NOT_APPLICABLE": "This document type does not apply to your professional category",
+  "NOT_FOUND": "Document not found",
+  "ALREADY_REVIEWED": "This document was already reviewed by another staff member",
+  "FILE_TOO_LARGE": "The file exceeds the maximum size of {maxSizeMb}MB",
+  "FILE_TYPE_NOT_ALLOWED": "File type not allowed",
+  "EXPIRED_NOTIFICATION_TITLE": "A document expired",
+  "EXPIRED_NOTIFICATION_MESSAGE": "One of your uploaded documents expired — upload a new one to keep your verification up to date"
+}
