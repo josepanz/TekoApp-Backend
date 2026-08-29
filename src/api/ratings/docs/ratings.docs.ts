@@ -94,6 +94,23 @@ export const GetUserRatingStatsDocs = () =>
     }),
   );
 
+export const GetMyRatingStatsDocs = () =>
+  applyDecorators(
+    ApiOperation({
+      summary:
+        'Obtener mis propias estadísticas de calificaciones (como cliente)',
+      description:
+        'Resuelve el userId desde el token — evita que el cliente necesite conocer su propio ' +
+        'id interno, que `GET /auth/scope` nunca expone.',
+    }),
+    ApiResponse({
+      status: 200,
+      description:
+        'Estadísticas del usuario autenticado obtenidas exitosamente',
+      type: UserRatingStatsResponseDTO,
+    }),
+  );
+
 export const FindByProfessionalDocs = () =>
   applyDecorators(
     ApiOperation({ summary: 'Obtener calificaciones de un profesional' }),

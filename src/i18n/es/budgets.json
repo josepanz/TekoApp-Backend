@@ -1,0 +1,12 @@
+{
+  "SERVICE_NOT_FOUND": "Servicio no encontrado",
+  "REQUEST_NOT_FOUND": "Solicitud no encontrada",
+  "ONLY_REQUEST_AUTHOR_CAN_EDIT": "Solo el profesional autor de la propuesta puede editar sus opciones de presupuesto",
+  "REQUEST_NOT_EDITABLE": "Esta solicitud ya no admite cambios en sus opciones de presupuesto",
+  "MAX_OPTIONS_EXCEEDED": "Se permiten como máximo {max} opciones de presupuesto para esta categoría",
+  "CATALOG_ITEM_NOT_FOUND": "Uno de los ítems de catálogo indicados no existe",
+  "NOT_AUTHORIZED": "No tenés permiso para ver estas opciones de presupuesto",
+  "ONLY_CLIENT_CAN_SELECT": "Solo el cliente dueño del servicio puede elegir una opción",
+  "OPTION_NOT_FOUND": "Opción de presupuesto no encontrada",
+  "NO_LONGER_AVAILABLE": "Esta solicitud ya no está disponible para ser aceptada"
+}

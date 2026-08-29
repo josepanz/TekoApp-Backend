@@ -11,6 +11,7 @@ import { PaymentStatus, PaymentProvider, PaymentMethod } from '@prisma/client';
 import { PaymentApiService } from './payments.service';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
+import { TaxService } from '@api/tax/services/tax.service';
 import { RefundReason } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentDto } from '../dtos/request/create-payment.dto';
 import type { RefundPaymentDto } from '../dtos/request/refund-payment.dto';
@@ -45,6 +46,9 @@ const mockGetPaymentTrends = jest.fn();
 // FeeCalculatorService
 const mockCalculateProviderFee = jest.fn();
 const mockCalculatePlatformFee = jest.fn();
+
+// TaxService
+const mockCalculateTax = jest.fn();
 
 // ============================================================
 // Fixtures reutilizables
@@ -152,6 +156,10 @@ describe('PaymentApiService', () => {
             calculatePlatformFee: mockCalculatePlatformFee,
           },
         },
+        {
+          provide: TaxService,
+          useValue: { calculateTax: mockCalculateTax },
+        },
       ],
     }).compile();
 
@@ -177,6 +185,7 @@ describe('PaymentApiService', () => {
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(3);
       mockCalculatePlatformFee.mockResolvedValue(10.3);
+      mockCalculateTax.mockResolvedValue(0);
       mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
 
       // Act
@@ -202,6 +211,7 @@ describe('PaymentApiService', () => {
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(3);
       mockCalculatePlatformFee.mockResolvedValue(10.3);
+      mockCalculateTax.mockResolvedValue(0);
       mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
 
       // Act
@@ -209,6 +219,26 @@ describe('PaymentApiService', () => {
 
       // Assert
       expect(mockCalculatePlatformFee).toHaveBeenCalledWith(103); // 100 + 3
+    });
+
+    it('debe llamar a taxService.calculateTax con la comisión de plataforma calculada', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto({ amount: 100 });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+      mockCalculateProviderFee.mockResolvedValue(3);
+      mockCalculatePlatformFee.mockResolvedValue(10.3);
+      mockCalculateTax.mockResolvedValue(0);
+      mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
+
+      // Act
+      await service.createPayment(BASE_USER_ID, dto);
+
+      // Assert
+      expect(mockCalculateTax).toHaveBeenCalledWith(10.3);
     });
 
     it('debe lanzar NotFoundException si el servicio (UUID) no existe', async () => {
@@ -249,14 +279,17 @@ describe('PaymentApiService', () => {
       );
     });
 
-    it('debe crear el pago con la PK interna del servicio, fee, tax y totalAmount calculados', async () => {
-      // Arrange
+    it('debe crear el pago con la PK interna del servicio, fee, platformFee, tax y totalAmount calculados', async () => {
+      // Arrange — `platformFee` es la comisión de la plataforma (antes mal guardada en `tax`);
+      // `tax` ahora es el IVA real resuelto por `TaxService`, sumado aparte al total.
       const dto = buildCreatePaymentDto({ amount: 100 });
       const fee = 3;
-      const tax = 10.3;
-      const expectedTotal = 100 + fee + tax;
+      const platformFee = 10.3;
+      const tax = 1.03;
+      const expectedTotal = 100 + fee + platformFee + tax;
       const createdPayment = buildPayment({
         fee,
+        platformFee,
         tax,
         totalAmount: expectedTotal,
       });
@@ -267,7 +300,8 @@ describe('PaymentApiService', () => {
       });
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(fee);
-      mockCalculatePlatformFee.mockResolvedValue(tax);
+      mockCalculatePlatformFee.mockResolvedValue(platformFee);
+      mockCalculateTax.mockResolvedValue(tax);
       mockCreatePaymentWithTransaction.mockResolvedValue(createdPayment);
 
       // Act
@@ -277,6 +311,7 @@ describe('PaymentApiService', () => {
       expect(mockCreatePaymentWithTransaction).toHaveBeenCalledWith(
         expect.objectContaining({
           fee,
+          platformFee,
           tax,
           totalAmount: expectedTotal,
           status: PaymentStatus.PENDING,
@@ -287,7 +322,8 @@ describe('PaymentApiService', () => {
         expect.any(String), // uuid generado dinámicamente
       );
       expect(result.totalAmount).toBe(expectedTotal);
-      expect(result.id).toBe(BASE_PAYMENT_REF);
+      expect(result.id).toBe(BASE_PAYMENT_PK);
+      expect(result.referenceId).toBe(BASE_PAYMENT_REF);
       expect(result.serviceId).toBe(BASE_SERVICE_REF);
     });
 
@@ -301,6 +337,7 @@ describe('PaymentApiService', () => {
       mockFindExistingPayment.mockResolvedValue(null);
       mockCalculateProviderFee.mockResolvedValue(0);
       mockCalculatePlatformFee.mockResolvedValue(0);
+      mockCalculateTax.mockResolvedValue(0);
       mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
 
       // Act
@@ -312,6 +349,31 @@ describe('PaymentApiService', () => {
         expect.any(String),
       );
     });
+
+    it('debe dar totalAmount igual al comportamiento previo cuando el IVA está deshabilitado (default)', async () => {
+      // Arrange — sin TaxConfig cargada, `TaxService.calculateTax` da 0, así que el total sigue
+      // siendo `amount + fee + platformFee`, sin cambio de comportamiento respecto a antes de la
+      // Fase 0011 (ver openspec/decisions.md).
+      const dto = buildCreatePaymentDto({ amount: 100 });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+      mockCalculateProviderFee.mockResolvedValue(3);
+      mockCalculatePlatformFee.mockResolvedValue(10.3);
+      mockCalculateTax.mockResolvedValue(0);
+      mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
+
+      // Act
+      await service.createPayment(BASE_USER_ID, dto);
+
+      // Assert
+      expect(mockCreatePaymentWithTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({ totalAmount: 113.3, tax: 0 }), // 100 + 3 + 10.3 + 0
+        expect.any(String),
+      );
+    });
   });
 
   // ============================================================
@@ -319,7 +381,7 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('getPaymentById', () => {
-    it('debe resolver el pago por su referenceId y exponerlo bajo la clave id', async () => {
+    it('debe resolver el pago por su referenceId y exponer id (PK) + referenceId (UUID) por separado', async () => {
       // Arrange
       const payment = buildPayment();
       mockFindPaymentByReferenceId.mockResolvedValue(payment);
@@ -328,7 +390,8 @@ describe('PaymentApiService', () => {
       const result = await service.getPaymentById(BASE_PAYMENT_REF);
 
       // Assert
-      expect(result.id).toBe(BASE_PAYMENT_REF);
+      expect(result.id).toBe(BASE_PAYMENT_PK);
+      expect(result.referenceId).toBe(BASE_PAYMENT_REF);
       expect(result.serviceId).toBe(BASE_SERVICE_REF);
       expect(mockFindPaymentByReferenceId).toHaveBeenCalledWith(
         BASE_PAYMENT_REF,
@@ -343,6 +406,85 @@ describe('PaymentApiService', () => {
       await expect(service.getPaymentById('id-inexistente')).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  // ============================================================
+  // getPaymentByIdForViewer
+  // ============================================================
+
+  describe('getPaymentByIdForViewer', () => {
+    function buildViewer(overrides: Record<string, unknown> = {}) {
+      return {
+        id: BASE_USER_ID,
+        permissions: [] as string[],
+        ...overrides,
+      } as unknown as import('@modules/auth/interfaces/user-data-on-jwt.interface').IUserDataOnJwt;
+    }
+
+    it('debe retornar el detalle cuando el viewer es el dueño del pago', async () => {
+      // Arrange
+      mockFindPaymentByReferenceId.mockResolvedValue(buildPayment());
+
+      // Act
+      const result = await service.getPaymentByIdForViewer(
+        BASE_PAYMENT_REF,
+        buildViewer(),
+      );
+
+      // Assert
+      expect(result.referenceId).toBe(BASE_PAYMENT_REF);
+    });
+
+    it('debe retornar el detalle cuando el viewer tiene payments.audit:read aunque no sea el dueño', async () => {
+      // Arrange
+      mockFindPaymentByReferenceId.mockResolvedValue(buildPayment());
+
+      // Act
+      const result = await service.getPaymentByIdForViewer(
+        BASE_PAYMENT_REF,
+        buildViewer({ id: 999, permissions: ['payments.audit:read'] }),
+      );
+
+      // Assert
+      expect(result.referenceId).toBe(BASE_PAYMENT_REF);
+    });
+
+    it('debe retornar el detalle cuando el viewer tiene admin:all aunque no sea el dueño', async () => {
+      // Arrange
+      mockFindPaymentByReferenceId.mockResolvedValue(buildPayment());
+
+      // Act
+      const result = await service.getPaymentByIdForViewer(
+        BASE_PAYMENT_REF,
+        buildViewer({ id: 999, permissions: ['admin:all'] }),
+      );
+
+      // Assert
+      expect(result.referenceId).toBe(BASE_PAYMENT_REF);
+    });
+
+    it('debe lanzar ForbiddenException cuando el viewer no es el dueño ni tiene permiso de auditoría', async () => {
+      // Arrange
+      mockFindPaymentByReferenceId.mockResolvedValue(buildPayment());
+
+      // Act & Assert
+      await expect(
+        service.getPaymentByIdForViewer(
+          BASE_PAYMENT_REF,
+          buildViewer({ id: 999 }),
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('debe lanzar NotFoundException cuando el pago no existe', async () => {
+      // Arrange
+      mockFindPaymentByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.getPaymentByIdForViewer('id-inexistente', buildViewer()),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -491,7 +633,7 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('getPaymentMethods', () => {
-    it('debe retornar los métodos de pago del usuario exponiendo el referenceId como id', async () => {
+    it('debe retornar los métodos de pago del usuario exponiendo id (PK) y referenceId (UUID) por separado', async () => {
       // Arrange
       const methods = [
         { id: BASE_PM_PK, referenceId: BASE_PM_REF, userId: BASE_USER_ID },
@@ -504,7 +646,8 @@ describe('PaymentApiService', () => {
       // Assert
       expect(mockFindAllPaymentMethods).toHaveBeenCalledWith(BASE_USER_ID);
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe(BASE_PM_REF);
+      expect(result[0].id).toBe(BASE_PM_PK);
+      expect(result[0].referenceId).toBe(BASE_PM_REF);
     });
   });
 
@@ -513,7 +656,7 @@ describe('PaymentApiService', () => {
   // ============================================================
 
   describe('createPaymentMethod', () => {
-    it('debe delegar la creación al dbService y exponer el referenceId como id', async () => {
+    it('debe delegar la creación al dbService y exponer id (PK) y referenceId (UUID) por separado', async () => {
       // Arrange
       const dto: CreatePaymentMethodRequestDTO = {
         name: 'Mi tarjeta VISA',
@@ -536,7 +679,8 @@ describe('PaymentApiService', () => {
 
       // Assert
       expect(mockCreatePaymentMethod).toHaveBeenCalledTimes(1);
-      expect(result.id).toBe(BASE_PM_REF);
+      expect(result.id).toBe(BASE_PM_PK);
+      expect(result.referenceId).toBe(BASE_PM_REF);
     });
   });
 

@@ -2,6 +2,10 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
+import { RatingViewerContext } from '@api/ratings/helpers/ratings-response.helper';
+import { mapReviewsToSummaries } from '../helpers/professional-reviews-response.helper';
 import {
   GetProfessionalsListQueryDTO,
   GetNearbyProfessionalsQueryDTO,
@@ -160,15 +164,34 @@ export class ProfessionalsService {
     return result as unknown as ProfessionalServicesListResponseDTO;
   }
 
+  /** Ver `mapReviewsToSummaries` — nunca exponer la fila cruda de `Users`/ignorar `isAnonymous`. */
+  private async buildReviewViewerContext(
+    user: IUserDataOnJwt,
+  ): Promise<RatingViewerContext> {
+    const isPrivileged =
+      user.permissions.includes(PERMISSIONS.RATINGS.AUDIT_VIEW) ||
+      user.permissions.includes(PERMISSIONS.ADMIN.ALL);
+    const professionalId =
+      await this.professionalsDb.findProfessionalIdByUserId(user.id);
+    return { userId: user.id, professionalId, isPrivileged };
+  }
+
   async getProfessionalReviews(
     id: number,
     query: GetProfessionalReviewsQueryDTO,
+    user: IUserDataOnJwt,
   ): Promise<ProfessionalReviewsListResponseDTO> {
-    const result = await this.professionalsDb.findReviews(
-      id,
-      query as unknown as PaginationQueryDTO & Record<string, unknown>,
-    );
-    return result as unknown as ProfessionalReviewsListResponseDTO;
+    const [result, viewer] = await Promise.all([
+      this.professionalsDb.findReviews(
+        id,
+        query as unknown as PaginationQueryDTO & Record<string, unknown>,
+      ),
+      this.buildReviewViewerContext(user),
+    ]);
+    return {
+      data: mapReviewsToSummaries(result.data, viewer),
+      pagination: result.pagination,
+    };
   }
 
   async getProfessionalStats(

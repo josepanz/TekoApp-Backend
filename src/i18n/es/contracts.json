@@ -1,0 +1,10 @@
+{
+  "OPTION_NOT_FOUND": "Opción de presupuesto no encontrada",
+  "ONLY_CLIENT_CAN_GENERATE": "Solo el cliente dueño del servicio puede generar el contrato",
+  "OPTION_NOT_SELECTED": "Esta opción de presupuesto todavía no fue seleccionada",
+  "CONTRACT_NOT_FOUND": "Contrato no encontrado",
+  "NOT_A_PARTY": "No sos parte de este contrato",
+  "MUST_ACCEPT": "Debés marcar el checkbox de aceptación para firmar",
+  "SIGNATURE_OUT_OF_TURN": "Este contrato ya fue firmado por vos, o todavía no te toca firmar",
+  "PDF_NOT_READY": "El contrato todavía no está firmado por ambas partes"
+}

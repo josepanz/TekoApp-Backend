@@ -23,6 +23,7 @@ const mockSearch = jest.fn();
 // ── Fixture base de categoría ────────────────────────────────────────────────
 const categoriaBase: Category = {
   id: 1,
+  referenceId: '11111111-1111-4111-8111-111111111111',
   name: 'Tecnología',
   slug: 'tecnologia',
   description: 'Categoría de tecnología',
@@ -32,6 +33,7 @@ const categoriaBase: Category = {
   status: CategoryStatus.ACTIVE,
   isVisible: true,
   requiresVerification: false,
+  requiresProgressLog: false,
   metadata: null,
   parentCategoryId: null,
   createdAt: new Date('2024-01-01'),

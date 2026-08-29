@@ -52,6 +52,22 @@ const mockRating = {
   createdAt: new Date('2024-06-01'),
 };
 
+/** Construye un `IUserDataOnJwt` mínimo para pasar a los métodos del service (`viewer` real). */
+function fakeUser(overrides: { id?: number; permissions?: string[] } = {}) {
+  return {
+    id: overrides.id ?? 1,
+    referenceId: 'user-ref-001',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    accessLevelId: 1,
+    userStatus: 'ACTIVE',
+    profileStatus: 'COMPLETE',
+    permissions: overrides.permissions ?? [],
+    roles: [],
+  } as never;
+}
+
 describe('RatingsService', () => {
   let service: RatingsService;
 
@@ -121,7 +137,8 @@ describe('RatingsService', () => {
       expect(mockCreate).toHaveBeenCalledWith(
         expect.objectContaining({ serviceId: SERVICE_PK }),
       );
-      expect(result.id).toBe(RATING_REF);
+      expect(result.id).toBe(RATING_PK);
+      expect(result.referenceId).toBe(RATING_REF);
       expect(result.serviceId).toBe(SERVICE_REF);
     });
 
@@ -273,21 +290,23 @@ describe('RatingsService', () => {
 
       // Assert
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe(RATING_REF);
+      expect(result[0].id).toBe(RATING_PK);
+      expect(result[0].referenceId).toBe(RATING_REF);
       expect(mockFindAll).toHaveBeenCalled();
     });
   });
 
   describe('findOne', () => {
-    it('debe resolver la calificación por su referenceId y exponerla bajo la clave id', async () => {
+    it('debe resolver la calificación por su referenceId y exponer id (PK) y referenceId (UUID) por separado', async () => {
       // Arrange
       mockFindByReferenceId.mockResolvedValue(mockRating);
 
       // Act
-      const result = await service.findOne(RATING_REF);
+      const result = await service.findOne(RATING_REF, fakeUser());
 
       // Assert
-      expect(result.id).toBe(RATING_REF);
+      expect(result.id).toBe(RATING_PK);
+      expect(result.referenceId).toBe(RATING_REF);
       expect(mockFindByReferenceId).toHaveBeenCalledWith(RATING_REF);
     });
 
@@ -296,9 +315,91 @@ describe('RatingsService', () => {
       mockFindByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findOne('no-existe')).rejects.toThrow(
+      await expect(service.findOne('no-existe', fakeUser())).rejects.toThrow(
         NotFoundException,
       );
+    });
+
+    it('debe ocultar el userId (autor) cuando isAnonymous=true y quien consulta no es el autor ni tiene permiso de auditoría', async () => {
+      // Arrange — CLIENT_TO_PROFESSIONAL: userId=1 es el autor (cliente), professionalId=5 es el
+      // calificado — el profesional (viewer distinto de 1, sin permiso) no debe ver quién lo calificó.
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        isAnonymous: true,
+      });
+
+      // Act
+      const result = await service.findOne(RATING_REF, fakeUser({ id: 99 }));
+
+      // Assert
+      expect(result.userId).toBeNull();
+      expect(result.professionalId).toBe(5);
+    });
+
+    it('NO debe ocultar el userId cuando quien consulta es el propio autor de la calificación anónima', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        isAnonymous: true,
+      });
+
+      // Act — viewer id=1 coincide con rating.userId=1 (es el autor)
+      const result = await service.findOne(RATING_REF, fakeUser({ id: 1 }));
+
+      // Assert
+      expect(result.userId).toBe(1);
+    });
+
+    it('NO debe ocultar el userId cuando quien consulta tiene permiso de auditoría de ratings', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        isAnonymous: true,
+      });
+
+      // Act
+      const result = await service.findOne(
+        RATING_REF,
+        fakeUser({ id: 99, permissions: ['ratings.audit:read'] }),
+      );
+
+      // Assert
+      expect(result.userId).toBe(1);
+    });
+
+    it('debe ocultar el professionalId (autor) cuando isAnonymous=true y type=PROFESSIONAL_TO_CLIENT, y quien consulta es el cliente calificado', async () => {
+      // Arrange — PROFESSIONAL_TO_CLIENT: professionalId=5 es el autor, userId=1 es el cliente
+      // calificado — el cliente (viewer id=1, que además NO tiene perfil profesional) no debe ver
+      // qué profesional lo calificó.
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        type: RatingType.PROFESSIONAL_TO_CLIENT,
+        isAnonymous: true,
+      });
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findOne(RATING_REF, fakeUser({ id: 1 }));
+
+      // Assert
+      expect(result.professionalId).toBeNull();
+      expect(result.userId).toBe(1);
+    });
+
+    it('NO debe ocultar el professionalId cuando quien consulta es el propio profesional autor', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockRating,
+        type: RatingType.PROFESSIONAL_TO_CLIENT,
+        isAnonymous: true,
+      });
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 5 });
+
+      // Act — viewer resuelve a professionalId=5, igual al autor de la calificación
+      const result = await service.findOne(RATING_REF, fakeUser({ id: 10 }));
+
+      // Assert
+      expect(result.professionalId).toBe(5);
     });
   });
 
@@ -308,7 +409,7 @@ describe('RatingsService', () => {
       mockFindByUser.mockResolvedValue([mockRating]);
 
       // Act
-      const result = await service.findByUser(1);
+      const result = await service.findByUser(1, fakeUser());
 
       // Assert
       expect(result).toHaveLength(1);
@@ -322,7 +423,7 @@ describe('RatingsService', () => {
       mockFindByProfessional.mockResolvedValue([mockRating]);
 
       // Act
-      const result = await service.findByProfessional(5);
+      const result = await service.findByProfessional(5, fakeUser());
 
       // Assert
       expect(result).toHaveLength(1);
@@ -336,7 +437,7 @@ describe('RatingsService', () => {
       mockFindClientRatings.mockResolvedValue([mockRating]);
 
       // Act
-      const result = await service.findClientRatings(5);
+      const result = await service.findClientRatings(5, fakeUser());
 
       // Assert
       expect(result).toBeDefined();
@@ -350,7 +451,7 @@ describe('RatingsService', () => {
       mockFindProfessionalRatings.mockResolvedValue([]);
 
       // Act
-      await service.findProfessionalRatings(1);
+      await service.findProfessionalRatings(1, fakeUser());
 
       // Assert
       expect(mockFindProfessionalRatings).toHaveBeenCalledWith(1);
@@ -364,7 +465,10 @@ describe('RatingsService', () => {
       mockFindByServiceId.mockResolvedValue([mockRating]);
 
       // Act
-      const result = await service.findByServiceRequest(SERVICE_REF);
+      const result = await service.findByServiceRequest(
+        SERVICE_REF,
+        fakeUser(),
+      );
 
       // Assert
       expect(result).toHaveLength(1);
@@ -377,9 +481,9 @@ describe('RatingsService', () => {
       mockFindServiceByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findByServiceRequest('no-existe')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findByServiceRequest('no-existe', fakeUser()),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -426,7 +530,7 @@ describe('RatingsService', () => {
       const dto = { rating: 3 } as never;
 
       // Act
-      const result = await service.update(RATING_REF, 1, dto);
+      const result = await service.update(RATING_REF, fakeUser(), dto);
 
       // Assert
       expect(mockUpdate).toHaveBeenCalledWith(RATING_PK, dto);
@@ -438,7 +542,7 @@ describe('RatingsService', () => {
       mockFindByReferenceId.mockResolvedValue({ ...mockRating, userId: 99 });
 
       // Act & Assert
-      await expect(service.update(RATING_REF, 1, {})).rejects.toThrow(
+      await expect(service.update(RATING_REF, fakeUser(), {})).rejects.toThrow(
         ForbiddenException,
       );
       expect(mockUpdate).not.toHaveBeenCalled();
@@ -453,7 +557,7 @@ describe('RatingsService', () => {
       });
 
       // Act & Assert
-      await expect(service.update(RATING_REF, 1, {})).rejects.toThrow(
+      await expect(service.update(RATING_REF, fakeUser(), {})).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -467,7 +571,7 @@ describe('RatingsService', () => {
       mockDeactivate.mockResolvedValue(undefined);
 
       // Act
-      await service.remove(RATING_REF, 1);
+      await service.remove(RATING_REF, fakeUser());
 
       // Assert
       expect(mockDeactivate).toHaveBeenCalledWith(RATING_PK);
@@ -478,7 +582,7 @@ describe('RatingsService', () => {
       mockFindByReferenceId.mockResolvedValue({ ...mockRating, userId: 99 });
 
       // Act & Assert
-      await expect(service.remove(RATING_REF, 1)).rejects.toThrow(
+      await expect(service.remove(RATING_REF, fakeUser())).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -492,7 +596,7 @@ describe('RatingsService', () => {
       });
 
       // Act & Assert
-      await expect(service.remove(RATING_REF, 1)).rejects.toThrow(
+      await expect(service.remove(RATING_REF, fakeUser())).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -507,7 +611,7 @@ describe('RatingsService', () => {
       // Act
       const result = await service.reportRating(
         RATING_REF,
-        1,
+        fakeUser(),
         'Contenido inapropiado',
       );
 
@@ -525,7 +629,7 @@ describe('RatingsService', () => {
 
       // Act & Assert
       await expect(
-        service.reportRating(RATING_REF, 1, 'razón'),
+        service.reportRating(RATING_REF, fakeUser(), 'razón'),
       ).rejects.toThrow(BadRequestException);
       expect(mockReport).not.toHaveBeenCalled();
     });
@@ -602,7 +706,7 @@ describe('RatingsService', () => {
       mockFindRecent.mockResolvedValue([mockRating]);
 
       // Act
-      const result = await service.getRecentRatings(20);
+      const result = await service.getRecentRatings(20, fakeUser());
 
       // Assert
       expect(result).toHaveLength(1);

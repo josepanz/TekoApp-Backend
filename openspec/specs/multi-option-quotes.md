@@ -121,8 +121,8 @@ model BudgetLineItems {
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
-| GET | `/material-catalog` | profesional | Filtrable por `categoryId`/`countryId`, `PrismaPaginationUtil` |
-| POST/PATCH/DELETE | `/admin/material-catalog` | staff | CRUD del catálogo |
+| GET | `/material-catalog` | cualquier usuario autenticado | Filtrable por `categoryId`/`countryId`/`qualityTier`/`isActive`, `PrismaPaginationUtil`. Mismo endpoint lo consume el profesional armando un presupuesto y la tabla admin de Web. |
+| POST/PATCH | `/admin/material-catalog` | staff | Alta/edición del catálogo. **Sin DELETE** (implementado): un hard delete rompería la FK de `BudgetLineItems.catalogItemId` en presupuestos históricos — se desactiva con `PATCH isActive: false`, mismo patrón que `ProfessionalDocumentTypes`. |
 | PUT | `/services/:referenceId/requests/:requestId/budget-options` | profesional autor de la propuesta | Reemplaza el set completo de opciones (array), transacción: borra las anteriores no seleccionadas + crea las nuevas, valida `count <= category.maxBudgetOptionsPerRequest`, recalcula `totalPrice`/`subtotal` server-side |
 | GET | `/services/:referenceId/requests/:requestId/budget-options` | cliente, profesional autor | Listado con line items |
 | PATCH | `/services/:referenceId/requests/:requestId/budget-options/:optionReferenceId/select` | cliente dueño del `Service` | Transacción: marca `isSelected=true` en la opción elegida, `false` en las demás de la misma propuesta, y reutiliza la lógica existente de auto-rechazo de `ServiceRequests` competidoras |

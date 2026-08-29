@@ -2,8 +2,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentMethod, PaymentProvider } from '@prisma/client';
 
 export class PaymentMethodDetailResponseDTO {
+  @ApiProperty({
+    example: 42,
+    description:
+      'ID interno secuencial — solo para ordenamiento, nunca para consultar/rutear',
+  })
+  id!: number;
+
   @ApiProperty({ example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479' })
-  id!: string;
+  referenceId!: string;
 
   @ApiProperty({ example: 1 })
   userId!: number;

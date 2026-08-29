@@ -12,6 +12,7 @@
   "ONLY_ASSIGNED_PROFESSIONAL_CAN_START": "Only the assigned professional can start the service",
   "ONLY_CLIENT_CAN_ANSWER_REQUESTS": "Only the client can answer the requests",
   "ONLY_PENDING_ACCEPT_REQUESTS": "Requests can only be created for pending services",
+  "PROGRESS_LOG_REQUIRED": "This category requires at least one progress log entry before the service can be completed",
   "REQUEST_ALREADY_SENT": "You have already sent a request for this service",
   "REQUEST_NOT_FOUND": "Request not found",
   "STATUS_CHANGED_BEFORE_CANCEL": "The service changed status before it could be cancelled",

@@ -1,6 +1,6 @@
 {
   "name": "tekoapp-backend",
-  "version": "1.0.0-qa.4",
+  "version": "1.0.0-develop.14",
   "description": "Backend para TekoApp - Plataforma de Servicios Profesionales",
   "author": "José Panza",
   "private": true,
