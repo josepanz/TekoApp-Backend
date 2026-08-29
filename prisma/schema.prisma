@@ -64,36 +64,36 @@ model AccessLevel {
 }
 
 model Users {
-  id              Int               @id @default(autoincrement())
-  referenceId     String            @unique @default(uuid()) @map("reference_id")
-  email           String            @unique @map("email")
-  status          UserStatus        @default(ACTIVE) @map("status")
-  profileStatus   UserProfileStatus @default(INCOMPLETE) @map("profile_status")
-  lastLogin       DateTime?         @map("last_login")
-  firstName       String            @map("first_name")
-  lastName        String            @map("last_name")
-  documentTypeId  Int               @map("document_type_id")
-  documentNumber  String?           @map("document_number")
-  phoneNumber     String?           @map("phone_number")
+  id                  Int               @id @default(autoincrement())
+  referenceId         String            @unique @default(uuid()) @map("reference_id")
+  email               String            @unique @map("email")
+  status              UserStatus        @default(ACTIVE) @map("status")
+  profileStatus       UserProfileStatus @default(INCOMPLETE) @map("profile_status")
+  lastLogin           DateTime?         @map("last_login")
+  firstName           String            @map("first_name")
+  lastName            String            @map("last_name")
+  documentTypeId      Int               @map("document_type_id")
+  documentNumber      String?           @map("document_number")
+  phoneNumber         String?           @map("phone_number")
   // Foto de perfil: guarda la KEY de S3 (permanente), no una URL — las URLs que devuelve
   // `POST /uploads/avatar` son presignadas y expiran en 900s (`S3_PRESIGNED_URL_EXPIRES_IN`).
   // Cada response que expone esto al cliente resuelve una URL presignada fresca a partir de la
   // key en el momento de la lectura (ver `UploadsService.getPresignedUrl()`), nunca sirve una URL
   // vieja guardada. Nullable: sin foto se muestra un fallback de iniciales.
-  avatarKey       String?           @map("avatar_key")
-  isEmployee      Boolean           @default(false) @map("is_employee")
-  isLdap          Boolean           @default(false) @map("ldap")
-  createdAt       DateTime          @default(now()) @map("created_at")
-  createdBy       String            @map("created_by")
-  lastChangedAt   DateTime?         @default(now()) @map("last_changed_at")
-  lastChangedBy   String?           @map("last_changed_by")
-  unverifiedEmail String?           @map("unverified_email")
-  changedReason   String?           @map("changed_reason")
-  acceptedTermsAt DateTime?         @map("accepted_terms_at")
-  accessLevelId   Int?              @map("access_level_id")
+  avatarKey           String?           @map("avatar_key")
+  isEmployee          Boolean           @default(false) @map("is_employee")
+  isLdap              Boolean           @default(false) @map("ldap")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  createdBy           String            @map("created_by")
+  lastChangedAt       DateTime?         @default(now()) @map("last_changed_at")
+  lastChangedBy       String?           @map("last_changed_by")
+  unverifiedEmail     String?           @map("unverified_email")
+  changedReason       String?           @map("changed_reason")
+  acceptedTermsAt     DateTime?         @map("accepted_terms_at")
+  accessLevelId       Int?              @map("access_level_id")
   // Idioma preferido del usuario. Nullable: sin preferencia explícita => se usa el default `es`
   // del sistema (ver catálogo `languages`). No cambia comportamiento hoy (negocio Paraguay-only).
-  preferredLanguageId Int?          @map("preferred_language_id")
+  preferredLanguageId Int?              @map("preferred_language_id")
 
   checksum        String? @map("checksum")
   changeSignature String? @map("change_signature")
@@ -103,9 +103,9 @@ model Users {
   credentials           UserCredentials[]
   professionals         Professionals?
   services              Services[]
-  documentTypes         DocumentsType         @relation(fields: [documentTypeId], references: [id])
-  accessLevel           AccessLevel?          @relation(fields: [accessLevelId], references: [id])
-  preferredLanguage     Language?             @relation(fields: [preferredLanguageId], references: [id])
+  documentTypes         DocumentsType          @relation(fields: [documentTypeId], references: [id])
+  accessLevel           AccessLevel?           @relation(fields: [accessLevelId], references: [id])
+  preferredLanguage     Language?              @relation(fields: [preferredLanguageId], references: [id])
   payments              Payments[]
   paymentMethodEntities PaymentMethodEntity[]
   ratings               Rating[]
@@ -115,6 +115,8 @@ model Users {
   legalConsents         UserConsents[]
   contentConsentGrants  ContentConsentGrants[]
   aiContentDisclosures  AiContentDisclosures[]
+  contracts             Contracts[]
+  tips                  Tips[]
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -362,7 +364,18 @@ model Professionals {
   isAvailable       Boolean            @default(false) @map("is_available")
   isOnline          Boolean            @default(false) @map("is_online")
 
+  // Aprobación manual de staff sobre la cuenta del profesional (onboarding) — "verified"/
+  // "rejected" seteado junto con `status` desde `ProfessionalsService.verifyProfessional()`.
+  // Campo legacy, NO tocar desde la Fase 0001 de documentos/antecedentes (ver
+  // `requiredDocumentsVerified` abajo y openspec/decisions.md — colisión encontrada y corregida).
   verificationStatus String @default("unverified") @map("verification_status") @db.VarChar(20) // e.g., verified
+
+  // Derivado automáticamente por `ProfessionalVerificationHelper.recompute()` — true cuando TODOS
+  // los `ProfessionalDocumentTypes` obligatorios aplicables a la categoría del profesional tienen
+  // un `ProfessionalDocuments` APPROVED y sin vencer. Campo separado de `verificationStatus` a
+  // propósito: son 2 conceptos distintos con 2 escritores distintos (aprobación manual de cuenta
+  // vs. estado automático de documentos), compartir el mismo campo los pisaría entre sí.
+  requiredDocumentsVerified Boolean @default(false) @map("required_documents_verified")
 
   // Última posición conocida (El histórico pesado va a Mongo)
   currentLatitude    Decimal?  @map("current_latitude") @db.Decimal(10, 7)
@@ -384,12 +397,16 @@ model Professionals {
   changeSignature String?   @map("change_signature")
 
   // Relaciones
-  user            Users             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category        Category          @relation(fields: [categoryId], references: [id])
-  services        Services[]
-  serviceRequests ServiceRequests[]
-  payments        Payments[]
-  ratings         Rating[]
+  user                  Users                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category              Category                 @relation(fields: [categoryId], references: [id])
+  services              Services[]
+  serviceRequests       ServiceRequests[]
+  payments              Payments[]
+  ratings               Rating[]
+  progressEntries       ServiceProgressEntries[]
+  professionalDocuments ProfessionalDocuments[]
+  contracts             Contracts[]
+  tips                  Tips[]
 
   @@index([status])
   @@index([isAvailable])
@@ -446,10 +463,115 @@ model Services {
   users    Users?            @relation(fields: [userId], references: [id])
   category Category          @relation(fields: [categoryId], references: [id])
 
+  progressEntries ServiceProgressEntries[]
+  contracts       Contracts[]
+
   @@index([status])
   @@index([userId])
   @@index([professionalId])
   @@map("services")
+}
+
+model ServiceProgressEntries {
+  id             Int      @id @default(autoincrement())
+  referenceId    String   @unique @default(uuid()) @map("reference_id")
+  serviceId      Int      @map("service_id")
+  professionalId Int      @map("professional_id")
+  note           String?  @db.Text
+  images         String[] @default([]) // S3 keys, mismo patrón que Services.images
+  entryOrder     Int      @map("entry_order") // secuencia dentro del service, para ordenar sin depender solo de createdAt
+
+  service      Services      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  professional Professionals @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String?   @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+  isActive      Boolean   @default(true) @map("is_active") // "borrado" = isActive:false dentro de la ventana de corrección
+
+  @@index([serviceId, entryOrder])
+  @@map("service_progress_entries")
+}
+
+enum DocumentCategory {
+  BACKGROUND_CHECK // antecedentes policiales/judiciales
+  QUALIFICATION // títulos, certificados
+  PORTFOLIO // evidencia de trabajos previos
+}
+
+enum DocumentReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+/// Catálogo parametrizable de documentos de habilitación/antecedente del PROFESIONAL en su rol de
+/// tal (título técnico, certificado, antecedentes policiales/judiciales) — no confundir con
+/// `DocumentsType` (documento de IDENTIDAD de la persona: Cédula/DNI/Pasaporte, usado por
+/// `Users.documentTypeId`), concepto de negocio completamente distinto. Ver
+/// openspec/decisions.md, "Fase 0001 — rename DocumentTypes → ProfessionalDocumentTypes".
+/// countryId/professionalCategoryId NULL = aplica globalmente (sin scoping).
+model ProfessionalDocumentTypes {
+  id                     Int              @id @default(autoincrement())
+  referenceId            String           @unique @default(uuid()) @map("reference_id")
+  code                   String           @unique @db.VarChar(60) // ej. "BG_CHECK_CRIMINAL_PY"
+  name                   String           @db.VarChar(150)
+  description            String?          @db.Text
+  category               DocumentCategory
+  countryId              Int?             @map("country_id")
+  professionalCategoryId Int?             @map("professional_category_id")
+  isRequired             Boolean          @default(false) @map("is_required")
+  validityDays           Int?             @map("validity_days") // null = no vence
+  requiresStaffReview    Boolean          @default(true) @map("requires_staff_review")
+  isVisibleToClient      Boolean          @default(false) @map("is_visible_to_client")
+  sortOrder              Int              @default(0) @map("sort_order")
+  isActive               Boolean          @default(true) @map("is_active")
+
+  country              Country?                @relation(fields: [countryId], references: [id])
+  professionalCategory Category?               @relation(fields: [professionalCategoryId], references: [id])
+  documents            ProfessionalDocuments[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String?   @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+
+  @@index([category])
+  @@map("professional_document_types")
+}
+
+model ProfessionalDocuments {
+  id                         Int                  @id @default(autoincrement())
+  referenceId                String               @unique @default(uuid()) @map("reference_id")
+  professionalId             Int                  @map("professional_id")
+  professionalDocumentTypeId Int                  @map("professional_document_type_id")
+  fileKey                    String               @map("file_key") // S3 key, mismo patrón que Users.avatarKey
+  status                     DocumentReviewStatus @default(PENDING)
+  issuedAt                   DateTime?            @map("issued_at")
+  expiresAt                  DateTime?            @map("expires_at")
+  reviewedAt                 DateTime?            @map("reviewed_at")
+  reviewedBy                 String?              @map("reviewed_by") // referenceId del usuario staff
+  rejectionReason            String?              @map("rejection_reason") @db.Text
+  metadata                   Json?                @db.JsonB
+
+  professional             Professionals             @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professionalDocumentType ProfessionalDocumentTypes @relation(fields: [professionalDocumentTypeId], references: [id])
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@index([professionalId, status])
+  @@map("professional_documents")
 }
 
 model ServiceRequests {
@@ -471,8 +593,9 @@ model ServiceRequests {
   checksum        String?   @map("checksum")
   changeSignature String?   @map("change_signature")
 
-  service      Services      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  professional Professionals @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  service       Services        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  professional  Professionals   @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  budgetOptions BudgetOptions[]
 
   @@map("service_requests")
 }
@@ -495,6 +618,7 @@ model Category {
   status               CategoryStatus @default(ACTIVE)
   isVisible            Boolean        @default(true) @map("is_visible")
   requiresVerification Boolean        @default(false) @map("requires_verification")
+  requiresProgressLog  Boolean        @default(false) @map("requires_progress_log")
   metadata             Json?          @db.JsonB
   parentCategoryId     Int?           @map("parent_category_id")
 
@@ -503,8 +627,14 @@ model Category {
   subcategories  Category[] @relation("CategoryToSubcategory")
 
   // Relaciones con dominios externos
-  professionals Professionals[]
-  services      Services[]
+  professionals             Professionals[]
+  services                  Services[]
+  professionalDocumentTypes ProfessionalDocumentTypes[]
+  materialCatalog           MaterialCatalog[]
+
+  // Cuántas opciones de presupuesto puede armar un profesional por propuesta en esta categoría
+  // (ver openspec/specs/multi-option-quotes.md) — configurable, no hardcodeado.
+  maxBudgetOptionsPerRequest Int @default(3) @map("max_budget_options_per_request")
 
   createdAt       DateTime  @default(now()) @map("created_at")
   createdBy       String?   @map("created_by")
@@ -601,14 +731,14 @@ model PaymentMethodEntity {
 }
 
 model PushSubscriptions {
-  id          Int    @id @default(autoincrement())
-  referenceId String @unique @default(uuid()) @map("reference_id")
-  userId      Int    @map("user_id")
+  id          Int     @id @default(autoincrement())
+  referenceId String  @unique @default(uuid()) @map("reference_id")
+  userId      Int     @map("user_id")
   // Forma estándar de PushSubscription.toJSON() del navegador (Web Push / VAPID).
-  endpoint  String  @unique @db.VarChar(500)
-  p256dh    String  @map("p256dh") @db.VarChar(255)
-  auth      String  @db.VarChar(255)
-  userAgent String? @map("user_agent") @db.VarChar(255)
+  endpoint    String  @unique @db.VarChar(500)
+  p256dh      String  @map("p256dh") @db.VarChar(255)
+  auth        String  @db.VarChar(255)
+  userAgent   String? @map("user_agent") @db.VarChar(255)
 
   createdAt     DateTime  @default(now()) @map("created_at")
   createdBy     String    @map("created_by")
@@ -674,9 +804,13 @@ model Country {
   checksum        String?   @map("checksum")
   changeSignature String?   @map("change_signature")
 
-  currencies             Currency[] // Relación con monedas
-  legalDocumentVersions  LegalDocumentVersions[]
-  dataRetentionPolicies  DataRetentionPolicies[]
+  currencies                Currency[] // Relación con monedas
+  legalDocumentVersions     LegalDocumentVersions[]
+  dataRetentionPolicies     DataRetentionPolicies[]
+  professionalDocumentTypes ProfessionalDocumentTypes[]
+  materialCatalog           MaterialCatalog[]
+  tipConfigs                TipConfig[]
+  taxConfigs                TaxConfig[]
 
   @@index([isActive])
   @@map("countries")
@@ -700,6 +834,7 @@ model Currency {
   changeSignature String? @map("change_signature")
 
   payments Payments[] // Relación con pagos
+  tips     Tips[]
   country  Country    @relation(fields: [countryId], references: [id])
 
   @@index([isActive])
@@ -773,6 +908,7 @@ model Payments {
   currency      Currency             @relation(fields: [currencyCode], references: [alphaCode])
   users         Users                @relation(fields: [userId], references: [id])
   professionals Professionals?       @relation(fields: [professionalId], references: [id])
+  tip           Tips?
 
   @@index([professionalId, status])
   @@index([status, createdAt])
@@ -809,6 +945,108 @@ model PaymentTransaction {
   @@index([paymentId, type])
   @@index([status, createdAt])
   @@map("payment_transactions")
+}
+
+// =====================================================================================================================
+// PROPINAS — entidad separada de `Payments`, nunca fusionada al monto del pago ni al cálculo de
+// comisión (`fee-calculator.service.ts`) — es 100% para el profesional. Ver
+// openspec/changes/0010-tips.md.
+// =====================================================================================================================
+
+enum TipMode {
+  PERCENTAGE
+  FIXED
+  FREE
+}
+
+// Configuración parametrizable de propinas — mismo criterio de resolución por país que
+// `LegalDocumentVersions` (`countryId: null` = default global, sin país por Service/User todavía
+// así que hoy solo se resuelve el default global — ver decisions.md). Sin `@@unique([countryId])`
+// a propósito: mismo patrón que `PlatformCommissionConfig` (múltiples filas posibles, se resuelve
+// la más reciente activa en vez de forzar unicidad a nivel de DB).
+model TipConfig {
+  id                   Int     @id @default(autoincrement())
+  countryId            Int?    @map("country_id")
+  isEnabled            Boolean @default(true) @map("is_enabled")
+  isMandatory          Boolean @default(false) @map("is_mandatory")
+  suggestedPercentages Json    @default("[10, 15, 20]") @map("suggested_percentages")
+  allowFreeAmount      Boolean @default(true) @map("allow_free_amount")
+  isActive             Boolean @default(true) @map("is_active")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  country Country? @relation(fields: [countryId], references: [id])
+
+  @@index([countryId, isActive])
+  @@map("tip_config")
+}
+
+// Backlog post-Fase 0004, punto 5 (2026-08-28): "protocolo de IVA por país" — mismo criterio de
+// resolución por país que TipConfig/LegalDocumentVersions (`countryId: null` = default global,
+// sin país resuelto por Service/User todavía). Deliberadamente NO se computa/wirea todavía en
+// `PaymentApiService.createPayment` — las tasas reales deben venir de asesoría fiscal real, no de
+// inferencia de este LLM (ver openspec/decisions.md). Sin CRUD admin en Web todavía, mismo alcance
+// mínimo que PlatformCommissionConfig/TipConfig (carga por DB directa hasta que exista una
+// necesidad real de UI).
+model TaxConfig {
+  id        Int     @id @default(autoincrement())
+  countryId Int?    @map("country_id")
+  name      String  @db.VarChar(100)
+  rate      Decimal @default(0.0000) @db.Decimal(6, 4)
+  isEnabled Boolean @default(false) @map("is_enabled")
+  isActive  Boolean @default(true) @map("is_active")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  country Country? @relation(fields: [countryId], references: [id])
+
+  @@index([countryId, isActive])
+  @@map("tax_config")
+}
+
+// Una propina por pago (`paymentId` único) — `userId`/`professionalId` denormalizados desde el
+// `Payment` para queries directas sin join. `percentage` solo se completa si `mode=PERCENTAGE`;
+// `amount` siempre queda poblado con el monto final (calculado server-side si es porcentaje,
+// provisto por el cliente si es `FIXED`/`FREE` — la distinción entre esos dos modos es de UI/
+// analítica, ambos mandan un monto final directo, ver decisions.md).
+model Tips {
+  id             Int      @id @default(autoincrement())
+  referenceId    String   @unique @default(uuid()) @map("reference_id")
+  paymentId      Int      @unique @map("payment_id")
+  userId         Int      @map("user_id")
+  professionalId Int      @map("professional_id")
+  mode           TipMode
+  percentage     Decimal? @db.Decimal(5, 2)
+  amount         Decimal  @db.Decimal(10, 2)
+  currencyCode   String   @map("currency_code") @db.VarChar(3)
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  payment      Payments      @relation(fields: [paymentId], references: [id])
+  users        Users         @relation(fields: [userId], references: [id])
+  professional Professionals @relation(fields: [professionalId], references: [id])
+  currency     Currency      @relation(fields: [currencyCode], references: [alphaCode])
+
+  @@index([professionalId])
+  @@map("tips")
 }
 
 // =====================================================================================================================
@@ -998,6 +1236,14 @@ enum LegalDocumentType {
   PRIVACY_POLICY
   DATA_PROCESSING_CONSENT
   IMAGE_USAGE_CONSENT
+  SERVICE_CONTRACT_TERMS
+  // Backlog post-Fase 0004, punto 5 (2026-08-28): "deslinde de responsabilidad por contenido de
+  // usuario". Reusa toda la infraestructura genérica ya existente (LegalDocumentVersions +
+  // UserConsents + RequiresActiveConsentGuard) — solo se agrega el tipo, staff carga la versión
+  // real vía el admin de Web cuando legal provea el texto. No se gatea ninguna ruta con esto
+  // todavía (decidir qué acción de contenido de usuario lo exige es un producto/legal call, no
+  // técnico — ver openspec/decisions.md).
+  USER_CONTENT_LIABILITY_DISCLAIMER
 }
 
 enum ContentUsageScope {
@@ -1026,12 +1272,13 @@ model LegalDocumentVersions {
   documentType LegalDocumentType @map("document_type")
   countryId    Int?              @map("country_id") // null = versión internacional/paraguas
   version      String            @db.VarChar(20)
-  contentUrl   String            @db.VarChar(500) @map("content_url")
+  contentUrl   String            @map("content_url") @db.VarChar(500)
   publishedAt  DateTime          @map("published_at")
   isActive     Boolean           @default(true) @map("is_active")
 
-  country  Country?       @relation(fields: [countryId], references: [id])
-  consents UserConsents[]
+  country   Country?       @relation(fields: [countryId], references: [id])
+  consents  UserConsents[]
+  contracts Contracts[]
 
   createdAt     DateTime  @default(now()) @map("created_at")
   createdBy     String?   @map("created_by")
@@ -1039,8 +1286,8 @@ model LegalDocumentVersions {
   lastChangedBy String?   @map("last_changed_by")
   changedReason String?   @map("changed_reason")
 
-  @@map("legal_document_versions")
   @@index([documentType, countryId, isActive])
+  @@map("legal_document_versions")
 }
 
 model UserConsents {
@@ -1049,9 +1296,9 @@ model UserConsents {
   userId                 Int      @map("user_id")
   legalDocumentVersionId Int      @map("legal_document_version_id")
   acceptedAt             DateTime @default(now()) @map("accepted_at")
-  ipAddress              String?  @db.VarChar(45) @map("ip_address")
-  userAgent              String?  @db.VarChar(255) @map("user_agent")
-  acceptanceHash         String   @db.VarChar(128) @map("acceptance_hash")
+  ipAddress              String?  @map("ip_address") @db.VarChar(45)
+  userAgent              String?  @map("user_agent") @db.VarChar(255)
+  acceptanceHash         String   @map("acceptance_hash") @db.VarChar(128)
 
   user                 Users                 @relation(fields: [userId], references: [id])
   legalDocumentVersion LegalDocumentVersions @relation(fields: [legalDocumentVersionId], references: [id])
@@ -1109,7 +1356,7 @@ model AiContentDisclosures {
   entityType        AiDisclosureEntityType @map("entity_type")
   entityReferenceId String                 @map("entity_reference_id")
   source            AiDisclosureSource
-  aiProvider        String?                @db.VarChar(60) @map("ai_provider")
+  aiProvider        String?                @map("ai_provider") @db.VarChar(60)
   declaredByUserId  Int?                   @map("declared_by_user_id")
   note              String?                @db.Text
 
@@ -1120,4 +1367,165 @@ model AiContentDisclosures {
 
   @@unique([entityType, entityReferenceId])
   @@map("ai_content_disclosures")
+}
+
+enum MaterialQualityTier {
+  BASIC
+  STANDARD
+  PREMIUM
+}
+
+enum BudgetLineItemType {
+  MATERIAL
+  LABOR
+  OTHER
+}
+
+/// Catálogo parametrizable de materiales/calidades por categoría de servicio y país — precio
+/// SUGERIDO para el profesional al armar un presupuesto, no un precio regulado/fijo (ver
+/// openspec/specs/multi-option-quotes.md).
+model MaterialCatalog {
+  id           Int                 @id @default(autoincrement())
+  referenceId  String              @unique @default(uuid()) @map("reference_id")
+  categoryId   Int                 @map("category_id")
+  countryId    Int?                @map("country_id") // null = aplica a todos los países
+  name         String              @db.VarChar(150)
+  unit         String              @db.VarChar(30)
+  qualityTier  MaterialQualityTier @map("quality_tier")
+  defaultPrice Decimal             @map("default_price") @db.Decimal(10, 2)
+  isActive     Boolean             @default(true) @map("is_active")
+
+  category  Category          @relation(fields: [categoryId], references: [id])
+  country   Country?          @relation(fields: [countryId], references: [id])
+  lineItems BudgetLineItems[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  createdBy     String?   @map("created_by")
+  lastChangedAt DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy String?   @map("last_changed_by")
+  changedReason String?   @map("changed_reason")
+
+  @@index([categoryId, countryId, isActive])
+  @@map("material_catalog")
+}
+
+/// Una opción de presupuesto alternativa sobre una ServiceRequests (propuesta de un profesional) —
+/// ver openspec/specs/multi-option-quotes.md. `totalPrice`/`estimatedHours` SIEMPRE se recalculan
+/// server-side a partir de los line items, nunca se confía en lo que manda el cliente.
+model BudgetOptions {
+  id               Int      @id @default(autoincrement())
+  referenceId      String   @unique @default(uuid()) @map("reference_id")
+  serviceRequestId Int      @map("service_request_id")
+  label            String   @db.VarChar(100)
+  description      String?  @db.Text
+  totalPrice       Decimal  @map("total_price") @db.Decimal(10, 2)
+  estimatedHours   Decimal? @map("estimated_hours") @db.Decimal(10, 2)
+  isSelected       Boolean  @default(false) @map("is_selected")
+
+  serviceRequest ServiceRequests   @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  lineItems      BudgetLineItems[]
+  contract       Contracts?
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  // Montos financieros reales (presupuesto de un profesional) — mismo criterio que
+  // ServiceRequests/Payments, califica para `fn_attach_audit_triggers()`. A diferencia de
+  // MaterialCatalog (catálogo de configuración, sin estos campos a propósito).
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@index([serviceRequestId])
+  @@map("budget_options")
+}
+
+/// Ítem de línea de una BudgetOptions — de catálogo (`catalogItemId`) o libre (`catalogItemId:
+/// null`). `subtotal` se recalcula server-side (`quantity * unitPrice`), nunca se confía en el
+/// valor que manda el cliente.
+model BudgetLineItems {
+  id             Int                @id @default(autoincrement())
+  referenceId    String             @unique @default(uuid()) @map("reference_id")
+  budgetOptionId Int                @map("budget_option_id")
+  itemType       BudgetLineItemType @map("item_type")
+  catalogItemId  Int?               @map("catalog_item_id")
+  description    String             @db.VarChar(255)
+  quantity       Decimal            @db.Decimal(10, 2)
+  unitPrice      Decimal            @map("unit_price") @db.Decimal(10, 2)
+  subtotal       Decimal            @db.Decimal(10, 2)
+
+  budgetOption BudgetOptions    @relation(fields: [budgetOptionId], references: [id], onDelete: Cascade)
+  catalogItem  MaterialCatalog? @relation(fields: [catalogItemId], references: [id])
+
+  @@index([budgetOptionId])
+  @@map("budget_line_items")
+}
+
+enum ContractStatus {
+  DRAFT
+  PENDING_CLIENT_SIGNATURE
+  PENDING_PROFESSIONAL_SIGNATURE
+  SIGNED
+  CANCELLED
+}
+
+/// Contrato cliente↔profesional generado a partir de una `BudgetOptions` seleccionada — ver
+/// openspec/specs/service-contracts.md. El mecanismo de firma es un "clickwrap" reforzado (nombre
+/// tipeado + checkbox + hash del contenido + timestamp), NO una firma digital calificada
+/// (eIDAS/FIDO/PKI) — ver "Riesgos / límites explícitos" del spec.
+model Contracts {
+  id             Int            @id @default(autoincrement())
+  referenceId    String         @unique @default(uuid()) @map("reference_id")
+  serviceId      Int            @map("service_id")
+  budgetOptionId Int            @unique @map("budget_option_id")
+  clientUserId   Int            @map("client_user_id")
+  professionalId Int            @map("professional_id")
+  status         ContractStatus @default(DRAFT)
+
+  /// Snapshot inmutable al momento de generar el contrato — nunca se relee BudgetOptions en vivo
+  /// después de creado (ver "Riesgos" del spec: cambios posteriores a BudgetOptions/Category no
+  /// afectan un contrato ya generado, es el comportamiento esperado).
+  contentSnapshot Json @map("content_snapshot") @db.JsonB
+
+  /// Hoy siempre resuelve a la versión `countryId: null` (paraguas) del tipo
+  /// `SERVICE_CONTRACT_TERMS` — mismo límite ya documentado en
+  /// `LegalConsentsDbService.findPendingVersionsForUser` (el negocio es Paraguay-only, no hay
+  /// país por Service/User todavía). Nullable: no bloquea la generación si no existe ninguna
+  /// versión publicada todavía.
+  legalTermsVersionId Int? @map("legal_terms_version_id")
+
+  clientSignedAt            DateTime? @map("client_signed_at")
+  clientSignatureName       String?   @map("client_signature_name")
+  clientSignatureHash       String?   @map("client_signature_hash")
+  professionalSignedAt      DateTime? @map("professional_signed_at")
+  professionalSignatureName String?   @map("professional_signature_name")
+  professionalSignatureHash String?   @map("professional_signature_hash")
+
+  /// Key de S3 del PDF — se genera recién cuando `status` pasa a `SIGNED` (ver
+  /// `ContractsService.signContract`), nunca antes.
+  pdfKey String? @map("pdf_key")
+
+  service           Services               @relation(fields: [serviceId], references: [id])
+  budgetOption      BudgetOptions          @relation(fields: [budgetOptionId], references: [id])
+  client            Users                  @relation(fields: [clientUserId], references: [id])
+  professional      Professionals          @relation(fields: [professionalId], references: [id])
+  legalTermsVersion LegalDocumentVersions? @relation(fields: [legalTermsVersionId], references: [id])
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  // Registro legal/financiero (contenido de un presupuesto aceptado + evidencia de firma) —
+  // mismo criterio que BudgetOptions, califica para `fn_attach_audit_triggers()`.
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@index([serviceId])
+  @@index([clientUserId])
+  @@index([professionalId])
+  @@map("contracts")
 }

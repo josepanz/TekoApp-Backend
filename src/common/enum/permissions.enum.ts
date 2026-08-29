@@ -50,6 +50,27 @@ export const PERMISSIONS = {
   AI_DISCLOSURE: {
     AUDIT_VIEW: 'ai-disclosure.audit:read',
   },
+  SERVICE_PROGRESS: {
+    AUDIT_VIEW: 'service-progress.audit:read',
+  },
+  PROFESSIONAL_DOCUMENT_TYPES: {
+    MANAGE: 'professional-document-types.catalog:manage',
+  },
+  PROFESSIONAL_DOCUMENTS: {
+    REVIEW: 'professional-documents.review:manage',
+  },
+  MATERIAL_CATALOG: {
+    MANAGE: 'material-catalog.catalog:manage',
+  },
+  CONTRACTS: {
+    AUDIT_VIEW: 'contracts.audit:read',
+  },
+  RATINGS: {
+    AUDIT_VIEW: 'ratings.audit:read',
+  },
+  PAYMENTS: {
+    AUDIT_VIEW: 'payments.audit:read',
+  },
 } as const;
 
 // Tipo utilitario para usar en guards o decoradores
