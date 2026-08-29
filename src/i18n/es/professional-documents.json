@@ -1,0 +1,10 @@
+{
+  "NO_FILE_UPLOADED": "No se recibió ningún archivo",
+  "DOCUMENT_TYPE_NOT_APPLICABLE": "Este tipo de documento no aplica a tu categoría profesional",
+  "NOT_FOUND": "Documento no encontrado",
+  "ALREADY_REVIEWED": "Este documento ya fue revisado por otro miembro del staff",
+  "FILE_TOO_LARGE": "El archivo supera el tamaño máximo de {maxSizeMb}MB",
+  "FILE_TYPE_NOT_ALLOWED": "Tipo de archivo no permitido",
+  "EXPIRED_NOTIFICATION_TITLE": "Un documento venció",
+  "EXPIRED_NOTIFICATION_MESSAGE": "Uno de tus documentos cargados venció — subí uno nuevo para mantener tu verificación al día"
+}
