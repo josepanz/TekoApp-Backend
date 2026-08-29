@@ -2,8 +2,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RequestStatus } from '@prisma/client';
 
 export class ServiceRequestDetailResponseDTO {
+  @ApiProperty({
+    example: 42,
+    description:
+      'ID interno secuencial — solo para ordenamiento, nunca para consultar/rutear',
+  })
+  id!: number;
+
   @ApiProperty({ example: 'b72c6323-ec6f-5fg6-a725-837725285111' })
-  id!: string;
+  referenceId!: string;
 
   @ApiProperty({ example: 'a63b5212-db5e-4ef5-9614-726614174000' })
   serviceId!: string;

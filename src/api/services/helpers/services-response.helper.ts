@@ -1,20 +1,20 @@
-import { exposeReferenceAsId } from '@common/helpers/reference-id.helper';
 import {
   ServiceDetailResponseDTO,
   ServiceRequestDetailResponseDTO,
 } from '../dtos/response';
 
 /**
- * Mapea un servicio crudo de Prisma a su DTO de respuesta: expone el `referenceId` (UUID) bajo la
- * clave `id` y no filtra la PK interna (Int). Las relaciones anidadas (users/professional/category)
- * conservan su forma actual (esos modelos ya exponen id numérico + referenceId).
+ * Mapea un servicio crudo de Prisma a su DTO de respuesta: `id` (Int) y `referenceId` (UUID) se
+ * exponen ambos tal cual — `id` es solo para ordenamiento, `referenceId` es la clave pública real.
+ * Las relaciones anidadas (users/professional/category) conservan su forma actual (esos modelos
+ * ya exponen id numérico + referenceId).
  */
 export function mapServiceToResponse(service: {
   id: number;
   referenceId: string;
   [key: string]: unknown;
 }): ServiceDetailResponseDTO {
-  return exposeReferenceAsId(service) as unknown as ServiceDetailResponseDTO;
+  return service as unknown as ServiceDetailResponseDTO;
 }
 
 export function mapServicesToResponse(
@@ -28,8 +28,9 @@ export function mapServicesToResponse(
 }
 
 /**
- * Mapea una solicitud de servicio cruda a su DTO. `id` pasa a ser el referenceId de la solicitud y
- * `serviceId` pasa a ser el referenceId (UUID) del servicio padre — nunca la PK interna.
+ * Mapea una solicitud de servicio cruda a su DTO. `id`/`referenceId` de la solicitud se exponen
+ * ambos tal cual. `serviceId` sigue siendo el referenceId (UUID) del servicio padre — nunca la PK
+ * interna — esto es independiente del id/referenceId de la propia solicitud.
  */
 export function mapServiceRequestToResponse(request: {
   id: number;
@@ -39,9 +40,7 @@ export function mapServiceRequestToResponse(request: {
   [key: string]: unknown;
 }): ServiceRequestDetailResponseDTO {
   const rest: Record<string, unknown> = { ...request };
-  delete rest.referenceId;
   delete rest.service;
-  rest.id = request.referenceId;
   rest.serviceId = request.service?.referenceId ?? '';
   return rest as unknown as ServiceRequestDetailResponseDTO;
 }

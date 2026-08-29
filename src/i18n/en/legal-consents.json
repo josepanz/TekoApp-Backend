@@ -1,0 +1,9 @@
+{
+  "CONSENT_REQUIRED": "You need to accept the current legal document before continuing",
+  "LEGAL_HOLD_ACTIVE": "This content has a mandatory legal hold and cannot be revoked",
+  "DOCUMENT_VERSION_NOT_FOUND": "Legal document version not found",
+  "DOCUMENT_VERSION_ALREADY_ACCEPTED": "You already accepted this document version",
+  "RETENTION_POLICY_NOT_FOUND": "Retention policy not found",
+  "CONTENT_CONSENT_NOT_FOUND": "No active usage consent found for this content",
+  "NOT_CONTENT_OWNER": "You cannot modify the consent of content that isn't yours"
+}

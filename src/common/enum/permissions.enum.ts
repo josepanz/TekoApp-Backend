@@ -41,6 +41,36 @@ export const PERMISSIONS = {
     UNASSIGN_USER: 'user.permission.unassignment:delete',
     UNASSIGN_ROLE: 'role.permission.unassignment:delete',
   },
+  // Permisos específicos (no genéricos) para permitir delegar a un futuro rol
+  // "compliance" separado del admin general — ver openspec/decisions.md, Fase 0006.
+  LEGAL: {
+    CONFIG_MANAGE: 'legal.config:manage',
+    CONSENT_AUDIT_VIEW: 'legal.consent-audit:read',
+  },
+  AI_DISCLOSURE: {
+    AUDIT_VIEW: 'ai-disclosure.audit:read',
+  },
+  SERVICE_PROGRESS: {
+    AUDIT_VIEW: 'service-progress.audit:read',
+  },
+  PROFESSIONAL_DOCUMENT_TYPES: {
+    MANAGE: 'professional-document-types.catalog:manage',
+  },
+  PROFESSIONAL_DOCUMENTS: {
+    REVIEW: 'professional-documents.review:manage',
+  },
+  MATERIAL_CATALOG: {
+    MANAGE: 'material-catalog.catalog:manage',
+  },
+  CONTRACTS: {
+    AUDIT_VIEW: 'contracts.audit:read',
+  },
+  RATINGS: {
+    AUDIT_VIEW: 'ratings.audit:read',
+  },
+  PAYMENTS: {
+    AUDIT_VIEW: 'payments.audit:read',
+  },
 } as const;
 
 // Tipo utilitario para usar en guards o decoradores

@@ -19,6 +19,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     let message = t('common.INTERNAL_SERVER_ERROR');
     let error = 'Internal Server Error';
+    // `errorCode` es un identificador MÁQUINA-legible opcional (ej. `CONSENT_REQUIRED`,
+    // `LEGAL_HOLD_ACTIVE`) — a diferencia de `message` (texto humano, cambia con el idioma) y
+    // `error` (nombre genérico de la excepción HTTP, ej. "Forbidden"), este campo es estable y
+    // pensado para que un cliente (Mobile/Web) rame en un `switch` sin parsear el mensaje.
+    // Opcional: la mayoría de las excepciones no lo setean y el campo se omite del JSON.
+    let errorCode: string | undefined;
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
       const resp = exceptionResponse as Record<string, unknown>;
@@ -36,6 +42,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const raw = resp['error'];
         error = typeof raw === 'string' ? raw : error;
       }
+      if ('errorCode' in resp) {
+        const raw = resp['errorCode'];
+        errorCode = typeof raw === 'string' ? raw : undefined;
+      }
     }
 
     const errorResponse = {
@@ -44,6 +54,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         code: status,
         message,
         error,
+        ...(errorCode ? { errorCode } : {}),
         timestamp: new Date().toISOString(),
         path: request.url,
       },

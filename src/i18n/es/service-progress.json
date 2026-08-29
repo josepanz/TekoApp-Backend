@@ -1,0 +1,11 @@
+{
+  "SERVICE_NOT_FOUND": "Servicio no encontrado",
+  "ONLY_ASSIGNED_PROFESSIONAL_CAN_ADD": "Solo el profesional asignado puede agregar una entrada de bitácora",
+  "SERVICE_NOT_IN_PROGRESS": "Solo se pueden agregar entradas mientras el servicio está aceptado o en curso",
+  "NOTE_OR_IMAGE_REQUIRED": "La entrada debe tener al menos una nota o una foto",
+  "TOO_MANY_IMAGES": "Superaste el máximo de fotos por entrada",
+  "ENTRY_NOT_FOUND": "No se encontró la entrada de bitácora",
+  "NOT_ENTRY_AUTHOR": "Solo quien creó la entrada puede eliminarla",
+  "EDIT_WINDOW_EXPIRED": "Ya venció la ventana para corregir esta entrada",
+  "NOT_AUTHORIZED_TO_VIEW": "No tenés permiso para ver la bitácora de este servicio"
+}

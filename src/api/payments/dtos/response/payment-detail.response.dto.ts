@@ -1,9 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentStatus, PaymentMethod, PaymentProvider } from '@prisma/client';
+import { TipResponseDTO } from '@api/tips/dtos/response';
 
 export class PaymentDetailResponseDTO {
+  @ApiProperty({
+    example: 42,
+    description:
+      'ID interno secuencial — solo para ordenamiento, nunca para consultar/rutear',
+  })
+  id!: number;
+
   @ApiProperty({ example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479' })
-  id!: string;
+  referenceId!: string;
 
   @ApiProperty({ example: 1 })
   userId!: number;
@@ -19,6 +27,15 @@ export class PaymentDetailResponseDTO {
 
   @ApiProperty({ example: 150000 })
   amount!: number;
+
+  @ApiPropertyOptional({
+    type: TipResponseDTO,
+    nullable: true,
+    description:
+      'Propina dejada para este pago, si existe — nunca fusionada a `totalAmount` ni a la ' +
+      'comisión de la plataforma. Ver `GET/POST /payments/:id/tip`.',
+  })
+  tip?: TipResponseDTO | null;
 
   @ApiProperty({ example: 'PYG' })
   currencyCode!: string;

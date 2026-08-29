@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 import { Prisma, ServiceStatus, RequestStatus } from '@prisma/client';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
+import { ServiceProgressDbService } from '@modules/service-progress-db/services/service-progress-db.service';
+import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
 import { CreateServiceRequestDTO } from '../dtos/request/create-service.request.dto';
 import { UpdateServiceRequestDTO } from '../dtos/request/update-service.request.dto';
 import { CreateServiceRequestRequestDTO } from '../dtos/request/create-service-request.request.dto';
@@ -38,7 +40,11 @@ type ServiceEntity = NonNullable<
 
 @Injectable()
 export class ServicesService {
-  constructor(private readonly db: ServicesDbService) {}
+  constructor(
+    private readonly db: ServicesDbService,
+    private readonly serviceProgressDb: ServiceProgressDbService,
+    private readonly budgetsDb: BudgetsDbService,
+  ) {}
 
   /**
    * Resuelve el UUID público (referenceId, recibido en la URL) a la entidad completa con su PK
@@ -287,6 +293,15 @@ export class ServicesService {
       );
     }
 
+    if (service.category.requiresProgressLog) {
+      const activeEntries = await this.serviceProgressDb.countActiveByServiceId(
+        service.id,
+      );
+      if (activeEntries === 0) {
+        throw new BadRequestException(t('services.PROGRESS_LOG_REQUIRED'));
+      }
+    }
+
     const completedAt = new Date();
     const data: Prisma.ServicesUncheckedUpdateInput = {
       status: ServiceStatus.COMPLETED,
@@ -299,6 +314,17 @@ export class ServicesService {
       const finalAmount = actualHours * Number(service.hourlyRate);
       data.actualHours = actualHours;
       data.finalAmount = finalAmount;
+    } else {
+      // Servicio aceptado vía una opción de presupuesto multi-opción (en vez de tarifa por hora)
+      // — finalAmount se alimenta de esa BudgetOptions.totalPrice al completar, mismo momento y
+      // mismo campo que la rama de arriba (decisión documentada en openspec/decisions.md, Fase
+      // 0003: finalAmount sigue siendo la única fuente de verdad del monto final).
+      const selectedOption = await this.budgetsDb.findSelectedOptionForService(
+        service.id,
+      );
+      if (selectedOption) {
+        data.finalAmount = Number(selectedOption.totalPrice);
+      }
     }
 
     const updatedCount = await this.db.updateServiceConditional(

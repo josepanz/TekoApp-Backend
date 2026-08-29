@@ -50,8 +50,15 @@ export class ServiceCategorySummaryResponseDTO {
 }
 
 export class ServiceDetailResponseDTO {
+  @ApiProperty({
+    example: 42,
+    description:
+      'ID interno secuencial — solo para ordenamiento, nunca para consultar/rutear',
+  })
+  id!: number;
+
   @ApiProperty({ example: 'a63b5212-db5e-4ef5-9614-726614174000' })
-  id!: string;
+  referenceId!: string;
 
   @ApiProperty({ example: 1 })
   userId!: number;

@@ -75,4 +75,8 @@ export const configSchema = Joi.object({
   TWILIO_ACCOUNT_SID: Joi.string().required(),
   TWILIO_AUTH_TOKEN: Joi.string().required(),
   TWILIO_PHONE_NUMBER: Joi.string().required(),
+
+  PROGRESS_LOG_MAX_IMAGES_PER_ENTRY: Joi.number().integer().min(1).default(6),
+  PROGRESS_LOG_EDIT_WINDOW_MINUTES: Joi.number().integer().min(1).default(15),
+  PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE: Joi.boolean().default(true),
 });
