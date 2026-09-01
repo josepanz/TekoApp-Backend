@@ -59,6 +59,9 @@ export const PERMISSIONS = {
   PROFESSIONAL_DOCUMENTS: {
     REVIEW: 'professional-documents.review:manage',
   },
+  PROFESSIONALS: {
+    VERIFY: 'professionals.verification:manage',
+  },
   MATERIAL_CATALOG: {
     MANAGE: 'material-catalog.catalog:manage',
   },
