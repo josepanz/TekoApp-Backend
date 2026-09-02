@@ -1,0 +1,8 @@
+{
+  "NO_FILE_UPLOADED": "No se recibió ninguna foto",
+  "NOT_FOUND": "Foto de portafolio no encontrada",
+  "NOT_OWNER": "No podés modificar una foto de portafolio que no es tuya",
+  "ALREADY_REVIEWED": "Esta foto ya fue revisada por otro miembro del staff",
+  "FILE_TOO_LARGE": "El archivo supera el tamaño máximo de {maxSizeMb}MB",
+  "FILE_TYPE_NOT_ALLOWED": "Solo se permiten imágenes (JPG, PNG, WEBP)"
+}

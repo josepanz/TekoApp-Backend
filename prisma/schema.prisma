@@ -407,6 +407,7 @@ model Professionals {
   professionalDocuments ProfessionalDocuments[]
   contracts             Contracts[]
   tips                  Tips[]
+  portfolioItems        ProfessionalPortfolioItems[]
 
   @@index([status])
   @@index([isAvailable])
@@ -572,6 +573,47 @@ model ProfessionalDocuments {
 
   @@index([professionalId, status])
   @@map("professional_documents")
+}
+
+enum PortfolioReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Galería de fotos de trabajos previos del profesional (evidencia de calidad/experiencia,
+/// visible en su perfil público) — NO confundir con `ProfessionalDocuments` (documentos de
+/// compliance: antecedentes, títulos). Reemplaza la idea original de `DocumentCategory.PORTFOLIO`
+/// (un documento único más, reusando el catálogo de compliance) — José confirmó 2026-09-02 que
+/// esto sí necesita revisión de staff antes de publicarse, igual que los documentos de compliance,
+/// pero es un modelo aparte porque no hay catálogo de "tipos" ni scoping por país/categoría: un
+/// profesional puede subir tantas fotos como quiera, cada una con su propia aprobación individual.
+model ProfessionalPortfolioItems {
+  id              Int                   @id @default(autoincrement())
+  referenceId     String                @unique @default(uuid()) @map("reference_id")
+  professionalId  Int                   @map("professional_id")
+  fileKey         String                @map("file_key") // S3 key, mismo patrón que ProfessionalDocuments.fileKey
+  caption         String?               @db.Text
+  sortOrder       Int                   @default(0) @map("sort_order")
+  isVisible       Boolean               @default(true) @map("is_visible") // ocultado reactivo por el propio profesional, independiente de `status`
+  status          PortfolioReviewStatus @default(PENDING)
+  reviewedAt      DateTime?             @map("reviewed_at")
+  reviewedBy      String?               @map("reviewed_by") // referenceId del usuario staff
+  rejectionReason String?               @map("rejection_reason") @db.Text
+
+  professional Professionals @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  isActive        Boolean   @default(true) @map("is_active")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  @@index([professionalId, status])
+  @@map("professional_portfolio_items")
 }
 
 model ServiceRequests {
