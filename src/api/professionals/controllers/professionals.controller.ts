@@ -16,6 +16,9 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
+import { Permissions } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { ProfessionalsService } from '../services/professionals.service';
 import {
@@ -44,7 +47,7 @@ import {
 
 @ApiTags('Professionals')
 @Controller('professionals')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth()
 export class ProfessionalsController {
   constructor(private readonly professionalsService: ProfessionalsService) {}
@@ -223,6 +226,7 @@ export class ProfessionalsController {
   }
 
   @Post(':id/verify')
+  @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
   @ApiOperation({ summary: 'Verificar identidad del profesional (solo admin)' })
   @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async verifyProfessional(
@@ -238,6 +242,7 @@ export class ProfessionalsController {
   }
 
   @Post(':id/suspend')
+  @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
   @ApiOperation({ summary: 'Suspender profesional (solo admin)' })
   @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async suspendProfessional(

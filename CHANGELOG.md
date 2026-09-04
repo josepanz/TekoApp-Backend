@@ -1,3 +1,7 @@
+## 1.0.0-develop.15 (2026-09-04)
+
+* fix(professionals): agregar guard de permisos real a verify/suspend (#41) ([d6c0548](https://github.com/josepanz/TekoApp-Backend/commit/d6c0548)), closes [#41](https://github.com/josepanz/TekoApp-Backend/issues/41)
+
 ## 1.0.0-develop.14 (2026-08-29)
 
 * Consentimiento legal, disclosure de IA y spec de registro de usuarios (#36) ([8bc2418](https://github.com/josepanz/TekoApp-Backend/commit/8bc2418)), closes [#36](https://github.com/josepanz/TekoApp-Backend/issues/36)

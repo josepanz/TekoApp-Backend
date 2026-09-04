@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
+import { PERMISSIONS_KEY } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { ProfessionalsController } from './professionals.controller';
 import { ProfessionalsService } from '../services/professionals.service';
@@ -74,6 +78,8 @@ describe('ProfessionalsController', () => {
       ],
     })
       .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+      .overrideGuard(PermissionsGuard)
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .compile();
 
@@ -418,6 +424,21 @@ describe('ProfessionalsController', () => {
   });
 
   describe('verifyProfessional', () => {
+    it('debe requerir el permiso de verificación de profesionales o admin:all', () => {
+      // Arrange & Act
+      const requiredPermissions = new Reflector().get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata, nunca se invoca desatado de la instancia
+        controller.verifyProfessional,
+      );
+
+      // Assert
+      expect(requiredPermissions).toEqual([
+        PERMISSIONS.PROFESSIONALS.VERIFY,
+        PERMISSIONS.ADMIN.ALL,
+      ]);
+    });
+
     it('debe verificar el profesional con el DTO de verificación y el userId del token', async () => {
       // Arrange
       const dto = {
@@ -440,6 +461,21 @@ describe('ProfessionalsController', () => {
   });
 
   describe('suspendProfessional', () => {
+    it('debe requerir el permiso de verificación de profesionales o admin:all', () => {
+      // Arrange & Act
+      const requiredPermissions = new Reflector().get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata, nunca se invoca desatado de la instancia
+        controller.suspendProfessional,
+      );
+
+      // Assert
+      expect(requiredPermissions).toEqual([
+        PERMISSIONS.PROFESSIONALS.VERIFY,
+        PERMISSIONS.ADMIN.ALL,
+      ]);
+    });
+
     it('debe suspender el profesional extrayendo la razón del DTO', async () => {
       // Arrange
       const dto = {
