@@ -2,45 +2,37 @@
 
 Web: `TekoApp-Frontend-Web/openspec/specs/professional-onboarding-and-portfolio.md`.
 Mobile: `TekoApp-Frontend-Mobile/openspec/specs/professional-onboarding-and-portfolio.md`.
-Reportado por José 2026-09-01: un cliente recién registrado no tiene ninguna forma visible de
-convertirse en profesional en Web (Mobile sí, ver más abajo), ni existe un portafolio real de
-fotos de trabajos previos (solo una categoría de documento genérica reusando el flujo de
-compliance).
+Reportado por José 2026-09-01: un cliente recién registrado no tenía ninguna forma visible de
+convertirse en profesional en Web (Mobile sí), ni existía un portafolio real de fotos de trabajos
+previos (solo una categoría de documento genérica reusando el flujo de compliance).
 
 ## Estado real relevado (2026-09-01, antes de escribir esta spec)
 
 - `POST /professionals` YA existe y es self-service
   (`src/api/professionals/controllers/professionals.controller.ts`) — solo `JwtAuthGuard`, sin
   gate de rol. Cualquier usuario logueado puede convertirse en profesional `PENDING` hoy. Mobile
-  ya lo consume (`/profesional/onboarding`); Web no tiene ninguna UI que lo llame.
-- `POST /professionals/me/documents` (compliance: antecedentes, títulos, portafolio) ya existe y
-  funciona, pero requiere que el `Professionals` ya exista (`professionalsDb.findByUserId(userId)`
-  lanza si no hay). Mobile lo consume (`lib/features/professional_documents/`); Web solo tiene la
-  cola de revisión de staff (`src/features/professional-documents/`), cero UI de subida para el
-  propio profesional.
-- `DocumentCategory.PORTFOLIO` ya existe en `ProfessionalDocumentTypes`, pero reusa el mismo
-  modelo de documento único con revisión de staff que antecedentes/certificaciones — no hay una
-  galería real de "trabajos previos" (múltiples fotos, sin revisión obligatoria, pensada para
-  mostrar calidad, no para cumplimiento).
+  ya lo consume (`/profesional/onboarding`); Web no tenía ninguna UI que lo llamara (resuelto en
+  la Fase 1 de Web).
+- `POST /professionals/me/documents` (compliance: antecedentes, títulos, portafolio-viejo) ya
+  existe y funciona, pero requiere que el `Professionals` ya exista. Mobile lo consume; Web no
+  tenía UI de subida para el propio profesional (resuelto en la Fase 2 de Web).
 - **Bug de seguridad encontrado durante el relevamiento** (no reportado por José, hallazgo propio
-  de esta sesión): `POST /professionals/:id/verify` y `POST /professionals/:id/suspend`
-  solo dicen "solo admin" en el summary de Swagger — no tienen `PermissionsGuard`/`@Roles` real.
-  Cualquier usuario autenticado puede aprobar o suspender a CUALQUIER profesional hoy. Corregir en
-  la Fase 0 de este plan, aislado del resto.
-- No existe `PROFESSIONAL`/`CLIENT` como rol formal en `Roles`/`UserRoles` — el "modo" de un
-  usuario se deriva solo de si tiene un `Professionals` vinculado por `userId`. Esta spec no
-  cambia eso.
+  de esta sesión, ya corregido en la Fase 0): `POST /professionals/:id/verify` y
+  `POST /professionals/:id/suspend` solo decían "solo admin" en el summary de Swagger — no tenían
+  `PermissionsGuard`/`@Roles` real. Cualquier usuario autenticado podía aprobar o suspender a
+  cualquier profesional.
 
 ## Objetivo
 
-1. Cerrar el gap de seguridad de `verify`/`suspend` (Fase 0, urgente, aislado).
-2. Dar a Web la misma capacidad de auto-postulación que Mobile ya tiene (Fase 1-2, sin cambios de
-   backend — documentado acá solo para dejar constancia).
-3. Agregar un llamado a la acción ("¿Querés trabajar con nosotros?") en el home de Web y Mobile
+1. ✅ Cerrar el gap de seguridad de `verify`/`suspend` (Fase 0).
+2. ✅ Dar a Web la misma capacidad de auto-postulación que Mobile ya tenía (Fases 1-2 de Web, sin
+   cambios de backend).
+3. ✅ Agregar un llamado a la acción ("¿Querés trabajar con nosotros?") en el home de Web y Mobile
    (Fase 3, sin cambios de backend).
-4. Reemplazar la categoría `PORTFOLIO` (documento único, flujo de compliance) por un modelo de
-   galería real: múltiples fotos, caption opcional, sin revisión obligatoria de staff (Fase 4,
-   backend nuevo — desbloquea la Fase 5 de Web/Mobile).
+4. ✅ Reemplazar la categoría `PORTFOLIO` (documento único, flujo de compliance) por un modelo de
+   galería real: múltiples fotos, caption opcional, **con revisión de staff antes de publicarse**
+   (Fase 4 — decisión de producto confirmada por José 2026-09-02: "revisión del staff", no
+   publicación inmediata como se había asumido inicialmente al escribir esta spec).
 
 ## Fuera de alcance
 
@@ -50,84 +42,93 @@ compliance).
   `Professionals` vinculado.
 - Verificación automática de documentos/antecedentes contra un organismo oficial.
 
-## Fase 0 — Fix de seguridad: guard real en verify/suspend
+## Fase 0 — Fix de seguridad: guard real en verify/suspend ✅ CERRADA
 
-**Sin dependencias. Aislado — se puede mergear el mismo día, independientemente del resto.**
+Ver PR #41. Permiso nuevo `PERMISSIONS.PROFESSIONALS.VERIFY` (OR `admin:all`) vía `PermissionsGuard`
+en `POST /professionals/:id/verify` y `:id/suspend`. Tests nuevos (`permissions.guard.spec.ts` +
+metadata en `professionals.controller.spec.ts`). 110 suites/1264 tests en verde.
 
-- [ ] Agregar `PermissionsGuard` + permiso (confirmar el nombre exacto contra
-      `src/common/enum/permissions.enum.ts` — reusar uno existente de profesionales si aplica, o
-      agregar uno nuevo tipo `PROFESSIONALS_VERIFY`) a `POST /professionals/:id/verify` y
-      `POST /professionals/:id/suspend`.
-- [ ] Test: un usuario sin el permiso recibe 403 al intentar verificar/suspender.
-- [ ] Test de regresión: un admin real sigue pudiendo — no romper el flujo de aprobación manual ya
-      usado en `openspec/changes/0001-professional-documents-and-background-checks.md`.
+## Fase 1-3 — Ningún cambio de backend
 
-## Fase 1 — Postulación de profesional: ningún cambio de backend
+Ver specs de Web y Mobile — reusan `POST /professionals` y `POST /professionals/me/documents`, ya
+existentes.
 
-`POST /professionals` y `GET /professionals/me` ya cubren esto — Web solo necesita consumirlos
-(ver spec de Web). Este ítem existe acá solo para dejar constancia de que NO hace falta tocar el
-backend.
+## Fase 4 — Modelo de portafolio de trabajos ✅ CERRADA (con revisión de staff)
 
-## Fase 2 — Subida de documentos: ningún cambio de backend
+**Decisión de producto confirmada por José 2026-09-02: "revisión del staff"** — cada foto pasa por
+el mismo flujo `PENDING → APPROVED/REJECTED` que los documentos de compliance antes de aparecer en
+el perfil público del profesional, con un `isVisible` adicional para que el propio profesional
+pueda ocultar una foto ya aprobada sin pedirle nada a staff.
 
-Mismo caso: `POST /professionals/me/documents`, `GET /professionals/me/documents` ya existen — Web
-solo necesita construir la UI (ver spec de Web).
-
-## Fase 3 — CTA de home: sin cambios de backend
-
-Puramente frontend (copy + navegación) en Web y Mobile.
-
-## Fase 4 — Modelo de portafolio de trabajos (nuevo, backend)
-
-**Decisión explícita a confirmar con José antes de implementar** (no asumir): ¿el portafolio
-necesita moderación de staff (como hoy, vía `DocumentCategory.PORTFOLIO`) o es de publicación
-inmediata al subir (más simple, más rápido para poblar la demo, con un `isVisible` reactivo para
-ocultar algo inapropiado después)? Esta spec asume **publicación inmediata + `isVisible` para
-ocultado manual reactivo (sin pre-moderación)** — es una decisión de producto, no técnica, que hay
-que confirmar antes de tocar código.
-
-### Modelo nuevo `ProfessionalPortfolioItems`
+### Modelo `ProfessionalPortfolioItems` (implementado)
 
 ```prisma
+enum PortfolioReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model ProfessionalPortfolioItems {
-  id             Int      @id @default(autoincrement())
-  referenceId    String   @unique @default(uuid()) @map("reference_id")
-  professionalId Int      @map("professional_id")
-  professional   Professionals @relation(fields: [professionalId], references: [id])
-  fileKey        String   @map("file_key")
-  caption        String?
-  sortOrder      Int      @default(0) @map("sort_order")
-  isVisible      Boolean  @default(true) @map("is_visible")
-  // + columnas de auditoría estándar (createdAt/createdBy/lastChangedAt/lastChangedBy)
-  @@map("professional_portfolio_items")
+  id              Int                   @id @default(autoincrement())
+  referenceId     String                @unique @default(uuid())
+  professionalId  Int
+  fileKey         String
+  caption         String?
+  sortOrder       Int                   @default(0)
+  isVisible       Boolean               @default(true)
+  status          PortfolioReviewStatus @default(PENDING)
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  rejectionReason String?
+  // + columnas de auditoría estándar (id/referenceId/createdBy/changeSignature/checksum)
 }
 ```
 
-- [ ] Migración Prisma (`id` interno + `referenceId` público, ver
-      `.claude/rules/database-conventions.md`).
-- [ ] `POST /professionals/me/portfolio` — multipart, un archivo por request (mismo patrón de
-      `professional-documents`, límite `MAX_FILE_SIZE` existente), `caption` opcional.
-- [ ] `GET /professionals/me/portfolio` — propio, incluye ocultos.
-- [ ] `DELETE /professionals/me/portfolio/:referenceId` — solo el dueño.
-- [ ] `PATCH /professionals/me/portfolio/:referenceId` — reordenar (`sortOrder`) / ocultar
-      (`isVisible`).
-- [ ] `GET /professionals/:referenceId/portfolio` — público, solo `isVisible: true`, mismo patrón
-      de URL presignada temporal que `professional-documents` (nunca persistir la URL resuelta).
-- [ ] Antes de decidir si hace falta migrar datos: `SELECT count(*) FROM professional_documents
-      WHERE category = 'PORTFOLIO'` — si hay filas reales, decidir si se migran o se dejan como
-      están (deprecated) junto con José.
-- [ ] Documentar en `decisions.md`: ¿se deja `DocumentCategory.PORTFOLIO` en el enum por
-      compatibilidad (deprecated, sin nuevos usos) o se elimina? No eliminar sin confirmar que
-      ningún dato real lo usa.
-- [ ] Tests unitarios (service, controller) + `pnpm run test:e2e` del módulo nuevo.
-- [ ] `pnpm run lint --fix` + `pnpm run format` en 0 warnings.
+Migración `20260902004052_add_professional_portfolio` — **aplicada contra Supabase** (autorización
+explícita de José, misma sesión). Sin drift, `prisma migrate status` limpio antes y después.
 
-## Checkpoint de salida (Backend)
+### Endpoints implementados
 
-- [ ] Un usuario sin permiso de verificación recibe 403 al llamar `verify`/`suspend`; un admin
+- `POST /professionals/me/portfolio` (multipart, campo `file` + `caption` opcional) — gateado por
+  `RequiresActiveConsentGuard` + `LegalDocumentType.IMAGE_USAGE_CONSENT` (mismo criterio que
+  `service-progress`: subir una foto de uso público exige consentimiento vigente de imagen).
+- `GET /professionals/me/portfolio` — propio, todos los estados y visibilidad.
+- `PATCH /professionals/me/portfolio/:referenceId` — el dueño edita `caption`/`sortOrder`/
+  `isVisible` (nunca el archivo — para cambiar la foto en sí, borrar y volver a subir).
+- `DELETE /professionals/me/portfolio/:referenceId` — el dueño borra (hard delete, sin necesidad de
+  retener historial legal como sí exige un documento de compliance).
+- `GET /professionals/:referenceId/portfolio/public` — solo `APPROVED` + `isVisible: true`.
+- `GET /admin/professional-portfolio` — cola de revisión de staff, paginada, filtrable por
+  `status`. Permiso `PERMISSIONS.PROFESSIONAL_PORTFOLIO.REVIEW` (OR `admin:all`).
+- `PATCH /admin/professional-portfolio/:referenceId/review` — aprobar/rechazar (`rejectionReason`
+  obligatorio si `REJECTED`), TOCTOU-safe (`updateStatusConditional` desde `PENDING` únicamente).
+
+### Decisiones tomadas al implementar
+
+- **Sin `ProfessionalVerificationHelper.recompute()`**: ese helper es 100% específico de
+  `requiredDocumentsVerified` (derivado de `ProfessionalDocumentTypes.isRequired`, un concepto de
+  catálogo que el portafolio no tiene). No hay ningún flag agregado equivalente para portafolio —
+  cada foto se aprueba/rechaza de forma independiente, sin agregación.
+- **`DocumentCategory.PORTFOLIO` queda intacto, sin nuevos usos**: no se tocó
+  `ProfessionalDocumentTypes`/`ProfessionalDocuments` — son un flujo de compliance completamente
+  aparte. Si en el futuro se confirma que ninguna fila real usa `category = PORTFOLIO`, es
+  candidato a limpieza, pero no se tocó en esta fase (fuera de alcance, no confirmado).
+- **`PORTFOLIO_ALLOWED_MIME_TYPES`** (`image/jpeg`, `image/png`, `image/webp`) nuevo en
+  `uploads.const.ts` — a diferencia de `ALLOWED_MIME_TYPES` (compliance, admite PDF/Word), el
+  portafolio son fotos, nunca un documento.
+- **`fn_attach_audit_triggers()`** re-invocado en la migración — `professional_portfolio_items`
+  califica (tiene `id`+`created_by`+`change_signature`).
+
+Gates en verde: 111 suites / 1280 tests, `pnpm run lint`/`format` 0 warnings, boot real contra
+Supabase confirmando rutas mapeadas + conexión + migración aplicada sin drift.
+
+## Checkpoint de salida (Backend) — Fase 4
+
+- [x] Un usuario sin permiso de verificación recibe 403 al llamar `verify`/`suspend`; un admin
       real sigue pudiendo.
-- [ ] Un profesional puede subir, listar, reordenar, ocultar y borrar sus propias fotos de
-      portafolio.
-- [ ] Cualquiera puede ver el portafolio visible de un profesional por su `referenceId`.
-- [ ] `openspec/decisions.md` documenta la decisión de moderación (inmediata vs. staff) y el
-      destino de `DocumentCategory.PORTFOLIO`.
+- [x] Un profesional puede subir, listar, editar (caption/orden/visibilidad) y borrar sus propias
+      fotos de portafolio.
+- [x] Cualquiera con sesión puede ver el portafolio visible (aprobado + no oculto) de un
+      profesional por su `referenceId`.
+- [x] Staff aprueba/rechaza cada foto individualmente vía la cola de revisión.

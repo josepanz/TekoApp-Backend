@@ -15,6 +15,14 @@ export const MERCHANT_DOC_ALLOWED_MIME_TYPES = [
   'application/pdf',
 ];
 
+// A diferencia de ALLOWED_MIME_TYPES (documentos de compliance, admite PDF/Word), el portafolio
+// de trabajos son fotos — nunca un documento.
+export const PORTFOLIO_ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+];
+
 export const MERCHANT_DOC_FIELDS = [
   { name: 'documentFrontImage', maxCount: 1 },
   { name: 'documentBackImage', maxCount: 1 },
