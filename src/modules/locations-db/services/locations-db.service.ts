@@ -93,7 +93,6 @@ export class LocationsDbService {
         ${categoryFilter}
         ${availableFilter}
         ${onlineFilter}
-      GROUP BY id
       HAVING (
         6371 * acos(
           cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +

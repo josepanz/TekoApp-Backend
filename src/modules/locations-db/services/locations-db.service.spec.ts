@@ -292,6 +292,27 @@ describe('LocationsDbService', () => {
       );
     });
 
+    it('no debe incluir GROUP BY (redundante: id es PK, no hay agregación real)', async () => {
+      // Arrange
+      mockQueryRaw.mockResolvedValue([]);
+
+      const dto: FindNearbyQueryDTO = {
+        latitude: -25.2867,
+        longitude: -57.647,
+        radius: 5,
+        limit: 10,
+        availableOnly: false,
+        onlineOnly: false,
+      };
+
+      // Act
+      await service.findNearby(dto);
+
+      // Assert
+      const [stringsArray]: unknown[] = mockQueryRaw.mock.calls[0] as unknown[];
+      expect((stringsArray as string[]).join('')).not.toContain('GROUP BY');
+    });
+
     it('debe retornar lista vacía cuando no hay profesionales en el radio', async () => {
       // Arrange
       mockQueryRaw.mockResolvedValue([]);
