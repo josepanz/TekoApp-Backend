@@ -614,9 +614,9 @@ hacelo en un commit propio y solo si no hay nada más urgente en vuelo.
 | ID | Sev | Estado | Commit | Notas |
 |---|---|---|---|---|
 | A-01 | CRÍTICO | [x] | `6979aee` | Webhook removido; pasarela real en `0014` |
-| D-01 | ALTO | [ ] | | Exige `EXPLAIN ANALYZE` antes y después |
-| D-02 | ALTO | [ ] | | |
-| D-03 | MEDIO | [ ] | | **Decisión de José**: quitar del DTO vs. calcular |
+| D-01 | ALTO | [x] | `896117f` | Índice parcial ESCRITO, NO aplicado — falta autorización para `prisma migrate deploy` contra Supabase. `EXPLAIN ANALYZE` corrido (1 sola fila en `professionals`, no representativo). Ver reporte de ejecución. |
+| D-02 | ALTO | [x] | `dc1663e` | Rutas enumeradas explícitamente (sin comodín `*`: Express 5 + path-to-regexp v8 lo exige con nombre) |
+| D-03 | MEDIO | [ ] | | Reproduce. **Decisión de José pendiente**: quitar del DTO vs. calcular — no implementado, ver reporte de ejecución |
 | H-01 | ALTO | [ ] | | **Preguntar antes**: agrega dependencia y servicio externo |
 | H-02 | ALTO | [ ] | | Arrancar permisivo, subir a bloqueante después |
 | I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
