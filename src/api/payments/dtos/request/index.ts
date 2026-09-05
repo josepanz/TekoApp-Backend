@@ -5,7 +5,6 @@ export * from './refund-payment.dto';
 export * from './payment-stats.dto';
 export * from './payment-id.param.dto';
 export * from './payment-method-id.param.dto';
-export * from './payment-webhook.param.dto';
 export * from './payment-list.query.dto';
 export * from './payment-summary.query.dto';
 export * from './payment-trends.query.dto';

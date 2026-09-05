@@ -11,12 +11,7 @@ import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculat
 import { TaxService } from '@api/tax/services/tax.service';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
-import {
-  PaymentProvider,
-  PaymentStatus,
-  TransactionStatus,
-  Prisma,
-} from '@prisma/client';
+import { PaymentStatus, Prisma } from '@prisma/client';
 import { PaymentSummaryResponseDTO } from '../dtos/response/payment-summary.response.dto';
 import { PaymentTrendsResponseDTO } from '../dtos/response/payment-trends.response.dto';
 import {
@@ -274,67 +269,28 @@ export class PaymentApiService {
   }
 
   // ==================== WEBHOOKS ====================
-
-  async processWebhook(
-    provider: PaymentProvider,
-    payload: Record<string, unknown>,
-  ): Promise<void> {
-    switch (provider) {
-      case PaymentProvider.STRIPE:
-        await this.processStripeWebhook(payload);
-        break;
-      // Añadir PayPal, MercadoPago, etc.
-      default:
-        throw new BadRequestException(t('payments.PROVIDER_NOT_SUPPORTED'));
-    }
-  }
-
-  private async processStripeWebhook(
-    payload: Record<string, unknown>,
-  ): Promise<void> {
-    const type = payload.type as string;
-    const dataObj = payload.data as Record<string, Record<string, unknown>>;
-    const target = dataObj?.object;
-
-    if (!target || typeof target.id !== 'string') return;
-
-    if (type === 'payment_intent.succeeded') {
-      await this.handlePaymentResult(
-        target.id,
-        TransactionStatus.COMPLETED,
-        PaymentStatus.COMPLETED,
-      );
-    } else if (type === 'payment_intent.payment_failed') {
-      const error = target.last_payment_error as
-        | Record<string, string>
-        | undefined;
-      await this.handlePaymentResult(
-        target.id,
-        TransactionStatus.FAILED,
-        PaymentStatus.FAILED,
-        error?.message || 'Pago fallido',
-      );
-    }
-  }
-
-  private async handlePaymentResult(
-    externalId: string,
-    tStatus: TransactionStatus,
-    pStatus: PaymentStatus,
-    reason?: string,
-  ) {
-    const transaction =
-      await this.dbService.findTransactionByExternalId(externalId);
-    if (transaction) {
-      await this.dbService.updateTransactionAndPaymentStatus(
-        transaction.id,
-        transaction.paymentId,
-        tStatus,
-        pStatus,
-        reason,
-      );
-    }
-  }
+  //
+  // REMOVIDO 2026-09-04 (auditoría de plataforma, Fase A — ver
+  // openspec/specs/platform-audit-2026-09.md §2.1).
+  //
+  // Existía `POST /payments/webhooks/:provider` con un handler de Stripe. Tenía dos problemas:
+  //
+  //  1. Seguridad: el endpoint tomaba un `externalId` arbitrario del body y flipeaba el estado
+  //     del pago/transacción correspondiente, protegido ÚNICAMENTE por `JwtAuthGuard` — que exige
+  //     un JWT válido, no un permiso. Cualquier usuario logueado podía marcar cualquier pago como
+  //     COMPLETED. Nunca verificó firma: `stripe.webhooks.constructEvent()` no se llamaba en
+  //     ningún lado, pese a que `STRIPE_WEBHOOK_SECRET` es `required` en `config-schema.ts`.
+  //  2. No servía a nadie: el SDK de Stripe está en `package.json` pero no se importa en todo
+  //     `src/` — los pagos son internos/simulados. Ningún cliente (Web ni Mobile) llamaba la ruta.
+  //
+  // No se re-implementó la verificación de firma de Stripe porque la pasarela definida para
+  // Paraguay es **Dinelco Checkout (BEPSA)**, cuyo contrato de callback es distinto. Ver
+  // `openspec/changes/0014-dinelco-checkout-integration.md`: ahí va el webhook nuevo, con la
+  // verificación de autenticidad que exija Dinelco, como ruta pública explícita y no bajo el
+  // guard de sesión.
+  //
+  // `PaymentDbService.findTransactionByExternalId` se mantiene: es un primitivo genérico, ya
+  // testeado, que la integración de Dinelco va a necesitar igual.
 
   // ==================== ESTADÍSTICAS Y MATEMÁTICA ====================
 

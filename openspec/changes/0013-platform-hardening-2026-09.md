@@ -11,24 +11,48 @@ performance y sostenibilidad. Todos los hallazgos de abajo fueron verificados ab
 citado — cuatro de los hallazgos crudos de los agentes venían mal o incompletos y se corrigieron
 antes de escribir esto (ver la tabla de correcciones en la spec).
 
-## Fase A — Webhook de Stripe (CRÍTICO, dinero)
+## Fase A — Webhook de pagos (CRÍTICO, autorización) ✅ CERRADA 2026-09-04
 
-Estado hoy: `@Post('webhooks/:provider')` (`payments.controller.ts:205`) hereda
-`@UseGuards(JwtAuthGuard)` de la clase (`:60`) → Stripe recibe 401 y **el webhook nunca corre**.
-`processStripeWebhook` (`payments.service.ts:292-318`) lee `payload.type`/`payload.data.object`
-crudos, y `constructEvent` no aparece en ningún lado del repo pese a que
-`STRIPE_WEBHOOK_SECRET` es `required` en `config-schema.ts:70`.
+**El plan original de esta fase cambió al verificarlo contra el código.** Decía "implementar
+verificación de firma de Stripe". Al auditar en profundidad aparecieron dos cosas que lo
+invalidaban:
 
-- [ ] A1 — Crear `src/common/decorators/public.decorator.ts` (`IS_PUBLIC_KEY` + `SetMetadata`) y
-      hacer que `JwtAuthGuard` lo respete vía `Reflector`. **No existe hoy**: hay 7 decoradores en
-      `common/decorators/` y ninguno de ruta pública; esta es la pieza faltante, no un detalle.
-- [ ] A2 — Registrar `express.raw({ type: 'application/json' })` acotado a la ruta del webhook. El
-      `bodyParser` JSON global destruye el buffer crudo que la verificación de firma necesita.
-- [ ] A3 — Verificar la firma con `constructEvent(rawBody, headers['stripe-signature'], secret)`;
-      rechazar con 400 lo que no valide, antes de tocar la DB.
-- [ ] A4 — Tests: firma válida procesa el evento; firma inválida devuelve 400 y no escribe nada;
-      provider desconocido sigue devolviendo el error actual.
-- [ ] **Checkpoint A**: `pnpm run lint`/`format`/`test` en verde + boot real contra la DB.
+1. **Stripe nunca estuvo integrado.** `stripe@^14.0.0` está en `package.json` pero **no se importa
+   en ningún archivo de `src/` ni `test/`**. Los pagos son internos/simulados. O sea: no era cierto
+   que "los webhooks estuvieran rotos en producción" — no había nada mandándolos.
+2. **El riesgo real era otro y estaba vivo.** El endpoint tomaba un `externalId` arbitrario del
+   body y, vía `handlePaymentResult`, flipeaba el estado del pago/transacción correspondiente,
+   protegido únicamente por `JwtAuthGuard` — que exige *una sesión válida, no un permiso*.
+   **Cualquier usuario logueado podía marcar cualquier pago como COMPLETED.**
+3. Decisión de José 2026-09-04: la pasarela real es **Dinelco Checkout (BEPSA)**, no Stripe. Así
+   que implementar `constructEvent` habría sido trabajo tirado.
+
+Resolución aplicada: **remover la superficie HTTP** en vez de gatearla con permiso de admin. No
+existe una versión legítima de "flipear el estado de un pago desde un body arbitrario" que sea una
+operación de admin, y el contrato de callback de Dinelco va a ser completamente distinto, así que
+el esqueleto con forma de Stripe no tenía valor de reuso.
+
+- [x] A1 — Removida la ruta `POST /payments/webhooks/:provider` (`payments.controller.ts`).
+      Verificado antes de remover: **ningún cliente la llamaba** — aparece en el
+      `types.generated.ts` de Web solo porque se genera del swagger, no porque algún código la use.
+- [x] A2 — Removidos `processWebhook`, `processStripeWebhook` y `handlePaymentResult` de
+      `payments.service.ts`, con un comentario que documenta por qué y apunta a la spec de Dinelco.
+- [x] A3 — Removidos los huérfanos: `PaymentWebhookParamDTO` (archivo borrado + barrel),
+      `ApiHandleWebhook` (`payments.docs.ts`), y los mocks/tests del webhook.
+- [x] A4 — Test de regresión que falla si alguien vuelve a exponer `handleWebhooks` sin querer.
+- [x] A5 — Spec de la pasarela real: `openspec/changes/0014-dinelco-checkout-integration.md`, con
+      el diseño del callback hecho bien (controller propio fuera del guard de sesión, verificación
+      de autenticidad antes de tocar la DB, idempotencia con `updateMany` condicional) y la lista
+      de datos que faltan de la doc de Dinelco.
+- [x] **Checkpoint A**: `pnpm run lint` 0 errores, `pnpm run format` sin cambios, `pnpm run test`
+      112 suites / 1286 tests en verde, `pnpm run build` OK.
+
+**Se mantiene**: `PaymentDbService.findTransactionByExternalId` — es un primitivo genérico, ya
+testeado, que la integración de Dinelco va a necesitar igual.
+
+**Deuda que queda registrada**: `stripe` sigue en `package.json` y el bloque `stripe` sigue en
+config exigiendo un `STRIPE_WEBHOOK_SECRET` que nadie consume. Se remueven en la Fase 0014 (tarea 2)
+para no mezclar la remoción de una dependencia con un fix de seguridad.
 
 ## Fase D — Performance y resiliencia
 
@@ -80,7 +104,8 @@ crudos, y `constructEvent` no aparece en ningún lado del repo pese a que
 
 ## Checkpoint de salida (Backend)
 
-- [ ] Un evento de Stripe con firma válida actualiza el pago; uno forjado se rechaza con 400.
+- [x] Ningún usuario con sesión puede alterar el estado de un pago desde un endpoint sin permiso.
+      (La verificación de firma del callback real se traslada a la Fase 0014 — Dinelco Checkout.)
 - [ ] Login y pagos tienen su propio límite de tasa, distinto del general.
 - [ ] `findNearby` usa un índice medible (comparar `EXPLAIN ANALYZE` antes/después).
 - [ ] Una excepción no controlada genera una alerta, no solo una línea de log.

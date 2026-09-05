@@ -9,7 +9,6 @@ import {
   UpdatePaymentMethodDto,
   PaymentIdParamDTO,
   PaymentMethodIdParamDTO,
-  PaymentWebhookParamDTO,
   PaymentListQueryDTO,
   PaymentSummaryQueryDTO,
   PaymentTrendsQueryDTO,
@@ -39,7 +38,6 @@ const mockGetPaymentMethods = jest.fn();
 const mockCreatePaymentMethod = jest.fn();
 const mockUpdatePaymentMethod = jest.fn();
 const mockDeletePaymentMethod = jest.fn();
-const mockProcessWebhook = jest.fn();
 
 const mockUser = {
   id: 1,
@@ -77,7 +75,6 @@ describe('PaymentController', () => {
             createPaymentMethod: mockCreatePaymentMethod,
             updatePaymentMethod: mockUpdatePaymentMethod,
             deletePaymentMethod: mockDeletePaymentMethod,
-            processWebhook: mockProcessWebhook,
           },
         },
       ],
@@ -393,24 +390,14 @@ describe('PaymentController', () => {
   });
 
   // ==================== handleWebhooks ====================
-  describe('handleWebhooks', () => {
-    it('debe procesar el webhook del proveedor indicado', async () => {
-      // Arrange
-      const param: PaymentWebhookParamDTO = {
-        provider: PaymentProvider.STRIPE,
-      };
-      const payload: Record<string, unknown> = {
-        type: 'payment_intent.succeeded',
-        data: { object: { id: 'pi_123' } },
-      };
-      mockProcessWebhook.mockResolvedValue(undefined);
-
-      // Act
-      const result = await controller.handleWebhooks(param, payload);
-
-      // Assert
-      expect(mockProcessWebhook).toHaveBeenCalledWith(param.provider, payload);
-      expect(result).toBeUndefined();
-    });
+  // Removido junto con la ruta (auditoría 2026-09-04, Fase A): el endpoint permitía a cualquier
+  // usuario con sesión flipear el estado de un pago desde un `externalId` del body, sin verificar
+  // firma. El webhook de la pasarela real se especifica en
+  // openspec/changes/0014-dinelco-checkout-integration.md.
+  it('no expone un endpoint de webhook: la ruta fue removida por seguridad', () => {
+    // Arrange & Act & Assert
+    expect(
+      (controller as unknown as Record<string, unknown>).handleWebhooks,
+    ).toBeUndefined();
   });
 });

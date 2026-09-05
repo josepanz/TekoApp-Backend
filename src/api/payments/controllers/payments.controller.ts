@@ -26,7 +26,6 @@ import {
   UpdatePaymentMethodDto,
   PaymentIdParamDTO,
   PaymentMethodIdParamDTO,
-  PaymentWebhookParamDTO,
   PaymentListQueryDTO,
   PaymentSummaryQueryDTO,
   PaymentTrendsQueryDTO,
@@ -52,7 +51,6 @@ import {
   ApiCreatePaymentMethod,
   ApiUpdatePaymentMethod,
   ApiDeletePaymentMethod,
-  ApiHandleWebhook,
 } from '../docs/payments.docs';
 
 @ApiTags('Pagos')
@@ -201,14 +199,11 @@ export class PaymentController {
   }
 
   // --- WEBHOOKS ---
-
-  @Post('webhooks/:provider')
-  @HttpCode(HttpStatus.OK)
-  @ApiHandleWebhook()
-  async handleWebhooks(
-    @Param() param: PaymentWebhookParamDTO,
-    @Body() payload: Record<string, unknown>,
-  ): Promise<void> {
-    return this.apiService.processWebhook(param.provider, payload);
-  }
+  //
+  // `POST /payments/webhooks/:provider` fue REMOVIDO 2026-09-04 (auditoría, Fase A). Era un
+  // agujero de autorización vivo: flipeaba el estado de un pago desde un `externalId` arbitrario
+  // del body, gateado solo por `JwtAuthGuard` (sesión, no permiso), y sin verificar firma.
+  // El webhook de la pasarela real (Dinelco Checkout) se define en
+  // `openspec/changes/0014-dinelco-checkout-integration.md` — ver el detalle en
+  // `payments.service.ts`, sección WEBHOOKS.
 }

@@ -170,8 +170,6 @@ export const ApiDeletePaymentMethod = () =>
     }),
   );
 
-export const ApiHandleWebhook = () =>
-  applyDecorators(
-    ApiOperation({ summary: 'Recibir webhook de proveedor de pagos' }),
-    ApiResponse({ status: 200, description: 'Webhook procesado' }),
-  );
+// `ApiHandleWebhook` removido 2026-09-04 junto con la ruta del webhook (auditoría, Fase A).
+// El webhook de Dinelco Checkout traerá su propio decorador de documentación cuando se implemente
+// — ver openspec/changes/0014-dinelco-checkout-integration.md.
