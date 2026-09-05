@@ -176,23 +176,26 @@ Diseño, en capas:
    mismo callback N veces produce un solo efecto. Persistir `payment.id` y `operationNumber` de la
    pasarela para auditar reintentos.
 
-> **A confirmar antes de implementar**: ¿el `metadata` es visible para el pagador en algún lado —
-> la página de checkout, un comprobante, o alguna API que el cliente pueda consultar? Si se expone,
-> el nonce deja de ser secreto y hay que mover la autenticación a la URL de callback (que la
-> pasarela sí acepta por link) o a ambas.
+> **CONFIRMADO por José 2026-09-04**: el `metadata` *"solo se comparte entre servicios, el pagador
+> nunca lo ve"* — salvo que nosotros decidamos exponer algún dato de ahí hacia Web/Mobile. El
+> diseño del nonce es válido. **Consecuencia operativa**: nunca incluir `metadata.callbackNonce`
+> en ningún DTO de respuesta hacia los clientes. Si en algún momento se expone metadata al
+> frontend, hacerlo con una lista blanca de campos, nunca pasando el objeto entero.
 
 ### Datos que igual faltan de la doc oficial
 
-- [ ] **Unidad y decimales de `amount`.** En la referencia es `@IsNumber() @Min(1)` con
-      `example: 1000` y moneda `PYG` — lo que sugiere **guaraníes enteros** (`1000` = Gs. 1.000), no
-      unidades menores escaladas al estilo Stripe/USD. Falta confirmar qué hace Checkout si le llega
-      un decimal: ¿lo rechaza, lo trunca, lo redondea? Importa porque `Payments.amount` es `Decimal`
-      en Prisma y el cálculo de comisión + IVA + propina produce valores no enteros — hay que decidir
-      dónde y cómo se redondea **antes** de mandar, y que ese redondeo sea el mismo que se le cobra
-      al cliente y el que se guarda.
+- [x] **Unidad y decimales de `amount`** — RESUELTO por José 2026-09-04: el campo **es decimal y
+      acepta decimales** (`10.5` sería válido para una moneda que los use). Hoy Checkout solo maneja
+      `PYG` y **no aplica ninguna lógica extra de escalado** — o sea, el número es la cifra nominal,
+      no unidades menores. No hay que multiplicar ni dividir nada.
+
+      **Pero sigue habiendo una decisión nuestra que tomar**: el guaraní no se fracciona en la
+      práctica, y `Payments.amount` es `Decimal` en Prisma alimentado por monto base + comisión +
+      IVA + propina, que da valores no enteros. Hay que fijar dónde se redondea y a cuánto, y que
+      **el mismo valor redondeado** sea el que se le muestra al cliente, el que se manda a Checkout
+      y el que se persiste. Si difieren aunque sea en 1 Gs., el contraste de monto del callback
+      (capa 2) empieza a dar falsos positivos y deja de servir como señal de manipulación.
 - [ ] ¿Existe endpoint de **consulta de estado** de un link/pago? Es el que necesita la capa 3.
-- [ ] ¿El `metadata` es visible para el pagador en algún punto (página de checkout, comprobante,
-      API consultable por el cliente)? Define si el nonce puede vivir ahí.
 - [ ] ¿Existe endpoint de **reembolso**? El código de referencia solo cancela links (que no es lo
       mismo que reembolsar un pago ya aprobado). TekoApp ya tiene reembolsos parciales acumulativos
       implementados del lado nuestro y habría que atarlos a algo real.
