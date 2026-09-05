@@ -14,14 +14,26 @@ interface RateLimitConfigReturn {
 }
 
 export class RateLimitConfig {
+  // Compartido entre llamadas: `createLimiter()` se invoca desde `middleware.config.ts` (limiter
+  // `general`) y desde `AppModule.configure()` (limiters específicos por dominio) — sin este
+  // singleton cada llamada abriría su propia conexión ioredis nueva contra el mismo Redis.
+  private static redisClient: Redis | undefined;
+
+  private static getRedisClient(configService: ConfigService): Redis {
+    if (!this.redisClient) {
+      this.redisClient = new Redis({
+        host: configService.get<string>('REDIS_HOST', 'localhost'),
+        port: configService.get<number>('REDIS_PORT', 6379),
+        password: configService.get<string>('REDIS_PASSWORD'),
+        db: configService.get<number>('REDIS_DB', 0),
+        maxRetriesPerRequest: 3,
+      });
+    }
+    return this.redisClient;
+  }
+
   static createLimiter(configService: ConfigService): RateLimitConfigReturn {
-    const redis = new Redis({
-      host: configService.get<string>('REDIS_HOST', 'localhost'),
-      port: configService.get<number>('REDIS_PORT', 6379),
-      password: configService.get<string>('REDIS_PASSWORD'),
-      db: configService.get<number>('REDIS_DB', 0),
-      maxRetriesPerRequest: 3,
-    });
+    const redis = this.getRedisClient(configService);
 
     const createStore = () =>
       new RedisStore({
