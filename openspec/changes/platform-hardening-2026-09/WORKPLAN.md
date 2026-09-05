@@ -614,9 +614,10 @@ hacelo en un commit propio y solo si no hay nada más urgente en vuelo.
 | ID | Sev | Estado | Commit | Notas |
 |---|---|---|---|---|
 | A-01 | CRÍTICO | [x] | `6979aee` | Webhook removido; pasarela real en `0014` |
-| D-01 | ALTO | [x] | `896117f` | Índice parcial ESCRITO, NO aplicado — falta autorización para `prisma migrate deploy` contra Supabase. `EXPLAIN ANALYZE` corrido (1 sola fila en `professionals`, no representativo). Ver reporte de ejecución. |
+| D-01 | ALTO | [x]¹ | `896117f` | José autorizó `prisma migrate deploy`, pero el propio sandbox de ejecución bloqueó el comando (clasificador de auto mode, tanto deploy como el `migrate status` de reconfirmación) — **la migración sigue SIN aplicar contra Supabase**, pendiente de que José la corra él mismo o ajuste el permiso. Código/migración commiteados y listos. |
 | D-02 | ALTO | [x] | `dc1663e` | Rutas enumeradas explícitamente (sin comodín `*`: Express 5 + path-to-regexp v8 lo exige con nombre) |
-| D-03 | MEDIO | [ ] | | Reproduce. **Decisión de José pendiente**: quitar del DTO vs. calcular — no implementado, ver reporte de ejecución |
+| D-03 | MEDIO | [x] | `6e65dbe` | Opción (b) de José: neto = amount − platformFee − tax (ya persistidos por pago), ajustado por reembolsos proporcionalmente. IVA hoy siempre 0 (`TaxConfig.isEnabled=false`, deliberado); comisión de plataforma sin fila en el seed de producción (solo dummy 10%) |
+| bug colateral (sin ID) | — | [x] | `efc2ad3` | `status='approved'` (string suelto) vs enum real `APPROVED` en `findNearby` — rompía `/locations/nearby` con 500 contra Postgres real. Fix vía `Prisma.raw(ProfessionalStatus.APPROVED)` |
 | H-01 | ALTO | [ ] | | **Preguntar antes**: agrega dependencia y servicio externo |
 | H-02 | ALTO | [ ] | | Arrancar permisivo, subir a bloqueante después |
 | I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
@@ -626,3 +627,7 @@ hacelo en un commit propio y solo si no hay nada más urgente en vuelo.
 | T-01 | MEDIO | [ ] | | Priorizar `contracts` |
 | T-02 | BAJO | [ ] | | |
 | T-03 | BAJO | [ ] | | El typo es barato, el rename no |
+
+¹ D-01: "cerrada" se refiere al trabajo de código (índice escrito, `GROUP BY` sacado, DoD en
+verde). El `[x]` NO significa que el índice ya exista en la base de Supabase — la migración
+`20260904150000_add_professionals_nearby_partial_index` sigue pendiente de aplicar.
