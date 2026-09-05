@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaDatasource } from '@/core/database/services/prisma.service';
-import { Prisma, Professionals } from '@prisma/client';
+import { Prisma, Professionals, ProfessionalStatus } from '@prisma/client';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
 import { NearbyProfessionalRow } from '../interfaces/nearby-professional-row.interface';
 
@@ -77,6 +77,20 @@ export class LocationsDbService {
       ? Prisma.sql`AND is_online = true`
       : Prisma.empty;
 
+    // `status` es un enum nativo de Postgres (`ProfessionalStatus`, valores en MAYÚSCULA —
+    // PENDING/APPROVED/REJECTED/SUSPENDED, ver prisma/schema.prisma). Un valor bindeado como
+    // parámetro normal acá falla en runtime (`42883: operator does not exist: "ProfessionalStatus"
+    // = text`, Postgres no castea implícito un parámetro tipado text contra un enum); tiene que
+    // viajar como literal de texto sin tipo declarado, que Postgres SÍ resuelve solo. Por eso
+    // `Prisma.raw` en vez de una interpolación común — seguro acá porque el valor sale de la
+    // constante tipada de nuestro propio código, nunca de input de usuario.
+    //
+    // Bug real que esto corrige: la query anterior tenía hardcodeado `status = 'approved'`
+    // (string suelto, minúscula) — no calzaba con ningún valor real del enum, así que
+    // `GET /locations/nearby` tiraba 500 contra Postgres real en producción. Ningún test
+    // unitario lo detectaba porque todos mockean `$queryRaw`.
+    const approvedStatus = Prisma.raw(`'${ProfessionalStatus.APPROVED}'`);
+
     // SQL parametrizado (tagged template) usando Haversine Fórmula
     return this.prisma.extended.$queryRaw<NearbyProfessionalRow[]>`
       SELECT *, (
@@ -88,7 +102,7 @@ export class LocationsDbService {
       FROM professionals
       WHERE current_latitude IS NOT NULL
         AND current_longitude IS NOT NULL
-        AND status = 'approved'
+        AND status = ${approvedStatus}
         AND verification_status = 'verified'
         ${categoryFilter}
         ${availableFilter}

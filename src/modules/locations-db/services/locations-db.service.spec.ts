@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ProfessionalStatus } from '@prisma/client';
 import { PrismaDatasource } from '@/core/database/services/prisma.service';
 import { LocationsDbService } from './locations-db.service';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
@@ -290,6 +291,36 @@ describe('LocationsDbService', () => {
       expect(fragments.some((f) => f.text.includes('is_online = true'))).toBe(
         true,
       );
+    });
+
+    it('debe filtrar por el valor real del enum de status (APPROVED en mayúscula, no "approved")', async () => {
+      // Arrange — este es el test que hubiera atrapado el bug real: el código tenía
+      // hardcodeado `status = 'approved'` (string suelto, minúscula) contra la columna
+      // `status`, que en Postgres es el enum nativo `ProfessionalStatus` con valores en
+      // MAYÚSCULA (PENDING/APPROVED/REJECTED/SUSPENDED). Ese literal nunca calzaba con un
+      // valor real del enum, así que `GET /locations/nearby` tiraba 500 contra Postgres real
+      // en producción — ningún test lo detectaba porque todos mockean `$queryRaw` y nunca
+      // ejecutan SQL de verdad. Este test inspecciona el valor resuelto en vez de asumirlo.
+      mockQueryRaw.mockResolvedValue([]);
+
+      const dto: FindNearbyQueryDTO = {
+        latitude: -25.2867,
+        longitude: -57.647,
+        radius: 5,
+        limit: 10,
+        availableOnly: false,
+        onlineOnly: false,
+      };
+
+      // Act
+      await service.findNearby(dto);
+
+      // Assert
+      const fragments = sqlFragmentsOf(mockQueryRaw.mock.calls[0] as unknown[]);
+      expect(
+        fragments.some((f) => f.text === `'${ProfessionalStatus.APPROVED}'`),
+      ).toBe(true);
+      expect(fragments.some((f) => f.text === "'approved'")).toBe(false);
     });
 
     it('no debe incluir GROUP BY (redundante: id es PK, no hay agregación real)', async () => {
