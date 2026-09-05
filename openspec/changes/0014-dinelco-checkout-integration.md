@@ -118,7 +118,14 @@ sincronización con la base.
 
 ## ⚠️ El punto crítico: la pasarela no ofrece verificación de autenticidad
 
-**Esto es lo más importante de esta spec.** En la implementación de referencia:
+**Esto es lo más importante de esta spec.**
+
+> Nota de alcance: `portal-comercios-backend` se leyó **solo como referencia de contrato** — es una
+> integración que ya existe y de la que sacamos la forma real de la API. No es un objetivo de esta
+> auditoría ni algo a modificar. TekoApp construye su propio `payments/checkout/callback`.
+
+Lo relevante de esa referencia para nuestro diseño es qué mecanismos de autenticidad **ofrece la
+pasarela**, y la respuesta es: ninguno. En esa implementación:
 
 - `POST payments/checkout/callback` (`checkout-payment.controller.ts:42-49`) **no tiene ningún
   `@UseGuards`** y el controller no aplica guard a nivel de clase.
