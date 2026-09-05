@@ -133,30 +133,66 @@ O sea: no es que se les haya olvidado verificar la firma — **es que no hay fir
 Eso cambia el diseño: no podemos copiar "verificá la firma" porque no existe. Hay que compensar por
 otro lado.
 
-### Mitigación propuesta para TekoApp (defensa en capas)
+### La solución: `metadata` como canal de autenticación
 
-Ninguna de las tres alcanza sola; van juntas:
+**Aclaración de José 2026-09-04 que define el diseño**: `metadata` es un campo genérico —
+*"podemos agregar los campos que queramos que nos va a retornar y enviar en el callback para
+matchear, firmar o seguridad o lo que deseemos"*. Verificado en el DTO de la referencia:
+`CheckoutCallbackRequestDTO.metadata!: Record<string, any>`
+(`callback-checkout-link.request.dto.ts:253`) — **el `metadata` que mandamos al crear el link
+vuelve tal cual en el callback**.
 
-1. **URL de callback con secreto por link.** `callbackUrl` se manda **por link** (no es fija), así
-   que podemos generar una ruta con un token de alta entropía por pago:
-   `POST /payments/dinelco/callback/:callbackToken`, con `callbackToken` = 256 bits aleatorios
-   guardados junto al `Payments`. Un atacante que conoce el `shortlinkId` (que viaja en la URL que
-   ve el cliente, o sea que **no es secreto**) igual no puede adivinar el token. Esto convierte una
-   URL pública en un canal autenticado por capacidad, sin depender de que la pasarela firme nada.
-2. **Nunca confiar en el `status` del body: reconsultar.** Al recibir el callback, consultar el
-   estado autoritativo del pago contra la API de Checkout antes de mover plata. El callback pasa a
-   ser una *señal de "revisá esto"*, no la fuente de verdad. (Pendiente de confirmar: si Checkout
-   expone un `GET /payment-link/:shortlinkId` o equivalente — no aparece en el código de
-   referencia, que solo usa `POST` y `DELETE`.)
-3. **Idempotencia real.** Usar el patrón `updateMany` condicional que ya es convención del repo, de
-   modo que el mismo callback recibido N veces produzca un solo efecto — y loguear el
-   `payment.id`/`operationNumber` de la pasarela para poder auditar duplicados.
+Eso resuelve el problema sin depender de que la pasarela firme nada: **nosotros ponemos el secreto,
+la pasarela nos lo devuelve**. Es un secreto compartido entre nuestro `createPayment` y nuestro
+handler de callback, que hace un round-trip por Checkout.
+
+Diseño, en capas:
+
+1. **Nonce por pago en `metadata`.** Al crear el link mandamos:
+   ```jsonc
+   "metadata": {
+     "paymentReferenceId": "<Payments.referenceId>",   // para matchear
+     "callbackNonce": "<256 bits aleatorios>"          // para autenticar
+   }
+   ```
+   El `callbackNonce` se persiste junto al `Payments`. En el callback: buscar el pago por
+   `metadata.paymentReferenceId` y comparar el nonce **en tiempo constante** (`timingSafeEqual`).
+   Si no coincide o no existe → 404, sin escribir nada y sin revelar si el pago existe.
+
+   Esto es estrictamente mejor que confiar en que la URL de callback sea difícil de adivinar,
+   porque **el backend de TekoApp es necesariamente público** (lo llama una app instalada en
+   teléfonos de usuarios finales — no puede vivir detrás de DNS interno como un portal de
+   backoffice). La oscuridad del hostname no aplica acá.
+
+2. **Contrastar el monto.** El callback devuelve `payment.amount` y `payment.currency`
+   (`callback-checkout-link.request.dto.ts:70,75`). Comparar contra lo que pedimos: si no coincide,
+   rechazar y alertar. Es gratis y ataja tanto un error de la pasarela como una manipulación.
+
+3. **Reconsultar el estado autoritativo** antes de mover plata, si Checkout expone endpoint de
+   consulta (pendiente de confirmar — el código de referencia solo usa `POST` y `DELETE`). Con las
+   capas 1 y 2 esto pasa a ser defensa en profundidad, no el mecanismo principal.
+
+4. **Idempotencia real** con el patrón `updateMany` condicional que ya es convención del repo: el
+   mismo callback N veces produce un solo efecto. Persistir `payment.id` y `operationNumber` de la
+   pasarela para auditar reintentos.
+
+> **A confirmar antes de implementar**: ¿el `metadata` es visible para el pagador en algún lado —
+> la página de checkout, un comprobante, o alguna API que el cliente pueda consultar? Si se expone,
+> el nonce deja de ser secreto y hay que mover la autenticación a la URL de callback (que la
+> pasarela sí acepta por link) o a ambas.
 
 ### Datos que igual faltan de la doc oficial
 
-- [ ] Formato exacto de `amount` para PYG: ¿entero de guaraníes (lo probable, el guaraní no tiene
-      decimales) o algún escalado? Hoy `Payments.amount` es `Decimal` en Prisma.
-- [ ] ¿Existe endpoint de **consulta de estado** de un link/pago? Es el que necesita la mitigación 2.
+- [ ] **Unidad y decimales de `amount`.** En la referencia es `@IsNumber() @Min(1)` con
+      `example: 1000` y moneda `PYG` — lo que sugiere **guaraníes enteros** (`1000` = Gs. 1.000), no
+      unidades menores escaladas al estilo Stripe/USD. Falta confirmar qué hace Checkout si le llega
+      un decimal: ¿lo rechaza, lo trunca, lo redondea? Importa porque `Payments.amount` es `Decimal`
+      en Prisma y el cálculo de comisión + IVA + propina produce valores no enteros — hay que decidir
+      dónde y cómo se redondea **antes** de mandar, y que ese redondeo sea el mismo que se le cobra
+      al cliente y el que se guarda.
+- [ ] ¿Existe endpoint de **consulta de estado** de un link/pago? Es el que necesita la capa 3.
+- [ ] ¿El `metadata` es visible para el pagador en algún punto (página de checkout, comprobante,
+      API consultable por el cliente)? Define si el nonce puede vivir ahí.
 - [ ] ¿Existe endpoint de **reembolso**? El código de referencia solo cancela links (que no es lo
       mismo que reembolsar un pago ya aprobado). TekoApp ya tiene reembolsos parciales acumulativos
       implementados del lado nuestro y habría que atarlos a algo real.
@@ -202,18 +238,15 @@ firma (ver §⚠️), la autenticidad se construye del lado nuestro:
 1. **Controller propio** (`dinelco-callback.controller.ts`), separado del controller de pagos que
    lleva el guard de sesión a nivel de clase — así el guard no se hereda ni se pierde por accidente,
    que es exactamente cómo nació el bug anterior.
-2. **Ruta con secreto por pago**: `POST /payments/dinelco/callback/:callbackToken`. El token se
-   genera al crear el link (256 bits), se persiste junto al `Payments` y se manda a Checkout en el
-   campo `callbackUrl` de la request de creación. Un `callbackToken` inválido o desconocido devuelve
-   404 **sin revelar si el pago existe** y sin tocar la base.
-3. **Reconsulta antes de mover estado**: el `payment.status` del body es una señal, no la verdad.
-   Confirmar contra la API de Checkout antes de marcar un pago como pagado (pendiente confirmar que
-   exista endpoint de consulta — ver datos faltantes).
+2. **Autenticación por nonce en `metadata`** (ver la sección de arriba): comparación en tiempo
+   constante contra el nonce persistido; mismatch → 404 sin escribir nada.
+3. **Contraste de monto y moneda** del callback contra lo solicitado.
 4. **Idempotencia** con el patrón `updateMany` condicional que ya es convención del repo (ver
    `.claude/rules/typescript.md`): el mismo callback N veces produce un solo efecto. Persistir el
    `payment.id` y `operationNumber` de la pasarela para poder auditar reintentos.
-5. **Tests obligatorios**: token válido aplica el efecto; token inválido devuelve 404 **y no escribe
-   en la base**; callback repetido no duplica el efecto; `status: REJECTED` no marca como pagado.
+5. **Tests obligatorios**: nonce válido aplica el efecto; nonce inválido/ausente devuelve 404 **y no
+   escribe en la base**; monto que no coincide se rechaza; callback repetido no duplica el efecto;
+   `status: REJECTED` no marca como pagado.
 
 ### Cancelación: copiar el manejo idempotente de la referencia
 
