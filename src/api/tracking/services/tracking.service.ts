@@ -1,7 +1,7 @@
 // src/api/tracking/services/tracking.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TrackingDbService } from '@modules/tracking-db/services/tacking-db.service';
+import { TrackingDbService } from '@modules/tracking-db/services/tracking-db.service';
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location.request.dto';
 import { UpdateLocationResponseDTO } from '../dtos/response/update-location.response.dto';
 import { GetNearbyProfessionalsRequestDTO } from '../dtos/request/get-nearby-professionals.request.dto';

@@ -2,7 +2,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { TrackingApiService } from './tracking.service';
-import { TrackingDbService } from '@modules/tracking-db/services/tacking-db.service';
+import { TrackingDbService } from '@modules/tracking-db/services/tracking-db.service';
 
 const mockSaveLocationPing = jest.fn();
 const mockFindInRadius = jest.fn();

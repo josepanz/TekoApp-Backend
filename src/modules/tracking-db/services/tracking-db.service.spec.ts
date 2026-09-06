@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
 import { GeoTrackingLog } from '../schemas/geo-tracking-log.schema';
-import { TrackingDbService, GeoTrackingLogLean } from './tacking-db.service';
+import { TrackingDbService, GeoTrackingLogLean } from './tracking-db.service';
 
 // ── Mocks a nivel de módulo ────────────────────────────────────────────────
 const mockCreate = jest.fn();

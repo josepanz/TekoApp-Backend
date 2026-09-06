@@ -1,7 +1,7 @@
 // src/modules/tracking-db/tracking-db.module.ts
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { TrackingDbService } from './services/tacking-db.service';
+import { TrackingDbService } from './services/tracking-db.service';
 import {
   GeoTrackingLog,
   GeoTrackingLogSchema,
