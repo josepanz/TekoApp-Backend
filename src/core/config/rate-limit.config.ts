@@ -1,5 +1,9 @@
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
+import rateLimit, {
+  RateLimitExceededEventHandler,
+  RateLimitRequestHandler,
+} from 'express-rate-limit';
 import RedisStore, { RedisReply } from 'rate-limit-redis';
 import Redis from 'ioredis';
 import { Request } from 'express';
@@ -18,6 +22,24 @@ export class RateLimitConfig {
   // `general`) y desde `AppModule.configure()` (limiters específicos por dominio) — sin este
   // singleton cada llamada abriría su propia conexión ioredis nueva contra el mismo Redis.
   private static redisClient: Redis | undefined;
+  private static readonly logger = new Logger(RateLimitConfig.name);
+
+  // `express-rate-limit` responde y corta la cadena ANTES de que corra `nestjs-pino`, así que un
+  // 429 nunca llega a loguearse por esa vía (ver WORKPLAN platform-hardening-2026-09, H-03:
+  // costó una sesión entera de debugging real — la app fallaba con 429 y el log no tenía ninguna
+  // línea de esa request). Este `handler` reemplaza el default de la librería para dejar
+  // constancia del rechazo antes de responder. Solo metadatos (ruta, método, IP, limitador que
+  // disparó) — NUNCA el body ni headers de auth de la request rechazada.
+  private static logRejection(
+    limiterName: string,
+  ): RateLimitExceededEventHandler {
+    return (req, res, _next, optionsUsed) => {
+      this.logger.warn(
+        `Rechazo por rate limit — limiter=${limiterName} method=${req.method} path=${req.originalUrl} ip=${req.ip}`,
+      );
+      res.status(optionsUsed.statusCode).send(optionsUsed.message);
+    };
+  }
 
   private static getRedisClient(configService: ConfigService): Redis {
     if (!this.redisClient) {
@@ -68,6 +90,7 @@ export class RateLimitConfig {
         const user = (req as typeof req & { user?: { id: string } }).user;
         return user?.id || req.ip || 'anonymous';
       },
+      handler: this.logRejection('general'),
     });
 
     // Rate limiter más estricto para autenticación
@@ -84,6 +107,7 @@ export class RateLimitConfig {
       legacyHeaders: false,
       keyGenerator: (req: Request): string => req.ip || 'anonymous',
       skipSuccessfulRequests: true,
+      handler: this.logRejection('auth'),
     });
 
     // Rate limiter para subida de archivos
@@ -101,6 +125,7 @@ export class RateLimitConfig {
         const user = (req as Request & { user?: { id: string } }).user;
         return user?.id ?? req.ip ?? 'anonymous';
       },
+      handler: this.logRejection('upload'),
     });
 
     // Rate limiter para pagos
@@ -118,6 +143,7 @@ export class RateLimitConfig {
         const user = (req as Request & { user?: { id: string } }).user;
         return user?.id ?? req.ip ?? 'anonymous';
       },
+      handler: this.logRejection('payment'),
     });
 
     // Rate limiter para búsquedas
@@ -135,6 +161,7 @@ export class RateLimitConfig {
         const user = (req as Request & { user?: { id: string } }).user;
         return user?.id ?? req.ip ?? 'anonymous';
       },
+      handler: this.logRejection('search'),
     });
 
     return {
