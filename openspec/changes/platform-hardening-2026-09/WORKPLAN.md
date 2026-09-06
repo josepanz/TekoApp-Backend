@@ -767,5 +767,5 @@ consentimientos.
 | I-04 | MEDIO | [ ] | | Spec |
 | T-01 | MEDIO | [ ] | | Priorizar `contracts` |
 | T-02 | BAJO | [ ] | | |
-| T-03 | BAJO | [ ] | | El typo es barato, el rename no |
+| T-03 | BAJO | [x] | `53de172` | Solo el typo de archivo (clase ya se llamaba `TrackingDbService`). Rename de módulos (`locations-db`/`tracking-db`) diferido, fuera de alcance de esta tarea |
 | T-04 | ALTO | [x] | `58fb50c` | Verificado contra Supabase real (0 filas antes). Seed corrido 2 veces: idempotente (docTypes=4, legalVersions=2, commissions=1, permissions=33). Sin enum cerrado de código de documento: 1 tipo por `DocumentCategory` (criterio documentado en el seed); solo 2 `LegalDocumentType` sembrados (los que un guard exige de verdad) |
