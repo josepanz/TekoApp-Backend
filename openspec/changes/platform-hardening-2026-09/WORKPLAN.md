@@ -768,4 +768,4 @@ consentimientos.
 | T-01 | MEDIO | [ ] | | Priorizar `contracts` |
 | T-02 | BAJO | [ ] | | |
 | T-03 | BAJO | [ ] | | El typo es barato, el rename no |
-| T-04 | ALTO | [ ] | | Decisiones ya tomadas (2026-09-06): comisión 5%, sembrar TODOS los tipos de documento, seeds autorizados. Sin bloqueos pendientes |
+| T-04 | ALTO | [x] | `58fb50c` | Verificado contra Supabase real (0 filas antes). Seed corrido 2 veces: idempotente (docTypes=4, legalVersions=2, commissions=1, permissions=33). Sin enum cerrado de código de documento: 1 tipo por `DocumentCategory` (criterio documentado en el seed); solo 2 `LegalDocumentType` sembrados (los que un guard exige de verdad) |
