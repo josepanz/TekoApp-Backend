@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ContractStatus, Prisma } from '@prisma/client';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { ContractsService } from './contracts.service';
 import { ContractsDbService } from '@modules/contracts-db/services/contracts-db.service';
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
@@ -200,6 +201,66 @@ describe('ContractsService', () => {
         service.generateContract('option-ref', CLIENT_USER_ID, 'user-ref'),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('debe devolver el contrato creado por la request concurrente que ganó la carrera (P2002)', async () => {
+      // Arrange — dos requests generan el mismo contrato a la vez: el pre-chequeo de ambas no ve
+      // nada (findByBudgetOptionId null), la segunda en llegar a `create` choca con el unique
+      // constraint y debe recuperar el contrato que ya creó la primera, no fallar.
+      mockFindByReferenceIdWithFullContext.mockResolvedValue(mockOption);
+      mockFindByBudgetOptionId
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockContract);
+      mockFindActiveVersionByType.mockResolvedValue(null);
+      const uniqueConstraintError = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint failed',
+        { code: 'P2002', clientVersion: '6.0.0' },
+      );
+      mockCreate.mockRejectedValue(uniqueConstraintError);
+
+      // Act
+      const result = await service.generateContract(
+        'option-ref',
+        CLIENT_USER_ID,
+        'user-ref',
+      );
+
+      // Assert
+      expect(mockFindByBudgetOptionId).toHaveBeenCalledTimes(2);
+      expect(result.referenceId).toBe('contract-ref');
+    });
+
+    it('debe relanzar el error si el P2002 no corresponde a una carrera resuelta (no aparece el contrato)', async () => {
+      // Arrange
+      mockFindByReferenceIdWithFullContext.mockResolvedValue(mockOption);
+      mockFindByBudgetOptionId
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+      mockFindActiveVersionByType.mockResolvedValue(null);
+      const uniqueConstraintError = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint failed',
+        { code: 'P2002', clientVersion: '6.0.0' },
+      );
+      mockCreate.mockRejectedValue(uniqueConstraintError);
+
+      // Act & Assert
+      await expect(
+        service.generateContract('option-ref', CLIENT_USER_ID, 'user-ref'),
+      ).rejects.toThrow(uniqueConstraintError);
+    });
+
+    it('debe relanzar cualquier otro error de create que no sea P2002', async () => {
+      // Arrange
+      mockFindByReferenceIdWithFullContext.mockResolvedValue(mockOption);
+      mockFindByBudgetOptionId.mockResolvedValue(null);
+      mockFindActiveVersionByType.mockResolvedValue(null);
+      const otherError = new Error('DB caída');
+      mockCreate.mockRejectedValue(otherError);
+
+      // Act & Assert
+      await expect(
+        service.generateContract('option-ref', CLIENT_USER_ID, 'user-ref'),
+      ).rejects.toThrow(otherError);
+    });
   });
 
   describe('getContract', () => {
@@ -226,6 +287,26 @@ describe('ContractsService', () => {
 
       // Assert
       expect(result.viewerRole).toBe('CLIENT');
+    });
+
+    it('debe lanzar NotFoundException si el contrato no existe', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.getContract('contract-ref', CLIENT_USER_ID),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe rechazar con 403 a quien no es cliente ni profesional del contrato', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue(mockContract);
+
+      // Act & Assert
+      await expect(service.getContract('contract-ref', 999)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -377,6 +458,85 @@ describe('ContractsService', () => {
 
       // Assert
       expect(result.url).toBe('https://s3/presigned');
+    });
+
+    it('debe lanzar NotFoundException si el contrato no existe', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.getPdfUrl('contract-ref', baseUser)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('debe permitir a staff con permiso de auditoría descargar el PDF sin ser parte del contrato', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockContract,
+        status: ContractStatus.SIGNED,
+        pdfKey: 'contracts/abc.pdf',
+      });
+      mockGetPresignedUrlQueue.mockResolvedValue('https://s3/presigned');
+      const staffUser = {
+        ...baseUser,
+        id: 999,
+        permissions: [PERMISSIONS.CONTRACTS.AUDIT_VIEW],
+      };
+
+      // Act
+      const result = await service.getPdfUrl('contract-ref', staffUser);
+
+      // Assert
+      expect(result.url).toBe('https://s3/presigned');
+    });
+
+    it('debe rechazar con 403 a quien no es parte del contrato ni tiene permiso de auditoría', async () => {
+      // Arrange
+      mockFindByReferenceId.mockResolvedValue({
+        ...mockContract,
+        status: ContractStatus.SIGNED,
+        pdfKey: 'contracts/abc.pdf',
+      });
+      const strangerUser = { ...baseUser, id: 999, permissions: [] };
+
+      // Act & Assert
+      await expect(
+        service.getPdfUrl('contract-ref', strangerUser),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('listAudit', () => {
+    it('debe mapear los contratos de auditoría con sus referenceId anidados', async () => {
+      // Arrange
+      const auditRow = {
+        referenceId: 'contract-ref',
+        status: ContractStatus.SIGNED,
+        service: { referenceId: 'service-ref' },
+        client: { referenceId: 'client-ref' },
+        professional: { referenceId: 'professional-ref' },
+        createdAt: new Date('2026-09-01'),
+        clientSignedAt: new Date('2026-09-02'),
+        professionalSignedAt: new Date('2026-09-03'),
+      };
+      mockFindAuditPaginated.mockResolvedValue({
+        data: [auditRow],
+        pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      });
+
+      // Act
+      const result = await service.listAudit({ page: 1, limit: 20 });
+
+      // Assert
+      expect(result.data[0]).toMatchObject({
+        referenceId: 'contract-ref',
+        serviceReferenceId: 'service-ref',
+        clientReferenceId: 'client-ref',
+        professionalReferenceId: 'professional-ref',
+        pdfAvailable: true,
+      });
+      expect(result.pagination.total).toBe(1);
     });
   });
 });
