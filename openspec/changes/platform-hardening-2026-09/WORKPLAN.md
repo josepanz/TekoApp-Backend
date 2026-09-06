@@ -701,16 +701,27 @@ Si ya tienen filas, **no reproduce**: anotalo en §7 con los números que encont
 
 **Cambio**:
 
+> **Decisiones ya tomadas por José (2026-09-06) — no volver a preguntarlas:**
+> 1. **Comisión de plataforma: 5%.** Sembrar `PlatformCommissionConfig` con ese valor.
+> 2. **Autorización explícita para correr TODOS los seeds** contra la base compartida. No hace
+>    falta pedir permiso de nuevo para este paso.
+> 3. **Sembrar TODOS los tipos de documento** del dominio, no un subconjunto.
+
 1. **`prisma/seed.ts`** — sembrar, de forma **idempotente** (`upsert`, igual que ya hace con
    `apiClientCredential`), el mínimo indispensable para que los flujos existan:
-   - Tipos de documento profesional: los que el negocio realmente pide (cédula, antecedentes,
-     título/certificación…). **Preguntá a José cuáles antes de inventarlos** — es una decisión de
-     producto, no técnica.
+   - **Todos** los tipos de documento profesional del dominio. Sacá la lista del enum/modelo real
+     (`grep -rn "ProfessionalDocumentType\|professionalDocumentType" src/ prisma/schema.prisma`),
+     no de una lista inventada. Si el dominio no define un enum cerrado, usá el conjunto que
+     consume la pantalla "Mis documentos" de Mobile y dejá anotado cuál fue el criterio.
    - Al menos una versión vigente de cada `LegalDocumentType` que el guard sepa exigir. Mirá qué
      valores del enum se usan realmente en los decoradores `@RequiresActiveConsent(...)` del código
      (`grep -rn "RequiresActiveConsent" src/`) — sembrar solo esos, no todo el enum.
-   - `PlatformCommissionConfig`: **decisión de José**, no inventes un porcentaje. Si no hay valor
-     definido, dejá la tabla vacía y anotalo, pero que quede explícito en el seed con un comentario.
+   - `PlatformCommissionConfig`: **5%** (decisión de José, 2026-09-06). Dejalo con un comentario que
+     diga que es el valor confirmado, no un placeholder.
+   - **Fallbacks para poder probar el listado**: la pantalla de documentos tiene que ser usable por
+     un profesional que todavía no subió nada — o sea, el listado debe mostrar cada tipo con su
+     botón de subir aunque no exista ningún `professional_documents` asociado. Verificá ese caso
+     explícitamente (profesional sin documentos → listado con filas, no vacío).
 2. **Contenido de los documentos legales**: para el seed alcanza un placeholder honesto y marcado
    como tal (ej. título + versión + un cuerpo que diga explícitamente que es contenido de
    desarrollo). **No copies texto legal real** ni lo redactes vos — eso lo define José con
@@ -718,8 +729,10 @@ Si ya tienen filas, **no reproduce**: anotalo en §7 con los números que encont
 3. **Verificá contra la base después de correr el seed**, no solo que el comando termine sin error:
    volvé a correr el `SELECT` de arriba y confirmá los conteos.
 
-> **La base de Supabase es COMPARTIDA.** Correr el seed la modifica. **Pedí autorización explícita a
-> José antes de ejecutarlo**, igual que con cualquier migración (ver §1.2).
+> **La base de Supabase es COMPARTIDA**, así que correr el seed la modifica. **José ya autorizó
+> explícitamente correr todos los seeds** (2026-09-06) — para ESTA tarea no hace falta volver a
+> pedirlo. La regla general del §1.2 sigue vigente para migraciones y para cualquier otra escritura
+> que no sea este seed.
 
 **Criterios de aceptación**: `pnpm run seed` corre dos veces seguidas sin error ni duplicados
 (idempotencia real); después de correrlo, "Mis documentos" muestra al menos un tipo con su botón
@@ -749,4 +762,4 @@ consentimientos.
 | T-01 | MEDIO | [ ] | | Priorizar `contracts` |
 | T-02 | BAJO | [ ] | | |
 | T-03 | BAJO | [ ] | | El typo es barato, el rename no |
-| T-04 | ALTO | [ ] | | **Decisión de José**: qué tipos de documento y qué comisión. **Autorización explícita** para correr el seed (base compartida) |
+| T-04 | ALTO | [ ] | | Decisiones ya tomadas (2026-09-06): comisión 5%, sembrar TODOS los tipos de documento, seeds autorizados. Sin bloqueos pendientes |
