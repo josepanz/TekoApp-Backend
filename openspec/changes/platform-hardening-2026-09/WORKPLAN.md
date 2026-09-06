@@ -759,7 +759,7 @@ consentimientos.
 | D-03 | MEDIO | [x] | `6e65dbe` | Opción (b) de José: neto = amount − platformFee − tax (ya persistidos por pago), ajustado por reembolsos proporcionalmente. IVA hoy siempre 0 (`TaxConfig.isEnabled=false`, deliberado); comisión de plataforma sin fila en el seed de producción (solo dummy 10%) |
 | bug colateral (sin ID) | — | [x] | `efc2ad3` | `status='approved'` (string suelto) vs enum real `APPROVED` en `findNearby` — rompía `/locations/nearby` con 500 contra Postgres real. Fix vía `Prisma.raw(ProfessionalStatus.APPROVED)` |
 | H-01 | ALTO | [ ] | | **Preguntar antes**: agrega dependencia y servicio externo |
-| H-02 | ALTO | [ ] | | Arrancar permisivo, subir a bloqueante después |
+| H-02 | ALTO | [x] | `22f41f3` | Job `scan` (PR-only, tras docker-validate): pnpm audit + Trivy + gitleaks, permisivo (continue-on-error/exit-code 0) hasta triagear hallazgos heredados |
 | H-03 | MEDIO | [x] | `7aa0f66` | Handler propio en los 5 limitadores (opción A), test unitario cubre metadatos + status/message |
 | I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
 | I-02 | ALTO | [ ] | | Spec. Bloqueada por qué ofrece Dinelco |
