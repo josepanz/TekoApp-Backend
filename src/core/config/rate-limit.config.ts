@@ -35,8 +35,16 @@ export class RateLimitConfig {
   static createLimiter(configService: ConfigService): RateLimitConfigReturn {
     const redis = this.getRedisClient(configService);
 
-    const createStore = () =>
+    // `prefix` es OBLIGATORIO y distinto por limitador: `rate-limit-redis` usa `rl:` por defecto,
+    // así que sin esto los 5 limitadores comparten el MISMO contador por IP en Redis. Con un solo
+    // limitador cableado no se notaba; al aplicar los otros cuatro (D-01/D-02 del WORKPLAN
+    // platform-hardening-2026-09) la colisión se vuelve un bloqueo real: el contador del limitador
+    // general (max 100) lo lee el de auth (max 5), así que 5 requests de CUALQUIER tipo desde una
+    // IP dejan a esa IP sin poder loguearse. Verificado contra Redis real el 2026-09-05: una sola
+    // clave `rl:::ffff:127.0.0.1 = 32` servía a todos los limitadores a la vez.
+    const createStore = (prefix: string) =>
       new RedisStore({
+        prefix,
         sendCommand: async (...args: string[]): Promise<RedisReply> => {
           // Aseguramos que el retorno se devuelva como RedisReply para cumplir el contrato
           return (await redis.call(args[0], ...args.slice(1))) as RedisReply;
@@ -45,7 +53,7 @@ export class RateLimitConfig {
 
     // Rate limiter general para toda la API
     const generalLimiter = rateLimit({
-      store: createStore(),
+      store: createStore('rl:general:'),
       windowMs: 15 * 60 * 1000, // 15 minutos
       max: 100,
       message: {
@@ -64,7 +72,7 @@ export class RateLimitConfig {
 
     // Rate limiter más estricto para autenticación
     const authLimiter = rateLimit({
-      store: createStore(),
+      store: createStore('rl:auth:'),
       windowMs: 15 * 60 * 1000, // 15 minutos
       max: 5,
       message: {
@@ -80,7 +88,7 @@ export class RateLimitConfig {
 
     // Rate limiter para subida de archivos
     const uploadLimiter = rateLimit({
-      store: createStore(),
+      store: createStore('rl:upload:'),
       windowMs: 60 * 60 * 1000, // 1 hora
       max: 10,
       message: {
@@ -97,7 +105,7 @@ export class RateLimitConfig {
 
     // Rate limiter para pagos
     const paymentLimiter = rateLimit({
-      store: createStore(),
+      store: createStore('rl:payment:'),
       windowMs: 60 * 60 * 1000, // 1 hora
       max: 20,
       message: {
@@ -114,7 +122,7 @@ export class RateLimitConfig {
 
     // Rate limiter para búsquedas
     const searchLimiter = rateLimit({
-      store: createStore(),
+      store: createStore('rl:search:'),
       windowMs: 1 * 60 * 1000, // 1 minuto
       max: 30,
       message: {
