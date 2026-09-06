@@ -766,6 +766,6 @@ consentimientos.
 | I-03 | MEDIO | [ ] | | Spec |
 | I-04 | MEDIO | [ ] | | Spec |
 | T-01 | MEDIO | [ ] | | Priorizar `contracts` |
-| T-02 | BAJO | [ ] | | |
+| T-02 | BAJO | [x] | `6657a7c` | Migración aplicada contra Supabase (2026-09-06, conexión directa 5432, `migrate status` limpio antes/después). Un solo valor real ("verified") mapeado sin pérdida vía `UPPER(...)::VerificationStatus`. `professionals_nearby_idx` (D-01) se reconstruyó solo, verificado en `pg_indexes` |
 | T-03 | BAJO | [x] | `53de172` | Solo el typo de archivo (clase ya se llamaba `TrackingDbService`). Rename de módulos (`locations-db`/`tracking-db`) diferido, fuera de alcance de esta tarea |
 | T-04 | ALTO | [x] | `58fb50c` | Verificado contra Supabase real (0 filas antes). Seed corrido 2 veces: idempotente (docTypes=4, legalVersions=2, commissions=1, permissions=33). Sin enum cerrado de código de documento: 1 tipo por `DocumentCategory` (criterio documentado en el seed); solo 2 `LegalDocumentType` sembrados (los que un guard exige de verdad) |
