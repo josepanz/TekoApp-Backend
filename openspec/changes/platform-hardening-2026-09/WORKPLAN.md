@@ -760,7 +760,7 @@ consentimientos.
 | bug colateral (sin ID) | — | [x] | `efc2ad3` | `status='approved'` (string suelto) vs enum real `APPROVED` en `findNearby` — rompía `/locations/nearby` con 500 contra Postgres real. Fix vía `Prisma.raw(ProfessionalStatus.APPROVED)` |
 | H-01 | ALTO | [ ] | | **Preguntar antes**: agrega dependencia y servicio externo |
 | H-02 | ALTO | [ ] | | Arrancar permisivo, subir a bloqueante después |
-| H-03 | MEDIO | [ ] | | Costó una sesión entera de debugging real. Preferir el `handler` del limitador |
+| H-03 | MEDIO | [x] | `7aa0f66` | Handler propio en los 5 limitadores (opción A), test unitario cubre metadatos + status/message |
 | I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
 | I-02 | ALTO | [ ] | | Spec. Bloqueada por qué ofrece Dinelco |
 | I-03 | MEDIO | [ ] | | Spec |
