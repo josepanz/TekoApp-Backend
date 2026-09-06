@@ -764,7 +764,7 @@ consentimientos.
 | I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
 | I-02 | ALTO | [ ] | | Spec. Bloqueada por qué ofrece Dinelco |
 | I-03 | MEDIO | [ ] | | Spec |
-| I-04 | MEDIO | [ ] | | Spec |
+| I-04 | MEDIO | [x] | `0bc8a31` | Spec en I-04-api-versioning-policy.md. Decisión: `defaultVersion: '1'` global (no decorar cada controller). Lista explícita de los 37 controllers. Corrige el supuesto del WORKPLAN sobre `lib/core/update/` de Mobile (hoy es aviso opcional, no bloqueo por versión mínima) |
 | T-01 | MEDIO | [x] | `8063819` | Ratio confirmado (professional-portfolio 17/1, contracts 22/1, budgets 14/1, service-progress 12/1). Priorizado `contracts` por riesgo (máquina de estados + firma legal): 15→24 tests en el service (carrera P2002, 404/403 faltantes, listAudit) + nuevo spec del generador de PDF legal. Los otros 3 módulos quedan con el mismo ratio, fuera de alcance de esta pasada |
 | T-02 | BAJO | [x] | `6657a7c` | Migración aplicada contra Supabase (2026-09-06, conexión directa 5432, `migrate status` limpio antes/después). Un solo valor real ("verified") mapeado sin pérdida vía `UPPER(...)::VerificationStatus`. `professionals_nearby_idx` (D-01) se reconstruyó solo, verificado en `pg_indexes` |
 | T-03 | BAJO | [x] | `53de172` | Solo el typo de archivo (clase ya se llamaba `TrackingDbService`). Rename de módulos (`locations-db`/`tracking-db`) diferido, fuera de alcance de esta tarea |
