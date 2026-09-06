@@ -682,6 +682,7 @@ sin ningún error visible que explique por qué:
 | `legal_document_versions` | **0** | `RequiresActiveConsentGuard` exige un consentimiento vigente. Sin documentos, **ningún usuario puede tener consentimiento** → 403 permanente en todo endpoint que use ese guard (ej. `POST professionals/me/portfolio`), y la pantalla de aceptación no tiene nada que ofrecer. |
 | `user_consents` | 0 | Consecuencia de la anterior. |
 | `PlatformCommissionConfig` | 0 en `seed.ts` (solo `seed-dummy.ts` tiene un 10%) | El cálculo de `professionalNetAmount` (D-03) queda sin tasa configurada en un entorno sembrado con el seed real. |
+| `permissions` | **1** (solo `admin:all`) | El RBAC entero está sin poblar: ninguno de los permisos que el código declara en `PermissionsEnum` existe como fila, así que no se pueden asignar a ningún rol aunque se quiera. Hay un solo rol (`ADMIN`). Verificado 2026-09-06 — ver C-02 del WORKPLAN de `TekoApp-Frontend-Web`, que se desbloqueó con este dato. |
 
 **Por qué es ALTO y no cosmético**: no es "faltan datos de ejemplo". Es que **el producto no
 funciona** en un entorno recién sembrado, y falla de la peor forma posible: en silencio. Se
@@ -722,6 +723,11 @@ Si ya tienen filas, **no reproduce**: anotalo en §7 con los números que encont
      un profesional que todavía no subió nada — o sea, el listado debe mostrar cada tipo con su
      botón de subir aunque no exista ningún `professional_documents` asociado. Verificá ese caso
      explícitamente (profesional sin documentos → listado con filas, no vacío).
+   - **El catálogo `permissions` completo**: sembrar TODOS los valores de `PermissionsEnum`
+     (`src/common/enum/permissions.enum.ts`) como filas, de forma idempotente. Hoy existe una sola
+     (`admin:all`), así que el RBAC no se puede configurar aunque alguien quiera. **No inventes qué
+     rol recibe cada permiso** — sembrar el catálogo es técnico y seguro; asignarlos a roles es una
+     decisión de negocio aparte. Dejá el rol `ADMIN` como está (con `admin:all`).
 2. **Contenido de los documentos legales**: para el seed alcanza un placeholder honesto y marcado
    como tal (ej. título + versión + un cuerpo que diga explícitamente que es contenido de
    desarrollo). **No copies texto legal real** ni lo redactes vos — eso lo define José con
