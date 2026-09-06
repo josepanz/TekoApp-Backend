@@ -7,11 +7,17 @@
 -- `current_latitude/longitude IS NOT NULL` porque esos dos IS NOT NULL ya son parte del WHERE
 -- real y reducen mucho el tamaño físico del índice.
 --
--- CONCURRENTLY: `professionals` recibe escrituras frecuentes (actualización de ubicación en
--- tiempo real vía `updateLocation`); construir el índice sin bloquear esas escrituras es
--- necesario. CREATE INDEX CONCURRENTLY no puede correr dentro de una transacción — Prisma
--- Migrate (>=4.7) detecta este statement y no envuelve esta migración en una transacción
--- implícita, así que no hace falta ningún workaround adicional acá.
+-- Sin CONCURRENTLY (decisión revisada 2026-09-05): se evaluó CONCURRENTLY porque
+-- `professionals` recibe escrituras frecuentes (actualización de ubicación en tiempo real vía
+-- `updateLocation`), pero Postgres no permite CONCURRENTLY dentro de una transacción, y
+-- `prisma migrate deploy` SÍ envuelve cada migración en una transacción explícita (confirmado
+-- empíricamente: falló con `25001 CREATE INDEX CONCURRENTLY cannot run inside a transaction
+-- block` contra Supabase, con `applied_steps_count=0` — no llegó a tocar la tabla). El
+-- workaround oficial de Prisma para esto es aplicar el SQL a mano fuera de `migrate deploy`, pero
+-- se optó por la alternativa más simple: un `CREATE INDEX` tradicional. Trade-off aceptado a
+-- sabiendas: toma un lock que bloquea escrituras concurrentes sobre `professionals` mientras se
+-- construye — aceptable hoy por el volumen de datos real (la tabla tiene un puñado de filas en
+-- este entorno); revisar esta decisión si el volumen de profesionales crece antes de escalar.
 --
 -- Alternativa evaluada y descartada: earthdistance/PostGIS con índice GiST es la solución
 -- correcta para distancia geográfica real a escala (evita el propio Haversine calculado a mano),
@@ -28,7 +34,7 @@
 -- lat/long, así que no hay volumen real para medir una mejora de tiempo; la justificación es de
 -- shape de plan (los índices existentes no cubren el WHERE compuesto), no de tiempo medido. Ver
 -- limitación documentada en el reporte de la tarea.
-CREATE INDEX CONCURRENTLY IF NOT EXISTS professionals_nearby_idx
+CREATE INDEX IF NOT EXISTS professionals_nearby_idx
   ON professionals (status, verification_status, is_available, is_online, category_id)
   WHERE current_latitude IS NOT NULL AND current_longitude IS NOT NULL;
 
