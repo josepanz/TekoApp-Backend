@@ -3,6 +3,7 @@ import {
   DocumentCategory,
   LegalDocumentType,
   CommissionTarget,
+  VerificationStatus,
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PERMISSIONS } from '../src/common/enum/permissions.enum';
@@ -369,7 +370,7 @@ async function main() {
       yearsOfExperience: 10,
       status: 'APPROVED',
       isAvailable: true,
-      verificationStatus: 'verified',
+      verificationStatus: VerificationStatus.VERIFIED,
     },
   });
 

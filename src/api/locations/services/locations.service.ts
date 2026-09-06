@@ -8,7 +8,7 @@ import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professio
 import { mapNearbyProfessionalRow } from '../helpers/nearby-professional.helper';
 import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-area-query.dto';
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
-import { Professionals } from '@prisma/client';
+import { Professionals, VerificationStatus } from '@prisma/client';
 
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
@@ -95,7 +95,7 @@ export class LocationsService {
       isOnline: true,
       isAvailable: true,
       status: 'APPROVED',
-      verificationStatus: 'verified',
+      verificationStatus: VerificationStatus.VERIFIED,
     });
   }
 

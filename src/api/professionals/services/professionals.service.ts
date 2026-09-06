@@ -1,5 +1,5 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, VerificationStatus } from '@prisma/client';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
@@ -228,7 +228,9 @@ export class ProfessionalsService {
   ): Promise<ProfessionalDetailResponseDTO> {
     await this.professionalsDb.findById(id);
     const result = await this.professionalsDb.update(id, {
-      verificationStatus: dto.isVerified ? 'verified' : 'rejected',
+      verificationStatus: dto.isVerified
+        ? VerificationStatus.VERIFIED
+        : VerificationStatus.REJECTED,
       status: dto.isVerified ? 'APPROVED' : 'REJECTED',
       lastChangedBy: String(adminId),
       changedReason: dto.notes,

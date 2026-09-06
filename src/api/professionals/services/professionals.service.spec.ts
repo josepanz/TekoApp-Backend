@@ -24,7 +24,7 @@ const mockProfessional = {
   categoryId: 2,
   isAvailable: true,
   status: 'APPROVED',
-  verificationStatus: 'verified',
+  verificationStatus: 'VERIFIED',
 };
 
 function fakeUser(overrides: { id?: number; permissions?: string[] } = {}) {
@@ -540,7 +540,7 @@ describe('ProfessionalsService', () => {
       mockFindById.mockResolvedValue(mockProfessional);
       mockUpdate.mockResolvedValue({
         ...mockProfessional,
-        verificationStatus: 'verified',
+        verificationStatus: 'VERIFIED',
         status: 'APPROVED',
       });
 
@@ -551,7 +551,7 @@ describe('ProfessionalsService', () => {
       expect(mockUpdate).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
-          verificationStatus: 'verified',
+          verificationStatus: 'VERIFIED',
           status: 'APPROVED',
           changedReason: 'Documentos válidos',
         }),
@@ -571,7 +571,7 @@ describe('ProfessionalsService', () => {
       expect(mockUpdate).toHaveBeenCalledWith(
         1,
         expect.objectContaining({
-          verificationStatus: 'rejected',
+          verificationStatus: 'REJECTED',
           status: 'REJECTED',
         }),
       );

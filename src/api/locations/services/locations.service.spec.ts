@@ -246,7 +246,7 @@ describe('LocationsService', () => {
         isOnline: true,
         isAvailable: true,
         status: 'APPROVED',
-        verificationStatus: 'verified',
+        verificationStatus: 'VERIFIED',
       });
     });
   });

@@ -316,6 +316,15 @@ enum ProfessionalStatus {
   SUSPENDED
 }
 
+/// Aprobación manual de staff sobre la cuenta del profesional (onboarding). Antes texto libre
+/// (`String @db.VarChar(20)`) — tipado como enum en WORKPLAN platform-hardening-2026-09, T-02:
+/// D-01 mostró que la consulta más caliente del producto (`findNearby`) filtra por este campo.
+enum VerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+}
+
 model ServiceType {
   id   Int    @id @default(autoincrement())
   name String @unique @map("name")
@@ -364,11 +373,11 @@ model Professionals {
   isAvailable       Boolean            @default(false) @map("is_available")
   isOnline          Boolean            @default(false) @map("is_online")
 
-  // Aprobación manual de staff sobre la cuenta del profesional (onboarding) — "verified"/
-  // "rejected" seteado junto con `status` desde `ProfessionalsService.verifyProfessional()`.
-  // Campo legacy, NO tocar desde la Fase 0001 de documentos/antecedentes (ver
-  // `requiredDocumentsVerified` abajo y openspec/decisions.md — colisión encontrada y corregida).
-  verificationStatus String @default("unverified") @map("verification_status") @db.VarChar(20) // e.g., verified
+  // Aprobación manual de staff sobre la cuenta del profesional (onboarding) — VERIFIED/REJECTED
+  // seteado junto con `status` desde `ProfessionalsService.verifyProfessional()`. Campo legacy,
+  // NO tocar desde la Fase 0001 de documentos/antecedentes (ver `requiredDocumentsVerified` abajo
+  // y openspec/decisions.md — colisión encontrada y corregida).
+  verificationStatus VerificationStatus @default(UNVERIFIED) @map("verification_status")
 
   // Derivado automáticamente por `ProfessionalVerificationHelper.recompute()` — true cuando TODOS
   // los `ProfessionalDocumentTypes` obligatorios aplicables a la categoría del profesional tienen

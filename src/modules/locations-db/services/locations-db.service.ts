@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaDatasource } from '@/core/database/services/prisma.service';
-import { Prisma, Professionals, ProfessionalStatus } from '@prisma/client';
+import {
+  Prisma,
+  Professionals,
+  ProfessionalStatus,
+  VerificationStatus,
+} from '@prisma/client';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
 import { NearbyProfessionalRow } from '../interfaces/nearby-professional-row.interface';
 
@@ -90,6 +95,9 @@ export class LocationsDbService {
     // `GET /locations/nearby` tiraba 500 contra Postgres real en producción. Ningún test
     // unitario lo detectaba porque todos mockean `$queryRaw`.
     const approvedStatus = Prisma.raw(`'${ProfessionalStatus.APPROVED}'`);
+    // T-02 (WORKPLAN platform-hardening-2026-09): `verificationStatus` pasó de texto libre a
+    // enum nativo de Postgres — mismo motivo que `approvedStatus` arriba, mismo patrón.
+    const verifiedStatus = Prisma.raw(`'${VerificationStatus.VERIFIED}'`);
 
     // SQL parametrizado (tagged template) usando Haversine Fórmula
     return this.prisma.extended.$queryRaw<NearbyProfessionalRow[]>`
@@ -103,7 +111,7 @@ export class LocationsDbService {
       WHERE current_latitude IS NOT NULL
         AND current_longitude IS NOT NULL
         AND status = ${approvedStatus}
-        AND verification_status = 'verified'
+        AND verification_status = ${verifiedStatus}
         ${categoryFilter}
         ${availableFilter}
         ${onlineFilter}
