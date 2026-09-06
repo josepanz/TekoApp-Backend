@@ -761,7 +761,7 @@ consentimientos.
 | H-01 | ALTO | [ ] | | **Preguntar antes**: agrega dependencia y servicio externo |
 | H-02 | ALTO | [x] | `22f41f3` | Job `scan` (PR-only, tras docker-validate): pnpm audit + Trivy + gitleaks, permisivo (continue-on-error/exit-code 0) hasta triagear hallazgos heredados |
 | H-03 | MEDIO | [x] | `7aa0f66` | Handler propio en los 5 limitadores (opción A), test unitario cubre metadatos + status/message |
-| I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
+| I-01 | CRÍTICO | [x] | `f38ca86` | Spec en I-01-account-deletion.md. Hallazgo: `DELETE /users/reference/:referenceId` no es esto (solo pone INACTIVE, es desactivación admin) — UserStatus.DELETED existe y ya bloquea login pero nada lo setea. Decisión: anonimizar solo Users, el resto hereda por FK. Ventana 14 días, bloqueantes explícitos (cruce con I-03) |
 | I-02 | ALTO | [ ] | | Spec. Bloqueada por qué ofrece Dinelco |
 | I-03 | MEDIO | [x] | `deb444d` | Spec en I-03-dispute-records.md. Modelo PaymentDisputes + reglas de negocio + 6 endpoints + permiso nuevo. Hallazgo relacionado anotado (no corregido): `POST /payments/:id/refund` sin PermissionsGuard |
 | I-04 | MEDIO | [x] | `0bc8a31` | Spec en I-04-api-versioning-policy.md. Decisión: `defaultVersion: '1'` global (no decorar cada controller). Lista explícita de los 37 controllers. Corrige el supuesto del WORKPLAN sobre `lib/core/update/` de Mobile (hoy es aviso opcional, no bloqueo por versión mínima) |
