@@ -179,6 +179,7 @@ Si un test existente se rompe: **no lo ajustes para que pase.** Entendé por qu�
 | D-03 | MEDIO | contrato | La API publica un campo de pago que siempre viaja `null` |
 | H-01 | ALTO | observabilidad | Una excepción no controlada no genera ninguna alerta |
 | H-02 | ALTO | CI/CD | El pipeline no tiene etapa de escaneo de seguridad |
+| H-03 | MEDIO | observabilidad | Un rechazo por rate limit (429) no deja ninguna línea en el log |
 | I-01 | CRÍTICO | legal | No existe borrado de cuenta (bloquea publicar Mobile) |
 | I-02 | ALTO | negocio | No hay forma de pagarle al profesional: el ciclo no cierra |
 | I-03 | MEDIO | negocio | Hay reembolsos pero ningún registro de disputa que los justifique |
@@ -186,6 +187,7 @@ Si un test existente se rompe: **no lo ajustes para que pase.** Entendé por qu�
 | T-01 | MEDIO | tests | Los módulos más nuevos son los de cobertura más fina |
 | T-02 | BAJO | diseño | Tres señales de verificación conviviendo en `Professionals` |
 | T-03 | BAJO | claridad | `locations-db` vs `tracking-db` no explican la división, y hay un typo |
+| T-04 | ALTO | datos | El seed no siembra los catálogos que bloquean flujos enteros de la app |
 
 **Descartados explícitamente (auditados y NO son bugs — no los "arregles"):**
 
@@ -477,6 +479,61 @@ heredados se termina desactivando.
 
 ---
 
+### H-03 · MEDIO · Un rechazo por rate limit (429) no deja rastro en el log
+
+**[VERIFICADO A MANO]** (2026-09-06: la app Flutter recibía 429 en `/v1/auth/nonce` y en el log del
+backend **no aparecía ninguna línea** de esa request — se diagnosticó recién inspeccionando las
+claves de Redis a mano)
+
+**Archivos**: `src/core/config/middleware.config.ts` (orden de registro de middlewares),
+`src/core/config/rate-limit.config.ts` (los 5 limitadores).
+
+**Síntoma**: cuando un limitador rechaza una request con 429, el logger estructurado
+(`nestjs-pino`) **no la registra**. Desde el log, esa request sencillamente no existió: no hay
+"Incoming", ni "Error", ni el status. Un operador viendo clientes que fallan no tiene forma de
+saber que los está bloqueando su propio rate limiter.
+
+**Causa raíz**: `express-rate-limit` responde y corta la cadena **antes** de que corra el
+middleware de logging, así que el ciclo de request nunca llega a loguearse.
+
+**Por qué importa más de lo que parece**: esto costó una sesión entera de debugging real. La app
+móvil fallaba con un error genérico, el backend mostraba un log limpio (ninguna request), y la
+hipótesis natural — "la request no está llegando" — era falsa: llegaba y era rechazada en silencio.
+Con una línea de log el diagnóstico habría sido inmediato.
+
+**Verificación previa obligatoria**:
+
+```bash
+# 1. Agotá el cupo del limitador de auth desde una IP (max 5 / 15 min):
+for i in $(seq 1 8); do curl -s -o /dev/null -w "%{http_code}\n" -X POST \
+  -H "Authorization: Basic <base64 de tekoapp-mobile:MOBILE_CLIENT_SECRET>" \
+  http://127.0.0.1:3000/tekoapp-backend/api/v1/auth/nonce; done
+# esperado: los primeros pasan, después 429
+# 2. Buscá esos 429 en el log del backend — hoy NO aparecen.
+```
+
+Si los 429 **sí** aparecen en el log, no reproduce: anotalo en §7 y seguí.
+
+**Cambio**: hacer que un rechazo por rate limit quede registrado, con al menos: IP/clave usada,
+limitador que disparó, ruta y status. Dos caminos:
+
+- **(A)** El `handler` de `express-rate-limit` (reemplaza a `message`) recibe `(req, res, next, options)`
+  — loguear ahí antes de responder. Es local a cada limitador y no toca el orden de middlewares.
+- **(B)** Mover el logger para que corra antes del limitador. Más invasivo y con riesgo de cambiar
+  el comportamiento de logging de toda la API.
+
+**Preferí (A)**: acotado, sin efectos colaterales sobre el resto del pipeline.
+
+**Trampa**: no loguees el body ni los headers de auth de la request rechazada — un 429 en
+`auth/login` lleva credenciales. Solo metadatos (ruta, método, IP, limitador).
+
+**Tests**: un test unitario de que el `handler` configurado llama al logger y responde 429. No hace
+falta e2e con Redis real.
+
+**Commit**: `fix(observabilidad): registrar en el log los rechazos por rate limit`
+
+---
+
 ## 5. WORKFLOW 3 — Specs de sostenibilidad (documentación, sin código)
 
 Estas cuatro tareas producen **specs**, no implementación. Requieren decisiones de producto y
@@ -609,6 +666,70 @@ hacelo en un commit propio y solo si no hay nada más urgente en vuelo.
 
 ---
 
+### T-04 · ALTO · El seed no siembra los catálogos que bloquean flujos enteros de la app
+
+**[VERIFICADO A MANO]** (consultado contra la base real el 2026-09-06)
+
+**Archivos**: `prisma/seed.ts` (seed de producción/desarrollo), `prisma/seed-dummy.ts` (datos de
+prueba).
+
+**Síntoma**: hay tablas de catálogo **vacías** que dejan flujos completos de la app inutilizables,
+sin ningún error visible que explique por qué:
+
+| Tabla | Filas hoy | Qué rompe |
+|---|---|---|
+| `professional_document_types` | **0** | La pantalla "Mis documentos" de Mobile renderiza una fila por tipo → sin tipos, **no hay ningún botón para subir**. La pantalla se ve vacía y correcta, pero es un callejón sin salida. |
+| `legal_document_versions` | **0** | `RequiresActiveConsentGuard` exige un consentimiento vigente. Sin documentos, **ningún usuario puede tener consentimiento** → 403 permanente en todo endpoint que use ese guard (ej. `POST professionals/me/portfolio`), y la pantalla de aceptación no tiene nada que ofrecer. |
+| `user_consents` | 0 | Consecuencia de la anterior. |
+| `PlatformCommissionConfig` | 0 en `seed.ts` (solo `seed-dummy.ts` tiene un 10%) | El cálculo de `professionalNetAmount` (D-03) queda sin tasa configurada en un entorno sembrado con el seed real. |
+
+**Por qué es ALTO y no cosmético**: no es "faltan datos de ejemplo". Es que **el producto no
+funciona** en un entorno recién sembrado, y falla de la peor forma posible: en silencio. Se
+descubrió probando en un dispositivo real (2026-09-06) — el flujo de subir al portafolio devolvía
+403 permanente y la app se colgaba esperando un consentimiento imposible de dar (ver M-06 del
+WORKPLAN de `TekoApp-Frontend-Mobile`).
+
+**Verificación previa obligatoria** — contá las filas reales antes de asumir que siguen vacías:
+
+```sql
+SELECT 'professional_document_types' t, count(*) FROM professional_document_types
+UNION ALL SELECT 'legal_document_versions', count(*) FROM legal_document_versions
+UNION ALL SELECT 'user_consents', count(*) FROM user_consents;
+```
+
+Si ya tienen filas, **no reproduce**: anotalo en §7 con los números que encontraste y seguí.
+
+**Cambio**:
+
+1. **`prisma/seed.ts`** — sembrar, de forma **idempotente** (`upsert`, igual que ya hace con
+   `apiClientCredential`), el mínimo indispensable para que los flujos existan:
+   - Tipos de documento profesional: los que el negocio realmente pide (cédula, antecedentes,
+     título/certificación…). **Preguntá a José cuáles antes de inventarlos** — es una decisión de
+     producto, no técnica.
+   - Al menos una versión vigente de cada `LegalDocumentType` que el guard sepa exigir. Mirá qué
+     valores del enum se usan realmente en los decoradores `@RequiresActiveConsent(...)` del código
+     (`grep -rn "RequiresActiveConsent" src/`) — sembrar solo esos, no todo el enum.
+   - `PlatformCommissionConfig`: **decisión de José**, no inventes un porcentaje. Si no hay valor
+     definido, dejá la tabla vacía y anotalo, pero que quede explícito en el seed con un comentario.
+2. **Contenido de los documentos legales**: para el seed alcanza un placeholder honesto y marcado
+   como tal (ej. título + versión + un cuerpo que diga explícitamente que es contenido de
+   desarrollo). **No copies texto legal real** ni lo redactes vos — eso lo define José con
+   asesoría, y ponerlo acá le daría apariencia de definitivo a algo que no lo es.
+3. **Verificá contra la base después de correr el seed**, no solo que el comando termine sin error:
+   volvé a correr el `SELECT` de arriba y confirmá los conteos.
+
+> **La base de Supabase es COMPARTIDA.** Correr el seed la modifica. **Pedí autorización explícita a
+> José antes de ejecutarlo**, igual que con cualquier migración (ver §1.2).
+
+**Criterios de aceptación**: `pnpm run seed` corre dos veces seguidas sin error ni duplicados
+(idempotencia real); después de correrlo, "Mis documentos" muestra al menos un tipo con su botón
+de subir, y `POST professionals/me/portfolio` deja de devolver 403 para un usuario que aceptó los
+consentimientos.
+
+**Commit**: `feat(seed): sembrar los catalogos de documentos y consentimientos legales`
+
+---
+
 ## 7. Tabla de seguimiento
 
 | ID | Sev | Estado | Commit | Notas |
@@ -620,6 +741,7 @@ hacelo en un commit propio y solo si no hay nada más urgente en vuelo.
 | bug colateral (sin ID) | — | [x] | `efc2ad3` | `status='approved'` (string suelto) vs enum real `APPROVED` en `findNearby` — rompía `/locations/nearby` con 500 contra Postgres real. Fix vía `Prisma.raw(ProfessionalStatus.APPROVED)` |
 | H-01 | ALTO | [ ] | | **Preguntar antes**: agrega dependencia y servicio externo |
 | H-02 | ALTO | [ ] | | Arrancar permisivo, subir a bloqueante después |
+| H-03 | MEDIO | [ ] | | Costó una sesión entera de debugging real. Preferir el `handler` del limitador |
 | I-01 | CRÍTICO | [ ] | | Spec. Bloquea publicación de Mobile |
 | I-02 | ALTO | [ ] | | Spec. Bloqueada por qué ofrece Dinelco |
 | I-03 | MEDIO | [ ] | | Spec |
@@ -627,3 +749,4 @@ hacelo en un commit propio y solo si no hay nada más urgente en vuelo.
 | T-01 | MEDIO | [ ] | | Priorizar `contracts` |
 | T-02 | BAJO | [ ] | | |
 | T-03 | BAJO | [ ] | | El typo es barato, el rename no |
+| T-04 | ALTO | [ ] | | **Decisión de José**: qué tipos de documento y qué comisión. **Autorización explícita** para correr el seed (base compartida) |
