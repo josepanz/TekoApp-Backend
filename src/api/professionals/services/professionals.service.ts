@@ -62,6 +62,7 @@ export class ProfessionalsService {
       minRating: query.minRating,
       maxPrice: query.maxPrice,
       isAvailable: query.isAvailable,
+      search: query.search,
     };
     const result = await this.professionalsDb.findMany(
       filters,
@@ -83,6 +84,7 @@ export class ProfessionalsService {
       minRating: query.minRating,
       maxPrice: query.maxPrice,
       isAvailable: query.isAvailable,
+      search: query.search,
     };
     const professionals = await this.professionalsDb.findAllForExport(filters);
     const buffer = await this.reportService.generate(

@@ -93,6 +93,21 @@ export class ProfessionalsDbService {
       };
     }
 
+    // Búsqueda multi-palabra (AND de ORs) sobre el nombre del usuario relacionado — mismo
+    // patrón que `UsersDbService.findAll` usa para su propio filtro `name`.
+    if (filters.search) {
+      const ilike = Prisma.QueryMode.insensitive;
+      const terms = filters.search.trim().split(/\s+/).filter(Boolean);
+      if (terms.length > 0) {
+        where.AND = terms.map((term) => ({
+          OR: [
+            { user: { firstName: { contains: term, mode: ilike } } },
+            { user: { lastName: { contains: term, mode: ilike } } },
+          ],
+        }));
+      }
+    }
+
     return where;
   }
 

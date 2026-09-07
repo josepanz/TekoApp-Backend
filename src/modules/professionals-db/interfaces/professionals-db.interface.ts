@@ -6,6 +6,7 @@ export interface ProfessionalFilters {
   minRating?: number;
   maxPrice?: number;
   isAvailable?: boolean;
+  search?: string;
   page?: number;
   pageSize?: number;
 }

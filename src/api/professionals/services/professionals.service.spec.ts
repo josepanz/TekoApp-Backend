@@ -117,6 +117,22 @@ describe('ProfessionalsService', () => {
       );
       expect(result).toEqual(mockResult);
     });
+
+    it('debe pasar el filtro search tal cual (W-03)', async () => {
+      // Arrange
+      const query = { search: 'Juan Perez', page: 1, pageSize: 10 } as never;
+      const mockResult = { data: [], pagination: { total: 0 } };
+      mockFindMany.mockResolvedValue(mockResult);
+
+      // Act
+      await service.getProfessionals(query);
+
+      // Assert
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'Juan Perez' }),
+        query,
+      );
+    });
   });
 
   describe('exportToCsv', () => {

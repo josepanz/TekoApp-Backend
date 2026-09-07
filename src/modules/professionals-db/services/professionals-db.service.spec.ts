@@ -223,6 +223,60 @@ describe('ProfessionalsDbService', () => {
         }),
       );
     });
+
+    it('debe aplicar búsqueda multi-palabra por nombre/apellido del usuario relacionado, parcial e insensible a mayúsculas (W-03)', async () => {
+      // Arrange
+      const paginatedResult = {
+        data: [],
+        pagination: { total: 0, page: 1, pageSize: 10, totalPages: 0 },
+      };
+      mockPaginate.mockResolvedValue(paginatedResult);
+      const filters = { search: 'Juan Perez' };
+      const query = { page: 1, pageSize: 10 } as never;
+
+      // Act
+      await service.findMany(filters, query);
+
+      // Assert
+      expect(mockPaginate).toHaveBeenCalledWith(
+        expect.anything(),
+        query,
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: [
+              {
+                OR: [
+                  {
+                    user: {
+                      firstName: { contains: 'Juan', mode: 'insensitive' },
+                    },
+                  },
+                  {
+                    user: {
+                      lastName: { contains: 'Juan', mode: 'insensitive' },
+                    },
+                  },
+                ],
+              },
+              {
+                OR: [
+                  {
+                    user: {
+                      firstName: { contains: 'Perez', mode: 'insensitive' },
+                    },
+                  },
+                  {
+                    user: {
+                      lastName: { contains: 'Perez', mode: 'insensitive' },
+                    },
+                  },
+                ],
+              },
+            ],
+          }) as unknown,
+        }),
+      );
+    });
   });
 
   // ─── findAllForExport ────────────────────────────────────────────────────
