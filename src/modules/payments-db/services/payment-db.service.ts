@@ -105,6 +105,10 @@ export class PaymentDbService {
     });
   }
 
+  async countPayments(where: Prisma.PaymentsWhereInput): Promise<number> {
+    return this.prisma.extended.payments.count({ where });
+  }
+
   /** Busca un pago por su PK interna (Int). Uso interno tras resolver el referenceId. */
   async findPaymentById(id: number) {
     return this.prisma.extended.payments.findUnique({

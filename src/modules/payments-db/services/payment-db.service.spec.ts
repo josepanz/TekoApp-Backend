@@ -292,6 +292,25 @@ describe('PaymentDbService', () => {
     });
   });
 
+  // ── countPayments ─────────────────────────────────────────────────────────────
+  describe('countPayments', () => {
+    it('debe contar con el where recibido tal cual', async () => {
+      // Arrange
+      mockPaymentsCount.mockResolvedValue(3);
+      const where: Prisma.PaymentsWhereInput = {
+        userId: 1,
+        status: { in: [PaymentStatus.PENDING] },
+      };
+
+      // Act
+      const result = await service.countPayments(where);
+
+      // Assert
+      expect(result).toBe(3);
+      expect(mockPaymentsCount).toHaveBeenCalledWith({ where });
+    });
+  });
+
   // ── findPaymentById ──────────────────────────────────────────────────────────
   describe('findPaymentById', () => {
     it('debe retornar el pago cuando existe la PK interna', async () => {

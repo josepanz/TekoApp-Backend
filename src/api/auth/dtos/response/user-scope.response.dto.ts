@@ -32,6 +32,7 @@ export class UserScopeResponseDTO {
       documentNumber: '12345678',
       phoneNumber: '+595981234567',
       avatarUrl: null,
+      deletionScheduledAt: null,
     },
   })
   @IsObject()
@@ -46,6 +47,9 @@ export class UserScopeResponseDTO {
     profileStatus: string;
     isEmployee: boolean;
     accessLevelId: number;
+    // I-01: no-null mientras la cuenta tiene una solicitud de borrado activa (banner de ventana
+    // de gracia en Mobile/Web). `null` en cualquier otro estado.
+    deletionScheduledAt: Date | null;
   };
 
   @ApiProperty({ type: [RoleScopeDTO] })

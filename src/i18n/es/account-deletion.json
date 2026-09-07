@@ -1,0 +1,5 @@
+{
+  "DELETION_BLOCKED": "No se puede eliminar la cuenta: hay bloqueantes activos",
+  "DELETION_ALREADY_REQUESTED": "Ya existe una solicitud de borrado activa para esta cuenta",
+  "DELETION_NOT_REQUESTED": "No hay ninguna solicitud de borrado activa para cancelar"
+}

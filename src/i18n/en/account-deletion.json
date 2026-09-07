@@ -1,0 +1,5 @@
+{
+  "DELETION_BLOCKED": "The account cannot be deleted: there are active blockers",
+  "DELETION_ALREADY_REQUESTED": "There is already an active deletion request for this account",
+  "DELETION_NOT_REQUESTED": "There is no active deletion request to cancel"
+}

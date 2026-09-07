@@ -322,6 +322,10 @@ export class AuthService {
       case UserStatus.PENDING_VERIFICATION:
         this.logger.warn('El usuario no ha verificado su cuenta.');
         return;
+      case UserStatus.PENDING_DELETION:
+        // Ventana de gracia de borrado de cuenta (I-01) — login permitido a propósito: alguien
+        // que se arrepiente necesita poder entrar para cancelar el pedido.
+        return;
       case UserStatus.ACTIVE:
         return;
     }

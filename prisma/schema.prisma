@@ -37,6 +37,7 @@ enum UserStatus {
   INACTIVE
   REFUSED
   PENDING_VERIFICATION
+  PENDING_DELETION // ventana de gracia de borrado de cuenta activa, login permitido, cancelable — ver I-01
 }
 
 enum UserProfileStatus {
@@ -89,6 +90,10 @@ model Users {
   lastChangedBy       String?           @map("last_changed_by")
   unverifiedEmail     String?           @map("unverified_email")
   changedReason       String?           @map("changed_reason")
+  // Borrado de cuenta (I-01) — ventana de gracia: fijado al solicitar, limpiado al cancelar,
+  // consumido por el job de anonimización cuando `deletionScheduledAt <= now()`.
+  deletionRequestedAt DateTime?         @map("deletion_requested_at")
+  deletionScheduledAt DateTime?         @map("deletion_scheduled_at")
   acceptedTermsAt     DateTime?         @map("accepted_terms_at")
   accessLevelId       Int?              @map("access_level_id")
   // Idioma preferido del usuario. Nullable: sin preferencia explícita => se usa el default `es`
@@ -568,7 +573,10 @@ model ProfessionalDocuments {
   referenceId                String               @unique @default(uuid()) @map("reference_id")
   professionalId             Int                  @map("professional_id")
   professionalDocumentTypeId Int                  @map("professional_document_type_id")
-  fileKey                    String               @map("file_key") // S3 key, mismo patrón que Users.avatarKey
+  // S3 key, mismo patrón que Users.avatarKey. Nullable desde I-01: al anonimizar una cuenta se
+  // borra el objeto real de S3 y se anula la referencia — la fila se conserva como registro de
+  // que existió una verificación.
+  fileKey                    String?              @map("file_key")
   status                     DocumentReviewStatus @default(PENDING)
   issuedAt                   DateTime?            @map("issued_at")
   expiresAt                  DateTime?            @map("expires_at")

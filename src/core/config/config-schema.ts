@@ -79,4 +79,6 @@ export const configSchema = Joi.object({
   PROGRESS_LOG_MAX_IMAGES_PER_ENTRY: Joi.number().integer().min(1).default(6),
   PROGRESS_LOG_EDIT_WINDOW_MINUTES: Joi.number().integer().min(1).default(15),
   PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE: Joi.boolean().default(true),
+
+  ACCOUNT_DELETION_GRACE_PERIOD_DAYS: Joi.number().integer().min(1).default(14),
 });

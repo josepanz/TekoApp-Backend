@@ -29,6 +29,7 @@ import { ContractsModule } from '@/api/contracts/contracts.module';
 import { TipsModule } from '@/api/tips/tips.module';
 import { TaxModule } from '@/api/tax/tax.module';
 import { AuditLogModule } from '@/api/audit-log/audit-log.module';
+import { AccountDeletionModule } from '@/api/account-deletion/account-deletion.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { AuditLogModule } from '@/api/audit-log/audit-log.module';
     TipsModule,
     TaxModule,
     AuditLogModule,
+    AccountDeletionModule,
   ],
 })
 export class ApiModule {}

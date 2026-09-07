@@ -316,6 +316,31 @@ describe('AuthService', () => {
         UnauthorizedException,
       );
     });
+
+    it('debe permitir el login normalmente durante la ventana de gracia de borrado de cuenta (I-01)', async () => {
+      // Arrange
+      const credentials = buildCredentials(UserStatus.PENDING_DELETION);
+      mockFindCredentialsByEmail.mockResolvedValue(credentials);
+      mockDecryptLoginPayload.mockReturnValue({
+        password: 'plain',
+        nonce: 'nonce-123',
+      });
+      mockNonceConsume.mockResolvedValue(true);
+      mockValidatePassword.mockReturnValue(true);
+      mockResetFailedAttempts.mockResolvedValue(undefined);
+      mockUpdateLastLogin.mockResolvedValue(undefined);
+      mockGenerateTokens.mockReturnValue({
+        accessToken: 'access_tok',
+        refreshToken: 'refresh_tok',
+      });
+
+      // Act
+      const result = await service.login(loginPayload);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.accessToken).toBe('access_tok');
+    });
   });
 
   // ──────────────────────────────────────────────────────────────────────────

@@ -142,6 +142,14 @@ export const APP_CONFIG = registerAs('config', () => {
       requireNoteOrImage:
         process.env.PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE !== 'false',
     },
+    accountDeletion: {
+      // Ventana de gracia (I-01): días entre pedir el borrado y la anonimización efectiva.
+      // Propuesta sin medir, no un número legal obligatorio — ver
+      // openspec/changes/platform-hardening-2026-09/I-01-account-deletion.md.
+      gracePeriodDays: process.env.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
+        ? parseInt(process.env.ACCOUNT_DELETION_GRACE_PERIOD_DAYS)
+        : 14,
+    },
   };
 });
 

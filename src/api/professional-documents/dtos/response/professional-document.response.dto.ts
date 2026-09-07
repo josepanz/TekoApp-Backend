@@ -9,12 +9,14 @@ export class ProfessionalDocumentResponseDTO {
   @ApiProperty({ type: ProfessionalDocumentTypeResponseDTO })
   professionalDocumentType!: ProfessionalDocumentTypeResponseDTO;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'Key de S3 — el cliente resuelve la URL presignada vía GET /uploads/presigned-url, mismo ' +
-      'patrón que Services.images.',
+      'patrón que Services.images. `null` si la cuenta del profesional fue anonimizada (I-01): ' +
+      'el objeto real se borra de S3, la fila se conserva como registro de que existió una ' +
+      'verificación.',
   })
-  fileKey!: string;
+  fileKey!: string | null;
 
   @ApiProperty({ enum: DocumentReviewStatus })
   status!: DocumentReviewStatus;

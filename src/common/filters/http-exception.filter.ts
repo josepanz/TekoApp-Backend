@@ -25,6 +25,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // pensado para que un cliente (Mobile/Web) rame en un `switch` sin parsear el mensaje.
     // Opcional: la mayoría de las excepciones no lo setean y el campo se omite del JSON.
     let errorCode: string | undefined;
+    // `details` es el complemento estructurado de `errorCode`: para casos donde el cliente
+    // necesita algo más que un código (ej. I-01, `DELETION_BLOCKED` con la lista de bloqueantes
+    // y cuántos casos de cada uno) — un objeto arbitrario, se pasa tal cual, nunca parseado.
+    let details: unknown;
 
     if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
       const resp = exceptionResponse as Record<string, unknown>;
@@ -46,6 +50,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const raw = resp['errorCode'];
         errorCode = typeof raw === 'string' ? raw : undefined;
       }
+      if ('details' in resp) {
+        details = resp['details'];
+      }
     }
 
     const errorResponse = {
@@ -55,6 +62,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message,
         error,
         ...(errorCode ? { errorCode } : {}),
+        ...(details !== undefined ? { details } : {}),
         timestamp: new Date().toISOString(),
         path: request.url,
       },

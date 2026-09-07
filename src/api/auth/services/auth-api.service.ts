@@ -181,6 +181,11 @@ export class AuthApiService {
         profileStatus: fullUser.profileStatus,
         accessLevelId: fullUser.accessLevelId,
         isEmployee: fullUser.isEmployee,
+        // I-01 (borrado de cuenta): fresco desde DB — a diferencia de `me()` (GET /auth/me), que
+        // solo ecoa el JWT y quedaría desactualizado durante la ventana de gracia (el JWT no se
+        // reemite al pedir/cancelar el borrado). Este endpoint ya hace un `findUserById` propio,
+        // no es una consulta nueva.
+        deletionScheduledAt: fullUser.deletionScheduledAt,
       },
       roles,
       permissions,

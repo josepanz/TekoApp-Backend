@@ -61,6 +61,8 @@ const mockUser = {
   updatedBy: null,
   deletedAt: null,
   acceptedTermsAt: null,
+  deletionRequestedAt: null,
+  deletionScheduledAt: null,
 } as unknown as Users;
 
 const mockJwtUser: IUserDataOnJwt = {
@@ -485,9 +487,27 @@ describe('AuthApiService', () => {
         profileStatus: mockUser.profileStatus,
         accessLevelId: mockUser.accessLevelId,
         isEmployee: mockUser.isEmployee,
+        deletionScheduledAt: null,
       });
       expect(result.roles).toHaveLength(1);
       expect(result.permissions).toHaveLength(1);
+    });
+
+    it('expone deletionScheduledAt fresco de DB cuando la cuenta tiene un borrado pendiente (I-01)', async () => {
+      // Arrange
+      const scheduledAt = new Date('2026-09-21');
+      mockFindUserById.mockResolvedValue({
+        ...mockUser,
+        status: UserStatus.PENDING_DELETION,
+        deletionScheduledAt: scheduledAt,
+      });
+      mockGetUserScope.mockResolvedValue({ roles: [], permissions: [] });
+
+      // Act
+      const result = await service.scope(mockJwtUser);
+
+      // Assert
+      expect(result.user.deletionScheduledAt).toBe(scheduledAt);
     });
 
     it('consulta usuario y scope en paralelo', async () => {
