@@ -639,3 +639,30 @@ filtros, sin paginar).
 Web: correr `pnpm generate:api-types` — desbloquea `admin-data-export.md`.
 
 Verificado: 123 suites/1341 tests, build/lint/format en verde.
+
+## W-03 de `0015-admin-backoffice-endpoints.md` — búsqueda por texto en listados (2026-09-07)
+
+Ver `openspec/changes/0015-admin-backoffice-endpoints.md` para el detalle completo. Un solo
+commit (`81083a8`) — `users` no necesitó cambio de código.
+
+**`users`**: verificado `users-db.service.ts#findAll` — el filtro `name` ya arma un `AND` de `OR`
+multi-palabra sobre `firstName`/`lastName` con `contains` + `mode: insensitive`, y `email` también
+usa `contains`/insensitive. Ya sirve tal cual para la búsqueda de Web. Se agregó un test de
+regresión en `users-db.service.spec.ts` (no existía cobertura explícita de este filtro antes).
+
+**`professionals`**: no tenía ningún filtro de texto. Se agregó `search?: string` a
+`GetProfessionalsListQueryDTO` y el mismo patrón multi-palabra (`AND` de `OR`) sobre
+`user.firstName`/`user.lastName` en `ProfessionalsDbService` — reusado tanto por `findMany` (vía
+`buildListWhere`, ver W-02) como por `findAllForExport`, así que el export CSV de W-02 también
+hereda la búsqueda sin cambios adicionales.
+
+No se agregó ningún endpoint agregador (`GET /admin/search`) — la spec de Web explícitamente no lo
+pide en esta iteración, hace la agregación del lado cliente contra `/users?search=` y
+`/professionals?search=`.
+
+Web: correr `pnpm generate:api-types` — desbloquea la "opción intermedia" de
+`admin-global-search.md` deja de ser necesaria (Web puede buscar con texto libre directo).
+
+Con esto, `0015-admin-backoffice-endpoints.md` queda cerrado: W-01, W-02 y W-03 completas.
+
+Verificado: 123 suites/1344 tests, build/lint/format en verde.
