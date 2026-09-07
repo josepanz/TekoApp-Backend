@@ -784,7 +784,7 @@ aparte**, para que nadie lea la tabla del §7 como "incompleta":
 | `I-01` de este WORKPLAN | Implementar el borrado de cuenta especificado | `platform-hardening-2026-09/I-01-account-deletion.md` | spec lista, sin implementar |
 | `I-03` de este WORKPLAN | Implementar el registro de disputas especificado | `platform-hardening-2026-09/I-03-dispute-records.md` | spec lista, sin implementar |
 | `I-04` de este WORKPLAN | Aplicar `defaultVersion: '1'` a los 37 controllers | `platform-hardening-2026-09/I-04-api-versioning-policy.md` | spec lista, sin implementar |
-| hallazgo de paso en `I-03` | `POST /payments/:id/refund` sin autorización | ver abajo | **sin corregir** |
+| hallazgo de paso en `I-03` | `POST /payments/:id/refund` sin autorización | ver abajo | **[x] corregido** — `a3760f6` |
 
 ### Hallazgo sin ID, encontrado haciendo `I-03` y confirmado el 2026-09-06
 
@@ -795,6 +795,10 @@ usuario autenticado** — recibe únicamente `param.id`. O sea: cualquier usuari
 reembolsar el pago de cualquier otro conociendo su id numérico. Es más grave que "le falta el
 guard de permisos" como quedó anotado en `I-03`, y por eso se registra acá aparte: es lo primero
 que hay que corregir del trabajo derivado, antes que cualquier feature nueva.
+
+**Corregido 2026-09-07** (`a3760f6`): `@UseGuards(PermissionsGuard)` + `@Permissions(PAYMENTS.AUDIT_VIEW, ADMIN.ALL)`
+(mismo permiso que gatea `findAll`/`getSummary`/`getTrends` del mismo controller) + acotar el pago
+al usuario autenticado en el service, igual que `cancelPayment`. Detalle en `openspec/decisions.md`.
 
 Al cerrar cualquiera de estos entregables, registrarlo en `openspec/decisions.md` con el mismo
 formato que las fases anteriores (`0011`, `0013`, …) — la tabla de acá solo lleva el estado.

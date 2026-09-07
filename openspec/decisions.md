@@ -557,3 +557,27 @@ sin errores de DI.
 
 Verificado: 109 suites/1258 tests, build/lint/format en verde. Migración aplicada y boot real
 confirmado contra Supabase — sin pendientes.
+
+## Trabajo derivado de `platform-hardening-2026-09` — fix de autorización en `POST /payments/:id/refund` (2026-09-07)
+
+Ver `openspec/changes/platform-hardening-2026-09/WORKPLAN.md` §8, "Hallazgo sin ID". Encontrado de
+paso haciendo I-03 (2026-09-06): el endpoint estaba solo detrás de `JwtAuthGuard` a nivel de clase,
+sin `PermissionsGuard`/`@Permissions` y sin acotar el pago al usuario autenticado — a diferencia de
+`cancel()`, que sí pasa `req.user.id` al service. Cualquier usuario logueado podía reembolsar el
+pago de cualquier otro conociendo su id.
+
+Fix (dos partes, ambas necesarias):
+
+- `@UseGuards(PermissionsGuard)` + `@Permissions(PERMISSIONS.PAYMENTS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)`
+  en `PaymentController.refund` — el mismo permiso que ya gatea `findAll`/`getSummary`/`getTrends`
+  en el mismo controller, no uno nuevo inventado.
+- `PaymentApiService.refundPayment` ahora recibe `userId` y lanza `ForbiddenException` si
+  `payment.userId !== userId`, igual que `cancelPayment`.
+
+Efecto: por diseño, este endpoint queda utilizable solo por quien tiene el permiso de auditoría de
+pagos **y** es dueño del pago — deliberadamente restrictivo como cierre provisorio del agujero de
+autorización. El camino real de reembolso administrativo (staff reembolsando pagos de terceros)
+queda para las vías de adjudicación de disputas que especifica `I-03-dispute-records.md`
+(`PATCH /admin/disputes/:referenceId/resolve`, aún sin implementar).
+
+Commit: `a3760f6`. Verificado: 117 suites/1323 tests, build/lint/format en verde.
