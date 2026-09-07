@@ -77,6 +77,9 @@ export const PERMISSIONS = {
   PAYMENTS: {
     AUDIT_VIEW: 'payments.audit:read',
   },
+  SYSTEM: {
+    AUDIT_VIEW: 'system.audit:read',
+  },
 } as const;
 
 // Tipo utilitario para usar en guards o decoradores
