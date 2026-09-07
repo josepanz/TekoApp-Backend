@@ -581,3 +581,29 @@ queda para las vías de adjudicación de disputas que especifica `I-03-dispute-r
 (`PATCH /admin/disputes/:referenceId/resolve`, aún sin implementar).
 
 Commit: `a3760f6`. Verificado: 117 suites/1323 tests, build/lint/format en verde.
+
+## W-01 de `0015-admin-backoffice-endpoints.md` — `GET /admin/audit-logs` (2026-09-07)
+
+Ver `openspec/changes/0015-admin-backoffice-endpoints.md` para el detalle completo. Endpoint de
+solo lectura sobre `AuditLogs` (poblada por triggers de auditoría, nada la escribe vía código de
+aplicación), para el visor de auditoría de Web (`admin-audit-log-viewer.md`).
+
+Módulos nuevos: `src/modules/audit-log-db` (Prisma) y `src/api/audit-log` (controller/service/DTOs),
+mismo layout que `contracts`. Permiso nuevo `SYSTEM.AUDIT_VIEW` (`system.audit:read`) — se suma
+solo al enum `PERMISSIONS`, el seed ya lo recoge automáticamente (`flattenPermissionCodes` de
+`prisma/seed.ts` itera el objeto completo, no una lista estática).
+
+**Decisión técnica**: no se reusó `PrismaPaginationUtil.paginate` a pesar de que otros módulos de
+auditoría lo hacen (`contracts`, `ai-disclosures`). Ese helper arma el filtro de rango de fechas
+siempre contra una columna `createdAt` hardcodeada; `AuditLogs` no tiene esa columna, solo
+`changedAt`. Reusarlo hubiera roto en runtime ("Unknown argument `createdAt`") apenas alguien
+mandara `startDate`/`endDate` en el query — que es justo uno de los filtros que pide la spec de
+Web. Se escribió paginación manual en `AuditLogDbService.findPaginated` en su lugar (mismo cálculo
+de `skip`/`take`/`totalPages`, filtro de fecha sobre `changedAt`).
+
+`AuditLogs.id` es `BigInt` — se serializa a `string` en el mapper de respuesta (`.toString()`),
+mismo criterio que otros ids grandes del repo (#0008).
+
+Web: correr `pnpm generate:api-types` — desbloquea `admin-audit-log-viewer.md`.
+
+Commit: `220b801`. Verificado: 120 suites/1331 tests, build/lint/format en verde.
