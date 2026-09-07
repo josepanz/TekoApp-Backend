@@ -769,3 +769,32 @@ consentimientos.
 | T-02 | BAJO | [x] | `6657a7c` | Migración aplicada contra Supabase (2026-09-06, conexión directa 5432, `migrate status` limpio antes/después). Un solo valor real ("verified") mapeado sin pérdida vía `UPPER(...)::VerificationStatus`. `professionals_nearby_idx` (D-01) se reconstruyó solo, verificado en `pg_indexes` |
 | T-03 | BAJO | [x] | `53de172` | Solo el typo de archivo (clase ya se llamaba `TrackingDbService`). Rename de módulos (`locations-db`/`tracking-db`) diferido, fuera de alcance de esta tarea |
 | T-04 | ALTO | [x] | `58fb50c` | Verificado contra Supabase real (0 filas antes). Seed corrido 2 veces: idempotente (docTypes=4, legalVersions=2, commissions=1, permissions=33). Sin enum cerrado de código de documento: 1 tipo por `DocumentCategory` (criterio documentado en el seed); solo 2 `LegalDocumentType` sembrados (los que un guard exige de verdad) |
+
+---
+
+## 8. Trabajo derivado — NO es parte de este change set
+
+Este WORKPLAN está cerrado salvo `H-01` e `I-02`, que quedan abiertos por decisión pendiente de
+José (no por falta de trabajo técnico). Lo que sigue **nació de este change set pero se ejecuta
+aparte**, para que nadie lea la tabla del §7 como "incompleta":
+
+| Origen | Entregable | Dónde vive | Estado |
+|---|---|---|---|
+| `I-01` de Web (`TekoApp-Frontend-Web`) | 3 endpoints admin que Web necesita | `openspec/changes/0015-admin-backoffice-endpoints.md` (`W-01`..`W-03`) | pendiente |
+| `I-01` de este WORKPLAN | Implementar el borrado de cuenta especificado | `platform-hardening-2026-09/I-01-account-deletion.md` | spec lista, sin implementar |
+| `I-03` de este WORKPLAN | Implementar el registro de disputas especificado | `platform-hardening-2026-09/I-03-dispute-records.md` | spec lista, sin implementar |
+| `I-04` de este WORKPLAN | Aplicar `defaultVersion: '1'` a los 37 controllers | `platform-hardening-2026-09/I-04-api-versioning-policy.md` | spec lista, sin implementar |
+| hallazgo de paso en `I-03` | `POST /payments/:id/refund` sin autorización | ver abajo | **sin corregir** |
+
+### Hallazgo sin ID, encontrado haciendo `I-03` y confirmado el 2026-09-06
+
+`src/api/payments/controllers/payments.controller.ts:159` (`POST :id/refund`) está solo detrás de
+`JwtAuthGuard` a nivel de clase: **no** tiene `@UseGuards(PermissionsGuard)` ni `@Permissions(...)`,
+y a diferencia de `cancel` (línea 153, que pasa `req.user.id` al service) **no acota el pago al
+usuario autenticado** — recibe únicamente `param.id`. O sea: cualquier usuario logueado puede
+reembolsar el pago de cualquier otro conociendo su id numérico. Es más grave que "le falta el
+guard de permisos" como quedó anotado en `I-03`, y por eso se registra acá aparte: es lo primero
+que hay que corregir del trabajo derivado, antes que cualquier feature nueva.
+
+Al cerrar cualquiera de estos entregables, registrarlo en `openspec/decisions.md` con el mismo
+formato que las fases anteriores (`0011`, `0013`, …) — la tabla de acá solo lleva el estado.

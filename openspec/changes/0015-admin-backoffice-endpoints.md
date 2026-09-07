@@ -13,6 +13,32 @@ Este archivo ya trae la exploración hecha (archivos, DTOs, permisos, patrones e
 **No re-explorar el dominio de cada módulo entero** — cada tarea dice qué archivo abrir y qué
 copiar. Si un archivo citado no existe o cambió de forma, recién ahí investigar puntual.
 
+## Protocolo de ejecución (vale para las 3 tareas)
+
+Este archivo es trabajo derivado de `platform-hardening-2026-09` y **hereda su protocolo**, no
+uno propio. Antes de tocar código, leer `openspec/changes/platform-hardening-2026-09/WORKPLAN.md`
+§0.1 (checkpoints) y §1.2 (Definition of Done). En resumen, lo que no es negociable:
+
+- Rama `audit/2026-09-04`. **Nunca** commitear en `develop`, `qa` ni `master`.
+- **Una tarea = un commit = un checkpoint.** Al terminar cada tarea: correr la DoD completa,
+  commitear con el mensaje que la tarea indica, marcar la casilla en la tabla del final de este
+  archivo con el hash, y **parar y reportar**. No seguir con la siguiente por iniciativa propia.
+- DoD del §1.2: `pnpm run format`, `pnpm run lint`, `pnpm run test`, `pnpm run build` — los cuatro
+  en verde, **0 warnings y 0 errores**. Prohibido reportar "completado" con el lint en rojo.
+- Commits en español, Conventional Commits, header ≤100 chars. **Sin `Co-Authored-By` ni ninguna
+  referencia a Claude/IA.**
+- Ninguna de estas 3 tareas necesita migración: son endpoints de lectura sobre tablas que ya
+  existen. Si alguna parece necesitar un cambio de schema, **parar y avisar** — la base de
+  Supabase es compartida y toda migración necesita autorización explícita de José.
+- **Cierre de cada tarea que publique un endpoint nuevo**: dejar anotado en el reporte que Web
+  tiene que correr `pnpm generate:api-types` en su repo, y qué spec de Web queda desbloqueada
+  (ver el mapeo del encabezado). Web tiene prohibido escribir esos tipos a mano.
+
+Estado y dependencias cruzadas: `WORKPLAN.md` §8 (tabla de trabajo derivado) del change set
+`platform-hardening-2026-09`.
+
+---
+
 ## Convenciones de este repo (para no tener que descubrirlas)
 
 - Permisos nuevos van en `src/common/enum/permissions.enum.ts`, formato
