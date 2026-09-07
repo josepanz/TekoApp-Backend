@@ -33,6 +33,16 @@ export const ApiGetPayments = () =>
     }),
   );
 
+export const ApiExportPayments = () =>
+  applyDecorators(
+    ApiBearerAuth('JWT-auth'),
+    ApiOperation({
+      summary: 'Exportar pagos a CSV (staff)',
+      description: 'Mismos filtros que el listado admin, sin paginar.',
+    }),
+    ApiResponse({ status: 200, description: 'Archivo CSV de pagos' }),
+  );
+
 export const ApiGetMyPayments = () =>
   applyDecorators(
     ApiBearerAuth(),

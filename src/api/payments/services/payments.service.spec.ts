@@ -12,11 +12,13 @@ import { PaymentApiService } from './payments.service';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
 import { TaxService } from '@api/tax/services/tax.service';
+import { ReportService } from '@modules/report/services/report.service';
 import { RefundReason } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentDto } from '../dtos/request/create-payment.dto';
 import type { RefundPaymentDto } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentMethodRequestDTO } from '../dtos/request/create-payment-method.request.dto';
 import type { UpdatePaymentMethodDto } from '../dtos/request/update-payment-method.dto';
+import type { PaymentListQueryDTO } from '../dtos/request/payment-list.query.dto';
 
 // ============================================================
 // Mocks a nivel de módulo — nunca inline en useValue
@@ -49,6 +51,9 @@ const mockCalculatePlatformFee = jest.fn();
 
 // TaxService
 const mockCalculateTax = jest.fn();
+
+// ReportService
+const mockGenerate = jest.fn();
 
 // ============================================================
 // Fixtures reutilizables
@@ -159,6 +164,10 @@ describe('PaymentApiService', () => {
         {
           provide: TaxService,
           useValue: { calculateTax: mockCalculateTax },
+        },
+        {
+          provide: ReportService,
+          useValue: { generate: mockGenerate },
         },
       ],
     }).compile();
@@ -654,6 +663,58 @@ describe('PaymentApiService', () => {
       await expect(
         service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  // ============================================================
+  // exportToCsv
+  // ============================================================
+  describe('exportToCsv', () => {
+    it('debe pedir los pagos con los mismos filtros que getPayments, sin paginar', async () => {
+      // Arrange
+      mockFindAllPayments.mockResolvedValue([buildPayment()]);
+      mockGenerate.mockResolvedValue(Buffer.from('csv'));
+      const query = {
+        userId: 1,
+        professionalId: 2,
+        status: PaymentStatus.COMPLETED,
+      } as PaymentListQueryDTO;
+
+      // Act
+      await service.exportToCsv(query);
+
+      // Assert
+      expect(mockFindAllPayments).toHaveBeenCalledWith(
+        1,
+        2,
+        PaymentStatus.COMPLETED,
+      );
+    });
+
+    it('debe generar un CSV con una fila por pago y devolver el buffer del reportService', async () => {
+      // Arrange
+      mockFindAllPayments.mockResolvedValue([buildPayment()]);
+      const csvBuffer = Buffer.from('csv-content');
+      mockGenerate.mockResolvedValue(csvBuffer);
+
+      // Act
+      const result = await service.exportToCsv({});
+
+      // Assert
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
+            expect.objectContaining({
+              referenceId: BASE_PAYMENT_REF,
+              serviceId: BASE_SERVICE_REF,
+            }),
+          ],
+        }),
+        { format: 'csv' },
+      );
+      expect(result.buffer).toBe(csvBuffer);
+      expect(result.format).toBe('csv');
+      expect(result.filename).toMatch(/^pagos-\d{4}-\d{2}-\d{2}\.csv$/);
     });
   });
 

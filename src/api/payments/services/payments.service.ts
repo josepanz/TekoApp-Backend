@@ -9,6 +9,8 @@ import {
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
 import { TaxService } from '@api/tax/services/tax.service';
+import { ReportService } from '@modules/report/services/report.service';
+import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PaymentStatus, Prisma } from '@prisma/client';
@@ -25,12 +27,17 @@ import {
   RefundPaymentDto,
   UpdatePaymentMethodDto,
   CreatePaymentMethodRequestDTO,
+  PaymentListQueryDTO,
 } from '../dtos/request';
 import {
   mapPaymentToResponse,
   mapPaymentsToResponse,
   mapPaymentMethodToResponse,
 } from '../helpers/payments-response.helper';
+import {
+  PAYMENTS_EXPORT_COLUMNS,
+  mapPaymentsToExportRows,
+} from '../helpers/payments-export.helper';
 
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
@@ -39,6 +46,7 @@ export class PaymentApiService {
     private readonly dbService: PaymentDbService,
     private readonly feeCalculator: FeeCalculatorService,
     private readonly taxService: TaxService,
+    private readonly reportService: ReportService,
   ) {}
 
   // ==================== PAGOS ====================
@@ -124,6 +132,29 @@ export class PaymentApiService {
       status,
     );
     return mapPaymentsToResponse(payments);
+  }
+
+  // Mismos filtros y misma fuente de datos que getPayments — sin paginar, el volumen lo
+  // controla el filtro que mande el staff, no una página.
+  async exportToCsv(query: PaymentListQueryDTO): Promise<IDownloadResponse> {
+    const payments = await this.dbService.findAllPayments(
+      query.userId,
+      query.professionalId,
+      query.status,
+    );
+    const rows = mapPaymentsToExportRows(mapPaymentsToResponse(payments));
+    const buffer = await this.reportService.generate(
+      {
+        metadata: { title: 'Pagos', excelColumns: PAYMENTS_EXPORT_COLUMNS },
+        items: rows,
+      },
+      { format: 'csv' },
+    );
+    return {
+      buffer,
+      filename: `pagos-${new Date().toISOString().slice(0, 10)}.csv`,
+      format: 'csv',
+    };
   }
 
   async getPaymentById(id: string): Promise<PaymentDetailResponseDTO> {
