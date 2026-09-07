@@ -10,7 +10,6 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  Version,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -49,7 +48,6 @@ export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
   @Post('image')
-  @Version('1')
   @UseInterceptors(FileInterceptor('file'))
   @UploadImageDocs()
   async uploadImage(
@@ -60,7 +58,6 @@ export class UploadsController {
   }
 
   @Post('document')
-  @Version('1')
   @UseInterceptors(FileInterceptor('file'))
   @UploadDocumentDocs()
   async uploadDocument(
@@ -71,7 +68,6 @@ export class UploadsController {
   }
 
   @Post('avatar')
-  @Version('1')
   @UseInterceptors(FileInterceptor('file'))
   @UploadAvatarDocs()
   async uploadAvatar(
@@ -82,7 +78,6 @@ export class UploadsController {
   }
 
   @Post('merchant-docs')
-  @Version('1')
   @FileUploader({
     fields: MERCHANT_DOC_FIELDS,
     allowedTypes: MERCHANT_DOC_ALLOWED_MIME_TYPES,
@@ -103,7 +98,6 @@ export class UploadsController {
   }
 
   @Get('presigned-url')
-  @Version('1')
   @GetPresignedUrlDocs()
   @ApiQuery({
     name: 'key',
@@ -117,7 +111,6 @@ export class UploadsController {
   }
 
   @Get('info/:filename')
-  @Version('1')
   async getFileInfo(
     @Param() param: UploadFileParamDTO,
   ): Promise<{ url: string; key: string }> {
@@ -126,7 +119,6 @@ export class UploadsController {
   }
 
   @Delete(':filename')
-  @Version('1')
   @DeleteFileDocs()
   async deleteFile(
     @Param() param: UploadFileParamDTO,

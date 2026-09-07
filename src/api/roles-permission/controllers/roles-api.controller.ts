@@ -6,7 +6,6 @@ import {
   Body,
   Param,
   Query,
-  Version,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -30,7 +29,6 @@ export class RolesApiController {
   constructor(private readonly rolesApiService: RolesApiService) {}
 
   @Post()
-  @Version('1')
   @RolesDocs('createRole')
   @Permissions(PERMISSIONS.ROLE.CREATE, PERMISSIONS.ADMIN.ALL)
   async createRole(
@@ -41,7 +39,6 @@ export class RolesApiController {
   }
 
   @Get()
-  @Version('1')
   @RolesDocs('getAllRoles')
   @Permissions(PERMISSIONS.ROLE.READ, PERMISSIONS.ADMIN.ALL)
   async getAllRoles(
@@ -51,7 +48,6 @@ export class RolesApiController {
   }
 
   @Get(':id')
-  @Version('1')
   @RolesDocs('getRoleById')
   @Permissions(PERMISSIONS.ROLE.READ, PERMISSIONS.ADMIN.ALL)
   async getRoleById(
@@ -61,7 +57,6 @@ export class RolesApiController {
   }
 
   @Put(':id')
-  @Version('1')
   @RolesDocs('updateRole')
   @Permissions(PERMISSIONS.ROLE.UPDATE, PERMISSIONS.ADMIN.ALL)
   async updateRole(
