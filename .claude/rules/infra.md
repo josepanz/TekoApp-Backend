@@ -11,3 +11,9 @@
   el default de nginx sin esta anotación es 1MB, así que una subida de imagen sin esto falla en
   el ingress antes de llegar a la app) — comparado contra `portal-comercios-backend`, que sí las
   tiene en sus 3 ambientes (2026-07-21).
+- El endpoint de healthcheck (`/tekoapp-backend/api/healthcheck`) NO puede moverse bajo `/v1` sin
+  migrar primero los 9 paths de probes de los 3 ambientes (ci/develop/1_deployment.yml líneas
+  60/67/75, ci/qa/1_deployment.yml líneas 60/67/75, ci/master/1_deployment.yml líneas 60/67/75) Y
+  la config de health check en Render (fuera del repo). Motivo: un health check en 404 hace que el
+  pod nunca llegue a Ready y el deploy falla con rollback inmediato; además, un rollback a una
+  imagen anterior también fallaría si solo cambiaron los manifiestos y no se revierte la app.

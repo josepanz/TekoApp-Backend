@@ -722,3 +722,46 @@ job de vencimiento).
 
 Commit: `a24cf7f`. Verificado: 127 suites/1369 tests, build/lint/format en verde, migración
 aplicada por José (2026-09-07) y `prisma migrate status` limpio antes y después.
+
+## I-04 — Versionado a v1 global + excepción del healthcheck (2026-09-07)
+
+Corte de versionado de la API: implementación del `defaultVersion: '1'` a nivel de `enableVersioning()`
+en `src/main.ts`, con remoción de los `@Version('1')` redundantes de los 6 controllers que ya 
+versionaban a mano (auth-api, onboarding, roles-api, users-roles-api, uploads, users). Decisión 
+técnica: un `defaultVersion` global heredado automáticamente por todo controller nuevo, sin la carga 
+cognitiva de decorar controller por controller — un developer que agrega un endpoint nuevo consume 
+`/v1` sin que tenga que acordarse nada. Resultado: 170 rutas en el Swagger, 169 bajo `/v1`, 1 
+excepción deliberada.
+
+**La excepción**: `src/modules/health/health.controller.ts` (`@Controller('healthcheck')`) lleva 
+`@Version(VERSION_NEUTRAL)` a nivel de **método**, no de clase. (El tipado de `@Version` en esta 
+versión de Nest es un `MethodDecorator`; aplicarlo en la clase rompe tsc con TS1238/TS1270.) Motivo: 
+9 paths de probes de Kubernetes apuntan al path sin versión — `ci/develop/1_deployment.yml`, 
+`ci/qa/1_deployment.yml` y `ci/master/1_deployment.yml`, líneas 60/67/75 de cada uno 
+(startupProbe + readinessProbe + livenessProbe), todos contra `/tekoapp-backend/api/healthcheck`. 
+Además, el health check de Render está configurado fuera del repo (en su dashboard) contra ese mismo 
+path. Si el health se movía a `/v1`, las probes daban 404, el pod nunca llegaba a Ready y el deploy 
+se caía con rollback inmediato. Se eligió `VERSION_NEUTRAL` en vez de editar los 9 paths a propósito: 
+cambiando los manifiestos, un rollback a una imagen anterior también fallaría.
+
+**Dato técnico importante, verificado empíricamente** leyendo `route-path-factory.js` de 
+`@nestjs/core` y con la app levantada: bajo `VersioningType.URI`, un endpoint `VERSION_NEUTRAL` 
+registra **únicamente** el path sin prefijo de versión, **nunca** ambos. `/tekoapp-backend/api/healthcheck` 
+responde; `/tekoapp-backend/api/v1/healthcheck` da 404 a propósito. Es contraintuitivo y debe 
+documentarse explícitamente — una sesión futura puede asumir que un `VERSION_NEUTRAL` registra ambos 
+paths y tropezar cuando Render o una probe da 404.
+
+**Bug concreto que este corte cierra**: `AccountDeletionController` (`@Controller('auth/me')`) había 
+nacido sin `@Version` mientras `AuthApiController` tenía `@Version('1')` por método, así que convivían 
+`GET /v1/auth/me` y `POST /auth/me/deletion-request`. Mobile ya tenía todo auth bajo `/v1`, así que 
+la llamada de borrado de cuenta le habría dado 404 — mismo género de bug que M-07 de Mobile, que 
+costó una sesión de prueba con teléfono real.
+
+**Deuda preexistente detectada de paso, NO corregida** (anotada como tal, no como parte de I-04): 
+`test/app.e2e-spec.ts` ya estaba roto antes de este corte porque el módulo 
+`@/core/database/base/mongo/database.config` no resuelve con `test/jest-e2e.json`. No es parte de la 
+Definition of Done del §1.2.
+
+Commits: `bedcca1` (versionado), `7e22526` (healthcheck version-neutral), `6f48d01` (doc). 
+Verificado: app levantada con Postgres/Mongo/Redis reales; 127 suites / 1369 tests en verde; 
+format/lint/build limpios.
