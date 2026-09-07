@@ -68,10 +68,11 @@ sobre "guardar o tokenizar"):
   nombre que le puso el usuario.
 - Los últimos 4 dígitos y la marca **no** son PAN y sí se pueden guardar — es el estándar de la
   industria para mostrar "Visa ···· 4242".
-- Falta confirmar con `0014-dinelco-checkout-integration.md` si el checkout de Dinelco devuelve un
-  token reutilizable (card-on-file) o si cada cobro exige que el cliente reingrese la tarjeta. Si
-  no hay card-on-file, "guardar el método de pago" no es implementable con Dinelco y hay que
-  decirlo en la UI en vez de simular la funcionalidad.
+- **CONFIRMADO por José el 2026-09-07: el checkout de Dinelco SÍ devuelve un token reutilizable
+  (card-on-file).** O sea que "guardar mi tarjeta" es implementable: el token va a `externalId` y
+  el cobro recurrente/posterior se hace contra ese token, sin que el cliente reingrese el PAN.
+  Esto NO cambia nada de lo de arriba — sigue prohibido persistir PAN/CVV; lo que se guarda es el
+  token, que es justamente el mecanismo que lo hace innecesario.
 
 ---
 
