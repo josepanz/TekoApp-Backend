@@ -238,3 +238,92 @@ separada explícitamente fuera de esta spec, no una variante de esta.
   intencional (es lo que la ley exige), pero es una decisión de una sola vía: verificar con José
   antes de implementar que el equipo de soporte entiende que no van a poder "recuperar" una cuenta
   después de la ventana de gracia.
+
+---
+
+## Estado de implementación (2026-09-07)
+
+**Código completo, testeado, migración aplicada contra Supabase por José (2026-09-07,
+`prisma migrate status` limpio antes y después). Commiteado — ver hash en la tabla del WORKPLAN
+§8.** Detalle completo en `openspec/decisions.md` ("I-01 — borrado de cuenta"). Resumen:
+
+### Hecho
+
+- Schema: `UserStatus.PENDING_DELETION`, `Users.deletionRequestedAt`/`deletionScheduledAt`,
+  `ProfessionalDocuments.fileKey` nullable. Migración escrita a mano en
+  `prisma/migrations/20260907130000_add_account_deletion/migration.sql`, **aplicada contra
+  Supabase** (conexión directa 5432, `prisma migrate status` limpio antes y después).
+- Config: `ACCOUNT_DELETION_GRACE_PERIOD_DAYS` (default 14) en `config-loader.ts`/`config-schema.ts`.
+- `AuthService.validateUserStatus`: caso `PENDING_DELETION` agregado, permite login (con test).
+- Módulo nuevo `src/modules/account-deletion-db/` (`AccountDeletionDbService`): request/cancel
+  (updateMany condicional), `findDueForAnonymization`, `anonymizeUser` (transacción única que
+  cruza Users+Professionals+ProfessionalDocuments+PushSubscriptions+FcmTokens — deliberadamente
+  fuera del patrón "un `-db` module por dominio" porque es una operación atómica única de este
+  feature, no una consulta de rutina de otro dominio).
+- Módulo nuevo `src/api/account-deletion/` (`AccountDeletionService` + `AccountDeletionController`
+  + `AccountDeletionAnonymizationJob`).
+- Métodos nuevos reusando infraestructura existente para los bloqueantes: `ServicesDbService.countServices`
+  (ya existía, sin cambios), `ContractsDbService.countContracts` (nuevo), `PaymentDbService.countPayments`
+  (nuevo) — evita duplicar acceso a Prisma de esas 3 tablas en el módulo nuevo.
+- `HttpExceptionFilter` extendido con un campo `details` opcional (junto a `message`/`errorCode`
+  que ya existían) — necesario para que `409 DELETION_BLOCKED` pueda devolver la lista real de
+  bloqueantes con su conteo, no solo un mensaje genérico. Sin este fix el filtro global lo hubiera
+  descartado en silencio. Cubierto con test nuevo.
+- `GET /auth/scope` extendido con `deletionScheduledAt` (fresco desde DB — ver desviación abajo).
+
+### Desviaciones respecto a lo que dice la spec arriba (verificadas, no asumidas)
+
+1. **Los endpoints NO viven bajo `users`, viven bajo `auth/me`.** La spec asumía "mismo dominio
+   que `GET /users/me`" pero ese endpoint no existe: el self-service real de "mi cuenta" en este
+   repo es `GET/PUT /auth/me` (`AuthApiController`), no `users`. `users` es admin/staff sobre
+   OTROS usuarios (`USER.READ`/`UPDATE`/`DELETE`, siempre con permiso). Se creó
+   `AccountDeletionController` en `src/api/account-deletion/` con `@Controller('auth/me')`
+   (Nest no necesita que el controller viva en el módulo `auth` para registrar esa ruta) — rutas
+   reales: `POST /auth/me/deletion-request`, `POST /auth/me/deletion-request/cancel`.
+2. **`GET /auth/me` (JWT-echo puro, sin DB) NO se tocó** — ahí es donde la spec asumía que iba
+   `deletionScheduledAt`, pero ese endpoint no lee la DB (`AuthApiService.me()` solo mapea el
+   payload del JWT), y el JWT no se reemite al pedir/cancelar el borrado — el banner quedaría
+   desactualizado hasta el próximo login. Se extendió `GET /auth/scope` en su lugar, que YA hace
+   `findUserById` fresco (usado hoy por Mobile/Web para el perfil completo) — cero costo extra de
+   DB, dato siempre correcto.
+3. **El bloqueante de disputa abierta (I-03) NO está implementado.** La tabla de bloqueantes de
+   esta spec incluye "Disputa abierta (I-03)", pero `PaymentDisputes` no existe todavía —I-03 es
+   la tarea siguiente en el WORKPLAN. Los otros 3 bloqueantes (servicio activo, pago pendiente,
+   contrato sin firmar) están completos. **Falta agregar el 4to bloqueante cuando se implemente
+   I-03** — anotado también en el archivo de esa spec.
+4. **`@Cron`, no Bull**, para el job de vencimiento — mismo criterio y misma corrección que ya se
+   aplicó en `professional-documents-expiration.job.ts` (barrido periódico = `@Cron`, Bull es para
+   colas reactivas). Corre a las 4am (el de documentos corre a las 3am, para no competir).
+5. **Consecuencia de `ProfessionalDocuments.fileKey` nullable**: `ProfessionalDocumentResponseDTO.fileKey`
+   pasó de `string` a `string | null` (y su helper de mapeo) — si no, el build rompía. Cambio
+   acotado, no se tocó nada más de ese módulo.
+6. **`Professionals.description`/`skills`/`certifications`**: sin anonimizar, tal como la spec
+   deja explícitamente sin resolver. Solo se setea `status = SUSPENDED, isActive = false` (mismo
+   efecto que `suspendProfessional()` ya usa, saca al profesional de `findNearby`/listados sin
+   flag nuevo).
+
+### Migración — cómo se aplicó (para referencia futura)
+
+El clasificador de "auto mode" de la sesión bloqueó el comando de migración (toca la base
+compartida con credenciales en la línea de comando) pese a la autorización explícita de José en
+el chat — no se intentó rodear. José corrió los 3 comandos a mano (conexión directa 5432, sin
+pooler):
+
+```bash
+DATABASE_URL="<misma URL de .env pero puerto 5432, sin ?pgbouncer=true>" npx prisma migrate status
+DATABASE_URL="<...:5432...>" npx prisma migrate deploy
+DATABASE_URL="<...:5432...>" npx prisma migrate status   # confirmado limpio
+```
+
+Confirmado desde la sesión (el `migrate status` de lectura sí pasó el clasificador):
+`Database schema is up to date!`, 20 migraciones aplicadas.
+
+### Sin pendientes técnicos
+
+DoD completa en verde (`format`/`lint`/`test`/`build`, `prisma migrate status` limpio),
+commiteado, casilla marcada en §8 del WORKPLAN, registrado en `decisions.md`. Lo único que sigue
+abierto es el bloqueante de disputas (punto 3 de "Desviaciones" arriba), a resolver como parte de
+I-03, la tarea siguiente.
+
+**Estado de tests**: 127 suites / 1369 tests, build/lint/format en verde, con la migración ya
+aplicada.

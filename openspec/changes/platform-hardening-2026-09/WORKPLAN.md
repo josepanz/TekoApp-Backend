@@ -781,7 +781,7 @@ aparte**, para que nadie lea la tabla del §7 como "incompleta":
 | Origen | Entregable | Dónde vive | Estado |
 |---|---|---|---|
 | `I-01` de Web (`TekoApp-Frontend-Web`) | 3 endpoints admin que Web necesita | `openspec/changes/0015-admin-backoffice-endpoints.md` (`W-01`..`W-03`) | pendiente |
-| `I-01` de este WORKPLAN | Implementar el borrado de cuenta especificado | `platform-hardening-2026-09/I-01-account-deletion.md` | spec lista, sin implementar |
+| `I-01` de este WORKPLAN | Implementar el borrado de cuenta especificado | `platform-hardening-2026-09/I-01-account-deletion.md` | **[x] implementado** — `a24cf7f`, migración aplicada. Falta el bloqueante de disputas (depende de I-03) |
 | `I-03` de este WORKPLAN | Implementar el registro de disputas especificado | `platform-hardening-2026-09/I-03-dispute-records.md` | spec lista, sin implementar |
 | `I-04` de este WORKPLAN | Aplicar `defaultVersion: '1'` a los 37 controllers | `platform-hardening-2026-09/I-04-api-versioning-policy.md` | spec lista, sin implementar |
 | hallazgo de paso en `I-03` | `POST /payments/:id/refund` sin autorización | ver abajo | **[x] corregido** — `a3760f6` |

@@ -666,3 +666,59 @@ Web: correr `pnpm generate:api-types` — desbloquea la "opción intermedia" de
 Con esto, `0015-admin-backoffice-endpoints.md` queda cerrado: W-01, W-02 y W-03 completas.
 
 Verificado: 123 suites/1344 tests, build/lint/format en verde.
+
+## I-01 — Borrado de cuenta con ventana de gracia (2026-09-07)
+
+Ver `openspec/changes/platform-hardening-2026-09/I-01-account-deletion.md` (spec original +
+sección "Estado de implementación" con el detalle completo). Implementación real de la spec que
+`I-01` de `platform-hardening-2026-09` había dejado escrita pero no implementada — bloquea la
+publicación de Mobile.
+
+**Schema**: `UserStatus.PENDING_DELETION` (login permitido durante la ventana, sin cambios de
+comportamiento respecto a `ACTIVE` en `AuthService.validateUserStatus`), `Users.deletionRequestedAt`/
+`deletionScheduledAt`, `ProfessionalDocuments.fileKey` pasa a nullable (se anula al borrar el
+objeto real de S3 al anonimizar). Migración `20260907130000_add_account_deletion` — **aplicada
+contra Supabase por José** (el clasificador de "auto mode" de la sesión bloqueó el comando de
+migración pese a la autorización explícita en el chat; se documentó el bloqueo en el propio
+archivo de la spec y José la corrió a mano). `prisma migrate status` limpio, confirmado.
+
+**Desviaciones reales respecto a la spec** (las 6 completas están detalladas en el archivo de la
+spec, sección "Estado de implementación" — resumen):
+
+1. Los endpoints de autoservicio NO viven en `users` (la spec asumía eso) sino en `auth/me/*` —
+   el self-service real de "mi cuenta" en este repo ya es `GET/PUT /auth/me`, `users` es
+   admin/staff sobre otros usuarios. `AccountDeletionController` nuevo, mismo módulo `auth/me`.
+2. `deletionScheduledAt` se expone en `GET /auth/scope` (ya hace `findUserById` fresco), no en
+   `GET /auth/me` (JWT-echo puro, quedaría desactualizado hasta el próximo login).
+3. El bloqueante de disputa abierta (I-03) queda **sin implementar** — `PaymentDisputes` no
+   existe todavía, I-03 es la tarea siguiente. Los otros 3 (servicio activo, pago pendiente,
+   contrato sin firmar) están completos y testeados.
+4. `@Cron` (no Bull) para el job de vencimiento — misma corrección que
+   `professional-documents-expiration.job.ts`, mismo criterio (barrido periódico, no cola
+   reactiva). Corre a las 4am.
+5. `ProfessionalDocumentResponseDTO.fileKey` pasa a `string | null` — consecuencia directa de
+   volver nullable la columna, si no el build rompía.
+6. `Professionals.description`/`skills`/`certifications` sin anonimizar — la spec lo deja
+   explícitamente como decisión abierta, no resuelta acá. Solo `status = SUSPENDED, isActive = false`
+   (mismo efecto que ya usa `suspendProfessional()`).
+
+**Fix de infraestructura compartida, necesario para el contrato de error de la spec**:
+`HttpExceptionFilter` normalizaba toda excepción a `{message, error, errorCode?}` — el `409
+DELETION_BLOCKED` necesita devolver la lista real de bloqueantes con su conteo (no un mensaje
+genérico, pedido explícito de la spec). Se agregó un campo `details` opcional, mismo criterio que
+`errorCode` (pasa tal cual, nunca se parsea). Cubierto con test nuevo en
+`http-exception.filter.spec.ts`.
+
+**Reuso de infraestructura existente para los bloqueantes** (evitó duplicar acceso a Prisma en el
+módulo nuevo): `ServicesDbService.countServices` (ya existía, sin cambios) +
+`ContractsDbService.countContracts` y `PaymentDbService.countPayments` (nuevos, un método
+genérico cada uno, mismo patrón que `countServices`).
+
+**Módulos nuevos**: `src/modules/account-deletion-db` (`AccountDeletionDbService` — la
+transacción de anonimización cruza Users+Professionals+ProfessionalDocuments+PushSubscriptions+FcmTokens
+en un solo lugar, deliberadamente fuera del patrón "un `-db` module por dominio" porque es una
+operación atómica única de este feature) y `src/api/account-deletion` (service + controller +
+job de vencimiento).
+
+Commit: `a24cf7f`. Verificado: 127 suites/1369 tests, build/lint/format en verde, migración
+aplicada por José (2026-09-07) y `prisma migrate status` limpio antes y después.
