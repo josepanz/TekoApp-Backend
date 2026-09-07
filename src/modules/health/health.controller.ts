@@ -1,5 +1,5 @@
 // api/health/health.controller.ts
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Version, VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import {
   HealthCheck,
@@ -51,6 +51,13 @@ export class HealthController {
   }
 
   @Get()
+  // Version-neutral a propósito: los manifiestos de K8s (ci/{develop,qa,master}/1_deployment.yml,
+  // probes de startup/readiness/liveness) y el health check de Render (configurado fuera del
+  // repo, en el dashboard) apuntan a /tekoapp-backend/api/healthcheck SIN /v1. Si este endpoint
+  // heredara el defaultVersion como el resto, las probes darían 404 y el pod nunca llegaría a
+  // Ready. No "corregir" esto a @Version('1') sin antes migrar los 9 paths de probes + la config
+  // de Render.
+  @Version(VERSION_NEUTRAL)
   @HealthCheck()
   @ApiOperation({
     summary:
