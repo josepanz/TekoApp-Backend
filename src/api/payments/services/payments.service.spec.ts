@@ -583,23 +583,49 @@ describe('PaymentApiService', () => {
 
       // Act & Assert
       await expect(
-        service.refundPayment(BASE_PAYMENT_REF, dto),
+        service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID),
       ).rejects.toThrow(NotFoundException);
+      expect(mockExecuteRefund).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar ForbiddenException si el userId no coincide con el dueño del pago', async () => {
+      // Arrange
+      const payment = buildPayment({
+        userId: 99,
+        status: PaymentStatus.COMPLETED,
+      });
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
+      const dto = buildRefundDto({ amount: 50 });
+
+      // Act & Assert
+      await expect(
+        service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID), // BASE_USER_ID = 42, owner = 99
+      ).rejects.toThrow(ForbiddenException);
       expect(mockExecuteRefund).not.toHaveBeenCalled();
     });
 
     it('debe delegar el reembolso a executeRefund con la PK interna, monto y motivo', async () => {
       // Arrange
-      const completed = buildPayment({ status: PaymentStatus.COMPLETED });
-      const partial = buildPayment({ status: PaymentStatus.PARTIAL_REFUNDED });
+      const completed = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.COMPLETED,
+      });
+      const partial = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.PARTIAL_REFUNDED,
+      });
       mockFindPaymentByReferenceId
-        .mockResolvedValueOnce(completed) // 404 check
+        .mockResolvedValueOnce(completed) // 404 + ownership check
         .mockResolvedValueOnce(partial); // re-fetch tras el reembolso
       mockExecuteRefund.mockResolvedValue(partial);
       const dto = buildRefundDto({ amount: 50 });
 
       // Act
-      const result = await service.refundPayment(BASE_PAYMENT_REF, dto);
+      const result = await service.refundPayment(
+        BASE_PAYMENT_REF,
+        dto,
+        BASE_USER_ID,
+      );
 
       // Assert
       expect(mockExecuteRefund).toHaveBeenCalledWith(
@@ -612,7 +638,10 @@ describe('PaymentApiService', () => {
 
     it('debe propagar el BadRequestException que lance executeRefund (ej. monto excede disponible)', async () => {
       // Arrange
-      const payment = buildPayment({ status: PaymentStatus.COMPLETED });
+      const payment = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.COMPLETED,
+      });
       mockFindPaymentByReferenceId.mockResolvedValue(payment);
       mockExecuteRefund.mockRejectedValue(
         new BadRequestException(
@@ -623,7 +652,7 @@ describe('PaymentApiService', () => {
 
       // Act & Assert
       await expect(
-        service.refundPayment(BASE_PAYMENT_REF, dto),
+        service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID),
       ).rejects.toThrow(BadRequestException);
     });
   });

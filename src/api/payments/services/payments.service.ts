@@ -197,11 +197,15 @@ export class PaymentApiService {
   async refundPayment(
     id: string,
     dto: RefundPaymentDto,
+    userId: number,
   ): Promise<PaymentDetailResponseDTO> {
     // 404 rápido si el pago no existe. La validación real de estado/monto disponible se hace
     // de forma atómica dentro de executeRefund (bajo lock de fila), no acá — un chequeo previo
     // sin lock sería una condición de carrera si dos reembolsos llegan al mismo tiempo.
     const payment = await this.getPaymentEntityByRef(id);
+    if (payment.userId !== userId) {
+      throw new ForbiddenException(t('payments.UNAUTHORIZED_REFUND'));
+    }
     await this.dbService.executeRefund(payment.id, dto.amount, dto.reason);
     return this.getPaymentById(id);
   }

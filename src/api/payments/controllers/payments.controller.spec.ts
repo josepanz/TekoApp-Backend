@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
+import { PERMISSIONS_KEY } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { PaymentController } from '@api/payments/controllers/payments.controller';
 import { PaymentApiService } from '@api/payments/services/payments.service';
 import {
@@ -276,7 +279,22 @@ describe('PaymentController', () => {
 
   // ==================== refund ====================
   describe('refund', () => {
-    it('debe procesar un reembolso y retornar el pago actualizado', async () => {
+    it('debe requerir el permiso de auditoría de pagos o admin:all', () => {
+      // Arrange & Act
+      const requiredPermissions = new Reflector().get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata, nunca se invoca desatado de la instancia
+        controller.refund,
+      );
+
+      // Assert
+      expect(requiredPermissions).toEqual([
+        PERMISSIONS.PAYMENTS.AUDIT_VIEW,
+        PERMISSIONS.ADMIN.ALL,
+      ]);
+    });
+
+    it('debe procesar un reembolso acotado al usuario autenticado y retornar el pago actualizado', async () => {
       // Arrange
       const param: PaymentIdParamDTO = { id: 'pay-1' };
       const dto = {
@@ -289,10 +307,14 @@ describe('PaymentController', () => {
       mockRefundPayment.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.refund(param, dto);
+      const result = await controller.refund(param, dto, { user: mockUser });
 
       // Assert
-      expect(mockRefundPayment).toHaveBeenCalledWith(param.id, dto);
+      expect(mockRefundPayment).toHaveBeenCalledWith(
+        param.id,
+        dto,
+        mockUser.id,
+      );
       expect(result).toBe(expected);
     });
   });

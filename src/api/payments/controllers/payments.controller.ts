@@ -158,12 +158,15 @@ export class PaymentController {
 
   @Post(':id/refund')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(PermissionsGuard)
+  @Permissions(PERMISSIONS.PAYMENTS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)
   @ApiRefundPayment()
   async refund(
     @Param() param: PaymentIdParamDTO,
     @Body() dto: RefundPaymentDto,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<PaymentDetailResponseDTO> {
-    return this.apiService.refundPayment(param.id, dto);
+    return this.apiService.refundPayment(param.id, dto, req.user.id);
   }
 
   // --- MÉTODOS DE PAGO ---
