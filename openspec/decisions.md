@@ -607,3 +607,35 @@ mismo criterio que otros ids grandes del repo (#0008).
 Web: correr `pnpm generate:api-types` — desbloquea `admin-audit-log-viewer.md`.
 
 Commit: `220b801`. Verificado: 120 suites/1331 tests, build/lint/format en verde.
+
+## W-02 de `0015-admin-backoffice-endpoints.md` — export CSV pagos y profesionales (2026-09-07)
+
+Ver `openspec/changes/0015-admin-backoffice-endpoints.md` para el detalle completo. Dos commits
+separados (`14c80d6` pagos, `cf63580` profesionales), como pide la spec.
+
+**Hallazgo de paso, no anotado en la spec**: `FileDownloadInterceptor` + `@DownloadFile()` ya
+existían en el repo (`src/core/interceptors/file-download.interceptor.ts`) pero **nunca se habían
+usado** — ningún controller los aplicaba, y tampoco estaban registrados como interceptor global.
+Al cablearlos por primera vez para este endpoint apareció un conflicto real: `TransformInterceptor`
+(global, envuelve toda respuesta en `{success, data, message, timestamp, path}`) no distinguía un
+`StreamableFile` de cualquier otro dato — lo hubiera envuelto adentro de `data`, rompiendo la
+respuesta binaria (Nest solo reconoce `StreamableFile` como valor de retorno de nivel superior).
+Corregido en `TransformInterceptor.intercept()`: si `data instanceof StreamableFile`, se devuelve
+tal cual sin envolver. Cubierto con `transform.interceptor.spec.ts` (no existía spec de ningún
+interceptor de `core/interceptors` antes de esto).
+
+**Pagos**: `AdminPaymentsController` (`GET /admin/payments/export`), mismo permiso que el listado
+admin (`PAYMENTS.AUDIT_VIEW`/`ADMIN.ALL`), mismos filtros que `getPayments` (`userId`,
+`professionalId`, `status`), sin paginar. Reusa `ReportService.generate(..., {format: 'csv'})` (ya
+existía, usado hoy por `contracts` para PDF) — no se escribió ningún generador de CSV nuevo.
+
+**Profesionales**: `AdminProfessionalsExportController` (`GET /admin/professionals/export`).
+Permiso `PROFESSIONALS.VERIFY`/`ADMIN.ALL` — decisión explícita de la spec: `GET /professionals`
+no tiene gate de permiso (lectura pública), así que el export no podía heredar "el mismo permiso
+que el listado" como en pagos. Se extrajo el armado de `where` de `ProfessionalsDbService.findMany`
+a un método privado (`buildListWhere`) para no duplicarlo en el nuevo `findAllForExport` (mismos
+filtros, sin paginar).
+
+Web: correr `pnpm generate:api-types` — desbloquea `admin-data-export.md`.
+
+Verificado: 123 suites/1341 tests, build/lint/format en verde.

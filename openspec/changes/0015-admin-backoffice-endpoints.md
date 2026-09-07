@@ -301,5 +301,5 @@ registrado por qué `admin-bulk-actions.md` no tiene una tarea `W-0N` acá.
 | ID   | Prioridad | Estado | Commit | Notas |
 | ---- | --------- | ------ | ------ | ----- |
 | W-01 | MEDIA     | [x]    | `220b801` | Endpoint de auditoría — nuevo módulo `audit-log` (+ `audit-log-db`). Paginación manual, no `PrismaPaginationUtil` (filtra fecha contra `createdAt` hardcodeado, `AuditLogs` solo tiene `changedAt`) |
-| W-02 | ALTA      | [ ]    |        | Export CSV pagos + profesionales — dos commits separados |
+| W-02 | ALTA      | [x]    | `14c80d6`, `cf63580` | Export CSV pagos + profesionales. De paso: `FileDownloadInterceptor` existía pero nunca se había cableado — `TransformInterceptor` envolvía toda respuesta y rompía cualquier `StreamableFile`, corregido |
 | W-03 | MEDIA     | [ ]    |        | Verificar `users` (`contains` vs exacto) antes de tocar `professionals` |
