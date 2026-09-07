@@ -91,3 +91,22 @@ Supabase expone el mismo Postgres por dos puertos, y **cada uno sirve para algo 
   tocado la tabla. Opciones: índice tradicional (lo que se eligió para
   `professionals_nearby_idx`, aceptando el lock breve durante el build), o aplicar el SQL a mano
   fuera de Prisma y reconciliar con `prisma migrate resolve --applied`.
+
+## `PaymentMethodEntity.details` — nunca dato de tarjeta (alcance PCI-DSS)
+
+`payment_methods.details` es `Json @db.JsonB` sin contrato de forma, así que el schema **no**
+impide escribir ahí lo que no debe ir. Regla, decidida el 2026-09-07:
+
+- **Prohibido almacenar PAN completo, CVV/CVC o datos de banda/chip.** Ni cifrados, ni "solo un
+  rato", ni en `metadata`. Un PAN persistido mete al backend entero en alcance PCI-DSS (auditoría
+  anual, segmentación de red, escaneos trimestrales) — costo desproporcionado y evitable.
+- El dato de tarjeta viaja del cliente **directo al proveedor** (checkout/SDK). Lo único que se
+  persiste es el token que devuelve, en `externalId`.
+- En `details` van solo datos no sensibles de presentación: marca, últimos 4 dígitos, mes/año de
+  vencimiento, y el nombre que el usuario le puso al método. Marca + últimos 4 no son PAN y son
+  el estándar de la industria para mostrar "Visa ···· 4242".
+- **Datos bancarios de payout son otra cosa**: una cuenta destino no es dato de tarjeta y no cae
+  bajo PCI-DSS, así que sí se puede almacenar (con cifrado en reposo y acceso restringido). Hoy
+  no existe ningún modelo de datos bancarios en el schema — ver
+  `openspec/changes/platform-hardening-2026-09/I-02-payout-open-questions.md`, y no modelarlo
+  antes de elegir el proveedor de pagos salientes, porque su API define el formato de cuenta.
