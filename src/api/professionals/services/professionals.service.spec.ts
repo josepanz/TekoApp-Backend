@@ -2,9 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException } from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { ReportService } from '@modules/report/services/report.service';
 
 const mockCreate = jest.fn();
 const mockFindMany = jest.fn();
+const mockFindAllForExport = jest.fn();
 const mockFindNearby = jest.fn();
 const mockFindById = jest.fn();
 const mockFindByUserId = jest.fn();
@@ -16,6 +18,7 @@ const mockFindReviews = jest.fn();
 const mockGetStats = jest.fn();
 const mockSearchBySkills = jest.fn();
 const mockGetTopRated = jest.fn();
+const mockGenerate = jest.fn();
 
 const mockProfessional = {
   id: 1,
@@ -46,6 +49,7 @@ describe('ProfessionalsService', () => {
           useValue: {
             create: mockCreate,
             findMany: mockFindMany,
+            findAllForExport: mockFindAllForExport,
             findNearby: mockFindNearby,
             findById: mockFindById,
             findByUserId: mockFindByUserId,
@@ -58,6 +62,10 @@ describe('ProfessionalsService', () => {
             searchBySkills: mockSearchBySkills,
             getTopRated: mockGetTopRated,
           },
+        },
+        {
+          provide: ReportService,
+          useValue: { generate: mockGenerate },
         },
       ],
     }).compile();
@@ -108,6 +116,63 @@ describe('ProfessionalsService', () => {
         query,
       );
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('exportToCsv', () => {
+    it('debe pedir los profesionales con los mismos filtros que getProfessionals, sin paginar', async () => {
+      // Arrange
+      const query = {
+        categoryId: 2,
+        minRating: 4,
+        isAvailable: true,
+      } as never;
+      mockFindAllForExport.mockResolvedValue([
+        {
+          referenceId: mockProfessional.referenceId,
+          user: {
+            firstName: 'Juan',
+            lastName: 'Pérez',
+            email: 'juan@example.com',
+          },
+          category: { name: 'Plomería' },
+          status: 'APPROVED',
+          verificationStatus: 'VERIFIED',
+          isAvailable: true,
+          averageRating: 4.5,
+          totalRatings: 10,
+          hourlyRate: 50000,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      mockGenerate.mockResolvedValue(Buffer.from('csv-content'));
+
+      // Act
+      const result = await service.exportToCsv(query);
+
+      // Assert
+      expect(mockFindAllForExport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categoryId: 2,
+          minRating: 4,
+          isAvailable: true,
+        }),
+      );
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
+            expect.objectContaining({
+              referenceId: mockProfessional.referenceId,
+              firstName: 'Juan',
+              lastName: 'Pérez',
+              category: 'Plomería',
+            }),
+          ],
+        }),
+        { format: 'csv' },
+      );
+      expect(result.format).toBe('csv');
+      expect(result.filename).toMatch(/^profesionales-\d{4}-\d{2}-\d{2}\.csv$/);
     });
   });
 

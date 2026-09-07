@@ -225,6 +225,33 @@ describe('ProfessionalsDbService', () => {
     });
   });
 
+  // ─── findAllForExport ────────────────────────────────────────────────────
+  describe('findAllForExport', () => {
+    it('debe traer todas las filas que matchean el filtro, sin paginar', async () => {
+      // Arrange
+      const professionals = [{ id: 1 }, { id: 2 }];
+      mockProfessionalsFindMany.mockResolvedValue(professionals);
+
+      // Act
+      const result = await service.findAllForExport({
+        categoryId: 2,
+        isAvailable: true,
+      });
+
+      // Assert
+      expect(result).toBe(professionals);
+      expect(mockProfessionalsFindMany).toHaveBeenCalledWith({
+        where: expect.objectContaining({
+          isActive: true,
+          categoryId: 2,
+          isAvailable: true,
+        }) as unknown,
+        include: professionalWithRelationsInclude,
+        orderBy: { averageRating: 'desc' },
+      });
+    });
+  });
+
   // ─── findNearby ──────────────────────────────────────────────────────────
   describe('findNearby', () => {
     it('debe retornar hasta 50 profesionales disponibles dentro del rango geográfico', async () => {

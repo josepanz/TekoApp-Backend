@@ -68,13 +68,9 @@ export class ProfessionalsDbService {
     });
   }
 
-  async findMany(
+  private buildListWhere(
     filters: ProfessionalFilters,
-    query: PaginationQueryDTO & Record<string, unknown>,
-  ): Promise<{
-    data: ProfessionalWithRelations[];
-    pagination: PaginationResponseDTO;
-  }> {
+  ): Prisma.ProfessionalsWhereInput {
     const where: Prisma.ProfessionalsWhereInput = { isActive: true };
 
     if (filters.categoryId) where.categoryId = filters.categoryId;
@@ -97,11 +93,21 @@ export class ProfessionalsDbService {
       };
     }
 
+    return where;
+  }
+
+  async findMany(
+    filters: ProfessionalFilters,
+    query: PaginationQueryDTO & Record<string, unknown>,
+  ): Promise<{
+    data: ProfessionalWithRelations[];
+    pagination: PaginationResponseDTO;
+  }> {
     return PrismaPaginationUtil.paginate<ProfessionalWithRelations>(
       this.prisma.extended.professionals,
       query,
       {
-        where,
+        where: this.buildListWhere(filters),
         include: professionalWithRelationsInclude,
         defaultOrderByField: 'averageRating',
         fieldMapping: {
@@ -115,6 +121,18 @@ export class ProfessionalsDbService {
         },
       },
     );
+  }
+
+  // Mismos filtros que findMany, sin paginar — usado por el export CSV del panel admin (el
+  // volumen lo controla el filtro, no una página).
+  async findAllForExport(
+    filters: ProfessionalFilters,
+  ): Promise<ProfessionalWithRelations[]> {
+    return this.prisma.extended.professionals.findMany({
+      where: this.buildListWhere(filters),
+      include: professionalWithRelationsInclude,
+      orderBy: { averageRating: 'desc' },
+    });
   }
 
   async findNearby(

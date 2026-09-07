@@ -1,11 +1,17 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { Prisma, VerificationStatus } from '@prisma/client';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { ReportService } from '@modules/report/services/report.service';
+import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { RatingViewerContext } from '@api/ratings/helpers/ratings-response.helper';
 import { mapReviewsToSummaries } from '../helpers/professional-reviews-response.helper';
+import {
+  PROFESSIONALS_EXPORT_COLUMNS,
+  mapProfessionalsToExportRows,
+} from '../helpers/professionals-export.helper';
 import {
   GetProfessionalsListQueryDTO,
   GetNearbyProfessionalsQueryDTO,
@@ -29,7 +35,10 @@ import {
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class ProfessionalsService {
-  constructor(private readonly professionalsDb: ProfessionalsDbService) {}
+  constructor(
+    private readonly professionalsDb: ProfessionalsDbService,
+    private readonly reportService: ReportService,
+  ) {}
 
   async registerProfessional(
     dto: CreateProfessionalRequestDTO,
@@ -59,6 +68,38 @@ export class ProfessionalsService {
       query as unknown as PaginationQueryDTO & Record<string, unknown>,
     );
     return result as unknown as ProfessionalsListResponseDTO;
+  }
+
+  // Mismos filtros que getProfessionals, sin paginar — el volumen lo controla el filtro, no
+  // una página.
+  async exportToCsv(
+    query: GetProfessionalsListQueryDTO,
+  ): Promise<IDownloadResponse> {
+    const filters = {
+      categoryId: query.categoryId,
+      latitude: query.latitude,
+      longitude: query.longitude,
+      radius: query.radius,
+      minRating: query.minRating,
+      maxPrice: query.maxPrice,
+      isAvailable: query.isAvailable,
+    };
+    const professionals = await this.professionalsDb.findAllForExport(filters);
+    const buffer = await this.reportService.generate(
+      {
+        metadata: {
+          title: 'Profesionales',
+          excelColumns: PROFESSIONALS_EXPORT_COLUMNS,
+        },
+        items: mapProfessionalsToExportRows(professionals),
+      },
+      { format: 'csv' },
+    );
+    return {
+      buffer,
+      filename: `profesionales-${new Date().toISOString().slice(0, 10)}.csv`,
+      format: 'csv',
+    };
   }
 
   async getNearbyProfessionals(
