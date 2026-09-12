@@ -27,6 +27,9 @@ function buildContext(
 ): ExecutionContext {
   return {
     getHandler: () => handler,
+    // El guard ahora también consulta `getClass()` (getAllAndOverride) para que un
+    // `@Permissions` de clase funcione como fallback — ver PermissionsGuard.
+    getClass: () => AdminProfessionalDocumentsController,
     switchToHttp: () => ({ getRequest: () => ({ user }) }),
   } as unknown as ExecutionContext;
 }

@@ -15,9 +15,13 @@ export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredPermissions = this.reflector.get<string[]>(
+    // `getAllAndOverride` mira primero `context.getHandler()` (método) y, si no hay metadata ahí,
+    // cae a `context.getClass()` (clase) — el handler siempre gana. Antes se leía solo el handler
+    // con `reflector.get`, lo que dejaba un `@Permissions` de clase sin efecto (ver
+    // openspec/decisions.md, hallazgo que expuso 5 endpoints admin, corregido en beb7e16).
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
       PERMISSIONS_KEY,
-      context.getHandler(),
+      [context.getHandler(), context.getClass()],
     );
 
     if (!requiredPermissions) {

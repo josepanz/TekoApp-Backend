@@ -32,12 +32,14 @@ interface RequestWithUser {
 @ApiTags('professional-portfolio (staff)')
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-// OJO: este `@Permissions` de clase es DECORATIVO — `PermissionsGuard.canActivate` lee la
-// metadata SOLO de `context.getHandler()` (nunca de la clase), así que esto NO protege nada por sí
-// solo. El que realmente protege cada endpoint es el `@Permissions` repetido método por método,
-// abajo. Hallazgo real (2026-09-11): los 2 métodos de este controller estuvieron sin decorar,
-// dejando `GET admin/professional-portfolio` y `PATCH admin/professional-portfolio/:referenceId/review`
-// accesibles a cualquier usuario logueado — ver openspec/decisions.md.
+// Este `@Permissions` de clase SÍ protege desde que `PermissionsGuard.canActivate` usa
+// `reflector.getAllAndOverride(KEY, [getHandler(), getClass()])` — antes leía SOLO el handler y
+// este decorador de clase era decorativo (ver openspec/decisions.md). Se mantiene el
+// `@Permissions` repetido en cada método de todos modos: si algún método cambia de permiso
+// requerido, el de método tiene precedencia sobre el de clase. Hallazgo real (2026-09-11): los 2
+// métodos de este controller estuvieron sin decorar, dejando `GET admin/professional-portfolio` y
+// `PATCH admin/professional-portfolio/:referenceId/review` accesibles a cualquier usuario logueado
+// — ver openspec/decisions.md.
 @Permissions(PERMISSIONS.PROFESSIONAL_PORTFOLIO.REVIEW, PERMISSIONS.ADMIN.ALL)
 export class AdminProfessionalPortfolioController {
   constructor(private readonly service: ProfessionalPortfolioService) {}
