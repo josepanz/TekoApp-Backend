@@ -6,6 +6,7 @@ import { ProfessionalsDbService } from '@modules/professionals-db/services/profe
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { ContractsDbService } from '@modules/contracts-db/services/contracts-db.service';
+import { PaymentDisputesDbService } from '@modules/payment-disputes-db/services/payment-disputes-db.service';
 import { AccountDeletionService } from './account-deletion.service';
 
 const mockRequestDeletion = jest.fn();
@@ -14,6 +15,7 @@ const mockFindProfessionalIdByUserId = jest.fn();
 const mockCountServices = jest.fn();
 const mockCountPayments = jest.fn();
 const mockCountContracts = jest.fn();
+const mockCountOpenDisputesForUser = jest.fn();
 
 describe('AccountDeletionService', () => {
   let service: AccountDeletionService;
@@ -48,6 +50,10 @@ describe('AccountDeletionService', () => {
           useValue: { countContracts: mockCountContracts },
         },
         {
+          provide: PaymentDisputesDbService,
+          useValue: { countOpenDisputesForUser: mockCountOpenDisputesForUser },
+        },
+        {
           provide: APP_CONFIG.KEY,
           useValue: { accountDeletion: { gracePeriodDays: 14 } },
         },
@@ -66,6 +72,7 @@ describe('AccountDeletionService', () => {
       mockCountServices.mockResolvedValue(0);
       mockCountPayments.mockResolvedValue(0);
       mockCountContracts.mockResolvedValue(0);
+      mockCountOpenDisputesForUser.mockResolvedValue(0);
       mockRequestDeletion.mockResolvedValue(1);
 
       // Act
@@ -86,6 +93,7 @@ describe('AccountDeletionService', () => {
       mockCountServices.mockResolvedValue(0);
       mockCountPayments.mockResolvedValue(0);
       mockCountContracts.mockResolvedValue(0);
+      mockCountOpenDisputesForUser.mockResolvedValue(0);
       mockRequestDeletion.mockResolvedValue(1);
 
       // Act
@@ -110,6 +118,7 @@ describe('AccountDeletionService', () => {
       mockCountServices.mockResolvedValue(1);
       mockCountPayments.mockResolvedValue(2);
       mockCountContracts.mockResolvedValue(0);
+      mockCountOpenDisputesForUser.mockResolvedValue(0);
 
       // Act & Assert
       await expect(service.requestDeletion(1)).rejects.toMatchObject({
@@ -126,12 +135,33 @@ describe('AccountDeletionService', () => {
       expect(mockRequestDeletion).not.toHaveBeenCalled();
     });
 
+    it('debe bloquear el borrado con OPEN_DISPUTE cuando el usuario tiene una disputa abierta (I-03)', async () => {
+      // Arrange — cabo suelto que I-01 dejó pendiente (PaymentDisputes no existía todavía):
+      // ver openspec/changes/platform-hardening-2026-09/I-01-account-deletion.md, "Desviaciones".
+      mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockCountServices.mockResolvedValue(0);
+      mockCountPayments.mockResolvedValue(0);
+      mockCountContracts.mockResolvedValue(0);
+      mockCountOpenDisputesForUser.mockResolvedValue(1);
+
+      // Act & Assert
+      await expect(service.requestDeletion(1)).rejects.toMatchObject({
+        response: {
+          errorCode: 'DELETION_BLOCKED',
+          details: { blockers: [{ type: 'OPEN_DISPUTE', count: 1 }] },
+        },
+      });
+      expect(mockCountOpenDisputesForUser).toHaveBeenCalledWith(1, null);
+      expect(mockRequestDeletion).not.toHaveBeenCalled();
+    });
+
     it('debe calcular deletionScheduledAt sumando los días de gracia configurados', async () => {
       // Arrange
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
       mockCountServices.mockResolvedValue(0);
       mockCountPayments.mockResolvedValue(0);
       mockCountContracts.mockResolvedValue(0);
+      mockCountOpenDisputesForUser.mockResolvedValue(0);
       mockRequestDeletion.mockResolvedValue(1);
 
       // Act
@@ -152,6 +182,7 @@ describe('AccountDeletionService', () => {
       mockCountServices.mockResolvedValue(0);
       mockCountPayments.mockResolvedValue(0);
       mockCountContracts.mockResolvedValue(0);
+      mockCountOpenDisputesForUser.mockResolvedValue(0);
       mockRequestDeletion.mockResolvedValue(0);
 
       // Act & Assert

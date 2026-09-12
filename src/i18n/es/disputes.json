@@ -1,0 +1,11 @@
+{
+  "NOT_A_PARTY": "No sos parte de este pago",
+  "PAYMENT_NOT_DISPUTABLE": "Solo un pago completado o con reembolso parcial puede disputarse",
+  "ALREADY_HAS_OPEN_DISPUTE": "Ya existe una disputa abierta o en revisión sobre este pago",
+  "NOT_FOUND": "Disputa no encontrada",
+  "ALREADY_CLAIMED": "Otro staff ya tomó esta disputa, o ya no está disponible para tomar",
+  "ALREADY_RESOLVED": "La disputa ya fue resuelta, retirada, o cambió de estado",
+  "REFUND_AMOUNT_REQUIRED": "El monto de reembolso es obligatorio para esta resolución",
+  "NOT_OPENER": "Solo quien abrió la disputa puede retirarla",
+  "CANNOT_WITHDRAW": "La disputa ya no puede retirarse (fue tomada o resuelta)"
+}

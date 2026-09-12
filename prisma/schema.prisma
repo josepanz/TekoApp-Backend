@@ -122,6 +122,8 @@ model Users {
   aiContentDisclosures  AiContentDisclosures[]
   contracts             Contracts[]
   tips                  Tips[]
+  disputesOpened        PaymentDisputes[]      @relation("DisputeOpenedBy")
+  disputesAdjudicated   PaymentDisputes[]      @relation("DisputeAdjudicatedBy")
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -411,8 +413,8 @@ model Professionals {
   changeSignature String?   @map("change_signature")
 
   // Relaciones
-  user                  Users                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category              Category                 @relation(fields: [categoryId], references: [id])
+  user                  Users                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category              Category                     @relation(fields: [categoryId], references: [id])
   services              Services[]
   serviceRequests       ServiceRequests[]
   payments              Payments[]
@@ -977,6 +979,7 @@ model Payments {
   users         Users                @relation(fields: [userId], references: [id])
   professionals Professionals?       @relation(fields: [professionalId], references: [id])
   tip           Tips?
+  disputes      PaymentDisputes[]
 
   @@index([professionalId, status])
   @@index([status, createdAt])
@@ -1013,6 +1016,79 @@ model PaymentTransaction {
   @@index([paymentId, type])
   @@index([status, createdAt])
   @@map("payment_transactions")
+}
+
+// =====================================================================================================================
+// DISPUTAS DE PAGO — registro y adjudicación de reclamos sobre un pago (I-03, ver
+// openspec/changes/platform-hardening-2026-09/I-03-dispute-records.md). Envuelve el mecanismo de
+// reembolsos ya existente (`PaymentDbService.executeRefund`), no lo reemplaza: un reembolso
+// disparado por una resolución de disputa queda trazado con `disputeReferenceId` dentro del mismo
+// `Payments.refundDetails` JSON que ya escribe `executeRefund`.
+// =====================================================================================================================
+
+enum DisputeStatus {
+  OPEN // recién abierta, en cola sin asignar
+  UNDER_REVIEW // un staff la tomó (adjudicatedByUserId seteado, todavía sin resolución)
+  RESOLVED // adjudicada, con resolution + resolvedAt
+  REJECTED // adjudicada como improcedente (variante de RESOLVED con resolution=NO_REFUND,
+  // separada para que un filtro simple "¿quedan pendientes?" no tenga que mirar el campo resolution)
+  WITHDRAWN // quien la abrió la retiró antes de que staff la resuelva
+}
+
+enum DisputeReason {
+  SERVICE_NOT_PROVIDED
+  POOR_SERVICE_QUALITY
+  OVERCHARGE
+  DUPLICATE_PAYMENT
+  FRAUD
+  OTHER
+}
+
+enum DisputeResolution {
+  FULL_REFUND
+  PARTIAL_REFUND
+  NO_REFUND
+  OTHER_REMEDY // ej. descuento en un servicio futuro — no mueve plata en este pago, se registra
+  // igual para dejar rastro de que la disputa SÍ tuvo una resolución
+}
+
+/// Quién puede abrir: el cliente o el profesional del pago (`openedByUserId` debe ser uno de los
+/// dos — validado en el service, no a nivel de FK). Quién adjudica: staff con
+/// `PERMISSIONS.DISPUTES.ADJUDICATE`.
+model PaymentDisputes {
+  id                  Int                @id @default(autoincrement())
+  referenceId         String             @unique @default(uuid()) @map("reference_id")
+  paymentId           Int                @map("payment_id")
+  openedByUserId      Int                @map("opened_by_user_id")
+  reason              DisputeReason
+  description         String             @db.Text
+  evidenceKeys        String[]           @default([]) @map("evidence_keys") // S3 keys, mismo patrón que professional-documents
+  status              DisputeStatus      @default(OPEN)
+  adjudicatedByUserId Int?               @map("adjudicated_by_user_id")
+  resolution          DisputeResolution?
+  resolutionNotes     String?            @map("resolution_notes") @db.Text
+  refundAmount        Decimal?           @map("refund_amount") @db.Decimal(10, 2) // solo si resolution es FULL_REFUND/PARTIAL_REFUND
+  resolvedAt          DateTime?          @map("resolved_at")
+
+  payment       Payments @relation(fields: [paymentId], references: [id])
+  openedBy      Users    @relation("DisputeOpenedBy", fields: [openedByUserId], references: [id])
+  adjudicatedBy Users?   @relation("DisputeAdjudicatedBy", fields: [adjudicatedByUserId], references: [id])
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  // Sin `@@unique([paymentId])`: un mismo pago puede tener más de una disputa a lo largo del
+  // tiempo (una REJECTED no impide un reclamo distinto después). El service impide 2 disputas
+  // simultáneamente OPEN/UNDER_REVIEW sobre el mismo pago — regla de negocio, no expresable como
+  // constraint simple de DB.
+  @@index([paymentId])
+  @@index([status])
+  @@map("payment_disputes")
 }
 
 // =====================================================================================================================

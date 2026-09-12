@@ -21,6 +21,7 @@ import { ProfessionalsDbService } from '@modules/professionals-db/services/profe
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { ContractsDbService } from '@modules/contracts-db/services/contracts-db.service';
+import { PaymentDisputesDbService } from '@modules/payment-disputes-db/services/payment-disputes-db.service';
 import { t } from '@common/i18n/i18n.helper';
 import {
   DeletionCancelResponseDTO,
@@ -52,6 +53,7 @@ export class AccountDeletionService {
     private readonly servicesDb: ServicesDbService,
     private readonly paymentDb: PaymentDbService,
     private readonly contractsDb: ContractsDbService,
+    private readonly disputesDb: PaymentDisputesDbService,
     @Inject(APP_CONFIG.KEY)
     private readonly configService: ConfigType<AppConfigType>,
   ) {}
@@ -62,7 +64,7 @@ export class AccountDeletionService {
     userId: number,
     professionalId: number | null,
   ): Promise<DeletionBlocker[]> {
-    const [activeServices, pendingPayments, unsignedContracts] =
+    const [activeServices, pendingPayments, unsignedContracts, openDisputes] =
       await Promise.all([
         this.servicesDb.countServices({
           status: { in: ACTIVE_SERVICE_STATUSES },
@@ -78,6 +80,10 @@ export class AccountDeletionService {
             ? [{ clientUserId: userId }, { professionalId }]
             : [{ clientUserId: userId }],
         }),
+        // I-03: cierra el cabo suelto que I-01 dejó pendiente ("Disputa abierta (I-03)" en la
+        // tabla de bloqueantes de I-01-account-deletion.md) — `PaymentDisputes` no existía
+        // todavía cuando se implementó I-01.
+        this.disputesDb.countOpenDisputesForUser(userId, professionalId),
       ]);
 
     const blockers: DeletionBlocker[] = [];
@@ -97,6 +103,12 @@ export class AccountDeletionService {
       blockers.push({
         type: DeletionBlockerType.UNSIGNED_CONTRACT,
         count: unsignedContracts,
+      });
+    }
+    if (openDisputes > 0) {
+      blockers.push({
+        type: DeletionBlockerType.OPEN_DISPUTE,
+        count: openDisputes,
       });
     }
     return blockers;

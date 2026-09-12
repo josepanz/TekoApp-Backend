@@ -790,6 +790,73 @@ describe('PaymentDbService', () => {
       expect(secondUpdateData?.status).toBe(PaymentStatus.PARTIAL_REFUNDED);
       expect(secondUpdateData?.refundDetails.refundedAmount).toBe(500);
     });
+
+    // I-03 (openspec/changes/platform-hardening-2026-09/I-03-dispute-records.md): el reembolso
+    // disparado por la adjudicación de una disputa debe trazar `disputeReferenceId` en el mismo
+    // JSON, y correr DENTRO de la transacción que ya abrió el caller (no una propia).
+    it('debe incluir disputeReferenceId en refundDetails cuando se recibe', async () => {
+      // Arrange
+      const refundedPayment = {
+        ...fakePayment,
+        status: PaymentStatus.REFUNDED,
+      };
+      const mockUpdate = jest
+        .fn<Promise<typeof refundedPayment>, unknown[]>()
+        .mockResolvedValue(refundedPayment);
+      mockTransaction.mockImplementation(
+        async (callback: (tx: Record<string, unknown>) => Promise<unknown>) => {
+          const txClient = {
+            $queryRaw: mockLockedPayment({
+              status: PaymentStatus.COMPLETED,
+              total_amount: 1500,
+            }),
+            paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+            payments: { update: mockUpdate },
+          };
+          return callback(txClient);
+        },
+      );
+
+      // Act
+      await service.executeRefund(1, 1500, 'adjudicación', 'dsp-uuid-1');
+
+      // Assert
+      const updateData = mockUpdate.mock.calls[0]?.[0] as {
+        data: { refundDetails: { disputeReferenceId?: string } };
+      };
+      expect(updateData.data.refundDetails.disputeReferenceId).toBe(
+        'dsp-uuid-1',
+      );
+    });
+
+    it('debe usar el `tx` recibido en vez de abrir una transacción propia cuando se pasa uno', async () => {
+      // Arrange
+      const refundedPayment = {
+        ...fakePayment,
+        status: PaymentStatus.REFUNDED,
+      };
+      const externalTx = {
+        $queryRaw: mockLockedPayment({
+          status: PaymentStatus.COMPLETED,
+          total_amount: 1500,
+        }),
+        paymentTransaction: { create: jest.fn().mockResolvedValue({}) },
+        payments: { update: jest.fn().mockResolvedValue(refundedPayment) },
+      };
+
+      // Act
+      const result = await service.executeRefund(
+        1,
+        1500,
+        'adjudicación',
+        'dsp-uuid-2',
+        externalTx as unknown as Prisma.TransactionClient,
+      );
+
+      // Assert — nunca se abre una transacción propia: se usó `externalTx` directo
+      expect(mockTransaction).not.toHaveBeenCalled();
+      expect(result).toEqual(refundedPayment);
+    });
   });
 
   // ── findTransactionByExternalId ──────────────────────────────────────────────
