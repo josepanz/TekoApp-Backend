@@ -826,6 +826,45 @@ quedar protegidos por el mismo permiso. El cambio de guard queda pendiente de de
 
 Commit: `beb7e16`. Verificado: 133 suites/1426 tests, build/lint/format en verde.
 
+### Arreglo de fondo — `PermissionsGuard` (2026-09-12)
+
+Se implementó la propuesta que quedó pendiente arriba, autorizada explícitamente por José.
+
+**Antes**: `PermissionsGuard.canActivate` hacía `this.reflector.get(PERMISSIONS_KEY,
+context.getHandler())` — leía metadata SOLO del método. Si no encontraba nada ahí (nunca miraba la
+clase), `return true`: **fallaba abierto**. Esto es lo que dejó expuestos los 5 endpoints de arriba
+(`beb7e16`): con un `@Permissions` puesto únicamente en la clase, el guard lo ignoraba por completo
+y cualquier usuario logueado pasaba.
+
+**Después**: `this.reflector.getAllAndOverride(PERMISSIONS_KEY, [context.getHandler(),
+context.getClass()])` — primero busca en el método y, si no hay nada ahí, cae a la clase; el
+método sigue teniendo precedencia sobre la clase (comportamiento estándar de NestJS). Un
+`@Permissions` de clase ahora protege de verdad, incluso si algún método nuevo se agrega sin su
+propio decorador.
+
+**Impacto verificado, no solo asumido**: se corrió la suite completa (135 suites, 1440 tests antes
+de este cambio) después de aplicar el fix. Fallaron 2 suites — `admin-professional-documents.
+controller.spec.ts` y `admin-professional-portfolio.controller.spec.ts` — pero con
+`TypeError: context.getClass is not a function`, no con un 403 inesperado: sus mocks de
+`ExecutionContext` (escritos para el fix de `beb7e16`, con un `Reflector` real) nunca implementaron
+`getClass()` porque el guard viejo no lo llamaba. Se corrigió agregando `getClass: () =>
+<Controller>` a esos dos mocks — no es el "test que empieza a fallar con 403" que se pidió
+detectar y NO ajustar, es un mock incompleto para una firma de método nueva. Con eso corregido, la
+suite completa (135 suites, 1446 tests — 6 nuevos en `permissions.guard.spec.ts` sobre precedencia
+handler/clase con `Reflector` real) quedó en verde sin ningún cambio de resultado en ningún otro
+test — confirma lo que ya se había revisado en `beb7e16`: ningún controller depende hoy de que el
+decorador de clase NO se aplique.
+
+**Barrido repetido** (mismo patrón que arriba, para confirmar que no apareció nada nuevo desde
+`beb7e16`): de los 18 controllers que usan `@Permissions`, solo `AdminProfessionalDocumentsController`
+y `AdminProfessionalPortfolioController` lo declaran a nivel de clase, y en ambos los métodos ya
+están decorados individualmente (el fix de `beb7e16` sigue siendo neutro respecto a este cambio).
+Los comentarios "OJO: este `@Permissions` de clase es DECORATIVO" en esos dos controllers dejaron
+de ser ciertos y se actualizaron para reflejar que la clase ahora sí protege (con precedencia del
+método).
+
+Commit: `07c852e`.
+
 ## I-04 — Versionado a v1 global + excepción del healthcheck (2026-09-07)
 
 Corte de versionado de la API: implementación del `defaultVersion: '1'` a nivel de `enableVersioning()`
