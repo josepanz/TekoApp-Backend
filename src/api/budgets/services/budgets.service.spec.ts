@@ -150,6 +150,57 @@ describe('BudgetsService', () => {
       expect(mockReplaceOptionsTransaction).not.toHaveBeenCalled();
     });
 
+    it('debe lanzar ForbiddenException cuando quien llama no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.replaceOptions(
+          SERVICE_REF,
+          REQUEST_REF,
+          { options: [] },
+          20,
+          'prof-ref-1',
+        ),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockReplaceOptionsTransaction).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando el servicio no existe', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.replaceOptions(
+          SERVICE_REF,
+          REQUEST_REF,
+          { options: [] },
+          10,
+          'prof-ref-1',
+        ),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockFindServiceRequestByReferenceId).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando la solicitud no existe para ese servicio', async () => {
+      // Arrange
+      mockFindServiceRequestByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.replaceOptions(
+          SERVICE_REF,
+          REQUEST_REF,
+          { options: [] },
+          10,
+          'prof-ref-1',
+        ),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockReplaceOptionsTransaction).not.toHaveBeenCalled();
+    });
+
     it('debe lanzar BadRequestException cuando la solicitud ya no está pendiente', async () => {
       // Arrange
       mockFindServiceRequestByReferenceId.mockResolvedValue({
