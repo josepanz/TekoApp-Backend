@@ -783,6 +783,49 @@ cualquier controller nuevo que agrupe varios endpoints bajo un mismo permiso.
 
 Commit: `262c071`. Verificado: 131 suites/1406 tests, build/lint/format en verde.
 
+## Fix de seguridad — endpoints admin desprotegidos por `@Permissions` de clase (2026-09-11)
+
+El hallazgo del `PermissionsGuard` de I-03 (arriba) se generalizó: se barrieron TODOS los
+controllers buscando el mismo patrón ("`@Permissions` entre `@Controller(...)` y `export class`,
+con algún método sin su propio `@Permissions`") y aparecieron dos, **en producción, sin ningún
+método decorado**:
+
+- `AdminProfessionalDocumentsController` (`professional-documents.review:manage`) — 3 endpoints:
+  `GET admin/professional-documents`, `GET admin/professionals/:referenceId/documents`,
+  `PATCH admin/professional-documents/:referenceId/review`.
+- `AdminProfessionalPortfolioController` (`professional-portfolio.review:manage`) — 2 endpoints:
+  `GET admin/professional-portfolio`, `PATCH admin/professional-portfolio/:referenceId/review`.
+
+A diferencia de `AdminDisputesController` (recién creado en I-03, nunca llegó a estar expuesto),
+estos dos YA estaban mergeados en `develop` — cualquier usuario logueado del marketplace podía
+listar y leer documentos de identidad/antecedentes de profesionales, y aprobar o rechazar
+revisiones de documentos y de portafolio (incluidas las propias), sin ningún permiso especial.
+
+**Fix**: `@Permissions(...)` repetido en cada uno de los 5 métodos, con el mismo permiso que ya
+declaraba la clase. El decorador de clase se dejó (mismo valor, no aporta protección real) pero
+con un comentario explícito de que es decorativo — para que el próximo que lo lea no vuelva a
+asumir que alcanza.
+
+**Tests de regresión reales, no solo de metadata**: cada uno de los 5 endpoints tiene un test que
+instancia `PermissionsGuard` con un `Reflector` real (sin mockear) contra el método real del
+controller — si el `@Permissions` de un método se borra otra vez, el test falla con un 403 que
+debía tirarse y no se tiró, en vez de solo comparar el arreglo de metadata.
+
+**Barrido posterior**: no apareció ningún otro controller con el mismo patrón.
+
+**Propuesta evaluada y NO implementada** (a pedido explícito, para no mezclar con el fix urgente):
+cambiar `PermissionsGuard.canActivate` a `this.reflector.getAllAndOverride(PERMISSIONS_KEY,
+[context.getHandler(), context.getClass()])` — el patrón estándar de NestJS, que haría que un
+`@Permissions` de clase funcione como cualquiera esperaría. Es el arreglo de fondo, pero cambia el
+comportamiento de TODOS los controllers a la vez (cualquier controller que hoy combine un
+`@Permissions` de clase con métodos sin permiso propio empezaría a exigirlo también en esos
+métodos). Revisado explícitamente: no se encontró ningún controller que hoy dependa de que el
+decorador de clase NO se aplique — los únicos dos casos existentes de `@Permissions` de clase son
+justamente los dos que este fix corrigió, y en ambos todos los métodos del controller debían
+quedar protegidos por el mismo permiso. El cambio de guard queda pendiente de decisión aparte.
+
+Commit: `beb7e16`. Verificado: 133 suites/1426 tests, build/lint/format en verde.
+
 ## I-04 — Versionado a v1 global + excepción del healthcheck (2026-09-07)
 
 Corte de versionado de la API: implementación del `defaultVersion: '1'` a nivel de `enableVersioning()`

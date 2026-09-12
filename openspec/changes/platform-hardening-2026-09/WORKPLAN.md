@@ -785,6 +785,7 @@ aparte**, para que nadie lea la tabla del §7 como "incompleta":
 | `I-03` de este WORKPLAN | Implementar el registro de disputas especificado | `platform-hardening-2026-09/I-03-dispute-records.md` | **[x] implementado** — `262c071`, migración `20260911120000_add_payment_disputes` aplicada contra Supabase (verificado: tabla, índices y `trg_audit_payment_disputes` presentes, `migrate status` limpio antes/después). Modelo `PaymentDisputes` + 6 endpoints + permiso `disputes.adjudication:manage` + reembolso de la resolución reusando `PaymentDbService.executeRefund` (ahora con `disputeReferenceId`/`tx` opcionales) dentro de la misma transacción. Cierra también el bloqueante de disputas de I-01 (ver esa fila). Hallazgo de paso: `PermissionsGuard` solo lee metadata de `context.getHandler()`, nunca de la clase — un `@Permissions()` a nivel de controller no hace nada en silencio |
 | `I-04` de este WORKPLAN | Aplicar `defaultVersion: '1'` a los 37 controllers | `platform-hardening-2026-09/I-04-api-versioning-policy.md` | **[x] implementado** — `bedcca1`, `7e22526`. `defaultVersion: '1'` en `main.ts` (URI versioning, sin cambiar el tipo); quitados los 6 `@Version('1')` redundantes (auth-api, onboarding, roles-api, users-roles-api, uploads, users). Corrige el desalineo confirmado entre `AccountDeletionController` (sin versión) y `AuthApiController` (`@Version('1')`), que dejaba `auth/me/deletion-request` fuera de `/v1` mientras `auth/me` sí vivía ahí. Excepción encontrada tras el primer commit: `HealthController` (`/healthcheck`) heredó `/v1` igual que el resto, pero los 9 paths de probes de K8s (`ci/{develop,qa,master}/1_deployment.yml`) y el health check de Render (fuera del repo) apuntan al path sin versión — se marcó `@Version(VERSION_NEUTRAL)` en el método (`7e22526`) para que siga sirviendo solo en `/healthcheck` sin versión (confirmado: VERSION_NEUTRAL con `VersioningType.URI` registra un único path sin prefijo, no ambos). App levantada y verificada: 170 rutas del documento Swagger bajo `/v1` sin excepción salvo `healthcheck`, que 404 en `/v1/healthcheck` a propósito |
 | hallazgo de paso en `I-03` | `POST /payments/:id/refund` sin autorización | ver abajo | **[x] corregido** — `a3760f6` |
+| hallazgo de paso en `I-03` | 5 endpoints admin sin permiso real (`@Permissions` de clase que el guard nunca lee) | ver abajo | **[x] corregido** — `beb7e16` |
 
 ### Hallazgo sin ID, encontrado haciendo `I-03` y confirmado el 2026-09-06
 
@@ -799,6 +800,26 @@ que hay que corregir del trabajo derivado, antes que cualquier feature nueva.
 **Corregido 2026-09-07** (`a3760f6`): `@UseGuards(PermissionsGuard)` + `@Permissions(PAYMENTS.AUDIT_VIEW, ADMIN.ALL)`
 (mismo permiso que gatea `findAll`/`getSummary`/`getTrends` del mismo controller) + acotar el pago
 al usuario autenticado en el service, igual que `cancelPayment`. Detalle en `openspec/decisions.md`.
+
+### Hallazgo sin ID, encontrado escribiendo los tests de `AdminDisputesController` (I-03) y confirmado el 2026-09-11
+
+`PermissionsGuard.canActivate` (`src/modules/auth/guards/permissions.guard.ts`) lee la metadata de
+permisos con `this.reflector.get(PERMISSIONS_KEY, context.getHandler())` — **solo el handler**,
+nunca `context.getClass()` — y si no encuentra metadata hace `return true`: falla abierto. Un
+barrido de todos los controllers buscando `@Permissions` a nivel de clase con algún método sin su
+propio `@Permissions` encontró dos, **ya mergeados en `develop`, ninguno de sus métodos
+decorado**: `AdminProfessionalDocumentsController` (3 endpoints — cola y detalle de documentos de
+identidad/antecedentes, más la revisión) y `AdminProfessionalPortfolioController` (2 endpoints —
+cola y revisión de fotos de portafolio). Los 5 estaban solo detrás de `JwtAuthGuard`: cualquier
+usuario logueado del marketplace podía leerlos y aprobar/rechazar revisiones ajenas.
+
+**Corregido 2026-09-11** (`beb7e16`): `@Permissions(...)` repetido en cada uno de los 5 métodos
+(mismo permiso que ya declaraba la clase); el decorador de clase se dejó pero anotado como
+decorativo. Tests de regresión reales (guard + Reflector reales contra el método real, no solo
+lectura de metadata) en los 2 controllers. Barrido repetido tras el fix: sin más casos. Propuesta
+de arreglo de fondo (cambiar el guard a `getAllAndOverride([handler, class])`) evaluada y NO
+implementada a propósito — ver `openspec/decisions.md` para el detalle y por qué no afecta a
+ningún controller existente.
 
 Al cerrar cualquiera de estos entregables, registrarlo en `openspec/decisions.md` con el mismo
 formato que las fases anteriores (`0011`, `0013`, …) — la tabla de acá solo lleva el estado.
