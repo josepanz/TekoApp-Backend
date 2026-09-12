@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 const mockRedisStoreConstructor = jest.fn();
 const mockRateLimit = jest.fn();
 const mockRedisCall = jest.fn();
+const mockRedisQuit = jest.fn();
 
 jest.mock('rate-limit-redis', () => ({
   __esModule: true,
@@ -23,7 +24,7 @@ jest.mock('express-rate-limit', () => ({
 
 jest.mock('ioredis', () => ({
   __esModule: true,
-  default: jest.fn(() => ({ call: mockRedisCall })),
+  default: jest.fn(() => ({ call: mockRedisCall, quit: mockRedisQuit })),
 }));
 
 import { RateLimitConfig } from './rate-limit.config';
@@ -131,6 +132,30 @@ describe('RateLimitConfig', () => {
       expect(res.send).toHaveBeenCalledWith(optionsUsed.message);
 
       warnSpy.mockRestore();
+    });
+  });
+
+  describe('closeRedisClient', () => {
+    // El cliente vive en un singleton estático a propósito (ver comentario en la clase), fuera de
+    // la DI de Nest: nada lo cierra solo. `test/app.e2e-spec.ts` depende de este método en su
+    // `afterAll` para que `pnpm run test:e2e` termine solo en vez de quedar colgado.
+    it('debe cerrar el cliente Redis compartido cuando ya fue creado', async () => {
+      // Arrange
+      RateLimitConfig.createLimiter(configService);
+
+      // Act
+      await RateLimitConfig.closeRedisClient();
+
+      // Assert
+      expect(mockRedisQuit).toHaveBeenCalled();
+    });
+
+    it('no debe fallar si todavía no se creó ningún cliente', async () => {
+      // Arrange: la prueba anterior ya lo cerró y dejó el singleton en undefined.
+
+      // Act & Assert
+      await expect(RateLimitConfig.closeRedisClient()).resolves.not.toThrow();
+      expect(mockRedisQuit).not.toHaveBeenCalled();
     });
   });
 });

@@ -54,6 +54,21 @@ export class RateLimitConfig {
     return this.redisClient;
   }
 
+  /**
+   * Este cliente es un singleton estático a propósito (ver comentario de `redisClient` arriba) y
+   * por eso vive fuera de la DI de Nest: nada llama `onModuleDestroy` sobre él porque no es un
+   * provider. `middleware.config.ts` y `AppModule.configure()` lo crean vía `createLimiter()`
+   * antes de que exista ningún hook de ciclo de vida donde enganchar el cierre, así que el cierre
+   * tiene que ser explícito. Usado por `test/app.e2e-spec.ts` (que sí llama esto en su `afterAll`,
+   * ya que `app.close()` no lo alcanza) y disponible para un futuro hook de shutdown real de Nest.
+   */
+  static async closeRedisClient(): Promise<void> {
+    if (this.redisClient) {
+      await this.redisClient.quit();
+      this.redisClient = undefined;
+    }
+  }
+
   static createLimiter(configService: ConfigService): RateLimitConfigReturn {
     const redis = this.getRedisClient(configService);
 

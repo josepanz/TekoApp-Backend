@@ -1,5 +1,11 @@
 // api/health/health.controller.ts
-import { Controller, Get, Version, VERSION_NEUTRAL } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  OnModuleDestroy,
+  Version,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import {
   HealthCheck,
@@ -28,7 +34,7 @@ const packageJson = JSON.parse(
 
 @ApiTags('Healthcheck')
 @Controller('healthcheck')
-export class HealthController {
+export class HealthController implements OnModuleDestroy {
   private readonly redisClient: Redis;
 
   constructor(
@@ -48,6 +54,15 @@ export class HealthController {
       db: Number(process.env.REDIS_DB) || 0,
       maxRetriesPerRequest: 1,
     });
+  }
+
+  // `this.redisClient` es un cliente aislado, creado a mano fuera del `PrismaDatasource`/
+  // `MongooseModule` que sí maneja Nest — sin este hook, `app.close()` nunca lo cierra (Nest solo
+  // llama `onModuleDestroy` en lo que la DI conoce). En producción esto dejaba la conexión abierta
+  // en cada shutdown; en el e2e (test/app.e2e-spec.ts) era, junto con el mismo problema en
+  // `RateLimitConfig`, la razón de que `pnpm run test:e2e` no terminara solo.
+  onModuleDestroy(): void {
+    this.redisClient.disconnect();
   }
 
   @Get()

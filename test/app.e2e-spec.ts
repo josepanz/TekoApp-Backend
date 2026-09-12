@@ -11,6 +11,7 @@ import cookieParser from 'cookie-parser';
 import { MemoryHealthIndicator, PrismaHealthIndicator } from '@nestjs/terminus';
 import { AppModule } from './../src/app.module';
 import { PrismaDatasource } from './../src/core/database/services/prisma.service';
+import { RateLimitConfig } from './../src/core/config/rate-limit.config';
 
 const mockPingCheck = jest
   .fn()
@@ -58,6 +59,14 @@ describe('AppController (e2e)', () => {
 
   afterAll(async () => {
     await app.close();
+    // `app.close()` cierra todo lo que Nest maneja vía DI (Mongoose, las colas de Bull, etc. —
+    // cada uno con su propio hook de shutdown). `RateLimitConfig` guarda su cliente Redis en un
+    // singleton estático a propósito (compartido entre `middleware.config.ts` y
+    // `AppModule.configure()`, ver su comentario), así que vive fuera de esa DI y nada lo cierra
+    // solo. Sin este cierre explícito, `pnpm run test:e2e` corría bien pero el proceso de Jest se
+    // quedaba colgado esperando por esta conexión — ver también HealthController.onModuleDestroy,
+    // que sí se resuelve solo porque ese cliente ahora está enganchado a la DI.
+    await RateLimitConfig.closeRedisClient();
   });
 
   afterEach(() => jest.clearAllMocks());
