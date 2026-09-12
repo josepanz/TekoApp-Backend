@@ -39,11 +39,19 @@ interface RequestWithUser {
 @ApiTags('professional-documents (staff)')
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
+// OJO: este `@Permissions` de clase es DECORATIVO — `PermissionsGuard.canActivate` lee la
+// metadata SOLO de `context.getHandler()` (nunca de la clase), así que esto NO protege nada por sí
+// solo. El que realmente protege cada endpoint es el `@Permissions` repetido método por método,
+// abajo. Hallazgo real (2026-09-11): los 3 métodos de este controller estuvieron sin decorar,
+// dejando `GET admin/professional-documents`, `GET admin/professionals/:referenceId/documents` y
+// `PATCH admin/professional-documents/:referenceId/review` accesibles a cualquier usuario logueado
+// — ver openspec/decisions.md.
 @Permissions(PERMISSIONS.PROFESSIONAL_DOCUMENTS.REVIEW, PERMISSIONS.ADMIN.ALL)
 export class AdminProfessionalDocumentsController {
   constructor(private readonly service: ProfessionalDocumentsService) {}
 
   @Get('admin/professional-documents')
+  @Permissions(PERMISSIONS.PROFESSIONAL_DOCUMENTS.REVIEW, PERMISSIONS.ADMIN.ALL)
   @ApiGetAdminProfessionalDocumentsQueue()
   async queue(
     @Query() query: GetAdminProfessionalDocumentsQueryDTO,
@@ -52,6 +60,7 @@ export class AdminProfessionalDocumentsController {
   }
 
   @Get('admin/professionals/:referenceId/documents')
+  @Permissions(PERMISSIONS.PROFESSIONAL_DOCUMENTS.REVIEW, PERMISSIONS.ADMIN.ALL)
   @ApiGetAdminProfessionalDocuments()
   async byProfessional(
     @Param() param: ProfessionalReferenceParamDTO,
@@ -60,6 +69,7 @@ export class AdminProfessionalDocumentsController {
   }
 
   @Patch('admin/professional-documents/:referenceId/review')
+  @Permissions(PERMISSIONS.PROFESSIONAL_DOCUMENTS.REVIEW, PERMISSIONS.ADMIN.ALL)
   @ApiReviewProfessionalDocument()
   async review(
     @Param() param: ProfessionalDocumentReferenceParamDTO,
