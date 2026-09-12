@@ -62,9 +62,26 @@ describe('AppController (e2e)', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('/tekoapp-backend/api/v1/healthcheck (GET)', () => {
+  // El healthcheck es VERSION_NEUTRAL a propósito (HealthController, commit 7e22526 / I-04):
+  // las 9 probes de K8s (ci/{develop,qa,master}/1_deployment.yml) y el health check de Render
+  // (fuera del repo) pegan a /tekoapp-backend/api/healthcheck SIN /v1. Si algún día se le agrega
+  // @Version('1') "para ser consistente con el resto", las probes dan 404, el pod nunca llega a
+  // Ready y el deploy se cae con rollback. No cambiar este path a /v1 sin migrar antes las 9
+  // probes + la config de Render.
+  it('/tekoapp-backend/api/healthcheck (GET) responde por la ruta version-neutral', () => {
+    // 200 si todos los indicadores de salud están up, 503 si alguno falla (ej. disco en esta
+    // máquina) — cualquiera de los dos prueba que la ruta existe y responde. Lo que NO es
+    // aceptable es 404: significaría que el ruteo version-neutral se rompió.
+    return request(app.getHttpServer())
+      .get('/tekoapp-backend/api/healthcheck')
+      .then((res) => {
+        expect([200, 503]).toContain(res.status);
+      });
+  });
+
+  it('/tekoapp-backend/api/v1/healthcheck (GET) da 404 porque el healthcheck no vive bajo /v1', () => {
     return request(app.getHttpServer())
       .get('/tekoapp-backend/api/v1/healthcheck')
-      .expect(200);
+      .expect(404);
   });
 });
