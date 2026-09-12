@@ -43,6 +43,57 @@ describe('ProfessionalPortfolioDbService', () => {
 
   afterEach(() => jest.clearAllMocks());
 
+  describe('create', () => {
+    it('debe crear la foto con los datos recibidos', async () => {
+      // Arrange
+      const data = {
+        professionalId: 10,
+        fileKey: 'abc.jpg',
+        status: PortfolioReviewStatus.PENDING,
+        createdBy: 'user-ref',
+      };
+      mockCreate.mockResolvedValue({ id: 1, ...data });
+
+      // Act
+      await service.create(data);
+
+      // Assert
+      expect(mockCreate).toHaveBeenCalledWith({ data });
+    });
+  });
+
+  describe('findByReferenceId', () => {
+    it('debe devolver null si no existe ninguna foto con ese referenceId', async () => {
+      // Arrange
+      mockFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findByReferenceId('inexistente');
+
+      // Assert
+      expect(result).toBeNull();
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'inexistente' },
+      });
+    });
+  });
+
+  describe('update', () => {
+    it('debe actualizar la foto por id con los campos recibidos', async () => {
+      // Arrange
+      mockUpdate.mockResolvedValue({ id: 3, caption: 'nuevo' });
+
+      // Act
+      await service.update(3, { caption: 'nuevo' });
+
+      // Assert
+      expect(mockUpdate).toHaveBeenCalledWith({
+        where: { id: 3 },
+        data: { caption: 'nuevo' },
+      });
+    });
+  });
+
   describe('findAllByProfessionalId', () => {
     it('debe ordenar por sortOrder y luego por más reciente', async () => {
       // Arrange
