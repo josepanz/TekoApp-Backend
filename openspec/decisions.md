@@ -723,6 +723,66 @@ job de vencimiento).
 Commit: `a24cf7f`. Verificado: 127 suites/1369 tests, build/lint/format en verde, migración
 aplicada por José (2026-09-07) y `prisma migrate status` limpio antes y después.
 
+## I-03 — Registro y adjudicación de disputas de pago (2026-09-11)
+
+Ver `openspec/changes/platform-hardening-2026-09/I-03-dispute-records.md` (spec original, cerrada
+y decidida) — implementación tal cual, sin rediseño.
+
+**Schema**: enums `DisputeStatus` (`OPEN`/`UNDER_REVIEW`/`RESOLVED`/`REJECTED`/`WITHDRAWN`),
+`DisputeReason` (5 valores, reemplaza como motivo de disputa al `RefundReason` TS-only que sigue
+viviendo en `refund-payment.dto.ts` para el camino de reembolso directo de staff) y
+`DisputeResolution` (`FULL_REFUND`/`PARTIAL_REFUND`/`NO_REFUND`/`OTHER_REMEDY`). Modelo
+`PaymentDisputes` con el patrón estándar (`id` Int + `referenceId` UUID + columnas de auditoría),
+sin `@@unique([paymentId])` a propósito — un pago puede tener más de una disputa a lo largo del
+tiempo, el service impide 2 simultáneas `OPEN`/`UNDER_REVIEW` sobre el mismo pago (chequeo previo,
+no constraint de DB). Migración `20260911120000_add_payment_disputes`, aplicada contra Supabase
+por conexión directa (5432): tabla, índices (`payment_id`, `status`,
+`reference_id` único) y `trg_audit_payment_disputes` verificados con consultas directas contra la
+base después de aplicar; `prisma migrate status` limpio antes y después.
+
+**Endpoints** (los 6 de la spec, sin desviación): `POST/GET /payments/:id/disputes`,
+`POST /payments/:id/disputes/:referenceId/withdraw`, `GET /admin/disputes`,
+`PATCH /admin/disputes/:referenceId/claim`, `PATCH /admin/disputes/:referenceId/resolve`. Permiso
+nuevo `disputes.adjudication:manage` (`PERMISSIONS.DISPUTES.ADJUDICATE`) — se siembra solo por
+existir en `PermissionsEnum` (el seed de T-04 ya aplana el catálogo completo, no hizo falta tocar
+`prisma/seed.ts`).
+
+**Decisiones tomadas durante la implementación** (la spec las dejaba abiertas a propósito):
+
+1. **`resolve` no fuerza pasar por `UNDER_REVIEW`**: el `updateMany` condicional acepta tanto
+   `OPEN` como `UNDER_REVIEW` como estado de origen — un staff puede adjudicar directo sin "tomar"
+   la disputa primero.
+2. **El reembolso de la resolución reusa `PaymentDbService.executeRefund` sin duplicarlo**: se le
+   agregaron dos parámetros opcionales — `disputeReferenceId` (queda en `refundDetails` para
+   trazabilidad inversa pago→disputa) y `tx` (permite que
+   `PaymentDisputesDbService.resolve` lo dispare DENTRO de la misma transacción que marca la
+   disputa `RESOLVED`/`REJECTED`, mismo patrón de `tx` opcional que ya usa
+   `UserRolesDBService.replaceUserRoles`). Sin `tx`, `executeRefund` sigue abriendo su propia
+   transacción — el camino de reembolso directo de staff (`POST /payments/:id/refund`, ya gateado
+   por permiso desde `a3760f6`) no cambia de comportamiento.
+3. **El camino sin disputa (reembolso directo de staff) no se tocó**: sigue existiendo, sigue sin
+   exigir abrir una `PaymentDisputes` — la spec lo dejaba como decisión de producto aparte, no
+   bloqueante para esta implementación.
+
+**Cierra el cabo suelto de I-01** (borrado de cuenta, `a24cf7f`): la tabla de bloqueantes de esa
+spec incluía "Disputa abierta (I-03)" pero no se pudo implementar porque `PaymentDisputes` no
+existía. `AccountDeletionService.findBlockers` ahora cuenta disputas `OPEN`/`UNDER_REVIEW` donde el
+usuario es quien la abrió, el cliente del pago, o su profesional (`DeletionBlockerType.OPEN_DISPUTE`,
+vía `PaymentDisputesDbService.countOpenDisputesForUser`) — una cuenta con una disputa abierta ya no
+puede completar el borrado.
+
+**Hallazgo real encontrado escribiendo los tests de `AdminDisputesController`**:
+`PermissionsGuard.canActivate` (`src/modules/auth/guards/permissions.guard.ts`) lee la metadata de
+permisos con `this.reflector.get(PERMISSIONS_KEY, context.getHandler())` — **solo el handler**,
+nunca `context.getClass()`. Un `@Permissions(...)` puesto a nivel de controller (en vez de en cada
+método) no lanza error ni se ignora con warning: `requiredPermissions` da `undefined` y el guard
+simplemente deja pasar a cualquier usuario autenticado. `AdminDisputesController` decora los 3
+métodos por separado (mismo criterio que `AdminPaymentsController`/`PaymentController`, que ya
+lo hacían así) — trampa real del repo, no de esta spec puntual, vale la pena tenerla presente para
+cualquier controller nuevo que agrupe varios endpoints bajo un mismo permiso.
+
+Commit: `262c071`. Verificado: 131 suites/1406 tests, build/lint/format en verde.
+
 ## I-04 — Versionado a v1 global + excepción del healthcheck (2026-09-07)
 
 Corte de versionado de la API: implementación del `defaultVersion: '1'` a nivel de `enableVersioning()`
