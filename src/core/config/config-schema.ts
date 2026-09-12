@@ -27,6 +27,10 @@ export const configSchema = Joi.object({
   SEQ_ENABLED: Joi.boolean().default(false),
   SEQ_URL: Joi.string().uri().required(),
 
+  // H-01: DSN de GlitchTip (mismo protocolo que Sentry, @sentry/nestjs). Opcional a propósito — si
+  // falta, el SDK queda desactivado y la app arranca igual (ver observability/services/sentry-reporter.service.ts).
+  GLITCHTIP_DSN: Joi.string().uri().allow('').optional(),
+
   DATABASE_URL: Joi.string().required(),
   DATABASE_CONNECTION_STRING: Joi.string().required(),
   AUDIT_SECRET_PEPPER: Joi.string().required(),

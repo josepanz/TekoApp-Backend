@@ -10,6 +10,8 @@ import { TRACE_ID_HEADER } from '@core/middlewares/trace-id.middleware';
 import { IncomingMessage } from 'http';
 import { Request } from 'express';
 import { format } from 'date-fns';
+import { SentryReporterService } from './services/sentry-reporter.service';
+import { AllExceptionsFilter } from '@core/filters/http-exception.filter';
 
 const MAX_PAYLOAD_SIZE_BYTES = 1024 * 1024; // 1MB
 
@@ -149,6 +151,11 @@ export function formatPayload(payload: unknown): unknown {
       inject: [APP_CONFIG.KEY],
     }),
   ],
-  exports: [LoggerModule],
+  // `AllExceptionsFilter` se registra ACÁ (no en `middleware.config.ts`, que hoy hace `new` a
+  // pelo de los 3 filtros globales) porque necesita `SentryReporterService` inyectado — un filtro
+  // instanciado con `new` fuera del contenedor de Nest no puede recibir dependencias. Se resuelve
+  // con `app.get(AllExceptionsFilter)` en `MiddlewareConfig.setup`.
+  providers: [SentryReporterService, AllExceptionsFilter],
+  exports: [LoggerModule, SentryReporterService, AllExceptionsFilter],
 })
 export class ObservabilityModule {}

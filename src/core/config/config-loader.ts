@@ -22,6 +22,12 @@ export const APP_CONFIG = registerAs('config', () => {
       seqUrl: process.env.SEQ_URL,
       seqEnabled: process.env.SEQ_ENABLED === 'true',
     },
+    // H-01: GlitchTip (implementa el protocolo de Sentry). `glitchtipDsn` queda `undefined` si la
+    // env var no está seteada o viene vacía — ese es el estado normal hoy, sin cuenta creada
+    // todavía. `SentryReporterService` no inicializa el SDK sin este valor.
+    observability: {
+      glitchtipDsn: process.env.GLITCHTIP_DSN || undefined,
+    },
     project: {
       name: process.env.PROJECT_NAME ?? pkg?.name,
       description: process.env.PROJECT_DESCRIPTION ?? pkg?.description,

@@ -4,16 +4,48 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Injectable,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { t } from '@common/i18n/i18n.helper';
+import { TRACE_ID_HEADER } from '@core/middlewares/trace-id.middleware';
+import { SentryReporterService } from '@modules/observability/services/sentry-reporter.service';
 
+interface RequestWithTraceAndUser extends Request {
+  [TRACE_ID_HEADER]?: string;
+  user?: { id?: number };
+}
+
+function extractRequestId(
+  request?: RequestWithTraceAndUser,
+): string | undefined {
+  const fromReq = request?.[TRACE_ID_HEADER];
+  if (typeof fromReq === 'string') return fromReq;
+  const fromHeader = request?.headers?.[TRACE_ID_HEADER.toLowerCase()];
+  return typeof fromHeader === 'string' ? fromHeader : undefined;
+}
+
+/**
+ * Último filtro en la cadena (ver `MiddlewareConfig.setup`, orden de `useGlobalFilters`): por
+ * cómo NestJS resuelve el filtro aplicable (`selectExceptionFilterMetadata`, primero el más
+ * específico), este `@Catch()` sin tipo SOLO se alcanza cuando ni `ValidationExceptionFilter`
+ * (`BadRequestException`) ni `HttpExceptionFilter` (`HttpException`) matchean — o sea, es el
+ * único de los tres que ve una excepción NO manejada de verdad (un `Error`/`TypeError` crudo, un
+ * error de Prisma no envuelto, etc.). Por eso es acá, y no en `HttpExceptionFilter`, donde se
+ * engancha el reporte a GlitchTip (H-01) — verificado leyendo `selectExceptionFilterMetadata` y
+ * `RouterExceptionFilters.create` (hace `filters.reverse()` antes de buscar), no asumido por el
+ * nombre de la clase.
+ */
+@Injectable()
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  constructor(private readonly sentryReporter: SentryReporterService) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<RequestWithTraceAndUser>();
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -36,6 +68,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = res;
       }
     }
+
+    // Nunca se manda el body/headers crudos — `SentryReporterService.captureException` sanitiza
+    // el body/query reusando `ObservabilityModule.formatPayload` antes de salir del proceso.
+    this.sentryReporter.captureException(exception, {
+      route: request?.url,
+      method: request?.method,
+      requestId: extractRequestId(request),
+      userId: request?.user?.id,
+      body: request?.body,
+      query: request?.query,
+    });
 
     response.status(status).json({
       statusCode: status,
