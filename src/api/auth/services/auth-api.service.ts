@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Users } from '@prisma/client';
 
@@ -14,6 +14,8 @@ import { AuthMigrationService } from './auth-migration.service';
 
 @Injectable()
 export class AuthApiService {
+  private readonly logger = new Logger(AuthApiService.name);
+
   constructor(
     private readonly userService: UsersDBService,
     private readonly authService: AuthService,
@@ -23,6 +25,28 @@ export class AuthApiService {
     @Inject(APP_CONFIG.KEY)
     private readonly configService: ConfigType<AppConfigType>,
   ) {}
+
+  /**
+   * Tarea 6 (platform-hardening-2026-09, 2026-09-14): avisos de seguridad por email — nunca
+   * deben poder tumbar el flujo principal (login/cambio de contraseña) si el SMTP falla, así
+   * que se atrapan acá y solo se loguean. Mismo criterio que `UsersDBService.createUser` ya usa
+   * para el email de verificación.
+   */
+  private sendSecurityEmail(
+    to: string,
+    emailType: EmailTypeEnum,
+    user: Users,
+  ): void {
+    void (async () => {
+      try {
+        await this.emailService.sendEmailByType(to, emailType, user);
+      } catch (error) {
+        this.logger.error(
+          `Error enviando el aviso de seguridad ${emailType} a ${to}: ${String(error)}`,
+        );
+      }
+    })();
+  }
 
   /**
    * Clave pública RSA (PEM) para que un cliente sin servidor propio (mobile) pueda cifrar el
@@ -53,6 +77,15 @@ export class AuthApiService {
     });
 
     if (loginResult.success) {
+      // Tarea 6: aviso de seguridad de "nuevo inicio de sesión" — no bloquea la respuesta del
+      // login (fire-and-forget vía sendSecurityEmail).
+      if (loginResult.user) {
+        this.sendSecurityEmail(
+          loginResult.user.email,
+          EmailTypeEnum.LOGIN,
+          loginResult.user,
+        );
+      }
       return {
         login: true,
         accessToken: loginResult.accessToken,
@@ -82,13 +115,26 @@ export class AuthApiService {
   async updatePassword(
     dto: DTO.UpdateUserPasswordDTO,
   ): Promise<{ success: boolean; message: string }> {
-    return await this.authService.changePassword(dto);
+    const result = await this.authService.changePassword(dto);
+    // Tarea 6: confirmación de "tu contraseña cambió" — si no fue el usuario, tiene rastro.
+    this.sendSecurityEmail(
+      result.user.email,
+      EmailTypeEnum.PASSWORD_CHANGED,
+      result.user,
+    );
+    return result;
   }
 
   async changeExpiredPassword(
     dto: DTO.ChangeExpiredPasswordDTO,
   ): Promise<{ success: boolean; message: string }> {
-    return await this.authService.changeExpiredPassword(dto);
+    const result = await this.authService.changeExpiredPassword(dto);
+    this.sendSecurityEmail(
+      result.user.email,
+      EmailTypeEnum.PASSWORD_CHANGED,
+      result.user,
+    );
+    return result;
   }
 
   async generateNonce(): Promise<DTO.NonceResponseDTO> {
@@ -149,11 +195,20 @@ export class AuthApiService {
     const email = this.authMigrationService.verifyForgotPasswordToken(
       dto.token,
     );
-    return await this.authService.resetPassword({
+    const result = await this.authService.resetPassword({
       email,
       encryptedNewPassword: dto.encryptedNewPassword,
       encryptedConfirmPassword: dto.encryptedConfirmPassword,
     });
+    // Tarea 6: confirmación de que el reseteo se completó — distinto del email FORGOT_PASSWORD
+    // que ya se manda en la SOLICITUD del reseteo (sendPasswordResetEmail, más abajo en este
+    // mismo archivo), no en la finalización.
+    this.sendSecurityEmail(
+      result.user.email,
+      EmailTypeEnum.PASSWORD_RESET,
+      result.user,
+    );
+    return result;
   }
 
   async refreshAccessToken(refreshToken: string): Promise<{

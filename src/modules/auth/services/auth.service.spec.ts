@@ -212,6 +212,8 @@ describe('AuthService', () => {
       expect(result.refreshToken).toBe('refresh_tok');
       expect(result.requiresPasswordCreation).toBe(false);
       expect(mockNonceConsume).toHaveBeenCalledWith('nonce-123');
+      // Tarea 6: el user se devuelve para el aviso de seguridad de nuevo login (AuthApiService).
+      expect(result.user).toEqual(credentials.user);
     });
 
     it('debe retornar requiresPasswordCreation true cuando existe usuario pero sin credenciales', async () => {
@@ -448,7 +450,8 @@ describe('AuthService', () => {
 
     it('debe retornar success true cuando el cambio de contraseña es exitoso', async () => {
       // Arrange
-      mockFindActiveUserByEmail.mockResolvedValue(buildUser());
+      const user = buildUser();
+      mockFindActiveUserByEmail.mockResolvedValue(user);
       mockFindCredentialsByEmail.mockResolvedValue(buildCredentials());
       mockChangeEncryptedPassword.mockResolvedValue(undefined);
 
@@ -458,6 +461,8 @@ describe('AuthService', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(mockChangeEncryptedPassword).toHaveBeenCalled();
+      // Tarea 6: el user se devuelve para el aviso de seguridad de cambio de contraseña.
+      expect(result.user).toEqual(user);
     });
 
     it('debe lanzar NotFoundException cuando el usuario no existe', async () => {
@@ -492,7 +497,8 @@ describe('AuthService', () => {
       mockDecryptPassword
         .mockReturnValueOnce('newpass')
         .mockReturnValueOnce('newpass');
-      mockFindActiveUserByEmail.mockResolvedValue(buildUser());
+      const user = buildUser();
+      mockFindActiveUserByEmail.mockResolvedValue(user);
       mockFindCredentialsByEmail.mockResolvedValue(buildCredentials());
       mockCreateOrUpdatePassword.mockResolvedValue(undefined);
 
@@ -506,6 +512,8 @@ describe('AuthService', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(mockCreateOrUpdatePassword).toHaveBeenCalledWith(10, 'newpass');
+      // Tarea 6: el user se devuelve para el aviso de confirmación de reseteo de contraseña.
+      expect(result.user).toEqual(user);
     });
 
     it('debe lanzar UnauthorizedException cuando las contraseñas nuevas no coinciden', async () => {

@@ -15,6 +15,9 @@ import { TaxService } from '@api/tax/services/tax.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { UsersDBService } from '@modules/users-db/services/users-db.service';
+import { EmailService } from '@modules/email/services/email.service';
+import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { RefundReason } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentDto } from '../dtos/request/create-payment.dto';
 import type { RefundPaymentDto } from '../dtos/request/refund-payment.dto';
@@ -59,6 +62,10 @@ const mockGenerate = jest.fn();
 
 // NotificationsService
 const mockNotificationsCreate = jest.fn();
+
+// UsersDBService / EmailService (tarea 6 — alta de medio de pago)
+const mockUsersFindById = jest.fn();
+const mockSendEmailByType = jest.fn();
 
 // ============================================================
 // Fixtures reutilizables
@@ -177,6 +184,14 @@ describe('PaymentApiService', () => {
         {
           provide: NotificationsService,
           useValue: { create: mockNotificationsCreate },
+        },
+        {
+          provide: UsersDBService,
+          useValue: { findById: mockUsersFindById },
+        },
+        {
+          provide: EmailService,
+          useValue: { sendEmailByType: mockSendEmailByType },
         },
       ],
     }).compile();
@@ -785,6 +800,68 @@ describe('PaymentApiService', () => {
       expect(mockCreatePaymentMethod).toHaveBeenCalledTimes(1);
       expect(result.id).toBe(BASE_PM_PK);
       expect(result.referenceId).toBe(BASE_PM_REF);
+    });
+
+    it('debe disparar el aviso de alta de medio de pago sin bloquear la respuesta (tarea 6)', async () => {
+      // Arrange
+      const dto: CreatePaymentMethodRequestDTO = {
+        name: 'Mi tarjeta VISA',
+        type: 'CREDIT_CARD',
+        provider: PaymentProvider.STRIPE,
+        isDefault: false,
+        details: { cardLast4: '4242' },
+        externalId: 'pm_stripe_001',
+      } as unknown as CreatePaymentMethodRequestDTO;
+      const createdMethod = {
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+        ...dto,
+      };
+      const user = { id: BASE_USER_ID, email: 'cliente@example.com' };
+      mockCreatePaymentMethod.mockResolvedValue(createdMethod);
+      mockUsersFindById.mockResolvedValue(user);
+      mockSendEmailByType.mockResolvedValue(undefined);
+
+      // Act
+      await service.createPaymentMethod(BASE_USER_ID, dto);
+      // fire-and-forget: encadena un findById antes del sendEmailByType — un solo microtask
+      // flush no alcanza, se espera un macrotask (setImmediate) para que ambos hayan corrido.
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Assert
+      expect(mockUsersFindById).toHaveBeenCalledWith(BASE_USER_ID);
+      expect(mockSendEmailByType).toHaveBeenCalledWith(
+        user.email,
+        EmailTypeEnum.PAYMENT_METHOD_CREATED,
+        user,
+        undefined,
+        expect.objectContaining({ dto: { methodLabel: dto.name } }),
+      );
+    });
+
+    it('no debe fallar la creación ni intentar enviar el email cuando el usuario no se encuentra', async () => {
+      // Arrange
+      const dto: CreatePaymentMethodRequestDTO = {
+        name: 'Mi tarjeta VISA',
+        type: 'CREDIT_CARD',
+        provider: PaymentProvider.STRIPE,
+      } as unknown as CreatePaymentMethodRequestDTO;
+      mockCreatePaymentMethod.mockResolvedValue({
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+        ...dto,
+      });
+      mockUsersFindById.mockResolvedValue(null);
+
+      // Act
+      const result = await service.createPaymentMethod(BASE_USER_ID, dto);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Assert
+      expect(result.id).toBe(BASE_PM_PK);
+      expect(mockSendEmailByType).not.toHaveBeenCalled();
     });
   });
 

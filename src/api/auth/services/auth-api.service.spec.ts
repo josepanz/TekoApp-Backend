@@ -175,6 +175,30 @@ describe('AuthApiService', () => {
       });
     });
 
+    it('dispara el aviso de seguridad LOGIN sin bloquear la respuesta cuando el login trae user (tarea 6)', async () => {
+      // Arrange
+      mockLogin.mockResolvedValue({
+        success: true,
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        requiresPasswordCreation: false,
+        user: mockUser,
+      });
+      mockSendEmailByType.mockResolvedValue(undefined);
+
+      // Act
+      const result = await service.handleLogin(loginDto);
+
+      // Assert: la respuesta no espera al email (fire-and-forget) — se verifica con un flush.
+      expect(result.login).toBe(true);
+      await Promise.resolve();
+      expect(mockSendEmailByType).toHaveBeenCalledWith(
+        mockUser.email,
+        EmailTypeEnum.LOGIN,
+        mockUser,
+      );
+    });
+
     it('propaga el userAgent al AuthService cuando es proporcionado', async () => {
       mockLogin.mockResolvedValue({
         success: true,
@@ -274,15 +298,44 @@ describe('AuthApiService', () => {
       mockChangePassword.mockResolvedValue({
         success: true,
         message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
       });
+      mockSendEmailByType.mockResolvedValue(undefined);
 
       const result = await service.updatePassword(payload);
 
       expect(result).toEqual({
         success: true,
         message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
       });
       expect(mockChangePassword).toHaveBeenCalledWith(payload);
+    });
+
+    it('dispara el aviso de seguridad PASSWORD_CHANGED (tarea 6)', async () => {
+      // Arrange
+      const payload = {
+        email: 'usuario@test.com',
+        encryptedOldPassword: 'oldPass',
+        encryptedNewPassword: 'newPass',
+      };
+      mockChangePassword.mockResolvedValue({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
+      });
+      mockSendEmailByType.mockResolvedValue(undefined);
+
+      // Act
+      await service.updatePassword(payload);
+      await Promise.resolve();
+
+      // Assert
+      expect(mockSendEmailByType).toHaveBeenCalledWith(
+        mockUser.email,
+        EmailTypeEnum.PASSWORD_CHANGED,
+        mockUser,
+      );
     });
   });
 
@@ -298,15 +351,44 @@ describe('AuthApiService', () => {
       mockChangeExpiredPassword.mockResolvedValue({
         success: true,
         message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
       });
+      mockSendEmailByType.mockResolvedValue(undefined);
 
       const result = await service.changeExpiredPassword(payload);
 
       expect(result).toEqual({
         success: true,
         message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
       });
       expect(mockChangeExpiredPassword).toHaveBeenCalledWith(payload);
+    });
+
+    it('dispara el aviso de seguridad PASSWORD_CHANGED (tarea 6)', async () => {
+      // Arrange
+      const payload: DTO.ChangeExpiredPasswordDTO = {
+        email: 'usuario@test.com',
+        encryptedOldPassword: 'oldPass',
+        encryptedNewPassword: 'newPass',
+      };
+      mockChangeExpiredPassword.mockResolvedValue({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
+      });
+      mockSendEmailByType.mockResolvedValue(undefined);
+
+      // Act
+      await service.changeExpiredPassword(payload);
+      await Promise.resolve();
+
+      // Assert
+      expect(mockSendEmailByType).toHaveBeenCalledWith(
+        mockUser.email,
+        EmailTypeEnum.PASSWORD_CHANGED,
+        mockUser,
+      );
     });
   });
 
@@ -420,13 +502,16 @@ describe('AuthApiService', () => {
       mockResetPassword.mockResolvedValue({
         success: true,
         message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
       });
+      mockSendEmailByType.mockResolvedValue(undefined);
 
       const result = await service.forgotPassword(payload);
 
       expect(result).toEqual({
         success: true,
         message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
       });
       expect(mockVerifyForgotPasswordToken).toHaveBeenCalledWith(payload.token);
       expect(mockResetPassword).toHaveBeenCalledWith({
@@ -434,6 +519,28 @@ describe('AuthApiService', () => {
         encryptedNewPassword: payload.encryptedNewPassword,
         encryptedConfirmPassword: payload.encryptedConfirmPassword,
       });
+    });
+
+    it('dispara la confirmación PASSWORD_RESET (tarea 6), distinta del email de solicitud', async () => {
+      // Arrange
+      mockVerifyForgotPasswordToken.mockReturnValue('usuario@test.com');
+      mockResetPassword.mockResolvedValue({
+        success: true,
+        message: 'Contraseña actualizada correctamente.',
+        user: mockUser,
+      });
+      mockSendEmailByType.mockResolvedValue(undefined);
+
+      // Act
+      await service.forgotPassword(payload);
+      await Promise.resolve();
+
+      // Assert
+      expect(mockSendEmailByType).toHaveBeenCalledWith(
+        mockUser.email,
+        EmailTypeEnum.PASSWORD_RESET,
+        mockUser,
+      );
     });
 
     it('lanza UnauthorizedException cuando el token es inválido o expirado', async () => {

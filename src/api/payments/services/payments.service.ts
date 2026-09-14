@@ -1,6 +1,7 @@
 // src/api/payments/services/payments.service.ts
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   ForbiddenException,
@@ -12,6 +13,9 @@ import { TaxService } from '@api/tax/services/tax.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { UsersDBService } from '@modules/users-db/services/users-db.service';
+import { EmailService } from '@modules/email/services/email.service';
+import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
@@ -44,12 +48,16 @@ import {
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class PaymentApiService {
+  private readonly logger = new Logger(PaymentApiService.name);
+
   constructor(
     private readonly dbService: PaymentDbService,
     private readonly feeCalculator: FeeCalculatorService,
     private readonly taxService: TaxService,
     private readonly reportService: ReportService,
     private readonly notificationsService: NotificationsService,
+    private readonly usersDb: UsersDBService,
+    private readonly emailService: EmailService,
   ) {}
 
   // ==================== PAGOS ====================
@@ -282,6 +290,30 @@ export class PaymentApiService {
       details: dto.details ?? {},
       externalId: dto.externalId,
     } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
+
+    // Tarea 6 (platform-hardening-2026-09): alta exitosa de medio de pago — fire-and-forget,
+    // un fallo de SMTP (o del lookup de usuario) nunca debe tumbar la respuesta de creación.
+    void (async () => {
+      try {
+        const user = await this.usersDb.findById(userId);
+        if (!user) return;
+        await this.emailService.sendEmailByType(
+          user.email,
+          EmailTypeEnum.PAYMENT_METHOD_CREATED,
+          user,
+          undefined,
+          {
+            dto: { methodLabel: dto.name },
+            description: 'alta de método de pago',
+          },
+        );
+      } catch (error) {
+        this.logger.error(
+          `Error enviando el aviso de alta de medio de pago a userId=${userId}: ${String(error)}`,
+        );
+      }
+    })();
+
     return mapPaymentMethodToResponse(created);
   }
 
