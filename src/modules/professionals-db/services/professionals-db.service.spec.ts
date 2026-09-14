@@ -25,6 +25,7 @@ const mockProfessionalsFindUnique = jest.fn();
 const mockProfessionalsFindMany = jest.fn();
 const mockProfessionalsCreate = jest.fn();
 const mockProfessionalsUpdate = jest.fn();
+const mockProfessionalsUpdateMany = jest.fn();
 
 // ─── Mocks de category ────────────────────────────────────────────────────────
 const mockCategoryFindUnique = jest.fn();
@@ -46,6 +47,7 @@ const mockPrisma = {
       findMany: mockProfessionalsFindMany,
       create: mockProfessionalsCreate,
       update: mockProfessionalsUpdate,
+      updateMany: mockProfessionalsUpdateMany,
     },
     category: {
       findUnique: mockCategoryFindUnique,
@@ -535,6 +537,44 @@ describe('ProfessionalsDbService', () => {
         data: { description: 'Nueva descripción' },
         include: professionalWithRelationsInclude,
       });
+    });
+  });
+
+  // ─── updateConditional ───────────────────────────────────────────────────
+  describe('updateConditional', () => {
+    it('debe actualizar y retornar la cantidad de filas afectadas cuando el estado coincide', async () => {
+      // Arrange
+      mockProfessionalsUpdateMany.mockResolvedValue({ count: 1 });
+
+      // Act
+      const result = await service.updateConditional(
+        1,
+        [ProfessionalStatus.PENDING],
+        { status: ProfessionalStatus.APPROVED },
+      );
+
+      // Assert
+      expect(result).toBe(1);
+      expect(mockProfessionalsUpdateMany).toHaveBeenCalledWith({
+        where: { id: 1, status: { in: [ProfessionalStatus.PENDING] } },
+        data: { status: ProfessionalStatus.APPROVED },
+      });
+    });
+
+    it('debe retornar 0 cuando el estado ya cambió (carrera entre dos transiciones concurrentes)', async () => {
+      // Arrange — otra escritura ya movió el profesional fuera de los estados esperados entre
+      // la lectura de validación y este updateMany.
+      mockProfessionalsUpdateMany.mockResolvedValue({ count: 0 });
+
+      // Act
+      const result = await service.updateConditional(
+        1,
+        [ProfessionalStatus.APPROVED],
+        { status: ProfessionalStatus.SUSPENDED },
+      );
+
+      // Assert
+      expect(result).toBe(0);
     });
   });
 

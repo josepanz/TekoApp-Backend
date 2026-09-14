@@ -241,6 +241,25 @@ export class ProfessionalsDbService {
     });
   }
 
+  /**
+   * Actualiza el profesional solo si su estado actual está entre `expectedStatuses` — evita
+   * la condición de carrera entre dos transiciones administrativas concurrentes sobre el mismo
+   * profesional (ej. verificar y suspender al mismo tiempo, o dos admins resolviendo la misma
+   * verificación). Devuelve la cantidad de filas afectadas: 0 significa que el estado cambió
+   * entre la lectura de validación y esta escritura.
+   */
+  async updateConditional(
+    id: number,
+    expectedStatuses: ProfessionalStatus[],
+    data: Prisma.ProfessionalsUpdateInput,
+  ): Promise<number> {
+    const result = await this.prisma.extended.professionals.updateMany({
+      where: { id, status: { in: expectedStatuses } },
+      data,
+    });
+    return result.count;
+  }
+
   async findServices(
     professionalId: number,
     query: PaginationQueryDTO & Record<string, unknown>,

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, ConflictException } from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
@@ -13,6 +13,7 @@ const mockFindByUserId = jest.fn();
 const mockFindProfessionalIdByUserId = jest.fn();
 const mockFindProfessionalByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
+const mockUpdateConditional = jest.fn();
 const mockFindServices = jest.fn();
 const mockFindReviews = jest.fn();
 const mockGetStats = jest.fn();
@@ -56,6 +57,7 @@ describe('ProfessionalsService', () => {
             findProfessionalIdByUserId: mockFindProfessionalIdByUserId,
             findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             update: mockUpdate,
+            updateConditional: mockUpdateConditional,
             findServices: mockFindServices,
             findReviews: mockFindReviews,
             getStats: mockGetStats,
@@ -618,23 +620,32 @@ describe('ProfessionalsService', () => {
     it('debe marcar el profesional como verificado cuando isVerified=true', async () => {
       // Arrange
       const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
-      mockFindById.mockResolvedValue(mockProfessional);
-      mockUpdate.mockResolvedValue({
-        ...mockProfessional,
-        verificationStatus: 'VERIFIED',
-        status: 'APPROVED',
-      });
+      mockFindById
+        .mockResolvedValueOnce(mockProfessional)
+        .mockResolvedValueOnce({
+          ...mockProfessional,
+          verificationStatus: 'VERIFIED',
+          status: 'APPROVED',
+        });
+      mockUpdateConditional.mockResolvedValue(1);
 
       // Act
-      await service.verifyProfessional(1, dto, 99);
+      const result = await service.verifyProfessional(1, dto, 99);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
+        [mockProfessional.status],
         expect.objectContaining({
           verificationStatus: 'VERIFIED',
           status: 'APPROVED',
           changedReason: 'Documentos válidos',
+        }),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'APPROVED',
+          verificationStatus: 'VERIFIED',
         }),
       );
     });
@@ -643,18 +654,37 @@ describe('ProfessionalsService', () => {
       // Arrange
       const dto = { isVerified: false, notes: 'Documentos inválidos' } as never;
       mockFindById.mockResolvedValue(mockProfessional);
-      mockUpdate.mockResolvedValue(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(1);
 
       // Act
       await service.verifyProfessional(1, dto, 99);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
+        [mockProfessional.status],
         expect.objectContaining({
           verificationStatus: 'REJECTED',
           status: 'REJECTED',
         }),
+      );
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la lectura y la escritura (carrera)', async () => {
+      // Arrange — dos admins resolviendo la misma verificación al mismo tiempo: el segundo
+      // `updateMany` no encuentra ninguna fila con el estado leído, count() vuelve 0.
+      const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.verifyProfessional(1, dto, 99)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        [mockProfessional.status],
+        expect.objectContaining({ status: 'APPROVED' }),
       );
     });
   });
@@ -662,20 +692,27 @@ describe('ProfessionalsService', () => {
   describe('suspendProfessional', () => {
     it('debe suspender el profesional con la razón indicada', async () => {
       // Arrange
-      mockFindById.mockResolvedValue(mockProfessional);
-      mockUpdate.mockResolvedValue({
-        ...mockProfessional,
-        status: 'SUSPENDED',
-        isActive: false,
-      });
+      mockFindById
+        .mockResolvedValueOnce(mockProfessional)
+        .mockResolvedValueOnce({
+          ...mockProfessional,
+          status: 'SUSPENDED',
+          isActive: false,
+        });
+      mockUpdateConditional.mockResolvedValue(1);
 
       // Act
-      await service.suspendProfessional(1, 'Comportamiento inadecuado', 99);
+      const result = await service.suspendProfessional(
+        1,
+        'Comportamiento inadecuado',
+        99,
+      );
 
       // Assert
       expect(mockFindById).toHaveBeenCalledWith(1);
-      expect(mockUpdate).toHaveBeenCalledWith(
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
+        [mockProfessional.status],
         expect.objectContaining({
           status: 'SUSPENDED',
           isActive: false,
@@ -683,6 +720,21 @@ describe('ProfessionalsService', () => {
           lastChangedBy: '99',
         }),
       );
+      expect(result).toEqual(
+        expect.objectContaining({ status: 'SUSPENDED', isActive: false }),
+      );
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la lectura y la escritura (carrera)', async () => {
+      // Arrange — ej. el profesional ya fue suspendido por otro admin, o se reactivó, entre
+      // la lectura de validación y esta escritura: el `updateMany` condicional no afecta filas.
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(
+        service.suspendProfessional(1, 'Comportamiento inadecuado', 99),
+      ).rejects.toThrow(ConflictException);
     });
   });
 });

@@ -1,5 +1,9 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
-import { Prisma, VerificationStatus } from '@prisma/client';
+import {
+  Injectable,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
+import { Prisma, ProfessionalStatus, VerificationStatus } from '@prisma/client';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
@@ -269,15 +273,31 @@ export class ProfessionalsService {
     dto: VerifyProfessionalRequestDTO,
     adminId: number,
   ): Promise<ProfessionalDetailResponseDTO> {
-    await this.professionalsDb.findById(id);
-    const result = await this.professionalsDb.update(id, {
-      verificationStatus: dto.isVerified
-        ? VerificationStatus.VERIFIED
-        : VerificationStatus.REJECTED,
-      status: dto.isVerified ? 'APPROVED' : 'REJECTED',
-      lastChangedBy: String(adminId),
-      changedReason: dto.notes,
-    });
+    const professional = await this.professionalsDb.findById(id);
+    // updateMany + count en vez de update() incondicional: evita que dos escrituras
+    // administrativas concurrentes sobre el mismo profesional (ej. dos admins resolviendo la
+    // misma verificación) se pisen sin detectar el conflicto — mismo patrón que
+    // services/payments/professional-documents — ver .claude/rules/typescript.md.
+    const updatedCount = await this.professionalsDb.updateConditional(
+      id,
+      [professional.status],
+      {
+        verificationStatus: dto.isVerified
+          ? VerificationStatus.VERIFIED
+          : VerificationStatus.REJECTED,
+        status: dto.isVerified
+          ? ProfessionalStatus.APPROVED
+          : ProfessionalStatus.REJECTED,
+        lastChangedBy: String(adminId),
+        changedReason: dto.notes,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        t('professionals.STATUS_CHANGED_BEFORE_VERIFY'),
+      );
+    }
+    const result = await this.professionalsDb.findById(id);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -286,13 +306,23 @@ export class ProfessionalsService {
     reason: string,
     adminId: number,
   ): Promise<ProfessionalDetailResponseDTO> {
-    await this.professionalsDb.findById(id);
-    const result = await this.professionalsDb.update(id, {
-      status: 'SUSPENDED',
-      isActive: false,
-      lastChangedBy: String(adminId),
-      changedReason: reason,
-    });
+    const professional = await this.professionalsDb.findById(id);
+    const updatedCount = await this.professionalsDb.updateConditional(
+      id,
+      [professional.status],
+      {
+        status: ProfessionalStatus.SUSPENDED,
+        isActive: false,
+        lastChangedBy: String(adminId),
+        changedReason: reason,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        t('professionals.STATUS_CHANGED_BEFORE_SUSPEND'),
+      );
+    }
+    const result = await this.professionalsDb.findById(id);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 }

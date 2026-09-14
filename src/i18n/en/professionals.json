@@ -1,6 +1,8 @@
 {
   "CATEGORY_DOES_NOT_EXIST": "The category does not exist",
   "NOT_FOUND": "Professional not found",
+  "STATUS_CHANGED_BEFORE_SUSPEND": "The professional's status changed before it could be suspended, please try again",
+  "STATUS_CHANGED_BEFORE_VERIFY": "The professional's status changed before it could be verified, please try again",
   "UNAUTHORIZED_UPDATE": "You do not have permission to modify this professional",
   "USER_ALREADY_PROFESSIONAL": "The user is already a professional",
   "USER_NOT_FOUND": "User not found"
