@@ -13,6 +13,8 @@ import { PaymentDbService } from '@modules/payments-db/services/payment-db.servi
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
 import { TaxService } from '@api/tax/services/tax.service';
 import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { RefundReason } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentDto } from '../dtos/request/create-payment.dto';
 import type { RefundPaymentDto } from '../dtos/request/refund-payment.dto';
@@ -54,6 +56,9 @@ const mockCalculateTax = jest.fn();
 
 // ReportService
 const mockGenerate = jest.fn();
+
+// NotificationsService
+const mockNotificationsCreate = jest.fn();
 
 // ============================================================
 // Fixtures reutilizables
@@ -168,6 +173,10 @@ describe('PaymentApiService', () => {
         {
           provide: ReportService,
           useValue: { generate: mockGenerate },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -643,6 +652,11 @@ describe('PaymentApiService', () => {
         dto.reason,
       );
       expect(result.status).toBe(PaymentStatus.PARTIAL_REFUNDED);
+      // I-05 (#16, IMPRESCINDIBLE): el cliente necesita confirmación del reembolso.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.PAYMENT_REFUNDED }),
+        BASE_USER_ID,
+      );
     });
 
     it('debe propagar el BadRequestException que lance executeRefund (ej. monto excede disponible)', async () => {

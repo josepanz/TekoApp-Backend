@@ -10,6 +10,8 @@ import { PaymentDbService } from '@modules/payments-db/services/payment-db.servi
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
 import { TaxService } from '@api/tax/services/tax.service';
 import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
@@ -47,6 +49,7 @@ export class PaymentApiService {
     private readonly feeCalculator: FeeCalculatorService,
     private readonly taxService: TaxService,
     private readonly reportService: ReportService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ==================== PAGOS ====================
@@ -238,6 +241,22 @@ export class PaymentApiService {
       throw new ForbiddenException(t('payments.UNAUTHORIZED_REFUND'));
     }
     await this.dbService.executeRefund(payment.id, dto.amount, dto.reason);
+
+    // I-05 (#16, IMPRESCINDIBLE): movimiento de dinero — el cliente necesita confirmación de
+    // que el reembolso se ejecutó y por cuánto. Después de que executeRefund ya resolvió (lock
+    // de fila liberado, ver comentario de ese método).
+    await this.notificationsService.create(
+      {
+        title: t('payments.NOTIFICATION_REFUNDED_TITLE'),
+        message: t('payments.NOTIFICATION_REFUNDED_MESSAGE', {
+          amount: dto.amount,
+        }),
+        type: NotificationType.PAYMENT_REFUNDED,
+        channels: ['in_app', 'push'],
+      },
+      payment.userId,
+    );
+
     return this.getPaymentById(id);
   }
 

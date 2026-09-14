@@ -4,6 +4,8 @@
   "CANNOT_DELETE_ONLY_METHOD": "The only payment method cannot be deleted",
   "METHOD_NOT_FOUND": "Payment method not found",
   "NOT_FOUND": "Payment not found",
+  "NOTIFICATION_REFUNDED_TITLE": "Refund processed",
+  "NOTIFICATION_REFUNDED_MESSAGE": "A refund of {amount} was processed on your payment.",
   "ONLY_COMPLETED_CAN_BE_REFUNDED": "Only completed payments can be refunded",
   "ONLY_PENDING_CAN_BE_UPDATED": "Only pending payments can be updated",
   "PROFESSIONAL_NOT_FOUND": "Professional not found",
