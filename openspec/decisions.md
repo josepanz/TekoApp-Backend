@@ -956,3 +956,40 @@ Tests de la carrera agregados en `professionals.service.spec.ts` (ambos métodos
 método nuevo en `professionals-db.service.spec.ts`.
 
 Commit: `80fa823`. Verificado: 135 suites / 1472 tests en verde; format/lint/build limpios.
+
+## Tarea 3 — Canal de email real en `NotificationsProcessor` (2026-09-14)
+
+Hallazgo colateral anotado (no corregido) por `I-05-notification-triggers.md`:
+`NotificationsProcessor.sendNotificationByChannel` trataba los canales `email`/`sms` como
+stubs (`logger.log` nomás), pese a que `modules/email` (`EmailService`) ya existe y se usa en
+`auth-api`, `onboarding`, `users-db`.
+
+Cambio — canal `email`: nuevo método privado `sendEmail(userId, title, message)` en el
+processor. Resuelve el email del destinatario vía `UsersDBService.findById` (inyectado desde
+`UsersDBModule`, ya importa `EmailModule` así que no hay ciclo nuevo) y reusa
+`EmailService.send()` con un template genérico nuevo,
+`EmailHelper.createGenericNotificationTemplate(firstName, title, message)` — no reusa los
+templates existentes porque esos están armados para un flujo puntual (verificación, contraseña),
+mientras que este canal despacha cualquier tipo de notificación de dominio con `title`/`message`
+libres.
+
+**Decisión de resiliencia**: igual que `sendWebPush`/`sendFcm` (que jamás relanzan — devuelven un
+`outcome` y loguean), el fallo del canal `email` se atrapa y solo se loguea, nunca se relanza. Si
+relanzara, un solo canal caído (SMTP abajo, usuario sin email) tumbaría `Promise.all` en
+`handleSendNotification` y marcaría **toda** la notificación como `FAILED` aunque otros canales
+(ej. `in_app` vía SSE) sí se hayan entregado. `EmailService.send()` ya lanza
+`InternalServerErrorException` en su propio catch — acá se la vuelve a atrapar a propósito.
+
+**Canal `sms`: sigue como stub, a propósito.** A diferencia de `email`, no hay ningún
+`SmsService`/wrapper de Twilio en el repo — el paquete `twilio` ni siquiera está en
+`package.json`. Lo único que existe son las env vars `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/
+`TWILIO_PHONE_NUMBER` validadas por Joi en `config-schema.ts`, que es validación de
+configuración, no un cliente real. Cablearlo de verdad implica agregar una dependencia nueva y
+un módulo completo — se deja documentado en el propio código (comentario en el `case 'sms'`) y
+acá, fuera del alcance de "cablear el canal que ya existe".
+
+Tests nuevos en `notifications.processor.spec.ts` (`describe('canal email')`): envío exitoso,
+usuario sin email (se omite sin lanzar), y fallo de SMTP (no relanza, no tumba otros canales ni
+marca `FAILED` la notificación).
+
+Commit: `1ab7f42`. Verificado: 135 suites / 1475 tests en verde; format/lint/build limpios.
