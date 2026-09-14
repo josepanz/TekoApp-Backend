@@ -907,3 +907,29 @@ Definition of Done del §1.2.
 Commits: `bedcca1` (versionado), `7e22526` (healthcheck version-neutral), `6f48d01` (doc). 
 Verificado: app levantada con Postgres/Mongo/Redis reales; 127 suites / 1369 tests en verde; 
 format/lint/build limpios.
+
+## T-03 (deuda diferida) — rename de `locations-db`/`tracking-db` (2026-09-14)
+
+Ver `openspec/changes/platform-hardening-2026-09/WORKPLAN.md` §6, T-03. T-03 ya había corregido el
+typo de archivo (`tacking-db.service.ts` → `tracking-db.service.ts`) pero difirió el rename de
+ambos módulos por no ser urgente. Se ejecuta ahora como tarea 1 de una tanda nueva pedida por José.
+
+Cambio: `src/modules/locations-db` → `src/modules/professional-position-db` (última posición
+conocida del profesional, Postgres — alimenta `findNearby`/Haversine, D-01) y
+`src/modules/tracking-db` → `src/modules/geo-tracking-db` (histórico de posiciones durante un
+servicio en curso, MongoDB con índice `2dsphere`). Clases renombradas en consecuencia
+(`LocationsDbService`→`ProfessionalPositionDbService`, `LocationsDbModule`→
+`ProfessionalPositionDbModule`, `TrackingDbService`→`GeoTrackingDbService`,
+`TrackingDbModule`→`GeoTrackingDbModule`), imports actualizados en `src/api/locations` y
+`src/api/tracking`, y cada módulo lleva ahora un docstring explicando su división de
+responsabilidad respecto del otro (la falta de esa explicación era el hallazgo original de T-03).
+Actualizados también el árbol de módulos de `README.md` y el ejemplo de `.claude/CLAUDE.md` que
+mencionaban el nombre viejo.
+
+No se tocaron los comentarios dentro de `prisma/migrations/**` (registro histórico inmutable) que
+mencionan `LocationsDbService` por nombre — sí se actualizó el comentario vivo en
+`prisma/schema.prisma` que referencia `professionals_nearby_idx`.
+
+Sin cambios de comportamiento ni de contrato — es un rename puro, sin migración de base de datos.
+
+Commit: `e3b466a`. Verificado: 135 suites / 1468 tests en verde; format/lint/build limpios.
