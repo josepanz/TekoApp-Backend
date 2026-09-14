@@ -10,9 +10,12 @@ import { ProfessionalsDbService } from '@modules/professionals-db/services/profe
 import { PaymentDisputesDbService } from '@modules/payment-disputes-db/services/payment-disputes-db.service';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { PaymentDisputesService } from './payment-disputes.service';
 
 const mockFindPaymentByReferenceId = jest.fn();
+const mockFindPaymentById = jest.fn();
 const mockFindProfessionalById = jest.fn();
 const mockDbCreate = jest.fn();
 const mockDbFindActiveDisputeForPayment = jest.fn();
@@ -22,6 +25,7 @@ const mockDbFindQueuePaginated = jest.fn();
 const mockDbClaim = jest.fn();
 const mockDbResolve = jest.fn();
 const mockDbWithdraw = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 const fakePayment = {
   id: 10,
@@ -78,7 +82,10 @@ describe('PaymentDisputesService', () => {
         PaymentDisputesService,
         {
           provide: PaymentDbService,
-          useValue: { findPaymentByReferenceId: mockFindPaymentByReferenceId },
+          useValue: {
+            findPaymentByReferenceId: mockFindPaymentByReferenceId,
+            findPaymentById: mockFindPaymentById,
+          },
         },
         {
           provide: ProfessionalsDbService,
@@ -96,6 +103,10 @@ describe('PaymentDisputesService', () => {
             resolve: mockDbResolve,
             withdraw: mockDbWithdraw,
           },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -124,6 +135,31 @@ describe('PaymentDisputesService', () => {
         expect.objectContaining({ paymentId: 10, openedByUserId: 1 }),
       );
       expect(result.referenceId).toBe('dsp-1');
+      // I-05 (#26, IMPRESCINDIBLE): el cliente abrió, se avisa al profesional (la contraparte).
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.DISPUTE_OPENED }),
+        999,
+      );
+    });
+
+    it('debe avisar al cliente cuando quien abre la disputa es el profesional (I-05 #26)', async () => {
+      // Arrange
+      mockFindPaymentByReferenceId.mockResolvedValue(fakePayment);
+      mockFindProfessionalById.mockResolvedValue({ userId: 999 });
+      mockDbFindActiveDisputeForPayment.mockResolvedValue(null);
+      mockDbCreate.mockResolvedValue(fakeDisputeRow);
+
+      // Act — llama el userId del profesional (999), no el del cliente (fakePayment.userId=1)
+      await service.openDispute('pay-1', 999, 'user-ref', {
+        reason: DisputeReason.SERVICE_NOT_PROVIDED,
+        description: 'no llegó',
+      });
+
+      // Assert — se avisa al cliente (fakePayment.userId)
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.DISPUTE_OPENED }),
+        fakePayment.userId,
+      );
     });
 
     it('debe rechazar con 403 si quien llama no es cliente ni profesional del pago', async () => {
@@ -271,6 +307,8 @@ describe('PaymentDisputesService', () => {
           resolution: DisputeResolution.NO_REFUND,
         });
       mockDbResolve.mockResolvedValue(1);
+      mockFindPaymentById.mockResolvedValue(fakePayment);
+      mockFindProfessionalById.mockResolvedValue({ userId: 999 });
 
       // Act
       const result = await service.resolve('dsp-1', 99, {
@@ -280,6 +318,18 @@ describe('PaymentDisputesService', () => {
 
       // Assert
       expect(result.status).toBe(DisputeStatus.REJECTED);
+      // I-05 (#28, IMPRESCINDIBLE): desenlace económico del reclamo — avisa a ambas partes.
+      expect(mockFindPaymentById).toHaveBeenCalledWith(
+        fakeDisputeRow.paymentId,
+      );
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.DISPUTE_RESOLVED }),
+        fakePayment.userId,
+      );
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.DISPUTE_RESOLVED }),
+        999,
+      );
     });
   });
 

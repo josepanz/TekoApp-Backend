@@ -13,6 +13,8 @@ import {
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { PaymentDisputesDbService } from '@modules/payment-disputes-db/services/payment-disputes-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
@@ -49,6 +51,7 @@ export class PaymentDisputesService {
     private readonly paymentDb: PaymentDbService,
     private readonly professionalsDb: ProfessionalsDbService,
     private readonly disputesDb: PaymentDisputesDbService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /** Resuelve el pago por su referenceId y determina si `userId` es cliente y/o profesional. */
@@ -65,7 +68,7 @@ export class PaymentDisputesService {
     );
     const isClient = payment.userId === userId;
     const isProfessional = professional.userId === userId;
-    return { payment, isClient, isProfessional };
+    return { payment, professional, isClient, isProfessional };
   }
 
   async openDispute(
@@ -74,7 +77,7 @@ export class PaymentDisputesService {
     createdBy: string,
     dto: CreateDisputeRequestDTO,
   ): Promise<DisputeResponseDTO> {
-    const { payment, isClient, isProfessional } =
+    const { payment, professional, isClient, isProfessional } =
       await this.resolvePaymentParty(paymentReferenceId, userId);
     if (!isClient && !isProfessional) {
       throw new ForbiddenException(t('disputes.NOT_A_PARTY'));
@@ -98,6 +101,21 @@ export class PaymentDisputesService {
       evidenceKeys: dto.evidenceKeys ?? [],
       createdBy,
     });
+
+    // I-05 (#26, IMPRESCINDIBLE): debido proceso mínimo — quien es objeto de un reclamo tiene
+    // que saber que existe, no enterarse cuando ya está resuelto. Avisa a la contraparte de
+    // quien lo abrió, después de crear el registro.
+    const counterpartyUserId = isClient ? professional.userId : payment.userId;
+    await this.notificationsService.create(
+      {
+        title: t('disputes.NOTIFICATION_OPENED_TITLE'),
+        message: t('disputes.NOTIFICATION_OPENED_MESSAGE'),
+        type: NotificationType.DISPUTE_OPENED,
+        channels: ['in_app', 'push'],
+      },
+      counterpartyUserId,
+    );
+
     return mapDisputeToResponse(created);
   }
 
@@ -166,6 +184,31 @@ export class PaymentDisputesService {
     );
     if (updatedCount === 0) {
       throw new ConflictException(t('disputes.ALREADY_RESOLVED'));
+    }
+
+    // I-05 (#28, IMPRESCINDIBLE): desenlace económico del reclamo — avisa a ambas partes,
+    // después de que la resolución (y el reembolso, si corresponde) ya commiteó.
+    const payment = await this.paymentDb.findPaymentById(dispute.paymentId);
+    if (payment) {
+      const professional = await this.professionalsDb.findById(
+        payment.professionalId,
+      );
+      const recipientUserIds = [payment.userId, professional?.userId].filter(
+        (id): id is number => id !== undefined && id !== null,
+      );
+      await Promise.all(
+        recipientUserIds.map((recipientUserId) =>
+          this.notificationsService.create(
+            {
+              title: t('disputes.NOTIFICATION_RESOLVED_TITLE'),
+              message: t('disputes.NOTIFICATION_RESOLVED_MESSAGE'),
+              type: NotificationType.DISPUTE_RESOLVED,
+              channels: ['in_app', 'push'],
+            },
+            recipientUserId,
+          ),
+        ),
+      );
     }
 
     const updated = await this.disputesDb.findByReferenceId(disputeReferenceId);
