@@ -13,6 +13,8 @@ import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.servic
 import { LegalConsentsDbService } from '@modules/legal-consents-db/services/legal-consents-db.service';
 import { StorageService } from '@modules/storage/services/storage.service';
 import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 
 const mockFindByReferenceIdWithFullContext = jest.fn();
 const mockFindByBudgetOptionId = jest.fn();
@@ -27,6 +29,7 @@ const mockFindByUserId = jest.fn();
 const mockGetPresignedUrlQueue = jest.fn();
 const mockUploadFilesQueue = jest.fn();
 const mockGenerate = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 const CLIENT_USER_ID = 1;
 const PROFESSIONAL_USER_ID = 2;
@@ -57,7 +60,7 @@ const mockOption = {
       description: 'Pintar el living',
       category: { name: 'Pintura' },
     },
-    professional: { id: PROFESSIONAL_ID },
+    professional: { id: PROFESSIONAL_ID, userId: PROFESSIONAL_USER_ID },
   },
 };
 
@@ -124,6 +127,10 @@ describe('ContractsService', () => {
           },
         },
         { provide: ReportService, useValue: { generate: mockGenerate } },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
+        },
       ],
     }).compile();
 
@@ -150,6 +157,11 @@ describe('ContractsService', () => {
       // Assert
       expect(mockCreate).toHaveBeenCalled();
       expect(result.referenceId).toBe('contract-ref');
+      // I-05 (#12, IMPRESCINDIBLE): el profesional se entera de que el contrato existe.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.CONTRACT_CREATED }),
+        PROFESSIONAL_USER_ID,
+      );
     });
 
     it('debe rechazar la generación si quien la pide no es el cliente dueño del servicio', async () => {
@@ -190,6 +202,8 @@ describe('ContractsService', () => {
       // Assert
       expect(mockCreate).not.toHaveBeenCalled();
       expect(result.referenceId).toBe('contract-ref');
+      // Ya existía — ese profesional ya fue notificado la primera vez, no de nuevo acá.
+      expect(mockNotificationsCreate).not.toHaveBeenCalled();
     });
 
     it('debe lanzar NotFoundException si la opción de presupuesto no existe', async () => {
@@ -338,6 +352,13 @@ describe('ContractsService', () => {
       // Assert
       expect(mockSignAsClientTransaction).toHaveBeenCalled();
       expect(result.status).toBe(ContractStatus.PENDING_PROFESSIONAL_SIGNATURE);
+      // I-05 (#13, IMPRESCINDIBLE): "te toca firmar" — avisa al profesional, no al cliente.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.CONTRACT_AWAITING_SIGNATURE,
+        }),
+        PROFESSIONAL_USER_ID,
+      );
     });
 
     it('debe generar el PDF recién cuando firma el profesional y el contrato queda SIGNED', async () => {
@@ -367,6 +388,15 @@ describe('ContractsService', () => {
       expect(mockUploadFilesQueue).toHaveBeenCalled();
       expect(mockSetPdfKey).toHaveBeenCalled();
       expect(result.status).toBe(ContractStatus.SIGNED);
+      // I-05 (#14, IMPRESCINDIBLE): ambas firmas + PDF listo — avisa a las dos partes.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.CONTRACT_SIGNED }),
+        CLIENT_USER_ID,
+      );
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.CONTRACT_SIGNED }),
+        PROFESSIONAL_USER_ID,
+      );
     });
 
     it('debe rechazar con 409 una firma fuera de turno o duplicada', async () => {
