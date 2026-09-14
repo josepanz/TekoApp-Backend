@@ -1253,3 +1253,43 @@ del DTO.
 
 Commit: `516856b`. Verificado: 140 suites / 1535 tests en verde (+9 tests); format/lint/build
 limpios.
+
+## Tarea 10 — Spec del canal de soporte in-app, I-06 (2026-09-14)
+
+Pedido explícito de José. `TekoApp-Frontend-Mobile/openspec/specs/support-channel.md` ya tiene la
+parte cliente diseñada (pantalla "Ayuda y soporte", formulario, 2 accesos contextuales desde
+pago fallido y servicio en curso) y queda textualmente bloqueada esperando esta definición del
+lado backend — la cita exacta: *"Backend necesita (dependencia de esta spec)... Migración
+Prisma: tabla `support_requests`... `POST /support/contact`... Nueva entrada en `EmailTypeEnum` +
+template"*.
+
+**Solo spec — cero cambios en `src/`** (verificado con `git status` antes de commitear: el único
+archivo tocado es `I-06-support-channel.md`).
+
+**Formato**: siguió la estructura de `I-03-dispute-records.md` (la spec hermana más completa, tal
+como pidió la tarea) — Contexto, Objetivo, Alcance, decisiones de diseño, modelo Prisma
+(`SupportRequests`), reglas de negocio, endpoints, casos de error, efecto sobre otras partes del
+dominio, fuera de alcance, riesgos.
+
+**Decisiones clave**:
+- Reusa `EmailModule` (no un proveedor de soporte de terceros) — mismo razonamiento que ya cerró
+  la spec de Mobile. Anotado un problema real que la implementación va a encontrar:
+  `EmailService.sendEmailByType` asume que `user?: Users` es el destinatario real; para el aviso
+  a staff el destinatario es una casilla de configuración, no un `Users` de la base — la firma
+  actual no contempla ese caso.
+- Tabla propia (`SupportRequests`) con auditoría automática — al calificar para
+  `fn_attach_audit_triggers()`, la cola queda visible en `GET /admin/audit-logs` (`W-01`) sin
+  trabajo adicional; el endpoint de cola dedicado (`GET /admin/support-requests`) solo hace falta
+  para una vista legible de asunto/mensaje, no para trazabilidad de cambios.
+- Sin `status`/SLA a propósito (mismo recorte que ya fijó Mobile) — el modelo queda abierto a una
+  migración aditiva si se decide agregar un flujo de atención después.
+- Rate limit: en vez de proponer un sexto limitador, recomienda sumar `support/contact` a las
+  rutas que ya usa el limitador `upload` (10/hora, cableado en D-02 de este mismo WORKPLAN) — cero
+  infraestructura nueva, mismo presupuesto que ya sirve para "acciones deliberadas poco
+  frecuentes".
+- Contexto polimórfico (`contextType`/`contextReferenceId`, pago o servicio) sin FK real a
+  propósito — Prisma no modela FKs polimórficas nativamente, y forzar 2 columnas de FK opcional
+  sería más rígido que necesario para un dato que es informativo, no autoritativo.
+
+Commit: `5892ac5`. Verificado: 140 suites / 1535 tests en verde (sin cambios, cero código
+tocado); format/lint/build limpios.
