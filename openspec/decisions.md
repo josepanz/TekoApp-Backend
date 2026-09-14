@@ -1038,3 +1038,48 @@ limpio antes y después). Verificado contra la base real: columnas, ambos índic
 
 Commit: `41fc3a8`. Verificado: 138 suites / 1489 tests en verde (+3 suites, +14 tests);
 format/lint/build limpios; `prisma migrate status` limpio antes y después.
+
+## Tarea 5 — Los disparos IMPRESCINDIBLE de notificación (I-05, 2026-09-14)
+
+Implementados los disparos de dominio inventariados en `I-05-notification-triggers.md`, uno por
+commit agrupado por dominio (8 commits): `b3e34b2` servicios, `da7f36d` presupuestos, `f7d94b5`
+contratos, `4d18513` pagos, `a6cd854` documentos profesionales, `b99cd02` disputas, `45eb27e`
+borrado de cuenta, `aac052d` profesionales.
+
+**Corrección al enunciado de la tarea — 18 disparos, no 16**: el párrafo resumen de
+`I-05-notification-triggers.md` dice "16 IMPRESCINDIBLE" pero la tabla fila-por-fila marca 18
+filas como `**IMPRESCINDIBLE**` (excluyendo la #15 bloqueada): las filas #33 y #34 (verificar/
+suspender profesional) están explícitamente marcadas `**IMPRESCINDIBLE**` en la tabla pero, por
+su encabezado *("hallazgo adicional, adyacente a documentos profesionales")*, quedaron fuera del
+resumen aritmético de abajo, que no se actualizó al agregarlas. Se implementaron las 18 (incluidas
+#33/#34) por ser inequívocamente IMPRESCINDIBLE según la propia tabla — omitirlas hubiera sido
+inconsistente, más aún habiendo tocado ese mismo código en la tarea 2 de esta tanda. Detalle
+completo en cada commit de dominio.
+
+**Plumbing compartida** (en el commit de servicios, primero cronológicamente):
+`NotificationsService.create()`/`createBulk()` ahora respetan las preferencias del usuario (tarea
+4: `NotificationPreferencesService.isEnabled(userId, type)`, consultada antes de persistir/
+encolar — si el tipo está desactivado, no se crea ni se encola nada) y encolan con reintentos
+configurables (`NOTIFICATIONS_MAX_RETRY_ATTEMPTS`, Joi con default 3, backoff exponencial
+2s). `NotificationType` se extendió con 16 valores nuevos guiados por la columna "Evento" de la
+tabla de la spec (2 disparos reusan tipos ya existentes: `SERVICE_ACCEPTED` para #2 y #5,
+`SERVICE_COMPLETED` para #7).
+
+**Regla seguida en los 18**: el disparo va después de confirmar la transición (`updatedCount > 0`
+del `updateMany`, o la transacción de Prisma ya commiteada), nunca antes ni en paralelo — mismo
+criterio que ya usaba `ProfessionalDocumentsExpirationJob` (el único caso real preexistente,
+tomado como molde). Ninguno queda dentro de un `$transaction` de Postgres (Mongo/Redis son
+motores distintos, no pueden participar).
+
+**Resiliencia entre canales, no entre notificaciones**: cada llamada a `create()` es independiente
+— si una falla (ej. usuario sin preferencias cargadas nunca lanza, pero un error de infraestructura
+en Mongo/Bull sí podría) no se revierte la transición de negocio que ya ocurrió (aceptada como
+"mejor esfuerzo", igual que documenta la pregunta de diseño §5.2 de la spec — la fuente de verdad
+sigue siendo consultar el recurso).
+
+**PAYMENT_RECEIVED (#15) NO implementado**, por instrucción explícita — sigue bloqueado por
+I-02/`0014` (no hay código que transicione un pago a `COMPLETED`).
+
+Verificado acumulado de los 8 commits: 138 suites / 1495 tests en verde (+27 tests sobre la base
+de la tarea 4), format/lint/build limpios en cada uno, sin regresión de `app.module.spec.ts`
+(confirma que ningún import nuevo de `NotificationsApiModule` introdujo un ciclo).
