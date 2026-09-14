@@ -3,6 +3,8 @@ import { ForbiddenException, ConflictException } from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 
 const mockCreate = jest.fn();
 const mockFindMany = jest.fn();
@@ -20,6 +22,7 @@ const mockGetStats = jest.fn();
 const mockSearchBySkills = jest.fn();
 const mockGetTopRated = jest.fn();
 const mockGenerate = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 const mockProfessional = {
   id: 1,
@@ -68,6 +71,10 @@ describe('ProfessionalsService', () => {
         {
           provide: ReportService,
           useValue: { generate: mockGenerate },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -648,6 +655,13 @@ describe('ProfessionalsService', () => {
           verificationStatus: 'VERIFIED',
         }),
       );
+      // I-05 (#33, IMPRESCINDIBLE): el profesional se entera de que ya puede operar.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_VERIFIED,
+        }),
+        mockProfessional.userId,
+      );
     });
 
     it('debe marcar el profesional como rechazado cuando isVerified=false', async () => {
@@ -667,6 +681,12 @@ describe('ProfessionalsService', () => {
           verificationStatus: 'REJECTED',
           status: 'REJECTED',
         }),
+      );
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_VERIFICATION_REJECTED,
+        }),
+        mockProfessional.userId,
       );
     });
 
@@ -722,6 +742,13 @@ describe('ProfessionalsService', () => {
       );
       expect(result).toEqual(
         expect.objectContaining({ status: 'SUSPENDED', isActive: false }),
+      );
+      // I-05 (#34, IMPRESCINDIBLE): necesita saber por qué dejó de poder operar.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_SUSPENDED,
+        }),
+        mockProfessional.userId,
       );
     });
 

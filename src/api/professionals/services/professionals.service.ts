@@ -11,6 +11,8 @@ import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { RatingViewerContext } from '@api/ratings/helpers/ratings-response.helper';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { mapReviewsToSummaries } from '../helpers/professional-reviews-response.helper';
 import {
   PROFESSIONALS_EXPORT_COLUMNS,
@@ -42,6 +44,7 @@ export class ProfessionalsService {
   constructor(
     private readonly professionalsDb: ProfessionalsDbService,
     private readonly reportService: ReportService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async registerProfessional(
@@ -297,6 +300,30 @@ export class ProfessionalsService {
         t('professionals.STATUS_CHANGED_BEFORE_VERIFY'),
       );
     }
+
+    // I-05 (#33, IMPRESCINDIBLE): caso más literal del hallazgo — sin este aviso el profesional
+    // no sabe que ya puede (o no puede) operar. El gate acá es que el `await` de arriba haya
+    // resuelto sin lanzar (no hay `count` de negocio adicional que chequear).
+    await this.notificationsService.create(
+      {
+        title: t(
+          dto.isVerified
+            ? 'professionals.NOTIFICATION_VERIFIED_TITLE'
+            : 'professionals.NOTIFICATION_VERIFICATION_REJECTED_TITLE',
+        ),
+        message: t(
+          dto.isVerified
+            ? 'professionals.NOTIFICATION_VERIFIED_MESSAGE'
+            : 'professionals.NOTIFICATION_VERIFICATION_REJECTED_MESSAGE',
+        ),
+        type: dto.isVerified
+          ? NotificationType.PROFESSIONAL_VERIFIED
+          : NotificationType.PROFESSIONAL_VERIFICATION_REJECTED,
+        channels: ['in_app', 'push'],
+      },
+      professional.userId,
+    );
+
     const result = await this.professionalsDb.findById(id);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
@@ -322,6 +349,19 @@ export class ProfessionalsService {
         t('professionals.STATUS_CHANGED_BEFORE_SUSPEND'),
       );
     }
+
+    // I-05 (#34, IMPRESCINDIBLE): necesita saber por qué dejó de poder operar, para poder
+    // responder o apelar.
+    await this.notificationsService.create(
+      {
+        title: t('professionals.NOTIFICATION_SUSPENDED_TITLE'),
+        message: t('professionals.NOTIFICATION_SUSPENDED_MESSAGE', { reason }),
+        type: NotificationType.PROFESSIONAL_SUSPENDED,
+        channels: ['in_app', 'push'],
+      },
+      professional.userId,
+    );
+
     const result = await this.professionalsDb.findById(id);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
