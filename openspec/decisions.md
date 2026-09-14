@@ -1211,3 +1211,45 @@ DEFAULT true`, ambas filas existentes quedaron en `true` (preserva el comportami
 
 Commit: `1c71be7`. Verificado: 139 suites / 1526 tests en verde (+6 tests); format/lint/build
 limpios; `prisma migrate status` limpio antes y después.
+
+## Tarea 9 — Nombres reales en el DTO de ratings, desbloquea Web G-06 (2026-09-14)
+
+Caso concreto documentado en el WORKPLAN de `TekoApp-Frontend-Web` (G-06, commit `5f55f17`):
+`ratings-table` mostraba `#${userId}` crudo y parchaba el caso `null` (anónimo) con "Anónimo",
+porque "resolver nombres reales requiere DTO nuevo del backend (fuera de alcance)" — esa es esta
+tarea.
+
+**Cambio**: `RatingDetailResponseDTO` suma `userName`/`professionalName` (`"Nombre Apellido"`),
+resueltos en `mapRatingToResponse` desde las relaciones `user`/`professional.user` — que
+`ratings-db.service.ts` **ya traía incluidas** en varias queries (`findAll`, `findRecent`,
+`findByServiceId`, `findById`, `findByReferenceId`) pero el mapper las descartaba sin usarlas;
+solo hubo que agregar el include faltante a `findByUser`/`findByProfessional`/
+`findClientRatings`/`findProfessionalRatings` (traían `professional: true` plano, sin
+`.user`, porque `Professionals` no tiene `firstName`/`lastName` propios) y sumar la resolución al
+mapper. Mismo criterio de anonimato que ya aplicaba a `userId`/`professionalId`: si el id queda
+`null` (`isAnonymous` + viewer ni autor ni privilegiado), el nombre también queda `null` — nunca
+se filtra la identidad por el campo nuevo aunque el id esté oculto.
+
+**Hallazgo colateral corregido de paso**: `mapRatingToResponse` hacía `{...rating}` y casteaba
+directo al DTO (`as unknown as RatingDetailResponseDTO`) sin pasar por `plainToInstance` — un
+cast de TypeScript no filtra nada en runtime, así que las filas COMPLETAS de `user`/`professional`
+(con email, teléfono, `shareContactInfo`, etc.) viajaban enteras en cada respuesta de ratings
+aunque el DTO nunca las declarara. El `ClassSerializerInterceptor` global no lo atrapaba porque
+(confirmado por comentarios ya existentes en otros helpers del repo) solo filtra sobre instancias
+reales de la clase, no sobre objetos planos. Se corrigió eliminando explícitamente `user`/
+`professional` del objeto antes de responder, en el mismo cambio — no ameritaba una tarea aparte
+porque tocar esta función para agregar los nombres ya obligaba a decidir qué hacer con esas
+relaciones completas.
+
+**No alcanza a `create()`/`update()`/`report()`**: sus queries (`db.create`/`db.update`/`db.report`)
+solo incluyen `{ service: true }`, no `user`/`professional.user` — sus respuestas van a seguir
+sin nombre resuelto (`userName`/`professionalName` en `null`, `userId`/`professionalId` intactos,
+sin regresión). No se tocó a propósito: esos endpoints no son el caso documentado (Web los usa
+para escribir, no para listar), y ampliar sus includes es un cambio de comportamiento aparte que
+no se pidió.
+
+**Acción pendiente para Web**: correr `pnpm generate:api-types` para levantar los campos nuevos
+del DTO.
+
+Commit: `516856b`. Verificado: 140 suites / 1535 tests en verde (+9 tests); format/lint/build
+limpios.
