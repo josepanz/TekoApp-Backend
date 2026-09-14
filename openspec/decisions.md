@@ -1083,3 +1083,54 @@ I-02/`0014` (no hay código que transicione un pago a `COMPLETED`).
 Verificado acumulado de los 8 commits: 138 suites / 1495 tests en verde (+27 tests sobre la base
 de la tarea 4), format/lint/build limpios en cada uno, sin regresión de `app.module.spec.ts`
 (confirma que ningún import nuevo de `NotificationsApiModule` introdujo un ciclo).
+
+## Tarea 6 — Los 7 eventos de email de seguridad/comprobantes (2026-09-14)
+
+Estado previo real (verificado leyendo el código, no asumido): de los 7 eventos que pidió José,
+3 ya estaban completamente wireados (`VERIFICATION`, `CREATE_PASSWORD` con call sites reales;
+`FORGOT_PASSWORD` cubre la *solicitud* del reseteo, no la confirmación) y 1 tenía enum + plantilla
+pero ningún `case` en el switch (`PAYMENT_RECEIPT`, que además nunca tuvo ningún llamador). Los
+otros 3 (login, cambio de contraseña, alta de medio de pago) no existían en absoluto.
+
+**Cambio**: `EmailTypeEnum` sumó `LOGIN`, `PASSWORD_CHANGED`, `PASSWORD_RESET`,
+`PAYMENT_METHOD_CREATED`. Los 4 reusan `EmailHelper.createGenericNotificationTemplate` (ya
+existía, agregado en I-05 para el canal email de `NotificationsProcessor`) en vez de plantillas
+bespoke, porque ninguno lleva un link de acción — a diferencia de VERIFICATION/FORGOT_PASSWORD/
+CREATE_PASSWORD, que sí son botón-con-token.
+
+**Call sites nuevos**:
+- `AuthApiService.handleLogin` → `LOGIN`, tras un login exitoso.
+- `AuthApiService.updatePassword` (`PUT /auth/change-password`, autenticado) y
+  `changeExpiredPassword` (`PUT /auth/change-expired-password`, pre-login) → `PASSWORD_CHANGED`.
+- `AuthApiService.forgotPassword` (la función que, pese al nombre, es la *finalización* del
+  reseteo — usa el token para fijar la contraseña nueva) → `PASSWORD_RESET`. Distinto del email
+  `FORGOT_PASSWORD` que ya se manda en la *solicitud* (`sendPasswordResetEmail`), no en el cierre.
+- `PaymentApiService.createPaymentMethod` → `PAYMENT_METHOD_CREATED`, con `dto.name` como
+  `methodLabel` (campo siempre presente, a diferencia de `details.cardLast4` que es opcional).
+
+**`AuthService.login`/`changePassword`/`resetPassword` ahora devuelven `user`** — antes solo
+devolvían `{success, message}`; `AuthApiService` necesitaba el `Users` completo (email, nombre)
+para armar el email sin un segundo lookup. Único consumidor de esos tres métodos en todo el repo
+es `AuthApiService` (verificado por grep), así que el cambio de contrato es seguro.
+
+**Todos los envíos son fire-and-forget** (`void (async () => { try {...} catch {...} })()`, nunca
+`.then().catch()` directo sobre el resultado del mock — un mock sin `mockResolvedValue` devuelve
+`undefined`, y encadenar `.catch()` sobre eso explota en los tests): un fallo de SMTP nunca debe
+tumbar login/cambio de contraseña/alta de medio de pago.
+
+**`PAYMENT_RECEIPT` sigue sin llamador real**, a propósito: se completó el `case` del switch
+(antes cualquier llamada con ese tipo tiraba `InternalServerErrorException` por caer al
+`default`) usando la plantilla ya existente (`createPaymentReceiptTemplate`), con un test que
+prueba la plumbing invocando `sendEmailByType` directo — pero no hay ningún punto del código que
+dispare un envío real, porque `PaymentStatus.COMPLETED` no tiene ningún escritor (bloqueado por
+I-02/`0014-dinelco-checkout-integration`, el mismo motivo que dejó `PAYMENT_RECEIVED` sin
+implementar en I-05, tarea 5 de esta misma tanda).
+
+**Hallazgo colateral anotado, NO corregido** (fuera de alcance de esta tarea): el link del email
+`VERIFICATION` apunta a `${baseUrl}/auth/verify-email/confirm?...`, pero esa ruta no existe en
+ningún lado del código — el único endpoint de verificación real es `GET /auth/user-verify`
+(requiere JWT, sin query params, no consume el token del email). Es un desalineo preexistente
+entre la plantilla y el flujo real, ajeno a los 7 eventos de esta tarea.
+
+Commit: `1964f52`. Verificado: 138 suites / 1513 tests en verde (+18 tests); format/lint/build
+limpios.
