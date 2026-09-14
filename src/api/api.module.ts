@@ -31,6 +31,7 @@ import { TaxModule } from '@/api/tax/tax.module';
 import { AuditLogModule } from '@/api/audit-log/audit-log.module';
 import { AccountDeletionModule } from '@/api/account-deletion/account-deletion.module';
 import { PaymentDisputesModule } from '@/api/payment-disputes/payment-disputes.module';
+import { NotificationPreferencesModule } from '@/api/notification-preferences/notification-preferences.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { PaymentDisputesModule } from '@/api/payment-disputes/payment-disputes.m
     AuditLogModule,
     AccountDeletionModule,
     PaymentDisputesModule,
+    NotificationPreferencesModule,
   ],
 })
 export class ApiModule {}

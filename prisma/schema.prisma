@@ -103,27 +103,28 @@ model Users {
   checksum        String? @map("checksum")
   changeSignature String? @map("change_signature")
 
-  roles                 UserRoles[]
-  permissions           UserPermissions[]
-  credentials           UserCredentials[]
-  professionals         Professionals?
-  services              Services[]
-  documentTypes         DocumentsType          @relation(fields: [documentTypeId], references: [id])
-  accessLevel           AccessLevel?           @relation(fields: [accessLevelId], references: [id])
-  preferredLanguage     Language?              @relation(fields: [preferredLanguageId], references: [id])
-  payments              Payments[]
-  paymentMethodEntities PaymentMethodEntity[]
-  ratings               Rating[]
-  promotionUsages       PromotionUsage[]
-  pushSubscriptions     PushSubscriptions[]
-  fcmTokens             FcmTokens[]
-  legalConsents         UserConsents[]
-  contentConsentGrants  ContentConsentGrants[]
-  aiContentDisclosures  AiContentDisclosures[]
-  contracts             Contracts[]
-  tips                  Tips[]
-  disputesOpened        PaymentDisputes[]      @relation("DisputeOpenedBy")
-  disputesAdjudicated   PaymentDisputes[]      @relation("DisputeAdjudicatedBy")
+  roles                   UserRoles[]
+  permissions             UserPermissions[]
+  credentials             UserCredentials[]
+  professionals           Professionals?
+  services                Services[]
+  documentTypes           DocumentsType            @relation(fields: [documentTypeId], references: [id])
+  accessLevel             AccessLevel?             @relation(fields: [accessLevelId], references: [id])
+  preferredLanguage       Language?                @relation(fields: [preferredLanguageId], references: [id])
+  payments                Payments[]
+  paymentMethodEntities   PaymentMethodEntity[]
+  ratings                 Rating[]
+  promotionUsages         PromotionUsage[]
+  pushSubscriptions       PushSubscriptions[]
+  fcmTokens               FcmTokens[]
+  legalConsents           UserConsents[]
+  contentConsentGrants    ContentConsentGrants[]
+  aiContentDisclosures    AiContentDisclosures[]
+  contracts               Contracts[]
+  tips                    Tips[]
+  disputesOpened          PaymentDisputes[]        @relation("DisputeOpenedBy")
+  disputesAdjudicated     PaymentDisputes[]        @relation("DisputeAdjudicatedBy")
+  notificationPreferences NotificationPreferences?
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -1089,6 +1090,41 @@ model PaymentDisputes {
   @@index([paymentId])
   @@index([status])
   @@map("payment_disputes")
+}
+
+// =====================================================================================================================
+// PREFERENCIAS DE NOTIFICACIÓN (I-05, tarea 4 de la tanda platform-hardening-2026-09
+// 2026-09-14) — pedida por Mobile en notification-preferences-and-inbox.md: no había dónde
+// persistir "qué tipos de notificación quiere recibir el usuario X", ni en Postgres ni en Mongo.
+// =====================================================================================================================
+
+/// Una fila por usuario, creada perezosamente (no en el alta de `Users`) — ausencia de fila
+/// equivale a "sin exclusiones" (todo habilitado), mismo default que una fila con `mutedTypes=[]`.
+/// `mutedTypes` es `Json` (array de strings) en vez de una columna booleana por valor de
+/// `NotificationType` porque ese enum es de aplicación (TS, vive en
+/// `notifications-db/enums/notification-type.enum.ts`, respaldado por Mongo, no por un enum
+/// nativo de Postgres) y va a crecer con la tarea 5 de esta misma tanda (disparos de dominio) sin
+/// requerir tocar esta tabla cada vez que se agregue un tipo nuevo.
+model NotificationPreferences {
+  id          Int    @id @default(autoincrement())
+  referenceId String @unique @default(uuid()) @map("reference_id")
+  userId      Int    @unique @map("user_id")
+  /// Valores de `NotificationType` (string, ej. `"promotion"`) que el usuario desactivó
+  /// explícitamente. No hay validación de forma a nivel de DB — el service es quien valida
+  /// contra el enum real antes de escribir.
+  mutedTypes  Json   @default("[]") @map("muted_types") @db.JsonB
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
 
 // =====================================================================================================================
