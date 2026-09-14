@@ -933,3 +933,26 @@ mencionan `LocationsDbService` por nombre — sí se actualizó el comentario vi
 Sin cambios de comportamiento ni de contrato — es un rename puro, sin migración de base de datos.
 
 Commit: `e3b466a`. Verificado: 135 suites / 1468 tests en verde; format/lint/build limpios.
+
+## Tarea 2 — TOCTOU en `verifyProfessional`/`suspendProfessional` (2026-09-14)
+
+Hallazgo colateral anotado (no corregido) por `I-05-notification-triggers.md`:
+`ProfessionalsService.verifyProfessional`/`suspendProfessional` usaban
+`professionalsDb.update(id, {...})` incondicional, a diferencia del patrón
+`updateMany`+condicional+`count===0`→`ConflictException` que ya usan `services`, `payments`,
+`professional-documents`, `professional-portfolio` y `payment-disputes`. Dos admins resolviendo
+la misma verificación/suspensión al mismo tiempo se pisaban sin error.
+
+Cambio: nuevo `ProfessionalsDbService.updateConditional(id, expectedStatuses, data)` — mismo
+molde que `updateServiceConditional`/`updatePaymentConditional` (`updateMany({ where: { id,
+status: { in: expectedStatuses } } })`, retorna `count`). `expectedStatuses` se arma con el
+`status` leído en el mismo `findById` de validación (no una lista fija de estados de negocio
+nueva) — preserva el comportamiento actual (cualquier estado de origen es válido, staff de baja
+frecuencia) mientras cierra la carrera: si el estado cambió entre la lectura y la escritura, el
+`updateMany` no afecta filas y se lanza `ConflictException`. Claves i18n nuevas
+`professionals.STATUS_CHANGED_BEFORE_VERIFY`/`STATUS_CHANGED_BEFORE_SUSPEND` (es/en).
+
+Tests de la carrera agregados en `professionals.service.spec.ts` (ambos métodos) y cobertura del
+método nuevo en `professionals-db.service.spec.ts`.
+
+Commit: `80fa823`. Verificado: 135 suites / 1472 tests en verde; format/lint/build limpios.
