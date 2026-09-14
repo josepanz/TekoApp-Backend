@@ -1,4 +1,4 @@
-// src/modules/tracking-db/tracking-db.service.ts
+// src/modules/geo-tracking-db/geo-tracking-db.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,8 +14,8 @@ export type GeoTrackingLogLean = Omit<
 };
 
 @Injectable()
-export class TrackingDbService {
-  private readonly logger = new Logger(TrackingDbService.name);
+export class GeoTrackingDbService {
+  private readonly logger = new Logger(GeoTrackingDbService.name);
 
   constructor(
     @InjectModel(GeoTrackingLog.name)

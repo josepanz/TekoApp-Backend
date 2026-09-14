@@ -16,7 +16,7 @@ Arquitectura en dos capas: `src/api/` (capa HTTP — controllers, DTOs, services
 - `modules/onboarding` — flujo de registro de usuarios y profesionales
 - `modules/email` — envío de emails (nodemailer)
 - `modules/notifications` — notificaciones push (Firebase)
-- `modules/*-db` — abstracción Prisma por dominio (users-db, payments-db, categories-db, locations-db, analytics-db, etc.)
+- `modules/*-db` — abstracción Prisma por dominio (users-db, payments-db, categories-db, professional-position-db, analytics-db, etc.)
 - `core/database` — `PrismaDatasource` central (usa `.extended` para audit triggers)
 - `core/config` — cargador de configuración con validación JOI, token `APP_CONFIG`
 - `common/` — decorators, filters, pipes, validators, helpers compartidos

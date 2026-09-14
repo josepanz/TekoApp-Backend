@@ -10,7 +10,7 @@ import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-que
 import { NearbyProfessionalRow } from '../interfaces/nearby-professional-row.interface';
 
 @Injectable()
-export class LocationsDbService {
+export class ProfessionalPositionDbService {
   constructor(private readonly prisma: PrismaDatasource) {}
 
   async findById(id: number): Promise<Professionals | null> {

@@ -1,5 +1,5 @@
 /**
- * Fila cruda devuelta por `SELECT *` en `LocationsDbService.findNearby` ($queryRaw, Haversine).
+ * Fila cruda devuelta por `SELECT *` en `ProfessionalPositionDbService.findNearby` ($queryRaw, Haversine).
  * Nunca pasa por el `$extends` de Prisma (solo aplica a las queries del query builder) — llega
  * con los nombres de columna reales de Postgres (snake_case) y los `NUMERIC` como string, no
  * number. `LocationsService.findNearbyProfessionals` mapea esto a `NearbyProfessionalResponseDTO`

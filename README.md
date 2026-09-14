@@ -115,14 +115,14 @@ src/
 │   └── *-db/               # Abstracción Prisma por dominio
 │       ├── analytics-db/
 │       ├── categories-db/
-│       ├── locations-db/
+│       ├── geo-tracking-db/    # Histórico de posiciones (Mongo)
 │       ├── payments-db/
+│       ├── professional-position-db/  # Última posición conocida (Postgres)
 │       ├── professionals-db/
 │       ├── promotions-db/
 │       ├── ratings-db/
 │       ├── roles-permission-db/
 │       ├── services-db/
-│       ├── tracking-db/
 │       └── users-db/
 ├── core/
 │   ├── database/           # PrismaDatasource (@Global, usa .extended para auditoría)

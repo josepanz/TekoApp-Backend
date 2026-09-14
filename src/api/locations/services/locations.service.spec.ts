@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LocationsService } from './locations.service';
-import { LocationsDbService } from '@modules/locations-db/services/locations-db.service';
+import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
 
 const mockFindById = jest.fn();
 const mockUpdateLocation = jest.fn();
@@ -31,7 +31,7 @@ describe('LocationsService', () => {
       providers: [
         LocationsService,
         {
-          provide: LocationsDbService,
+          provide: ProfessionalPositionDbService,
           useValue: {
             findById: mockFindById,
             updateLocation: mockUpdateLocation,

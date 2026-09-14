@@ -429,7 +429,7 @@ model Professionals {
   @@index([isAvailable])
   // `professionals_nearby_idx`: índice parcial compuesto (status, verification_status,
   // is_available, is_online, category_id) WHERE current_latitude/longitude IS NOT NULL, para
-  // cubrir el patrón real del WHERE de `LocationsDbService.findNearby` (D-01,
+  // cubrir el patrón real del WHERE de `ProfessionalPositionDbService.findNearby` (D-01,
   // openspec/changes/platform-hardening-2026-09/WORKPLAN.md). Vive SOLO en
   // prisma/migrations/<...>_add_professionals_nearby_partial_index/migration.sql — la sintaxis
   // declarativa de Prisma no soporta índices parciales (cláusula WHERE), así que a propósito NO

@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
 import { GeoTrackingLog } from '../schemas/geo-tracking-log.schema';
-import { TrackingDbService, GeoTrackingLogLean } from './tracking-db.service';
+import {
+  GeoTrackingDbService,
+  GeoTrackingLogLean,
+} from './geo-tracking-db.service';
 
 // ── Mocks a nivel de módulo ────────────────────────────────────────────────
 const mockCreate = jest.fn();
@@ -37,8 +40,8 @@ const baseLogLean: GeoTrackingLogLean = {
   updatedAt: new Date('2024-01-01T10:00:00Z'),
 };
 
-describe('TrackingDbService', () => {
-  let service: TrackingDbService;
+describe('GeoTrackingDbService', () => {
+  let service: GeoTrackingDbService;
 
   beforeEach(async () => {
     // Silenciar logs del Logger de NestJS en tests
@@ -52,7 +55,7 @@ describe('TrackingDbService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        TrackingDbService,
+        GeoTrackingDbService,
         {
           provide: getModelToken(GeoTrackingLog.name),
           useValue: MockGeoTrackingModel,
@@ -60,7 +63,7 @@ describe('TrackingDbService', () => {
       ],
     }).compile();
 
-    service = module.get<TrackingDbService>(TrackingDbService);
+    service = module.get<GeoTrackingDbService>(GeoTrackingDbService);
   });
 
   afterEach(() => jest.clearAllMocks());

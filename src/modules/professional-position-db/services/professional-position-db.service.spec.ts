@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfessionalStatus } from '@prisma/client';
 import { PrismaDatasource } from '@/core/database/services/prisma.service';
-import { LocationsDbService } from './locations-db.service';
+import { ProfessionalPositionDbService } from './professional-position-db.service';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
 
 // ── Mocks a nivel de módulo ────────────────────────────────────────────────
@@ -36,18 +36,20 @@ const baseProfessional = {
   isAvailable: true,
 };
 
-describe('LocationsDbService', () => {
-  let service: LocationsDbService;
+describe('ProfessionalPositionDbService', () => {
+  let service: ProfessionalPositionDbService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        LocationsDbService,
+        ProfessionalPositionDbService,
         { provide: PrismaDatasource, useValue: mockPrisma },
       ],
     }).compile();
 
-    service = module.get<LocationsDbService>(LocationsDbService);
+    service = module.get<ProfessionalPositionDbService>(
+      ProfessionalPositionDbService,
+    );
   });
 
   afterEach(() => jest.clearAllMocks());

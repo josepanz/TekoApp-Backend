@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { LocationsDbService } from '@/modules/locations-db/services/locations-db.service';
+import { ProfessionalPositionDbService } from '@/modules/professional-position-db/services/professional-position-db.service';
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location-request.dto';
 import { FindNearbyQueryDTO } from '../dtos/request/find-nearby-query.dto';
 import { ProfessionalLocationResponseDTO } from '../dtos/response/professional-location-response.dto';
@@ -14,7 +14,7 @@ import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class LocationsService {
   constructor(
-    private readonly locationsDb: LocationsDbService,
+    private readonly locationsDb: ProfessionalPositionDbService,
     private readonly configService: ConfigService,
   ) {}
 
