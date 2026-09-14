@@ -993,3 +993,48 @@ usuario sin email (se omite sin lanzar), y fallo de SMTP (no relanza, no tumba o
 marca `FAILED` la notificación).
 
 Commit: `1ab7f42`. Verificado: 135 suites / 1475 tests en verde; format/lint/build limpios.
+
+## Tarea 4 — Módulo de preferencias de notificación por usuario (2026-09-14)
+
+Pedido explícito de José + gap documentado por Mobile en
+`notification-preferences-and-inbox.md`: no existía dónde persistir "qué tipos de notificación
+quiere recibir el usuario X" — ni en `Users` (Postgres) ni en Mongo.
+
+**Decisión de diseño — Postgres, no Mongo**: la instrucción de la tarea ("Modelo nuevo +
+migración... la migración la aplicás vos... `SELECT fn_attach_audit_triggers()`") apunta a
+Postgres/Prisma. Tabla nueva `NotificationPreferences` (`notification_preferences`): `id` +
+`referenceId` + columnas de auditoría completas (patrón `PaymentDisputes`), `userId` único (FK a
+`Users`, `onDelete: Cascade`), y `mutedTypes` como `Json @db.JsonB` — un array de strings con los
+valores de `NotificationType` que el usuario desactivó.
+
+**Por qué JSON y no una columna booleana por tipo**: `NotificationType` es un enum de aplicación
+(TS, vive en `notifications-db/enums/notification-type.enum.ts`, respaldado por Mongo — no un
+enum nativo de Postgres) y la tarea 5 de esta misma tanda va a agregarle ~15 valores nuevos
+(presupuestos, contratos, disputas, borrado de cuenta, verificación/suspensión de profesional).
+Una columna por tipo hubiera significado una migración cada vez que ese catálogo crece. Con JSON,
+agregar un tipo nuevo a `NotificationType` no toca esta tabla — default "sin exclusiones" (fila
+ausente o `mutedTypes=[]`) sigue siendo válido para cualquier tipo nuevo automáticamente.
+
+**Sin enforcement de "tipos no desactivables"**: la spec de Mobile deja anotado que
+`system`/`document_expired` "no deberían ser desactivables (o al menos, requerir confirmación
+explícita)" pero pide explícitamente no asumir el criterio sin José. Esta tarea implementa el
+mecanismo genérico (cualquier tipo se puede activar/desactivar) sin esa regla de negocio — queda
+como pregunta abierta para cuando se decida, en vez de inventarla acá.
+
+**API**: módulo propio `src/api/notification-preferences/` (independiente de
+`NotificationsApiModule`, con `NotificationPreferencesService` exportado para que la tarea 5 lo
+inyecte y llame `isEnabled(userId, type)` antes de encolar un envío) +
+`src/modules/notification-preferences-db/` (capa Prisma). Dos endpoints, ambos bajo JWT:
+`GET /notification-preferences/me` (devuelve un ítem por **cada** valor de `NotificationType`, no
+solo los desactivados, para que el frontend pinte todos los switches sin conocer el catálogo) y
+`PATCH /notification-preferences/me` (`{ type, enabled }`, un tipo por request — auto-save por
+switch, mismo patrón que pide la spec de Mobile, sin botón "Guardar").
+
+**Migración**: `20260914120000_add_notification_preferences`, aplicada contra Supabase (conexión
+5432 ya activa en `.env`, no hizo falta swap de puerto — confirmado con `prisma migrate status`
+limpio antes y después). Verificado contra la base real: columnas, ambos índices únicos
+(`reference_id`, `user_id`) y el trigger `trg_audit_notification_preferences` reatachado por
+`fn_attach_audit_triggers()`.
+
+Commit: `41fc3a8`. Verificado: 138 suites / 1489 tests en verde (+3 suites, +14 tests);
+format/lint/build limpios; `prisma migrate status` limpio antes y después.
