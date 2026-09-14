@@ -76,6 +76,14 @@ model Users {
   documentTypeId      Int               @map("document_type_id")
   documentNumber      String?           @map("document_number")
   phoneNumber         String?           @map("phone_number")
+  // Tarea 8 (platform-hardening-2026-09, 2026-09-14): decide si `email`/`phoneNumber` se
+  // exponen en `ServiceUserSummaryResponseDTO` (services-response.helper.ts) — hoy viajaban
+  // siempre, sin que el dueño de esos datos pudiera optar por no compartirlos. Default `true`:
+  // preserva el comportamiento actual (siempre visible) para todos los usuarios existentes; el
+  // opt-out es explícito hacia adelante. Se aplica parejo a cliente y profesional porque el
+  // campo vive en `Users` (no hay tabla separada por rol) — ambos usan el mismo endpoint de
+  // autoedición (`PUT /auth/me`) para cambiarlo.
+  shareContactInfo    Boolean           @default(true) @map("share_contact_info")
   // Foto de perfil: guarda la KEY de S3 (permanente), no una URL — las URLs que devuelve
   // `POST /uploads/avatar` son presignadas y expiran en 900s (`S3_PRESIGNED_URL_EXPIRES_IN`).
   // Cada response que expone esto al cliente resuelve una URL presignada fresca a partir de la

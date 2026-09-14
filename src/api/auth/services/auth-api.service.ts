@@ -171,6 +171,7 @@ export class AuthApiService {
         lastName: dto.lastName,
         phoneNumber: dto.phoneNumber,
         avatarKey: dto.avatarKey,
+        shareContactInfo: dto.shareContactInfo,
       },
       user.email,
     );
@@ -186,6 +187,7 @@ export class AuthApiService {
       accessLevelId: updated.accessLevelId,
       roles: user.roles,
       permissions: user.permissions,
+      shareContactInfo: updated.shareContactInfo,
     };
   }
 

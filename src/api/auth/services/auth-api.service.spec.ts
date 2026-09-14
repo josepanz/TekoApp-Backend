@@ -486,6 +486,25 @@ describe('AuthApiService', () => {
         permissions: mockJwtUser.permissions,
       });
     });
+
+    it('debe propagar shareContactInfo al UsersDBService y devolver el valor fresco (tarea 8)', async () => {
+      // Arrange
+      const dto: DTO.UpdateMeRequestDTO = { shareContactInfo: false };
+      const updatedUser = { ...mockUser, shareContactInfo: false };
+      mockUpdateUser.mockResolvedValue(updatedUser);
+      mockGetPresignedUrl.mockResolvedValue(null);
+
+      // Act
+      const result = await service.updateMe(mockJwtUser, dto);
+
+      // Assert
+      expect(mockUpdateUser).toHaveBeenCalledWith(
+        mockJwtUser.id,
+        expect.objectContaining({ shareContactInfo: false }),
+        mockJwtUser.email,
+      );
+      expect(result.shareContactInfo).toBe(false);
+    });
   });
 
   // ─── forgotPassword ───────────────────────────────────────────────────────
