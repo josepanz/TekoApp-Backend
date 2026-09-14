@@ -156,6 +156,16 @@ export const APP_CONFIG = registerAs('config', () => {
         ? parseInt(process.env.ACCOUNT_DELETION_GRACE_PERIOD_DAYS)
         : 14,
     },
+    notifications: {
+      // Tarea 5 (I-05, platform-hardening-2026-09): reintentos del job `send-notification` de
+      // la cola `notifications` — decisión de José, "hasta N, 3 por defecto, configurable".
+      // Se pasa como `attempts` al encolar (`NotificationsService.create`/`createBulk`), no en
+      // `defaultJobOptions` de `BullModule.registerQueue`, porque ese registro es síncrono y
+      // este valor viene de `APP_CONFIG` (inyectado, no `process.env` directo fuera de acá).
+      maxRetryAttempts: process.env.NOTIFICATIONS_MAX_RETRY_ATTEMPTS
+        ? parseInt(process.env.NOTIFICATIONS_MAX_RETRY_ATTEMPTS)
+        : 3,
+    },
   };
 });
 

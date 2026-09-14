@@ -9,6 +9,7 @@ import { PushNotificationsDbModule } from '@modules/push-notifications-db/push-n
 import { PushProviderModule } from '@modules/push-provider/push-provider.module';
 import { UsersDBModule } from '@modules/users-db/users-db.module';
 import { EmailModule } from '@modules/email/email.module';
+import { NotificationPreferencesModule } from '@api/notification-preferences/notification-preferences.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EmailModule } from '@modules/email/email.module';
     PushProviderModule,
     UsersDBModule,
     EmailModule,
+    NotificationPreferencesModule,
     BullModule.registerQueue({
       name: 'notifications',
     }),

@@ -85,4 +85,6 @@ export const configSchema = Joi.object({
   PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE: Joi.boolean().default(true),
 
   ACCOUNT_DELETION_GRACE_PERIOD_DAYS: Joi.number().integer().min(1).default(14),
+
+  NOTIFICATIONS_MAX_RETRY_ATTEMPTS: Joi.number().integer().min(1).default(3),
 });
