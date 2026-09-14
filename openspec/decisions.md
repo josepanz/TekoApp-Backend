@@ -1134,3 +1134,39 @@ entre la plantilla y el flujo real, ajeno a los 7 eventos de esta tarea.
 
 Commit: `1964f52`. Verificado: 138 suites / 1513 tests en verde (+18 tests); format/lint/build
 limpios.
+
+## Tarea 7 — Rechazar el pago con medio de pago vencido (2026-09-14)
+
+Decisión de José: el backend rechaza. Antes de esta tarea no había ninguna validación de
+expiración — de hecho `CreatePaymentDto.paymentMethodId` (referenceId de un `PaymentMethodEntity`
+guardado) **nunca se leía en ningún lado de `createPayment`**, y la columna
+`PaymentMethodEntity.expiresAt` **nunca se poblaba** al crear un método (`createPaymentMethod`
+solo escribía `name/type/provider/isDefault/details/externalId`). Ambos gaps eran necesarios
+para que el rechazo pedido tuviera algo real que validar, así que se cerraron como parte de esta
+tarea (no un problema aparte — sin esto la validación sería inalcanzable en la práctica).
+
+**Cambio**: `PaymentApiService.assertPaymentMethodNotExpired(userId, dto)`, llamado en
+`createPayment` antes de calcular fees/impuestos o tocar la DB de escritura. Dos caminos:
+
+1. **Método guardado** (`dto.paymentMethodId` presente): resuelve vía
+   `PaymentDbService.findPaymentMethodByReferenceId` (ya existía, valida pertenencia al usuario)
+   y chequea la columna `expiresAt`. Si no resuelve (no existe o es de otro usuario) →
+   `NotFoundException`. Si `expiresAt` está en el pasado → rechazo tipado.
+2. **Tarjeta suelta sin guardar** (sin `paymentMethodId`, solo cuando `paymentMethod` es
+   CREDIT_CARD/DEBIT_CARD/PREPAID_CARD): calcula la expiración al vuelo desde
+   `dto.paymentDetails.cardExpMonth/cardExpYear` con el mismo helper
+   (`computeCardExpiresAt`, `new Date(year, month, 1)` — vence al primer día del mes siguiente
+   al impreso, o sea válida hasta el último día del mes de vencimiento).
+
+**Rechazo**: `BadRequestException({ message, errorCode: 'PAYMENT_METHOD_EXPIRED', details })` —
+mismo patrón que ya usa `AccountDeletionService` (`errorCode` como string plano en el body, sin
+un enum central de códigos de error todavía en el repo). El `errorCode` es lo que el cliente
+necesita para deshabilitar el método en el selector en vez de mostrar un mensaje genérico.
+
+**`createPaymentMethod` ahora calcula y persiste `expiresAt`** cuando el tipo es tarjeta y
+`details` trae `cardExpMonth`/`cardExpYear` (mismos campos no sensibles de presentación que ya
+documenta `.claude/rules/typescript.md` sobre PCI — marca, últimos 4, mes/año). Sin tipo tarjeta
+o sin esos campos, `expiresAt` queda `null` (igual que antes).
+
+Commit: `242812d`. Verificado: 138 suites / 1520 tests en verde (+7 tests); format/lint/build
+limpios.
