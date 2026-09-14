@@ -191,7 +191,11 @@ describe('RatingsDbService', () => {
       // Assert
       expect(result).toEqual(ratings);
       expect(mockRatingFindMany).toHaveBeenCalledWith({
-        include: { user: true, professional: true, service: true },
+        include: {
+          user: true,
+          professional: { include: { user: true } },
+          service: true,
+        },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -210,7 +214,11 @@ describe('RatingsDbService', () => {
       // Assert
       expect(result).toEqual(ratings);
       expect(mockRatingFindMany).toHaveBeenCalledWith({
-        include: { user: true, professional: true, service: true },
+        include: {
+          user: true,
+          professional: { include: { user: true } },
+          service: true,
+        },
         orderBy: { createdAt: 'desc' },
         take: 3,
       });
@@ -231,7 +239,7 @@ describe('RatingsDbService', () => {
       expect(result).toEqual(ratings);
       expect(mockRatingFindMany).toHaveBeenCalledWith({
         where: { userId: 10 },
-        include: { professional: true, service: true },
+        include: { professional: { include: { user: true } }, service: true },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -315,7 +323,7 @@ describe('RatingsDbService', () => {
           isAnonymous: false,
           isActive: true,
         },
-        include: { professional: true, service: true },
+        include: { professional: { include: { user: true } }, service: true },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -335,7 +343,11 @@ describe('RatingsDbService', () => {
       expect(result).toEqual(ratings);
       expect(mockRatingFindMany).toHaveBeenCalledWith({
         where: { serviceId: 30, isActive: true },
-        include: { user: true, professional: true, service: true },
+        include: {
+          user: true,
+          professional: { include: { user: true } },
+          service: true,
+        },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -355,7 +367,11 @@ describe('RatingsDbService', () => {
       expect(result).toEqual(rating);
       expect(mockRatingFindUnique).toHaveBeenCalledWith({
         where: { id: 1 },
-        include: { user: true, professional: true, service: true },
+        include: {
+          user: true,
+          professional: { include: { user: true } },
+          service: true,
+        },
       });
     });
 
@@ -385,7 +401,11 @@ describe('RatingsDbService', () => {
       expect(result).toEqual(rating);
       expect(mockRatingFindUnique).toHaveBeenCalledWith({
         where: { referenceId: 'rating-uuid-1' },
-        include: { user: true, professional: true, service: true },
+        include: {
+          user: true,
+          professional: { include: { user: true } },
+          service: true,
+        },
       });
     });
   });
