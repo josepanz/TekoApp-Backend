@@ -6,6 +6,7 @@ import { PaymentsDbModule } from '@modules/payments-db/payments-db.module';
 import { ContractsDbModule } from '@modules/contracts-db/contracts-db.module';
 import { PaymentDisputesDbModule } from '@modules/payment-disputes-db/payment-disputes-db.module';
 import { StorageModule } from '@modules/storage/storage.module';
+import { NotificationsApiModule } from '@api/notifications/notifications.module';
 import { AccountDeletionController } from './controllers/account-deletion.controller';
 import { AccountDeletionService } from './services/account-deletion.service';
 import { AccountDeletionAnonymizationJob } from './jobs/account-deletion-anonymization.job';
@@ -19,6 +20,7 @@ import { AccountDeletionAnonymizationJob } from './jobs/account-deletion-anonymi
     ContractsDbModule,
     PaymentDisputesDbModule,
     StorageModule,
+    NotificationsApiModule,
   ],
   controllers: [AccountDeletionController],
   providers: [AccountDeletionService, AccountDeletionAnonymizationJob],

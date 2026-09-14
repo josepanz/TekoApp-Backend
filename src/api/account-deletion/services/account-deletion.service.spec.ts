@@ -7,6 +7,8 @@ import { ServicesDbService } from '@modules/services-db/services/services-db.ser
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { ContractsDbService } from '@modules/contracts-db/services/contracts-db.service';
 import { PaymentDisputesDbService } from '@modules/payment-disputes-db/services/payment-disputes-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { AccountDeletionService } from './account-deletion.service';
 
 const mockRequestDeletion = jest.fn();
@@ -16,6 +18,7 @@ const mockCountServices = jest.fn();
 const mockCountPayments = jest.fn();
 const mockCountContracts = jest.fn();
 const mockCountOpenDisputesForUser = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 describe('AccountDeletionService', () => {
   let service: AccountDeletionService;
@@ -56,6 +59,10 @@ describe('AccountDeletionService', () => {
         {
           provide: APP_CONFIG.KEY,
           useValue: { accountDeletion: { gracePeriodDays: 14 } },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -174,6 +181,13 @@ describe('AccountDeletionService', () => {
           result.deletionRequestedAt.getTime()) /
         (24 * 60 * 60 * 1000);
       expect(diffDays).toBeCloseTo(14, 5);
+      // I-05 (#30, IMPRESCINDIBLE): confirmación con la fecha efectiva del borrado.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.ACCOUNT_DELETION_REQUESTED,
+        }),
+        1,
+      );
     });
 
     it('debe lanzar ConflictException DELETION_ALREADY_REQUESTED si ya estaba pedido', async () => {
@@ -202,6 +216,13 @@ describe('AccountDeletionService', () => {
 
       // Assert
       expect(result).toEqual({ status: UserStatus.ACTIVE });
+      // I-05 (#31, IMPRESCINDIBLE): confirmación de que la cuenta sigue activa.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.ACCOUNT_DELETION_CANCELLED,
+        }),
+        1,
+      );
     });
 
     it('debe lanzar BadRequestException DELETION_NOT_REQUESTED si no había solicitud activa', async () => {

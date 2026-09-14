@@ -1,5 +1,9 @@
 {
   "DELETION_BLOCKED": "The account cannot be deleted: there are active blockers",
   "DELETION_ALREADY_REQUESTED": "There is already an active deletion request for this account",
-  "DELETION_NOT_REQUESTED": "There is no active deletion request to cancel"
+  "DELETION_NOT_REQUESTED": "There is no active deletion request to cancel",
+  "NOTIFICATION_REQUESTED_TITLE": "Account deletion request registered",
+  "NOTIFICATION_REQUESTED_MESSAGE": "We registered your deletion request. Your account will be deleted on {scheduledAt} unless you cancel it from the app before then.",
+  "NOTIFICATION_CANCELLED_TITLE": "Account deletion cancelled",
+  "NOTIFICATION_CANCELLED_MESSAGE": "We cancelled your deletion request. Your account remains active."
 }

@@ -22,6 +22,8 @@ import { ServicesDbService } from '@modules/services-db/services/services-db.ser
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { ContractsDbService } from '@modules/contracts-db/services/contracts-db.service';
 import { PaymentDisputesDbService } from '@modules/payment-disputes-db/services/payment-disputes-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { t } from '@common/i18n/i18n.helper';
 import {
   DeletionCancelResponseDTO,
@@ -54,6 +56,7 @@ export class AccountDeletionService {
     private readonly paymentDb: PaymentDbService,
     private readonly contractsDb: ContractsDbService,
     private readonly disputesDb: PaymentDisputesDbService,
+    private readonly notificationsService: NotificationsService,
     @Inject(APP_CONFIG.KEY)
     private readonly configService: ConfigType<AppConfigType>,
   ) {}
@@ -144,6 +147,20 @@ export class AccountDeletionService {
       });
     }
 
+    // I-05 (#30, IMPRESCINDIBLE): claridad legal — el usuario necesita confirmación de que se
+    // registró el pedido, la fecha efectiva, y cómo cancelarlo.
+    await this.notificationsService.create(
+      {
+        title: t('account-deletion.NOTIFICATION_REQUESTED_TITLE'),
+        message: t('account-deletion.NOTIFICATION_REQUESTED_MESSAGE', {
+          scheduledAt: scheduledAt.toISOString().slice(0, 10),
+        }),
+        type: NotificationType.ACCOUNT_DELETION_REQUESTED,
+        channels: ['in_app', 'push'],
+      },
+      userId,
+    );
+
     return {
       status: UserStatus.PENDING_DELETION,
       deletionRequestedAt: requestedAt,
@@ -159,6 +176,18 @@ export class AccountDeletionService {
         errorCode: 'DELETION_NOT_REQUESTED',
       });
     }
+
+    // I-05 (#31, IMPRESCINDIBLE): confirmación de que la cuenta sigue activa.
+    await this.notificationsService.create(
+      {
+        title: t('account-deletion.NOTIFICATION_CANCELLED_TITLE'),
+        message: t('account-deletion.NOTIFICATION_CANCELLED_MESSAGE'),
+        type: NotificationType.ACCOUNT_DELETION_CANCELLED,
+        channels: ['in_app', 'push'],
+      },
+      userId,
+    );
+
     return { status: UserStatus.ACTIVE };
   }
 }
