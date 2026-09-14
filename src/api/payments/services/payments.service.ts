@@ -19,7 +19,7 @@ import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
-import { PaymentStatus, Prisma } from '@prisma/client';
+import { PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
 import { PaymentSummaryResponseDTO } from '../dtos/response/payment-summary.response.dto';
 import { PaymentTrendsResponseDTO } from '../dtos/response/payment-trends.response.dto';
 import {
@@ -46,6 +46,15 @@ import {
 } from '../helpers/payments-export.helper';
 
 import { t } from '@common/i18n/i18n.helper';
+
+// Tarea 7 (platform-hardening-2026-09): tipos de PaymentMethod que efectivamente vencen — el
+// resto (CASH, QR, LINK, TRANSFER, WALLET, MOBILE_WALLET, CRYPTO) no tiene mes/año de expiración.
+const CARD_PAYMENT_METHODS = new Set<PaymentMethod>([
+  PaymentMethod.CREDIT_CARD,
+  PaymentMethod.DEBIT_CARD,
+  PaymentMethod.PREPAID_CARD,
+]);
+
 @Injectable()
 export class PaymentApiService {
   private readonly logger = new Logger(PaymentApiService.name);
@@ -72,6 +81,64 @@ export class PaymentApiService {
     return payment;
   }
 
+  /**
+   * Fecha en la que vence una tarjeta a partir del mes/año impreso — válida hasta el último día
+   * del mes indicado, así que expira al primer día del mes siguiente (`new Date(year, month, 1)`,
+   * `month` en base 1 acá: si `month=12` da el 1° de enero del año siguiente).
+   */
+  private computeCardExpiresAt(month: unknown, year: unknown): Date | null {
+    if (typeof month !== 'number' || typeof year !== 'number') return null;
+    if (month < 1 || month > 12) return null;
+    return new Date(year, month, 1);
+  }
+
+  /**
+   * Tarea 7 (platform-hardening-2026-09): decisión de José — el backend rechaza el pago con un
+   * medio de pago vencido, con un `errorCode` tipado para que el cliente pueda deshabilitar el
+   * método en el selector en vez de mostrar un error genérico. Dos caminos: método guardado
+   * (`paymentMethodId`, chequea la columna `expiresAt` ya persistida) o tarjeta suelta sin
+   * guardar (`paymentDetails.cardExpMonth/cardExpYear`, calculado al vuelo).
+   */
+  private async assertPaymentMethodNotExpired(
+    userId: number,
+    dto: CreatePaymentDto,
+  ): Promise<void> {
+    const now = new Date();
+
+    if (dto.paymentMethodId) {
+      const method = await this.dbService.findPaymentMethodByReferenceId(
+        dto.paymentMethodId,
+        userId,
+      );
+      if (!method) throw new NotFoundException(t('payments.METHOD_NOT_FOUND'));
+
+      if (method.expiresAt && method.expiresAt <= now) {
+        throw new BadRequestException({
+          message: t('payments.PAYMENT_METHOD_EXPIRED'),
+          errorCode: 'PAYMENT_METHOD_EXPIRED',
+          details: {
+            paymentMethodId: dto.paymentMethodId,
+            expiresAt: method.expiresAt,
+          },
+        });
+      }
+      return;
+    }
+
+    if (!CARD_PAYMENT_METHODS.has(dto.paymentMethod)) return;
+    const expiresAt = this.computeCardExpiresAt(
+      dto.paymentDetails?.cardExpMonth,
+      dto.paymentDetails?.cardExpYear,
+    );
+    if (expiresAt && expiresAt <= now) {
+      throw new BadRequestException({
+        message: t('payments.PAYMENT_METHOD_EXPIRED'),
+        errorCode: 'PAYMENT_METHOD_EXPIRED',
+        details: { expiresAt },
+      });
+    }
+  }
+
   async createPayment(
     userId: number,
     dto: CreatePaymentDto,
@@ -95,6 +162,9 @@ export class PaymentApiService {
     if (existingPayment) {
       throw new BadRequestException(t('payments.ALREADY_EXISTS_FOR_SERVICE'));
     }
+
+    // Tarea 7: rechazo temprano, antes de calcular fees/impuestos o tocar la DB de escritura.
+    await this.assertPaymentMethodNotExpired(userId, dto);
 
     const fee = await this.feeCalculator.calculateProviderFee(
       dto.amount,
@@ -281,6 +351,16 @@ export class PaymentApiService {
     userId: number,
     dto: CreatePaymentMethodRequestDTO,
   ): Promise<PaymentMethodDetailResponseDTO> {
+    // Tarea 7: persiste `expiresAt` a partir de mes/año de tarjeta en `details` (si vienen) —
+    // sin esto la columna quedaba siempre null y el rechazo de `createPayment` nunca podía
+    // encontrar un método realmente vencido.
+    const expiresAt = CARD_PAYMENT_METHODS.has(dto.type)
+      ? this.computeCardExpiresAt(
+          dto.details?.cardExpMonth,
+          dto.details?.cardExpYear,
+        )
+      : null;
+
     const created = await this.dbService.createPaymentMethod({
       userId,
       name: dto.name,
@@ -289,6 +369,7 @@ export class PaymentApiService {
       isDefault: dto.isDefault ?? false,
       details: dto.details ?? {},
       externalId: dto.externalId,
+      expiresAt,
     } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
 
     // Tarea 6 (platform-hardening-2026-09): alta exitosa de medio de pago — fire-and-forget,

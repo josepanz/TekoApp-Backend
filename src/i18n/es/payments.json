@@ -8,6 +8,7 @@
   "NOTIFICATION_REFUNDED_MESSAGE": "Se procesó un reembolso de {amount} sobre tu pago.",
   "ONLY_COMPLETED_CAN_BE_REFUNDED": "Solo se pueden reembolsar pagos completados",
   "ONLY_PENDING_CAN_BE_UPDATED": "Solo se pueden actualizar pagos pendientes",
+  "PAYMENT_METHOD_EXPIRED": "El medio de pago seleccionado está vencido",
   "PROFESSIONAL_NOT_FOUND": "Profesional no encontrado",
   "PROVIDER_NOT_SUPPORTED": "Proveedor de pagos no soportado",
   "REFUND_EXCEEDS_AVAILABLE": "El monto del reembolso excede el monto disponible",
