@@ -1170,3 +1170,44 @@ o sin esos campos, `expiresAt` queda `null` (igual que antes).
 
 Commit: `242812d`. Verificado: 138 suites / 1520 tests en verde (+7 tests); format/lint/build
 limpios.
+
+## Tarea 8 — El cliente decide si comparte su contacto (2026-09-14)
+
+`ServiceUserSummaryResponseDTO.email`/`phoneNumber` viajaban siempre en `GET /services/:id` (y
+en cualquier respuesta que anide un servicio) — sin importar quién pregunte. Ese endpoint,
+además, no tiene ningún chequeo de pertenencia (`GET /services/:id` solo exige JWT, no que quien
+pregunta sea el cliente/profesional del servicio) — hallazgo colateral, anotado pero NO
+corregido, fuera de alcance de esta tarea (arreglar esa autorización es un cambio de contrato
+más grande, ajeno al pedido puntual de José).
+
+**Diseño**: `Users.shareContactInfo` (boolean, default `true` — preserva el comportamiento
+actual para todas las filas existentes) en vez de una tabla/columna separada por dominio, porque
+la propiedad es "¿comparto MI contacto?", inherente al usuario, no al servicio ni a un rol
+específico. Consecuencia deliberada: se aplica igual a clientes y profesionales (ambos son
+`Users`, ambos usan `ServiceUserSummaryResponseDTO` cuando aparecen anidados en un servicio) —
+la instrucción hablaba del cliente, pero restringir el campo a "solo si es cliente" hubiera
+significado inventar una distinción de rol que el modelo de datos no tiene (el "modo" de un
+usuario se deriva de si existe un `Professionals` vinculado, no de un campo propio).
+
+**Enmascarado en `mapServiceToResponse`** (no en la query de Prisma): elimina las claves
+`email`/`phoneNumber` del objeto — no las deja en `null` — para que "no expuesto" sea literal en
+el JSON de respuesta, no un valor que confirma que el dato existe pero está oculto. Se aplica a
+`service.users` (cliente) y `service.professional.user` (profesional) por igual.
+
+**Endpoint**: se reutilizó `PUT /auth/me` (autoedición de perfil ya existente) agregando
+`shareContactInfo` como campo opcional, en vez de crear un controller/servicio nuevo solo para
+este booleano — mismo patrón que ya usa ese endpoint para `firstName`/`lastName`/`phoneNumber`/
+`avatarKey`. La respuesta de `PUT /auth/me` devuelve el valor fresco de DB; `GET /auth/me` (que
+lee directo del JWT) no lo incluye — no se tocó el payload del token para esta tarea, así que ese
+endpoint seguirá sin reflejar el cambio hasta que se decida meterlo en el JWT (fuera de alcance).
+
+**Migración**: `20260914130000_add_share_contact_info` — `ALTER TABLE users ADD COLUMN
+share_contact_info BOOLEAN NOT NULL DEFAULT true` (metadata-only en Postgres 11+, sin
+`CONCURRENTLY` porque no hace falta un índice ni reescritura). `users` ya tenía
+`trg_audit_users` adjunto (verificado con una query directa antes de escribir la migración), así
+que no hizo falta `SELECT fn_attach_audit_triggers();` — agregar una columna no desprende un
+trigger de fila ya existente. Aplicada y verificada contra Supabase: columna `boolean NOT NULL
+DEFAULT true`, ambas filas existentes quedaron en `true` (preserva el comportamiento previo).
+
+Commit: `1c71be7`. Verificado: 139 suites / 1526 tests en verde (+6 tests); format/lint/build
+limpios; `prisma migrate status` limpio antes y después.
