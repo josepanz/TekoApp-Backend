@@ -63,14 +63,22 @@ export class RatingsDbService {
 
   async findAll() {
     return this.prisma.extended.rating.findMany({
-      include: { user: true, professional: true, service: true },
+      include: {
+        user: true,
+        professional: { include: { user: true } },
+        service: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async findRecent(limit: number) {
     return this.prisma.extended.rating.findMany({
-      include: { user: true, professional: true, service: true },
+      include: {
+        user: true,
+        professional: { include: { user: true } },
+        service: true,
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
     });
@@ -79,7 +87,7 @@ export class RatingsDbService {
   async findByUser(userId: number) {
     return this.prisma.extended.rating.findMany({
       where: { userId },
-      include: { professional: true, service: true },
+      include: { professional: { include: { user: true } }, service: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -113,7 +121,7 @@ export class RatingsDbService {
         isAnonymous: false,
         isActive: true,
       },
-      include: { professional: true, service: true },
+      include: { professional: { include: { user: true } }, service: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -121,7 +129,11 @@ export class RatingsDbService {
   async findByServiceId(serviceId: number) {
     return this.prisma.extended.rating.findMany({
       where: { serviceId, isActive: true },
-      include: { user: true, professional: true, service: true },
+      include: {
+        user: true,
+        professional: { include: { user: true } },
+        service: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -129,7 +141,11 @@ export class RatingsDbService {
   async findById(id: number) {
     return this.prisma.extended.rating.findUnique({
       where: { id },
-      include: { user: true, professional: true, service: true },
+      include: {
+        user: true,
+        professional: { include: { user: true } },
+        service: true,
+      },
     });
   }
 
@@ -137,7 +153,11 @@ export class RatingsDbService {
   async findByReferenceId(referenceId: string) {
     return this.prisma.extended.rating.findUnique({
       where: { referenceId },
-      include: { user: true, professional: true, service: true },
+      include: {
+        user: true,
+        professional: { include: { user: true } },
+        service: true,
+      },
     });
   }
 

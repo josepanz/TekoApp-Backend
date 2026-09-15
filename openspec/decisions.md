@@ -557,3 +557,739 @@ sin errores de DI.
 
 Verificado: 109 suites/1258 tests, build/lint/format en verde. Migración aplicada y boot real
 confirmado contra Supabase — sin pendientes.
+
+## Trabajo derivado de `platform-hardening-2026-09` — fix de autorización en `POST /payments/:id/refund` (2026-09-07)
+
+Ver `openspec/changes/platform-hardening-2026-09/WORKPLAN.md` §8, "Hallazgo sin ID". Encontrado de
+paso haciendo I-03 (2026-09-06): el endpoint estaba solo detrás de `JwtAuthGuard` a nivel de clase,
+sin `PermissionsGuard`/`@Permissions` y sin acotar el pago al usuario autenticado — a diferencia de
+`cancel()`, que sí pasa `req.user.id` al service. Cualquier usuario logueado podía reembolsar el
+pago de cualquier otro conociendo su id.
+
+Fix (dos partes, ambas necesarias):
+
+- `@UseGuards(PermissionsGuard)` + `@Permissions(PERMISSIONS.PAYMENTS.AUDIT_VIEW, PERMISSIONS.ADMIN.ALL)`
+  en `PaymentController.refund` — el mismo permiso que ya gatea `findAll`/`getSummary`/`getTrends`
+  en el mismo controller, no uno nuevo inventado.
+- `PaymentApiService.refundPayment` ahora recibe `userId` y lanza `ForbiddenException` si
+  `payment.userId !== userId`, igual que `cancelPayment`.
+
+Efecto: por diseño, este endpoint queda utilizable solo por quien tiene el permiso de auditoría de
+pagos **y** es dueño del pago — deliberadamente restrictivo como cierre provisorio del agujero de
+autorización. El camino real de reembolso administrativo (staff reembolsando pagos de terceros)
+queda para las vías de adjudicación de disputas que especifica `I-03-dispute-records.md`
+(`PATCH /admin/disputes/:referenceId/resolve`, aún sin implementar).
+
+Commit: `a3760f6`. Verificado: 117 suites/1323 tests, build/lint/format en verde.
+
+## W-01 de `0015-admin-backoffice-endpoints.md` — `GET /admin/audit-logs` (2026-09-07)
+
+Ver `openspec/changes/0015-admin-backoffice-endpoints.md` para el detalle completo. Endpoint de
+solo lectura sobre `AuditLogs` (poblada por triggers de auditoría, nada la escribe vía código de
+aplicación), para el visor de auditoría de Web (`admin-audit-log-viewer.md`).
+
+Módulos nuevos: `src/modules/audit-log-db` (Prisma) y `src/api/audit-log` (controller/service/DTOs),
+mismo layout que `contracts`. Permiso nuevo `SYSTEM.AUDIT_VIEW` (`system.audit:read`) — se suma
+solo al enum `PERMISSIONS`, el seed ya lo recoge automáticamente (`flattenPermissionCodes` de
+`prisma/seed.ts` itera el objeto completo, no una lista estática).
+
+**Decisión técnica**: no se reusó `PrismaPaginationUtil.paginate` a pesar de que otros módulos de
+auditoría lo hacen (`contracts`, `ai-disclosures`). Ese helper arma el filtro de rango de fechas
+siempre contra una columna `createdAt` hardcodeada; `AuditLogs` no tiene esa columna, solo
+`changedAt`. Reusarlo hubiera roto en runtime ("Unknown argument `createdAt`") apenas alguien
+mandara `startDate`/`endDate` en el query — que es justo uno de los filtros que pide la spec de
+Web. Se escribió paginación manual en `AuditLogDbService.findPaginated` en su lugar (mismo cálculo
+de `skip`/`take`/`totalPages`, filtro de fecha sobre `changedAt`).
+
+`AuditLogs.id` es `BigInt` — se serializa a `string` en el mapper de respuesta (`.toString()`),
+mismo criterio que otros ids grandes del repo (#0008).
+
+Web: correr `pnpm generate:api-types` — desbloquea `admin-audit-log-viewer.md`.
+
+Commit: `220b801`. Verificado: 120 suites/1331 tests, build/lint/format en verde.
+
+## W-02 de `0015-admin-backoffice-endpoints.md` — export CSV pagos y profesionales (2026-09-07)
+
+Ver `openspec/changes/0015-admin-backoffice-endpoints.md` para el detalle completo. Dos commits
+separados (`14c80d6` pagos, `cf63580` profesionales), como pide la spec.
+
+**Hallazgo de paso, no anotado en la spec**: `FileDownloadInterceptor` + `@DownloadFile()` ya
+existían en el repo (`src/core/interceptors/file-download.interceptor.ts`) pero **nunca se habían
+usado** — ningún controller los aplicaba, y tampoco estaban registrados como interceptor global.
+Al cablearlos por primera vez para este endpoint apareció un conflicto real: `TransformInterceptor`
+(global, envuelve toda respuesta en `{success, data, message, timestamp, path}`) no distinguía un
+`StreamableFile` de cualquier otro dato — lo hubiera envuelto adentro de `data`, rompiendo la
+respuesta binaria (Nest solo reconoce `StreamableFile` como valor de retorno de nivel superior).
+Corregido en `TransformInterceptor.intercept()`: si `data instanceof StreamableFile`, se devuelve
+tal cual sin envolver. Cubierto con `transform.interceptor.spec.ts` (no existía spec de ningún
+interceptor de `core/interceptors` antes de esto).
+
+**Pagos**: `AdminPaymentsController` (`GET /admin/payments/export`), mismo permiso que el listado
+admin (`PAYMENTS.AUDIT_VIEW`/`ADMIN.ALL`), mismos filtros que `getPayments` (`userId`,
+`professionalId`, `status`), sin paginar. Reusa `ReportService.generate(..., {format: 'csv'})` (ya
+existía, usado hoy por `contracts` para PDF) — no se escribió ningún generador de CSV nuevo.
+
+**Profesionales**: `AdminProfessionalsExportController` (`GET /admin/professionals/export`).
+Permiso `PROFESSIONALS.VERIFY`/`ADMIN.ALL` — decisión explícita de la spec: `GET /professionals`
+no tiene gate de permiso (lectura pública), así que el export no podía heredar "el mismo permiso
+que el listado" como en pagos. Se extrajo el armado de `where` de `ProfessionalsDbService.findMany`
+a un método privado (`buildListWhere`) para no duplicarlo en el nuevo `findAllForExport` (mismos
+filtros, sin paginar).
+
+Web: correr `pnpm generate:api-types` — desbloquea `admin-data-export.md`.
+
+Verificado: 123 suites/1341 tests, build/lint/format en verde.
+
+## W-03 de `0015-admin-backoffice-endpoints.md` — búsqueda por texto en listados (2026-09-07)
+
+Ver `openspec/changes/0015-admin-backoffice-endpoints.md` para el detalle completo. Un solo
+commit (`81083a8`) — `users` no necesitó cambio de código.
+
+**`users`**: verificado `users-db.service.ts#findAll` — el filtro `name` ya arma un `AND` de `OR`
+multi-palabra sobre `firstName`/`lastName` con `contains` + `mode: insensitive`, y `email` también
+usa `contains`/insensitive. Ya sirve tal cual para la búsqueda de Web. Se agregó un test de
+regresión en `users-db.service.spec.ts` (no existía cobertura explícita de este filtro antes).
+
+**`professionals`**: no tenía ningún filtro de texto. Se agregó `search?: string` a
+`GetProfessionalsListQueryDTO` y el mismo patrón multi-palabra (`AND` de `OR`) sobre
+`user.firstName`/`user.lastName` en `ProfessionalsDbService` — reusado tanto por `findMany` (vía
+`buildListWhere`, ver W-02) como por `findAllForExport`, así que el export CSV de W-02 también
+hereda la búsqueda sin cambios adicionales.
+
+No se agregó ningún endpoint agregador (`GET /admin/search`) — la spec de Web explícitamente no lo
+pide en esta iteración, hace la agregación del lado cliente contra `/users?search=` y
+`/professionals?search=`.
+
+Web: correr `pnpm generate:api-types` — desbloquea la "opción intermedia" de
+`admin-global-search.md` deja de ser necesaria (Web puede buscar con texto libre directo).
+
+Con esto, `0015-admin-backoffice-endpoints.md` queda cerrado: W-01, W-02 y W-03 completas.
+
+Verificado: 123 suites/1344 tests, build/lint/format en verde.
+
+## I-01 — Borrado de cuenta con ventana de gracia (2026-09-07)
+
+Ver `openspec/changes/platform-hardening-2026-09/I-01-account-deletion.md` (spec original +
+sección "Estado de implementación" con el detalle completo). Implementación real de la spec que
+`I-01` de `platform-hardening-2026-09` había dejado escrita pero no implementada — bloquea la
+publicación de Mobile.
+
+**Schema**: `UserStatus.PENDING_DELETION` (login permitido durante la ventana, sin cambios de
+comportamiento respecto a `ACTIVE` en `AuthService.validateUserStatus`), `Users.deletionRequestedAt`/
+`deletionScheduledAt`, `ProfessionalDocuments.fileKey` pasa a nullable (se anula al borrar el
+objeto real de S3 al anonimizar). Migración `20260907130000_add_account_deletion` — **aplicada
+contra Supabase por José** (el clasificador de "auto mode" de la sesión bloqueó el comando de
+migración pese a la autorización explícita en el chat; se documentó el bloqueo en el propio
+archivo de la spec y José la corrió a mano). `prisma migrate status` limpio, confirmado.
+
+**Desviaciones reales respecto a la spec** (las 6 completas están detalladas en el archivo de la
+spec, sección "Estado de implementación" — resumen):
+
+1. Los endpoints de autoservicio NO viven en `users` (la spec asumía eso) sino en `auth/me/*` —
+   el self-service real de "mi cuenta" en este repo ya es `GET/PUT /auth/me`, `users` es
+   admin/staff sobre otros usuarios. `AccountDeletionController` nuevo, mismo módulo `auth/me`.
+2. `deletionScheduledAt` se expone en `GET /auth/scope` (ya hace `findUserById` fresco), no en
+   `GET /auth/me` (JWT-echo puro, quedaría desactualizado hasta el próximo login).
+3. El bloqueante de disputa abierta (I-03) queda **sin implementar** — `PaymentDisputes` no
+   existe todavía, I-03 es la tarea siguiente. Los otros 3 (servicio activo, pago pendiente,
+   contrato sin firmar) están completos y testeados.
+4. `@Cron` (no Bull) para el job de vencimiento — misma corrección que
+   `professional-documents-expiration.job.ts`, mismo criterio (barrido periódico, no cola
+   reactiva). Corre a las 4am.
+5. `ProfessionalDocumentResponseDTO.fileKey` pasa a `string | null` — consecuencia directa de
+   volver nullable la columna, si no el build rompía.
+6. `Professionals.description`/`skills`/`certifications` sin anonimizar — la spec lo deja
+   explícitamente como decisión abierta, no resuelta acá. Solo `status = SUSPENDED, isActive = false`
+   (mismo efecto que ya usa `suspendProfessional()`).
+
+**Fix de infraestructura compartida, necesario para el contrato de error de la spec**:
+`HttpExceptionFilter` normalizaba toda excepción a `{message, error, errorCode?}` — el `409
+DELETION_BLOCKED` necesita devolver la lista real de bloqueantes con su conteo (no un mensaje
+genérico, pedido explícito de la spec). Se agregó un campo `details` opcional, mismo criterio que
+`errorCode` (pasa tal cual, nunca se parsea). Cubierto con test nuevo en
+`http-exception.filter.spec.ts`.
+
+**Reuso de infraestructura existente para los bloqueantes** (evitó duplicar acceso a Prisma en el
+módulo nuevo): `ServicesDbService.countServices` (ya existía, sin cambios) +
+`ContractsDbService.countContracts` y `PaymentDbService.countPayments` (nuevos, un método
+genérico cada uno, mismo patrón que `countServices`).
+
+**Módulos nuevos**: `src/modules/account-deletion-db` (`AccountDeletionDbService` — la
+transacción de anonimización cruza Users+Professionals+ProfessionalDocuments+PushSubscriptions+FcmTokens
+en un solo lugar, deliberadamente fuera del patrón "un `-db` module por dominio" porque es una
+operación atómica única de este feature) y `src/api/account-deletion` (service + controller +
+job de vencimiento).
+
+Commit: `a24cf7f`. Verificado: 127 suites/1369 tests, build/lint/format en verde, migración
+aplicada por José (2026-09-07) y `prisma migrate status` limpio antes y después.
+
+## I-03 — Registro y adjudicación de disputas de pago (2026-09-11)
+
+Ver `openspec/changes/platform-hardening-2026-09/I-03-dispute-records.md` (spec original, cerrada
+y decidida) — implementación tal cual, sin rediseño.
+
+**Schema**: enums `DisputeStatus` (`OPEN`/`UNDER_REVIEW`/`RESOLVED`/`REJECTED`/`WITHDRAWN`),
+`DisputeReason` (5 valores, reemplaza como motivo de disputa al `RefundReason` TS-only que sigue
+viviendo en `refund-payment.dto.ts` para el camino de reembolso directo de staff) y
+`DisputeResolution` (`FULL_REFUND`/`PARTIAL_REFUND`/`NO_REFUND`/`OTHER_REMEDY`). Modelo
+`PaymentDisputes` con el patrón estándar (`id` Int + `referenceId` UUID + columnas de auditoría),
+sin `@@unique([paymentId])` a propósito — un pago puede tener más de una disputa a lo largo del
+tiempo, el service impide 2 simultáneas `OPEN`/`UNDER_REVIEW` sobre el mismo pago (chequeo previo,
+no constraint de DB). Migración `20260911120000_add_payment_disputes`, aplicada contra Supabase
+por conexión directa (5432): tabla, índices (`payment_id`, `status`,
+`reference_id` único) y `trg_audit_payment_disputes` verificados con consultas directas contra la
+base después de aplicar; `prisma migrate status` limpio antes y después.
+
+**Endpoints** (los 6 de la spec, sin desviación): `POST/GET /payments/:id/disputes`,
+`POST /payments/:id/disputes/:referenceId/withdraw`, `GET /admin/disputes`,
+`PATCH /admin/disputes/:referenceId/claim`, `PATCH /admin/disputes/:referenceId/resolve`. Permiso
+nuevo `disputes.adjudication:manage` (`PERMISSIONS.DISPUTES.ADJUDICATE`) — se siembra solo por
+existir en `PermissionsEnum` (el seed de T-04 ya aplana el catálogo completo, no hizo falta tocar
+`prisma/seed.ts`).
+
+**Decisiones tomadas durante la implementación** (la spec las dejaba abiertas a propósito):
+
+1. **`resolve` no fuerza pasar por `UNDER_REVIEW`**: el `updateMany` condicional acepta tanto
+   `OPEN` como `UNDER_REVIEW` como estado de origen — un staff puede adjudicar directo sin "tomar"
+   la disputa primero.
+2. **El reembolso de la resolución reusa `PaymentDbService.executeRefund` sin duplicarlo**: se le
+   agregaron dos parámetros opcionales — `disputeReferenceId` (queda en `refundDetails` para
+   trazabilidad inversa pago→disputa) y `tx` (permite que
+   `PaymentDisputesDbService.resolve` lo dispare DENTRO de la misma transacción que marca la
+   disputa `RESOLVED`/`REJECTED`, mismo patrón de `tx` opcional que ya usa
+   `UserRolesDBService.replaceUserRoles`). Sin `tx`, `executeRefund` sigue abriendo su propia
+   transacción — el camino de reembolso directo de staff (`POST /payments/:id/refund`, ya gateado
+   por permiso desde `a3760f6`) no cambia de comportamiento.
+3. **El camino sin disputa (reembolso directo de staff) no se tocó**: sigue existiendo, sigue sin
+   exigir abrir una `PaymentDisputes` — la spec lo dejaba como decisión de producto aparte, no
+   bloqueante para esta implementación.
+
+**Cierra el cabo suelto de I-01** (borrado de cuenta, `a24cf7f`): la tabla de bloqueantes de esa
+spec incluía "Disputa abierta (I-03)" pero no se pudo implementar porque `PaymentDisputes` no
+existía. `AccountDeletionService.findBlockers` ahora cuenta disputas `OPEN`/`UNDER_REVIEW` donde el
+usuario es quien la abrió, el cliente del pago, o su profesional (`DeletionBlockerType.OPEN_DISPUTE`,
+vía `PaymentDisputesDbService.countOpenDisputesForUser`) — una cuenta con una disputa abierta ya no
+puede completar el borrado.
+
+**Hallazgo real encontrado escribiendo los tests de `AdminDisputesController`**:
+`PermissionsGuard.canActivate` (`src/modules/auth/guards/permissions.guard.ts`) lee la metadata de
+permisos con `this.reflector.get(PERMISSIONS_KEY, context.getHandler())` — **solo el handler**,
+nunca `context.getClass()`. Un `@Permissions(...)` puesto a nivel de controller (en vez de en cada
+método) no lanza error ni se ignora con warning: `requiredPermissions` da `undefined` y el guard
+simplemente deja pasar a cualquier usuario autenticado. `AdminDisputesController` decora los 3
+métodos por separado (mismo criterio que `AdminPaymentsController`/`PaymentController`, que ya
+lo hacían así) — trampa real del repo, no de esta spec puntual, vale la pena tenerla presente para
+cualquier controller nuevo que agrupe varios endpoints bajo un mismo permiso.
+
+Commit: `262c071`. Verificado: 131 suites/1406 tests, build/lint/format en verde.
+
+## Fix de seguridad — endpoints admin desprotegidos por `@Permissions` de clase (2026-09-11)
+
+El hallazgo del `PermissionsGuard` de I-03 (arriba) se generalizó: se barrieron TODOS los
+controllers buscando el mismo patrón ("`@Permissions` entre `@Controller(...)` y `export class`,
+con algún método sin su propio `@Permissions`") y aparecieron dos, **en producción, sin ningún
+método decorado**:
+
+- `AdminProfessionalDocumentsController` (`professional-documents.review:manage`) — 3 endpoints:
+  `GET admin/professional-documents`, `GET admin/professionals/:referenceId/documents`,
+  `PATCH admin/professional-documents/:referenceId/review`.
+- `AdminProfessionalPortfolioController` (`professional-portfolio.review:manage`) — 2 endpoints:
+  `GET admin/professional-portfolio`, `PATCH admin/professional-portfolio/:referenceId/review`.
+
+A diferencia de `AdminDisputesController` (recién creado en I-03, nunca llegó a estar expuesto),
+estos dos YA estaban mergeados en `develop` — cualquier usuario logueado del marketplace podía
+listar y leer documentos de identidad/antecedentes de profesionales, y aprobar o rechazar
+revisiones de documentos y de portafolio (incluidas las propias), sin ningún permiso especial.
+
+**Fix**: `@Permissions(...)` repetido en cada uno de los 5 métodos, con el mismo permiso que ya
+declaraba la clase. El decorador de clase se dejó (mismo valor, no aporta protección real) pero
+con un comentario explícito de que es decorativo — para que el próximo que lo lea no vuelva a
+asumir que alcanza.
+
+**Tests de regresión reales, no solo de metadata**: cada uno de los 5 endpoints tiene un test que
+instancia `PermissionsGuard` con un `Reflector` real (sin mockear) contra el método real del
+controller — si el `@Permissions` de un método se borra otra vez, el test falla con un 403 que
+debía tirarse y no se tiró, en vez de solo comparar el arreglo de metadata.
+
+**Barrido posterior**: no apareció ningún otro controller con el mismo patrón.
+
+**Propuesta evaluada y NO implementada** (a pedido explícito, para no mezclar con el fix urgente):
+cambiar `PermissionsGuard.canActivate` a `this.reflector.getAllAndOverride(PERMISSIONS_KEY,
+[context.getHandler(), context.getClass()])` — el patrón estándar de NestJS, que haría que un
+`@Permissions` de clase funcione como cualquiera esperaría. Es el arreglo de fondo, pero cambia el
+comportamiento de TODOS los controllers a la vez (cualquier controller que hoy combine un
+`@Permissions` de clase con métodos sin permiso propio empezaría a exigirlo también en esos
+métodos). Revisado explícitamente: no se encontró ningún controller que hoy dependa de que el
+decorador de clase NO se aplique — los únicos dos casos existentes de `@Permissions` de clase son
+justamente los dos que este fix corrigió, y en ambos todos los métodos del controller debían
+quedar protegidos por el mismo permiso. El cambio de guard queda pendiente de decisión aparte.
+
+Commit: `beb7e16`. Verificado: 133 suites/1426 tests, build/lint/format en verde.
+
+### Arreglo de fondo — `PermissionsGuard` (2026-09-12)
+
+Se implementó la propuesta que quedó pendiente arriba, autorizada explícitamente por José.
+
+**Antes**: `PermissionsGuard.canActivate` hacía `this.reflector.get(PERMISSIONS_KEY,
+context.getHandler())` — leía metadata SOLO del método. Si no encontraba nada ahí (nunca miraba la
+clase), `return true`: **fallaba abierto**. Esto es lo que dejó expuestos los 5 endpoints de arriba
+(`beb7e16`): con un `@Permissions` puesto únicamente en la clase, el guard lo ignoraba por completo
+y cualquier usuario logueado pasaba.
+
+**Después**: `this.reflector.getAllAndOverride(PERMISSIONS_KEY, [context.getHandler(),
+context.getClass()])` — primero busca en el método y, si no hay nada ahí, cae a la clase; el
+método sigue teniendo precedencia sobre la clase (comportamiento estándar de NestJS). Un
+`@Permissions` de clase ahora protege de verdad, incluso si algún método nuevo se agrega sin su
+propio decorador.
+
+**Impacto verificado, no solo asumido**: se corrió la suite completa (135 suites, 1440 tests antes
+de este cambio) después de aplicar el fix. Fallaron 2 suites — `admin-professional-documents.
+controller.spec.ts` y `admin-professional-portfolio.controller.spec.ts` — pero con
+`TypeError: context.getClass is not a function`, no con un 403 inesperado: sus mocks de
+`ExecutionContext` (escritos para el fix de `beb7e16`, con un `Reflector` real) nunca implementaron
+`getClass()` porque el guard viejo no lo llamaba. Se corrigió agregando `getClass: () =>
+<Controller>` a esos dos mocks — no es el "test que empieza a fallar con 403" que se pidió
+detectar y NO ajustar, es un mock incompleto para una firma de método nueva. Con eso corregido, la
+suite completa (135 suites, 1446 tests — 6 nuevos en `permissions.guard.spec.ts` sobre precedencia
+handler/clase con `Reflector` real) quedó en verde sin ningún cambio de resultado en ningún otro
+test — confirma lo que ya se había revisado en `beb7e16`: ningún controller depende hoy de que el
+decorador de clase NO se aplique.
+
+**Barrido repetido** (mismo patrón que arriba, para confirmar que no apareció nada nuevo desde
+`beb7e16`): de los 18 controllers que usan `@Permissions`, solo `AdminProfessionalDocumentsController`
+y `AdminProfessionalPortfolioController` lo declaran a nivel de clase, y en ambos los métodos ya
+están decorados individualmente (el fix de `beb7e16` sigue siendo neutro respecto a este cambio).
+Los comentarios "OJO: este `@Permissions` de clase es DECORATIVO" en esos dos controllers dejaron
+de ser ciertos y se actualizaron para reflejar que la clase ahora sí protege (con precedencia del
+método).
+
+Commit: `07c852e`.
+
+## I-04 — Versionado a v1 global + excepción del healthcheck (2026-09-07)
+
+Corte de versionado de la API: implementación del `defaultVersion: '1'` a nivel de `enableVersioning()`
+en `src/main.ts`, con remoción de los `@Version('1')` redundantes de los 6 controllers que ya 
+versionaban a mano (auth-api, onboarding, roles-api, users-roles-api, uploads, users). Decisión 
+técnica: un `defaultVersion` global heredado automáticamente por todo controller nuevo, sin la carga 
+cognitiva de decorar controller por controller — un developer que agrega un endpoint nuevo consume 
+`/v1` sin que tenga que acordarse nada. Resultado: 170 rutas en el Swagger, 169 bajo `/v1`, 1 
+excepción deliberada.
+
+**La excepción**: `src/modules/health/health.controller.ts` (`@Controller('healthcheck')`) lleva 
+`@Version(VERSION_NEUTRAL)` a nivel de **método**, no de clase. (El tipado de `@Version` en esta 
+versión de Nest es un `MethodDecorator`; aplicarlo en la clase rompe tsc con TS1238/TS1270.) Motivo: 
+9 paths de probes de Kubernetes apuntan al path sin versión — `ci/develop/1_deployment.yml`, 
+`ci/qa/1_deployment.yml` y `ci/master/1_deployment.yml`, líneas 60/67/75 de cada uno 
+(startupProbe + readinessProbe + livenessProbe), todos contra `/tekoapp-backend/api/healthcheck`. 
+Además, el health check de Render está configurado fuera del repo (en su dashboard) contra ese mismo 
+path. Si el health se movía a `/v1`, las probes daban 404, el pod nunca llegaba a Ready y el deploy 
+se caía con rollback inmediato. Se eligió `VERSION_NEUTRAL` en vez de editar los 9 paths a propósito: 
+cambiando los manifiestos, un rollback a una imagen anterior también fallaría.
+
+**Dato técnico importante, verificado empíricamente** leyendo `route-path-factory.js` de 
+`@nestjs/core` y con la app levantada: bajo `VersioningType.URI`, un endpoint `VERSION_NEUTRAL` 
+registra **únicamente** el path sin prefijo de versión, **nunca** ambos. `/tekoapp-backend/api/healthcheck` 
+responde; `/tekoapp-backend/api/v1/healthcheck` da 404 a propósito. Es contraintuitivo y debe 
+documentarse explícitamente — una sesión futura puede asumir que un `VERSION_NEUTRAL` registra ambos 
+paths y tropezar cuando Render o una probe da 404.
+
+**Bug concreto que este corte cierra**: `AccountDeletionController` (`@Controller('auth/me')`) había 
+nacido sin `@Version` mientras `AuthApiController` tenía `@Version('1')` por método, así que convivían 
+`GET /v1/auth/me` y `POST /auth/me/deletion-request`. Mobile ya tenía todo auth bajo `/v1`, así que 
+la llamada de borrado de cuenta le habría dado 404 — mismo género de bug que M-07 de Mobile, que 
+costó una sesión de prueba con teléfono real.
+
+**Deuda preexistente detectada de paso, NO corregida** (anotada como tal, no como parte de I-04): 
+`test/app.e2e-spec.ts` ya estaba roto antes de este corte porque el módulo 
+`@/core/database/base/mongo/database.config` no resuelve con `test/jest-e2e.json`. No es parte de la 
+Definition of Done del §1.2.
+
+Commits: `bedcca1` (versionado), `7e22526` (healthcheck version-neutral), `6f48d01` (doc). 
+Verificado: app levantada con Postgres/Mongo/Redis reales; 127 suites / 1369 tests en verde; 
+format/lint/build limpios.
+
+## T-03 (deuda diferida) — rename de `locations-db`/`tracking-db` (2026-09-14)
+
+Ver `openspec/changes/platform-hardening-2026-09/WORKPLAN.md` §6, T-03. T-03 ya había corregido el
+typo de archivo (`tacking-db.service.ts` → `tracking-db.service.ts`) pero difirió el rename de
+ambos módulos por no ser urgente. Se ejecuta ahora como tarea 1 de una tanda nueva pedida por José.
+
+Cambio: `src/modules/locations-db` → `src/modules/professional-position-db` (última posición
+conocida del profesional, Postgres — alimenta `findNearby`/Haversine, D-01) y
+`src/modules/tracking-db` → `src/modules/geo-tracking-db` (histórico de posiciones durante un
+servicio en curso, MongoDB con índice `2dsphere`). Clases renombradas en consecuencia
+(`LocationsDbService`→`ProfessionalPositionDbService`, `LocationsDbModule`→
+`ProfessionalPositionDbModule`, `TrackingDbService`→`GeoTrackingDbService`,
+`TrackingDbModule`→`GeoTrackingDbModule`), imports actualizados en `src/api/locations` y
+`src/api/tracking`, y cada módulo lleva ahora un docstring explicando su división de
+responsabilidad respecto del otro (la falta de esa explicación era el hallazgo original de T-03).
+Actualizados también el árbol de módulos de `README.md` y el ejemplo de `.claude/CLAUDE.md` que
+mencionaban el nombre viejo.
+
+No se tocaron los comentarios dentro de `prisma/migrations/**` (registro histórico inmutable) que
+mencionan `LocationsDbService` por nombre — sí se actualizó el comentario vivo en
+`prisma/schema.prisma` que referencia `professionals_nearby_idx`.
+
+Sin cambios de comportamiento ni de contrato — es un rename puro, sin migración de base de datos.
+
+Commit: `e3b466a`. Verificado: 135 suites / 1468 tests en verde; format/lint/build limpios.
+
+## Tarea 2 — TOCTOU en `verifyProfessional`/`suspendProfessional` (2026-09-14)
+
+Hallazgo colateral anotado (no corregido) por `I-05-notification-triggers.md`:
+`ProfessionalsService.verifyProfessional`/`suspendProfessional` usaban
+`professionalsDb.update(id, {...})` incondicional, a diferencia del patrón
+`updateMany`+condicional+`count===0`→`ConflictException` que ya usan `services`, `payments`,
+`professional-documents`, `professional-portfolio` y `payment-disputes`. Dos admins resolviendo
+la misma verificación/suspensión al mismo tiempo se pisaban sin error.
+
+Cambio: nuevo `ProfessionalsDbService.updateConditional(id, expectedStatuses, data)` — mismo
+molde que `updateServiceConditional`/`updatePaymentConditional` (`updateMany({ where: { id,
+status: { in: expectedStatuses } } })`, retorna `count`). `expectedStatuses` se arma con el
+`status` leído en el mismo `findById` de validación (no una lista fija de estados de negocio
+nueva) — preserva el comportamiento actual (cualquier estado de origen es válido, staff de baja
+frecuencia) mientras cierra la carrera: si el estado cambió entre la lectura y la escritura, el
+`updateMany` no afecta filas y se lanza `ConflictException`. Claves i18n nuevas
+`professionals.STATUS_CHANGED_BEFORE_VERIFY`/`STATUS_CHANGED_BEFORE_SUSPEND` (es/en).
+
+Tests de la carrera agregados en `professionals.service.spec.ts` (ambos métodos) y cobertura del
+método nuevo en `professionals-db.service.spec.ts`.
+
+Commit: `80fa823`. Verificado: 135 suites / 1472 tests en verde; format/lint/build limpios.
+
+## Tarea 3 — Canal de email real en `NotificationsProcessor` (2026-09-14)
+
+Hallazgo colateral anotado (no corregido) por `I-05-notification-triggers.md`:
+`NotificationsProcessor.sendNotificationByChannel` trataba los canales `email`/`sms` como
+stubs (`logger.log` nomás), pese a que `modules/email` (`EmailService`) ya existe y se usa en
+`auth-api`, `onboarding`, `users-db`.
+
+Cambio — canal `email`: nuevo método privado `sendEmail(userId, title, message)` en el
+processor. Resuelve el email del destinatario vía `UsersDBService.findById` (inyectado desde
+`UsersDBModule`, ya importa `EmailModule` así que no hay ciclo nuevo) y reusa
+`EmailService.send()` con un template genérico nuevo,
+`EmailHelper.createGenericNotificationTemplate(firstName, title, message)` — no reusa los
+templates existentes porque esos están armados para un flujo puntual (verificación, contraseña),
+mientras que este canal despacha cualquier tipo de notificación de dominio con `title`/`message`
+libres.
+
+**Decisión de resiliencia**: igual que `sendWebPush`/`sendFcm` (que jamás relanzan — devuelven un
+`outcome` y loguean), el fallo del canal `email` se atrapa y solo se loguea, nunca se relanza. Si
+relanzara, un solo canal caído (SMTP abajo, usuario sin email) tumbaría `Promise.all` en
+`handleSendNotification` y marcaría **toda** la notificación como `FAILED` aunque otros canales
+(ej. `in_app` vía SSE) sí se hayan entregado. `EmailService.send()` ya lanza
+`InternalServerErrorException` en su propio catch — acá se la vuelve a atrapar a propósito.
+
+**Canal `sms`: sigue como stub, a propósito.** A diferencia de `email`, no hay ningún
+`SmsService`/wrapper de Twilio en el repo — el paquete `twilio` ni siquiera está en
+`package.json`. Lo único que existe son las env vars `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/
+`TWILIO_PHONE_NUMBER` validadas por Joi en `config-schema.ts`, que es validación de
+configuración, no un cliente real. Cablearlo de verdad implica agregar una dependencia nueva y
+un módulo completo — se deja documentado en el propio código (comentario en el `case 'sms'`) y
+acá, fuera del alcance de "cablear el canal que ya existe".
+
+Tests nuevos en `notifications.processor.spec.ts` (`describe('canal email')`): envío exitoso,
+usuario sin email (se omite sin lanzar), y fallo de SMTP (no relanza, no tumba otros canales ni
+marca `FAILED` la notificación).
+
+Commit: `1ab7f42`. Verificado: 135 suites / 1475 tests en verde; format/lint/build limpios.
+
+## Tarea 4 — Módulo de preferencias de notificación por usuario (2026-09-14)
+
+Pedido explícito de José + gap documentado por Mobile en
+`notification-preferences-and-inbox.md`: no existía dónde persistir "qué tipos de notificación
+quiere recibir el usuario X" — ni en `Users` (Postgres) ni en Mongo.
+
+**Decisión de diseño — Postgres, no Mongo**: la instrucción de la tarea ("Modelo nuevo +
+migración... la migración la aplicás vos... `SELECT fn_attach_audit_triggers()`") apunta a
+Postgres/Prisma. Tabla nueva `NotificationPreferences` (`notification_preferences`): `id` +
+`referenceId` + columnas de auditoría completas (patrón `PaymentDisputes`), `userId` único (FK a
+`Users`, `onDelete: Cascade`), y `mutedTypes` como `Json @db.JsonB` — un array de strings con los
+valores de `NotificationType` que el usuario desactivó.
+
+**Por qué JSON y no una columna booleana por tipo**: `NotificationType` es un enum de aplicación
+(TS, vive en `notifications-db/enums/notification-type.enum.ts`, respaldado por Mongo — no un
+enum nativo de Postgres) y la tarea 5 de esta misma tanda va a agregarle ~15 valores nuevos
+(presupuestos, contratos, disputas, borrado de cuenta, verificación/suspensión de profesional).
+Una columna por tipo hubiera significado una migración cada vez que ese catálogo crece. Con JSON,
+agregar un tipo nuevo a `NotificationType` no toca esta tabla — default "sin exclusiones" (fila
+ausente o `mutedTypes=[]`) sigue siendo válido para cualquier tipo nuevo automáticamente.
+
+**Sin enforcement de "tipos no desactivables"**: la spec de Mobile deja anotado que
+`system`/`document_expired` "no deberían ser desactivables (o al menos, requerir confirmación
+explícita)" pero pide explícitamente no asumir el criterio sin José. Esta tarea implementa el
+mecanismo genérico (cualquier tipo se puede activar/desactivar) sin esa regla de negocio — queda
+como pregunta abierta para cuando se decida, en vez de inventarla acá.
+
+**API**: módulo propio `src/api/notification-preferences/` (independiente de
+`NotificationsApiModule`, con `NotificationPreferencesService` exportado para que la tarea 5 lo
+inyecte y llame `isEnabled(userId, type)` antes de encolar un envío) +
+`src/modules/notification-preferences-db/` (capa Prisma). Dos endpoints, ambos bajo JWT:
+`GET /notification-preferences/me` (devuelve un ítem por **cada** valor de `NotificationType`, no
+solo los desactivados, para que el frontend pinte todos los switches sin conocer el catálogo) y
+`PATCH /notification-preferences/me` (`{ type, enabled }`, un tipo por request — auto-save por
+switch, mismo patrón que pide la spec de Mobile, sin botón "Guardar").
+
+**Migración**: `20260914120000_add_notification_preferences`, aplicada contra Supabase (conexión
+5432 ya activa en `.env`, no hizo falta swap de puerto — confirmado con `prisma migrate status`
+limpio antes y después). Verificado contra la base real: columnas, ambos índices únicos
+(`reference_id`, `user_id`) y el trigger `trg_audit_notification_preferences` reatachado por
+`fn_attach_audit_triggers()`.
+
+Commit: `41fc3a8`. Verificado: 138 suites / 1489 tests en verde (+3 suites, +14 tests);
+format/lint/build limpios; `prisma migrate status` limpio antes y después.
+
+## Tarea 5 — Los disparos IMPRESCINDIBLE de notificación (I-05, 2026-09-14)
+
+Implementados los disparos de dominio inventariados en `I-05-notification-triggers.md`, uno por
+commit agrupado por dominio (8 commits): `b3e34b2` servicios, `da7f36d` presupuestos, `f7d94b5`
+contratos, `4d18513` pagos, `a6cd854` documentos profesionales, `b99cd02` disputas, `45eb27e`
+borrado de cuenta, `aac052d` profesionales.
+
+**Corrección al enunciado de la tarea — 18 disparos, no 16**: el párrafo resumen de
+`I-05-notification-triggers.md` dice "16 IMPRESCINDIBLE" pero la tabla fila-por-fila marca 18
+filas como `**IMPRESCINDIBLE**` (excluyendo la #15 bloqueada): las filas #33 y #34 (verificar/
+suspender profesional) están explícitamente marcadas `**IMPRESCINDIBLE**` en la tabla pero, por
+su encabezado *("hallazgo adicional, adyacente a documentos profesionales")*, quedaron fuera del
+resumen aritmético de abajo, que no se actualizó al agregarlas. Se implementaron las 18 (incluidas
+#33/#34) por ser inequívocamente IMPRESCINDIBLE según la propia tabla — omitirlas hubiera sido
+inconsistente, más aún habiendo tocado ese mismo código en la tarea 2 de esta tanda. Detalle
+completo en cada commit de dominio.
+
+**Plumbing compartida** (en el commit de servicios, primero cronológicamente):
+`NotificationsService.create()`/`createBulk()` ahora respetan las preferencias del usuario (tarea
+4: `NotificationPreferencesService.isEnabled(userId, type)`, consultada antes de persistir/
+encolar — si el tipo está desactivado, no se crea ni se encola nada) y encolan con reintentos
+configurables (`NOTIFICATIONS_MAX_RETRY_ATTEMPTS`, Joi con default 3, backoff exponencial
+2s). `NotificationType` se extendió con 16 valores nuevos guiados por la columna "Evento" de la
+tabla de la spec (2 disparos reusan tipos ya existentes: `SERVICE_ACCEPTED` para #2 y #5,
+`SERVICE_COMPLETED` para #7).
+
+**Regla seguida en los 18**: el disparo va después de confirmar la transición (`updatedCount > 0`
+del `updateMany`, o la transacción de Prisma ya commiteada), nunca antes ni en paralelo — mismo
+criterio que ya usaba `ProfessionalDocumentsExpirationJob` (el único caso real preexistente,
+tomado como molde). Ninguno queda dentro de un `$transaction` de Postgres (Mongo/Redis son
+motores distintos, no pueden participar).
+
+**Resiliencia entre canales, no entre notificaciones**: cada llamada a `create()` es independiente
+— si una falla (ej. usuario sin preferencias cargadas nunca lanza, pero un error de infraestructura
+en Mongo/Bull sí podría) no se revierte la transición de negocio que ya ocurrió (aceptada como
+"mejor esfuerzo", igual que documenta la pregunta de diseño §5.2 de la spec — la fuente de verdad
+sigue siendo consultar el recurso).
+
+**PAYMENT_RECEIVED (#15) NO implementado**, por instrucción explícita — sigue bloqueado por
+I-02/`0014` (no hay código que transicione un pago a `COMPLETED`).
+
+Verificado acumulado de los 8 commits: 138 suites / 1495 tests en verde (+27 tests sobre la base
+de la tarea 4), format/lint/build limpios en cada uno, sin regresión de `app.module.spec.ts`
+(confirma que ningún import nuevo de `NotificationsApiModule` introdujo un ciclo).
+
+## Tarea 6 — Los 7 eventos de email de seguridad/comprobantes (2026-09-14)
+
+Estado previo real (verificado leyendo el código, no asumido): de los 7 eventos que pidió José,
+3 ya estaban completamente wireados (`VERIFICATION`, `CREATE_PASSWORD` con call sites reales;
+`FORGOT_PASSWORD` cubre la *solicitud* del reseteo, no la confirmación) y 1 tenía enum + plantilla
+pero ningún `case` en el switch (`PAYMENT_RECEIPT`, que además nunca tuvo ningún llamador). Los
+otros 3 (login, cambio de contraseña, alta de medio de pago) no existían en absoluto.
+
+**Cambio**: `EmailTypeEnum` sumó `LOGIN`, `PASSWORD_CHANGED`, `PASSWORD_RESET`,
+`PAYMENT_METHOD_CREATED`. Los 4 reusan `EmailHelper.createGenericNotificationTemplate` (ya
+existía, agregado en I-05 para el canal email de `NotificationsProcessor`) en vez de plantillas
+bespoke, porque ninguno lleva un link de acción — a diferencia de VERIFICATION/FORGOT_PASSWORD/
+CREATE_PASSWORD, que sí son botón-con-token.
+
+**Call sites nuevos**:
+- `AuthApiService.handleLogin` → `LOGIN`, tras un login exitoso.
+- `AuthApiService.updatePassword` (`PUT /auth/change-password`, autenticado) y
+  `changeExpiredPassword` (`PUT /auth/change-expired-password`, pre-login) → `PASSWORD_CHANGED`.
+- `AuthApiService.forgotPassword` (la función que, pese al nombre, es la *finalización* del
+  reseteo — usa el token para fijar la contraseña nueva) → `PASSWORD_RESET`. Distinto del email
+  `FORGOT_PASSWORD` que ya se manda en la *solicitud* (`sendPasswordResetEmail`), no en el cierre.
+- `PaymentApiService.createPaymentMethod` → `PAYMENT_METHOD_CREATED`, con `dto.name` como
+  `methodLabel` (campo siempre presente, a diferencia de `details.cardLast4` que es opcional).
+
+**`AuthService.login`/`changePassword`/`resetPassword` ahora devuelven `user`** — antes solo
+devolvían `{success, message}`; `AuthApiService` necesitaba el `Users` completo (email, nombre)
+para armar el email sin un segundo lookup. Único consumidor de esos tres métodos en todo el repo
+es `AuthApiService` (verificado por grep), así que el cambio de contrato es seguro.
+
+**Todos los envíos son fire-and-forget** (`void (async () => { try {...} catch {...} })()`, nunca
+`.then().catch()` directo sobre el resultado del mock — un mock sin `mockResolvedValue` devuelve
+`undefined`, y encadenar `.catch()` sobre eso explota en los tests): un fallo de SMTP nunca debe
+tumbar login/cambio de contraseña/alta de medio de pago.
+
+**`PAYMENT_RECEIPT` sigue sin llamador real**, a propósito: se completó el `case` del switch
+(antes cualquier llamada con ese tipo tiraba `InternalServerErrorException` por caer al
+`default`) usando la plantilla ya existente (`createPaymentReceiptTemplate`), con un test que
+prueba la plumbing invocando `sendEmailByType` directo — pero no hay ningún punto del código que
+dispare un envío real, porque `PaymentStatus.COMPLETED` no tiene ningún escritor (bloqueado por
+I-02/`0014-dinelco-checkout-integration`, el mismo motivo que dejó `PAYMENT_RECEIVED` sin
+implementar en I-05, tarea 5 de esta misma tanda).
+
+**Hallazgo colateral anotado, NO corregido** (fuera de alcance de esta tarea): el link del email
+`VERIFICATION` apunta a `${baseUrl}/auth/verify-email/confirm?...`, pero esa ruta no existe en
+ningún lado del código — el único endpoint de verificación real es `GET /auth/user-verify`
+(requiere JWT, sin query params, no consume el token del email). Es un desalineo preexistente
+entre la plantilla y el flujo real, ajeno a los 7 eventos de esta tarea.
+
+Commit: `1964f52`. Verificado: 138 suites / 1513 tests en verde (+18 tests); format/lint/build
+limpios.
+
+## Tarea 7 — Rechazar el pago con medio de pago vencido (2026-09-14)
+
+Decisión de José: el backend rechaza. Antes de esta tarea no había ninguna validación de
+expiración — de hecho `CreatePaymentDto.paymentMethodId` (referenceId de un `PaymentMethodEntity`
+guardado) **nunca se leía en ningún lado de `createPayment`**, y la columna
+`PaymentMethodEntity.expiresAt` **nunca se poblaba** al crear un método (`createPaymentMethod`
+solo escribía `name/type/provider/isDefault/details/externalId`). Ambos gaps eran necesarios
+para que el rechazo pedido tuviera algo real que validar, así que se cerraron como parte de esta
+tarea (no un problema aparte — sin esto la validación sería inalcanzable en la práctica).
+
+**Cambio**: `PaymentApiService.assertPaymentMethodNotExpired(userId, dto)`, llamado en
+`createPayment` antes de calcular fees/impuestos o tocar la DB de escritura. Dos caminos:
+
+1. **Método guardado** (`dto.paymentMethodId` presente): resuelve vía
+   `PaymentDbService.findPaymentMethodByReferenceId` (ya existía, valida pertenencia al usuario)
+   y chequea la columna `expiresAt`. Si no resuelve (no existe o es de otro usuario) →
+   `NotFoundException`. Si `expiresAt` está en el pasado → rechazo tipado.
+2. **Tarjeta suelta sin guardar** (sin `paymentMethodId`, solo cuando `paymentMethod` es
+   CREDIT_CARD/DEBIT_CARD/PREPAID_CARD): calcula la expiración al vuelo desde
+   `dto.paymentDetails.cardExpMonth/cardExpYear` con el mismo helper
+   (`computeCardExpiresAt`, `new Date(year, month, 1)` — vence al primer día del mes siguiente
+   al impreso, o sea válida hasta el último día del mes de vencimiento).
+
+**Rechazo**: `BadRequestException({ message, errorCode: 'PAYMENT_METHOD_EXPIRED', details })` —
+mismo patrón que ya usa `AccountDeletionService` (`errorCode` como string plano en el body, sin
+un enum central de códigos de error todavía en el repo). El `errorCode` es lo que el cliente
+necesita para deshabilitar el método en el selector en vez de mostrar un mensaje genérico.
+
+**`createPaymentMethod` ahora calcula y persiste `expiresAt`** cuando el tipo es tarjeta y
+`details` trae `cardExpMonth`/`cardExpYear` (mismos campos no sensibles de presentación que ya
+documenta `.claude/rules/typescript.md` sobre PCI — marca, últimos 4, mes/año). Sin tipo tarjeta
+o sin esos campos, `expiresAt` queda `null` (igual que antes).
+
+Commit: `242812d`. Verificado: 138 suites / 1520 tests en verde (+7 tests); format/lint/build
+limpios.
+
+## Tarea 8 — El cliente decide si comparte su contacto (2026-09-14)
+
+`ServiceUserSummaryResponseDTO.email`/`phoneNumber` viajaban siempre en `GET /services/:id` (y
+en cualquier respuesta que anide un servicio) — sin importar quién pregunte. Ese endpoint,
+además, no tiene ningún chequeo de pertenencia (`GET /services/:id` solo exige JWT, no que quien
+pregunta sea el cliente/profesional del servicio) — hallazgo colateral, anotado pero NO
+corregido, fuera de alcance de esta tarea (arreglar esa autorización es un cambio de contrato
+más grande, ajeno al pedido puntual de José).
+
+**Diseño**: `Users.shareContactInfo` (boolean, default `true` — preserva el comportamiento
+actual para todas las filas existentes) en vez de una tabla/columna separada por dominio, porque
+la propiedad es "¿comparto MI contacto?", inherente al usuario, no al servicio ni a un rol
+específico. Consecuencia deliberada: se aplica igual a clientes y profesionales (ambos son
+`Users`, ambos usan `ServiceUserSummaryResponseDTO` cuando aparecen anidados en un servicio) —
+la instrucción hablaba del cliente, pero restringir el campo a "solo si es cliente" hubiera
+significado inventar una distinción de rol que el modelo de datos no tiene (el "modo" de un
+usuario se deriva de si existe un `Professionals` vinculado, no de un campo propio).
+
+**Enmascarado en `mapServiceToResponse`** (no en la query de Prisma): elimina las claves
+`email`/`phoneNumber` del objeto — no las deja en `null` — para que "no expuesto" sea literal en
+el JSON de respuesta, no un valor que confirma que el dato existe pero está oculto. Se aplica a
+`service.users` (cliente) y `service.professional.user` (profesional) por igual.
+
+**Endpoint**: se reutilizó `PUT /auth/me` (autoedición de perfil ya existente) agregando
+`shareContactInfo` como campo opcional, en vez de crear un controller/servicio nuevo solo para
+este booleano — mismo patrón que ya usa ese endpoint para `firstName`/`lastName`/`phoneNumber`/
+`avatarKey`. La respuesta de `PUT /auth/me` devuelve el valor fresco de DB; `GET /auth/me` (que
+lee directo del JWT) no lo incluye — no se tocó el payload del token para esta tarea, así que ese
+endpoint seguirá sin reflejar el cambio hasta que se decida meterlo en el JWT (fuera de alcance).
+
+**Migración**: `20260914130000_add_share_contact_info` — `ALTER TABLE users ADD COLUMN
+share_contact_info BOOLEAN NOT NULL DEFAULT true` (metadata-only en Postgres 11+, sin
+`CONCURRENTLY` porque no hace falta un índice ni reescritura). `users` ya tenía
+`trg_audit_users` adjunto (verificado con una query directa antes de escribir la migración), así
+que no hizo falta `SELECT fn_attach_audit_triggers();` — agregar una columna no desprende un
+trigger de fila ya existente. Aplicada y verificada contra Supabase: columna `boolean NOT NULL
+DEFAULT true`, ambas filas existentes quedaron en `true` (preserva el comportamiento previo).
+
+Commit: `1c71be7`. Verificado: 139 suites / 1526 tests en verde (+6 tests); format/lint/build
+limpios; `prisma migrate status` limpio antes y después.
+
+## Tarea 9 — Nombres reales en el DTO de ratings, desbloquea Web G-06 (2026-09-14)
+
+Caso concreto documentado en el WORKPLAN de `TekoApp-Frontend-Web` (G-06, commit `5f55f17`):
+`ratings-table` mostraba `#${userId}` crudo y parchaba el caso `null` (anónimo) con "Anónimo",
+porque "resolver nombres reales requiere DTO nuevo del backend (fuera de alcance)" — esa es esta
+tarea.
+
+**Cambio**: `RatingDetailResponseDTO` suma `userName`/`professionalName` (`"Nombre Apellido"`),
+resueltos en `mapRatingToResponse` desde las relaciones `user`/`professional.user` — que
+`ratings-db.service.ts` **ya traía incluidas** en varias queries (`findAll`, `findRecent`,
+`findByServiceId`, `findById`, `findByReferenceId`) pero el mapper las descartaba sin usarlas;
+solo hubo que agregar el include faltante a `findByUser`/`findByProfessional`/
+`findClientRatings`/`findProfessionalRatings` (traían `professional: true` plano, sin
+`.user`, porque `Professionals` no tiene `firstName`/`lastName` propios) y sumar la resolución al
+mapper. Mismo criterio de anonimato que ya aplicaba a `userId`/`professionalId`: si el id queda
+`null` (`isAnonymous` + viewer ni autor ni privilegiado), el nombre también queda `null` — nunca
+se filtra la identidad por el campo nuevo aunque el id esté oculto.
+
+**Hallazgo colateral corregido de paso**: `mapRatingToResponse` hacía `{...rating}` y casteaba
+directo al DTO (`as unknown as RatingDetailResponseDTO`) sin pasar por `plainToInstance` — un
+cast de TypeScript no filtra nada en runtime, así que las filas COMPLETAS de `user`/`professional`
+(con email, teléfono, `shareContactInfo`, etc.) viajaban enteras en cada respuesta de ratings
+aunque el DTO nunca las declarara. El `ClassSerializerInterceptor` global no lo atrapaba porque
+(confirmado por comentarios ya existentes en otros helpers del repo) solo filtra sobre instancias
+reales de la clase, no sobre objetos planos. Se corrigió eliminando explícitamente `user`/
+`professional` del objeto antes de responder, en el mismo cambio — no ameritaba una tarea aparte
+porque tocar esta función para agregar los nombres ya obligaba a decidir qué hacer con esas
+relaciones completas.
+
+**No alcanza a `create()`/`update()`/`report()`**: sus queries (`db.create`/`db.update`/`db.report`)
+solo incluyen `{ service: true }`, no `user`/`professional.user` — sus respuestas van a seguir
+sin nombre resuelto (`userName`/`professionalName` en `null`, `userId`/`professionalId` intactos,
+sin regresión). No se tocó a propósito: esos endpoints no son el caso documentado (Web los usa
+para escribir, no para listar), y ampliar sus includes es un cambio de comportamiento aparte que
+no se pidió.
+
+**Acción pendiente para Web**: correr `pnpm generate:api-types` para levantar los campos nuevos
+del DTO.
+
+Commit: `516856b`. Verificado: 140 suites / 1535 tests en verde (+9 tests); format/lint/build
+limpios.
+
+## Tarea 10 — Spec del canal de soporte in-app, I-06 (2026-09-14)
+
+Pedido explícito de José. `TekoApp-Frontend-Mobile/openspec/specs/support-channel.md` ya tiene la
+parte cliente diseñada (pantalla "Ayuda y soporte", formulario, 2 accesos contextuales desde
+pago fallido y servicio en curso) y queda textualmente bloqueada esperando esta definición del
+lado backend — la cita exacta: *"Backend necesita (dependencia de esta spec)... Migración
+Prisma: tabla `support_requests`... `POST /support/contact`... Nueva entrada en `EmailTypeEnum` +
+template"*.
+
+**Solo spec — cero cambios en `src/`** (verificado con `git status` antes de commitear: el único
+archivo tocado es `I-06-support-channel.md`).
+
+**Formato**: siguió la estructura de `I-03-dispute-records.md` (la spec hermana más completa, tal
+como pidió la tarea) — Contexto, Objetivo, Alcance, decisiones de diseño, modelo Prisma
+(`SupportRequests`), reglas de negocio, endpoints, casos de error, efecto sobre otras partes del
+dominio, fuera de alcance, riesgos.
+
+**Decisiones clave**:
+- Reusa `EmailModule` (no un proveedor de soporte de terceros) — mismo razonamiento que ya cerró
+  la spec de Mobile. Anotado un problema real que la implementación va a encontrar:
+  `EmailService.sendEmailByType` asume que `user?: Users` es el destinatario real; para el aviso
+  a staff el destinatario es una casilla de configuración, no un `Users` de la base — la firma
+  actual no contempla ese caso.
+- Tabla propia (`SupportRequests`) con auditoría automática — al calificar para
+  `fn_attach_audit_triggers()`, la cola queda visible en `GET /admin/audit-logs` (`W-01`) sin
+  trabajo adicional; el endpoint de cola dedicado (`GET /admin/support-requests`) solo hace falta
+  para una vista legible de asunto/mensaje, no para trazabilidad de cambios.
+- Sin `status`/SLA a propósito (mismo recorte que ya fijó Mobile) — el modelo queda abierto a una
+  migración aditiva si se decide agregar un flujo de atención después.
+- Rate limit: en vez de proponer un sexto limitador, recomienda sumar `support/contact` a las
+  rutas que ya usa el limitador `upload` (10/hora, cableado en D-02 de este mismo WORKPLAN) — cero
+  infraestructura nueva, mismo presupuesto que ya sirve para "acciones deliberadas poco
+  frecuentes".
+- Contexto polimórfico (`contextType`/`contextReferenceId`, pago o servicio) sin FK real a
+  propósito — Prisma no modela FKs polimórficas nativamente, y forzar 2 columnas de FK opcional
+  sería más rígido que necesario para un dato que es informativo, no autoritativo.
+
+Commit: `5892ac5`. Verificado: 140 suites / 1535 tests en verde (sin cambios, cero código
+tocado); format/lint/build limpios.

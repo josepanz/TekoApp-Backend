@@ -65,8 +65,11 @@ export class MiddlewareConfig {
     );
 
     // 7. Filtros globales interceptores de excepciones catastróficas o de negocio
+    //
+    // `AllExceptionsFilter` se resuelve vía DI (`app.get`, no `new`) porque desde H-01 depende de
+    // `SentryReporterService` — ver `ObservabilityModule`, que es donde ahora se provee/exporta.
     app.useGlobalFilters(
-      new AllExceptionsFilter(),
+      app.get(AllExceptionsFilter),
       new HttpExceptionFilter(),
       new ValidationExceptionFilter(),
     );

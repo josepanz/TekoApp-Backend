@@ -155,6 +155,49 @@ describe('ProfessionalPortfolioService', () => {
         }),
       );
     });
+
+    it('debe propagar el 404 si el usuario autenticado no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindByUserId.mockRejectedValue(
+        new NotFoundException('professionals.NOT_FOUND'),
+      );
+
+      // Act & Assert
+      await expect(
+        service.uploadItem(5, {}, multerFile(), 'user-ref'),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockUploadFilesQueue).not.toHaveBeenCalled();
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('myPortfolio', () => {
+    it('debe resolver el profesional del usuario autenticado y devolver todas sus fotos', async () => {
+      // Arrange
+      mockFindByUserId.mockResolvedValue(professional);
+      mockFindAllByProfessionalId.mockResolvedValue([
+        portfolioItem({ isVisible: false }),
+      ]);
+
+      // Act
+      const result = await service.myPortfolio(5);
+
+      // Assert
+      expect(mockFindByUserId).toHaveBeenCalledWith(5);
+      expect(mockFindAllByProfessionalId).toHaveBeenCalledWith(professional.id);
+      expect(result.data).toHaveLength(1);
+    });
+
+    it('debe propagar el 404 si el usuario autenticado no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindByUserId.mockRejectedValue(
+        new NotFoundException('professionals.NOT_FOUND'),
+      );
+
+      // Act & Assert
+      await expect(service.myPortfolio(5)).rejects.toThrow(NotFoundException);
+      expect(mockFindAllByProfessionalId).not.toHaveBeenCalled();
+    });
   });
 
   describe('publicPortfolio', () => {
@@ -220,6 +263,18 @@ describe('ProfessionalPortfolioService', () => {
   });
 
   describe('deleteItem', () => {
+    it('debe rechazar con 404 si la foto no existe', async () => {
+      // Arrange
+      mockFindByUserId.mockResolvedValue(professional);
+      mockFindByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.deleteItem(5, 'item-1')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockDelete).not.toHaveBeenCalled();
+    });
+
     it('debe rechazar con 403 si la foto pertenece a otro profesional', async () => {
       // Arrange
       mockFindByUserId.mockResolvedValue(professional);

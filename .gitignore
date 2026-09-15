@@ -73,6 +73,14 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
+# El patrón `.env*` cubre cualquier variante (backups tipo `.env.backup-YYYYMMDD`, `.env.local`,
+# `.env.prod`) — con las reglas exactas de abajo un backup manual quedaba visible para git, con
+# secretos reales adentro (caso real evitado el 2026-09-06).
+.env*
+# Excepción explícita: la plantilla SÍ se commitea (no tiene secretos reales). Hoy se salva solo
+# porque ya está trackeada — sin esta línea, borrarla y volver a agregarla la dejaría ignorada en
+# silencio.
+!.env.example
 .env
 .env.develop.local
 .env.qa.local

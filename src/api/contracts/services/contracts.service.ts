@@ -13,6 +13,8 @@ import { LegalConsentsDbService } from '@modules/legal-consents-db/services/lega
 import { StorageService } from '@modules/storage/services/storage.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
 import { t } from '@common/i18n/i18n.helper';
@@ -40,6 +42,7 @@ export class ContractsService {
     private readonly legalConsentsDb: LegalConsentsDbService,
     private readonly storageService: StorageService,
     private readonly reportService: ReportService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async generateContract(
@@ -103,6 +106,20 @@ export class ContractsService {
         contentSnapshot: contentSnapshot,
         createdBy,
       });
+
+      // I-05 (#12, IMPRESCINDIBLE): sin este aviso el profesional nunca sabe que el contrato
+      // existe y el trato se estanca — disparado solo en la creación real, no en las dos ramas
+      // de "ya existía" (ese profesional ya fue notificado la primera vez).
+      await this.notificationsService.create(
+        {
+          title: t('contracts.NOTIFICATION_CONTRACT_CREATED_TITLE'),
+          message: t('contracts.NOTIFICATION_CONTRACT_CREATED_MESSAGE'),
+          type: NotificationType.CONTRACT_CREATED,
+          channels: ['in_app', 'push'],
+        },
+        professional.userId,
+      );
+
       return mapContractToResponse(created, 'CLIENT');
     } catch (error) {
       if (
@@ -190,6 +207,45 @@ export class ContractsService {
 
     if (updated.status === 'SIGNED') {
       await this.generateAndStorePdf(updated);
+
+      // I-05 (#14, IMPRESCINDIBLE): confirmación legal de que el contrato es efectivo y el PDF
+      // ya está disponible — avisar a ambas partes, después de que el PDF quedó generado y
+      // guardado (mismo momento que pide la fila #14 de la spec).
+      await Promise.all([
+        this.notificationsService.create(
+          {
+            title: t('contracts.NOTIFICATION_CONTRACT_SIGNED_TITLE'),
+            message: t('contracts.NOTIFICATION_CONTRACT_SIGNED_MESSAGE'),
+            type: NotificationType.CONTRACT_SIGNED,
+            channels: ['in_app', 'push'],
+          },
+          updated.clientUserId,
+        ),
+        this.notificationsService.create(
+          {
+            title: t('contracts.NOTIFICATION_CONTRACT_SIGNED_TITLE'),
+            message: t('contracts.NOTIFICATION_CONTRACT_SIGNED_MESSAGE'),
+            type: NotificationType.CONTRACT_SIGNED,
+            channels: ['in_app', 'push'],
+          },
+          updated.professional.userId,
+        ),
+      ]);
+    } else {
+      // I-05 (#13, IMPRESCINDIBLE): "te toca firmar" — avisar a la contraparte que todavía no
+      // firmó. `isClient` es quien acaba de firmar; la contraparte es la otra.
+      const counterpartyUserId = isClient
+        ? updated.professional.userId
+        : updated.clientUserId;
+      await this.notificationsService.create(
+        {
+          title: t('contracts.NOTIFICATION_AWAITING_SIGNATURE_TITLE'),
+          message: t('contracts.NOTIFICATION_AWAITING_SIGNATURE_MESSAGE'),
+          type: NotificationType.CONTRACT_AWAITING_SIGNATURE,
+          channels: ['in_app', 'push'],
+        },
+        counterpartyUserId,
+      );
     }
 
     const final = await this.contractsDb.findByReferenceId(referenceId);

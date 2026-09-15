@@ -1,11 +1,23 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import {
+  Injectable,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
+import { Prisma, ProfessionalStatus, VerificationStatus } from '@prisma/client';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { ReportService } from '@modules/report/services/report.service';
+import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { RatingViewerContext } from '@api/ratings/helpers/ratings-response.helper';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { mapReviewsToSummaries } from '../helpers/professional-reviews-response.helper';
+import {
+  PROFESSIONALS_EXPORT_COLUMNS,
+  mapProfessionalsToExportRows,
+} from '../helpers/professionals-export.helper';
 import {
   GetProfessionalsListQueryDTO,
   GetNearbyProfessionalsQueryDTO,
@@ -29,7 +41,11 @@ import {
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class ProfessionalsService {
-  constructor(private readonly professionalsDb: ProfessionalsDbService) {}
+  constructor(
+    private readonly professionalsDb: ProfessionalsDbService,
+    private readonly reportService: ReportService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async registerProfessional(
     dto: CreateProfessionalRequestDTO,
@@ -53,12 +69,46 @@ export class ProfessionalsService {
       minRating: query.minRating,
       maxPrice: query.maxPrice,
       isAvailable: query.isAvailable,
+      search: query.search,
     };
     const result = await this.professionalsDb.findMany(
       filters,
       query as unknown as PaginationQueryDTO & Record<string, unknown>,
     );
     return result as unknown as ProfessionalsListResponseDTO;
+  }
+
+  // Mismos filtros que getProfessionals, sin paginar — el volumen lo controla el filtro, no
+  // una página.
+  async exportToCsv(
+    query: GetProfessionalsListQueryDTO,
+  ): Promise<IDownloadResponse> {
+    const filters = {
+      categoryId: query.categoryId,
+      latitude: query.latitude,
+      longitude: query.longitude,
+      radius: query.radius,
+      minRating: query.minRating,
+      maxPrice: query.maxPrice,
+      isAvailable: query.isAvailable,
+      search: query.search,
+    };
+    const professionals = await this.professionalsDb.findAllForExport(filters);
+    const buffer = await this.reportService.generate(
+      {
+        metadata: {
+          title: 'Profesionales',
+          excelColumns: PROFESSIONALS_EXPORT_COLUMNS,
+        },
+        items: mapProfessionalsToExportRows(professionals),
+      },
+      { format: 'csv' },
+    );
+    return {
+      buffer,
+      filename: `profesionales-${new Date().toISOString().slice(0, 10)}.csv`,
+      format: 'csv',
+    };
   }
 
   async getNearbyProfessionals(
@@ -226,13 +276,55 @@ export class ProfessionalsService {
     dto: VerifyProfessionalRequestDTO,
     adminId: number,
   ): Promise<ProfessionalDetailResponseDTO> {
-    await this.professionalsDb.findById(id);
-    const result = await this.professionalsDb.update(id, {
-      verificationStatus: dto.isVerified ? 'verified' : 'rejected',
-      status: dto.isVerified ? 'APPROVED' : 'REJECTED',
-      lastChangedBy: String(adminId),
-      changedReason: dto.notes,
-    });
+    const professional = await this.professionalsDb.findById(id);
+    // updateMany + count en vez de update() incondicional: evita que dos escrituras
+    // administrativas concurrentes sobre el mismo profesional (ej. dos admins resolviendo la
+    // misma verificación) se pisen sin detectar el conflicto — mismo patrón que
+    // services/payments/professional-documents — ver .claude/rules/typescript.md.
+    const updatedCount = await this.professionalsDb.updateConditional(
+      id,
+      [professional.status],
+      {
+        verificationStatus: dto.isVerified
+          ? VerificationStatus.VERIFIED
+          : VerificationStatus.REJECTED,
+        status: dto.isVerified
+          ? ProfessionalStatus.APPROVED
+          : ProfessionalStatus.REJECTED,
+        lastChangedBy: String(adminId),
+        changedReason: dto.notes,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        t('professionals.STATUS_CHANGED_BEFORE_VERIFY'),
+      );
+    }
+
+    // I-05 (#33, IMPRESCINDIBLE): caso más literal del hallazgo — sin este aviso el profesional
+    // no sabe que ya puede (o no puede) operar. El gate acá es que el `await` de arriba haya
+    // resuelto sin lanzar (no hay `count` de negocio adicional que chequear).
+    await this.notificationsService.create(
+      {
+        title: t(
+          dto.isVerified
+            ? 'professionals.NOTIFICATION_VERIFIED_TITLE'
+            : 'professionals.NOTIFICATION_VERIFICATION_REJECTED_TITLE',
+        ),
+        message: t(
+          dto.isVerified
+            ? 'professionals.NOTIFICATION_VERIFIED_MESSAGE'
+            : 'professionals.NOTIFICATION_VERIFICATION_REJECTED_MESSAGE',
+        ),
+        type: dto.isVerified
+          ? NotificationType.PROFESSIONAL_VERIFIED
+          : NotificationType.PROFESSIONAL_VERIFICATION_REJECTED,
+        channels: ['in_app', 'push'],
+      },
+      professional.userId,
+    );
+
+    const result = await this.professionalsDb.findById(id);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -241,13 +333,36 @@ export class ProfessionalsService {
     reason: string,
     adminId: number,
   ): Promise<ProfessionalDetailResponseDTO> {
-    await this.professionalsDb.findById(id);
-    const result = await this.professionalsDb.update(id, {
-      status: 'SUSPENDED',
-      isActive: false,
-      lastChangedBy: String(adminId),
-      changedReason: reason,
-    });
+    const professional = await this.professionalsDb.findById(id);
+    const updatedCount = await this.professionalsDb.updateConditional(
+      id,
+      [professional.status],
+      {
+        status: ProfessionalStatus.SUSPENDED,
+        isActive: false,
+        lastChangedBy: String(adminId),
+        changedReason: reason,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        t('professionals.STATUS_CHANGED_BEFORE_SUSPEND'),
+      );
+    }
+
+    // I-05 (#34, IMPRESCINDIBLE): necesita saber por qué dejó de poder operar, para poder
+    // responder o apelar.
+    await this.notificationsService.create(
+      {
+        title: t('professionals.NOTIFICATION_SUSPENDED_TITLE'),
+        message: t('professionals.NOTIFICATION_SUSPENDED_MESSAGE', { reason }),
+        type: NotificationType.PROFESSIONAL_SUSPENDED,
+        channels: ['in_app', 'push'],
+      },
+      professional.userId,
+    );
+
+    const result = await this.professionalsDb.findById(id);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 }

@@ -11,7 +11,6 @@ import {
   Query,
   Res,
   Req,
-  Version,
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -45,7 +44,6 @@ export class AuthApiController {
   ) {}
 
   @Post('login')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @AuthDocs('login')
@@ -77,7 +75,6 @@ export class AuthApiController {
   }
 
   @Post('create-password')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @AuthDocs('createPassword')
@@ -89,7 +86,6 @@ export class AuthApiController {
 
   @Put('change-password')
   @ApiBearerAuth()
-  @Version('1')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions(PERMISSIONS.USER.PASSWORD.UPDATE, PERMISSIONS.ADMIN.ALL)
   @AuthDocs('changePassword')
@@ -101,7 +97,6 @@ export class AuthApiController {
 
   @Put('change-expired-password')
   @ApiBasicAuth()
-  @Version('1')
   @UseGuards(BasicAuthGuard)
   @AuthDocs('changeExpiredPassword')
   async changeExpiredPassword(
@@ -112,7 +107,6 @@ export class AuthApiController {
 
   @Put('forgot-password')
   @ApiBasicAuth()
-  @Version('1')
   @UseGuards(BasicAuthGuard)
   @AuthDocs('forgotPassword')
   async forgotPassword(
@@ -122,7 +116,6 @@ export class AuthApiController {
   }
 
   @Post('nonce')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @AuthDocs('nonce')
@@ -131,7 +124,6 @@ export class AuthApiController {
   }
 
   @Get('public-key')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @AuthDocs('publicKey')
@@ -142,7 +134,6 @@ export class AuthApiController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Version('1')
   @AuthDocs('me')
   me(@User() user: IUserDataOnJwt): DTO.MeResponseDTO {
     return this.authApiService.me(user);
@@ -151,7 +142,6 @@ export class AuthApiController {
   @Put('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Version('1')
   @AuthDocs('updateMe')
   async updateMe(
     @User() user: IUserDataOnJwt,
@@ -162,7 +152,6 @@ export class AuthApiController {
 
   @Post('refresh-token')
   @UseGuards(AuthGuard('jwt-refresh'), BasicAuthGuard)
-  @Version('1')
   @AuthDocs('refreshToken')
   async refreshToken(
     @Req() req: IAuthenticatedRequest,
@@ -184,7 +173,6 @@ export class AuthApiController {
   @Get('scope')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Version('1')
   @AuthDocs('scope')
   async scope(@User() user: IUserDataOnJwt): Promise<DTO.UserScopeResponseDTO> {
     return this.authApiService.scope(user);
@@ -193,14 +181,12 @@ export class AuthApiController {
   @Get('user-verify')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Version('1')
   @AuthDocs('userVerify')
   async userVerify(@User() user: Users): Promise<void> {
     return this.authApiService.userVerify(user);
   }
 
   @Get('verification-status')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard, UserByEmailLoaderGuard)
   @AuthDocs('verificationStatus')
@@ -212,7 +198,6 @@ export class AuthApiController {
   }
 
   @Post('email/send-verification')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard, UserByEmailLoaderGuard)
   @AuthDocs('sendVerificationEmail')
@@ -225,7 +210,6 @@ export class AuthApiController {
   }
 
   @Post('email/send-create-password')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard, UserByEmailLoaderGuard)
   @AuthDocs('sendCreatePasswordEmail')
@@ -240,7 +224,6 @@ export class AuthApiController {
   }
 
   @Post('email/send-password-reset')
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard, UserByEmailLoaderGuard)
   @AuthDocs('sendPasswordResetEmail')

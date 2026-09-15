@@ -37,6 +37,7 @@ enum UserStatus {
   INACTIVE
   REFUSED
   PENDING_VERIFICATION
+  PENDING_DELETION // ventana de gracia de borrado de cuenta activa, login permitido, cancelable — ver I-01
 }
 
 enum UserProfileStatus {
@@ -75,6 +76,14 @@ model Users {
   documentTypeId      Int               @map("document_type_id")
   documentNumber      String?           @map("document_number")
   phoneNumber         String?           @map("phone_number")
+  // Tarea 8 (platform-hardening-2026-09, 2026-09-14): decide si `email`/`phoneNumber` se
+  // exponen en `ServiceUserSummaryResponseDTO` (services-response.helper.ts) — hoy viajaban
+  // siempre, sin que el dueño de esos datos pudiera optar por no compartirlos. Default `true`:
+  // preserva el comportamiento actual (siempre visible) para todos los usuarios existentes; el
+  // opt-out es explícito hacia adelante. Se aplica parejo a cliente y profesional porque el
+  // campo vive en `Users` (no hay tabla separada por rol) — ambos usan el mismo endpoint de
+  // autoedición (`PUT /auth/me`) para cambiarlo.
+  shareContactInfo    Boolean           @default(true) @map("share_contact_info")
   // Foto de perfil: guarda la KEY de S3 (permanente), no una URL — las URLs que devuelve
   // `POST /uploads/avatar` son presignadas y expiran en 900s (`S3_PRESIGNED_URL_EXPIRES_IN`).
   // Cada response que expone esto al cliente resuelve una URL presignada fresca a partir de la
@@ -89,6 +98,10 @@ model Users {
   lastChangedBy       String?           @map("last_changed_by")
   unverifiedEmail     String?           @map("unverified_email")
   changedReason       String?           @map("changed_reason")
+  // Borrado de cuenta (I-01) — ventana de gracia: fijado al solicitar, limpiado al cancelar,
+  // consumido por el job de anonimización cuando `deletionScheduledAt <= now()`.
+  deletionRequestedAt DateTime?         @map("deletion_requested_at")
+  deletionScheduledAt DateTime?         @map("deletion_scheduled_at")
   acceptedTermsAt     DateTime?         @map("accepted_terms_at")
   accessLevelId       Int?              @map("access_level_id")
   // Idioma preferido del usuario. Nullable: sin preferencia explícita => se usa el default `es`
@@ -98,25 +111,28 @@ model Users {
   checksum        String? @map("checksum")
   changeSignature String? @map("change_signature")
 
-  roles                 UserRoles[]
-  permissions           UserPermissions[]
-  credentials           UserCredentials[]
-  professionals         Professionals?
-  services              Services[]
-  documentTypes         DocumentsType          @relation(fields: [documentTypeId], references: [id])
-  accessLevel           AccessLevel?           @relation(fields: [accessLevelId], references: [id])
-  preferredLanguage     Language?              @relation(fields: [preferredLanguageId], references: [id])
-  payments              Payments[]
-  paymentMethodEntities PaymentMethodEntity[]
-  ratings               Rating[]
-  promotionUsages       PromotionUsage[]
-  pushSubscriptions     PushSubscriptions[]
-  fcmTokens             FcmTokens[]
-  legalConsents         UserConsents[]
-  contentConsentGrants  ContentConsentGrants[]
-  aiContentDisclosures  AiContentDisclosures[]
-  contracts             Contracts[]
-  tips                  Tips[]
+  roles                   UserRoles[]
+  permissions             UserPermissions[]
+  credentials             UserCredentials[]
+  professionals           Professionals?
+  services                Services[]
+  documentTypes           DocumentsType            @relation(fields: [documentTypeId], references: [id])
+  accessLevel             AccessLevel?             @relation(fields: [accessLevelId], references: [id])
+  preferredLanguage       Language?                @relation(fields: [preferredLanguageId], references: [id])
+  payments                Payments[]
+  paymentMethodEntities   PaymentMethodEntity[]
+  ratings                 Rating[]
+  promotionUsages         PromotionUsage[]
+  pushSubscriptions       PushSubscriptions[]
+  fcmTokens               FcmTokens[]
+  legalConsents           UserConsents[]
+  contentConsentGrants    ContentConsentGrants[]
+  aiContentDisclosures    AiContentDisclosures[]
+  contracts               Contracts[]
+  tips                    Tips[]
+  disputesOpened          PaymentDisputes[]        @relation("DisputeOpenedBy")
+  disputesAdjudicated     PaymentDisputes[]        @relation("DisputeAdjudicatedBy")
+  notificationPreferences NotificationPreferences?
 
   @@unique([documentTypeId, documentNumber, email], name: "UK_users_document")
   @@map("users")
@@ -316,6 +332,15 @@ enum ProfessionalStatus {
   SUSPENDED
 }
 
+/// Aprobación manual de staff sobre la cuenta del profesional (onboarding). Antes texto libre
+/// (`String @db.VarChar(20)`) — tipado como enum en WORKPLAN platform-hardening-2026-09, T-02:
+/// D-01 mostró que la consulta más caliente del producto (`findNearby`) filtra por este campo.
+enum VerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+}
+
 model ServiceType {
   id   Int    @id @default(autoincrement())
   name String @unique @map("name")
@@ -364,11 +389,11 @@ model Professionals {
   isAvailable       Boolean            @default(false) @map("is_available")
   isOnline          Boolean            @default(false) @map("is_online")
 
-  // Aprobación manual de staff sobre la cuenta del profesional (onboarding) — "verified"/
-  // "rejected" seteado junto con `status` desde `ProfessionalsService.verifyProfessional()`.
-  // Campo legacy, NO tocar desde la Fase 0001 de documentos/antecedentes (ver
-  // `requiredDocumentsVerified` abajo y openspec/decisions.md — colisión encontrada y corregida).
-  verificationStatus String @default("unverified") @map("verification_status") @db.VarChar(20) // e.g., verified
+  // Aprobación manual de staff sobre la cuenta del profesional (onboarding) — VERIFIED/REJECTED
+  // seteado junto con `status` desde `ProfessionalsService.verifyProfessional()`. Campo legacy,
+  // NO tocar desde la Fase 0001 de documentos/antecedentes (ver `requiredDocumentsVerified` abajo
+  // y openspec/decisions.md — colisión encontrada y corregida).
+  verificationStatus VerificationStatus @default(UNVERIFIED) @map("verification_status")
 
   // Derivado automáticamente por `ProfessionalVerificationHelper.recompute()` — true cuando TODOS
   // los `ProfessionalDocumentTypes` obligatorios aplicables a la categoría del profesional tienen
@@ -397,8 +422,8 @@ model Professionals {
   changeSignature String?   @map("change_signature")
 
   // Relaciones
-  user                  Users                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category              Category                 @relation(fields: [categoryId], references: [id])
+  user                  Users                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category              Category                     @relation(fields: [categoryId], references: [id])
   services              Services[]
   serviceRequests       ServiceRequests[]
   payments              Payments[]
@@ -411,6 +436,15 @@ model Professionals {
 
   @@index([status])
   @@index([isAvailable])
+  // `professionals_nearby_idx`: índice parcial compuesto (status, verification_status,
+  // is_available, is_online, category_id) WHERE current_latitude/longitude IS NOT NULL, para
+  // cubrir el patrón real del WHERE de `ProfessionalPositionDbService.findNearby` (D-01,
+  // openspec/changes/platform-hardening-2026-09/WORKPLAN.md). Vive SOLO en
+  // prisma/migrations/<...>_add_professionals_nearby_partial_index/migration.sql — la sintaxis
+  // declarativa de Prisma no soporta índices parciales (cláusula WHERE), así que a propósito NO
+  // hay un `@@index([...])` acá que lo represente. Si en el futuro `prisma migrate dev` propone
+  // crear un índice compuesto "faltante" con estas mismas columnas, es ese fantasma: descartar la
+  // propuesta, no aplicarla.
   @@map("professionals")
 }
 
@@ -550,7 +584,10 @@ model ProfessionalDocuments {
   referenceId                String               @unique @default(uuid()) @map("reference_id")
   professionalId             Int                  @map("professional_id")
   professionalDocumentTypeId Int                  @map("professional_document_type_id")
-  fileKey                    String               @map("file_key") // S3 key, mismo patrón que Users.avatarKey
+  // S3 key, mismo patrón que Users.avatarKey. Nullable desde I-01: al anonimizar una cuenta se
+  // borra el objeto real de S3 y se anula la referencia — la fila se conserva como registro de
+  // que existió una verificación.
+  fileKey                    String?              @map("file_key")
   status                     DocumentReviewStatus @default(PENDING)
   issuedAt                   DateTime?            @map("issued_at")
   expiresAt                  DateTime?            @map("expires_at")
@@ -951,6 +988,7 @@ model Payments {
   users         Users                @relation(fields: [userId], references: [id])
   professionals Professionals?       @relation(fields: [professionalId], references: [id])
   tip           Tips?
+  disputes      PaymentDisputes[]
 
   @@index([professionalId, status])
   @@index([status, createdAt])
@@ -987,6 +1025,114 @@ model PaymentTransaction {
   @@index([paymentId, type])
   @@index([status, createdAt])
   @@map("payment_transactions")
+}
+
+// =====================================================================================================================
+// DISPUTAS DE PAGO — registro y adjudicación de reclamos sobre un pago (I-03, ver
+// openspec/changes/platform-hardening-2026-09/I-03-dispute-records.md). Envuelve el mecanismo de
+// reembolsos ya existente (`PaymentDbService.executeRefund`), no lo reemplaza: un reembolso
+// disparado por una resolución de disputa queda trazado con `disputeReferenceId` dentro del mismo
+// `Payments.refundDetails` JSON que ya escribe `executeRefund`.
+// =====================================================================================================================
+
+enum DisputeStatus {
+  OPEN // recién abierta, en cola sin asignar
+  UNDER_REVIEW // un staff la tomó (adjudicatedByUserId seteado, todavía sin resolución)
+  RESOLVED // adjudicada, con resolution + resolvedAt
+  REJECTED // adjudicada como improcedente (variante de RESOLVED con resolution=NO_REFUND,
+  // separada para que un filtro simple "¿quedan pendientes?" no tenga que mirar el campo resolution)
+  WITHDRAWN // quien la abrió la retiró antes de que staff la resuelva
+}
+
+enum DisputeReason {
+  SERVICE_NOT_PROVIDED
+  POOR_SERVICE_QUALITY
+  OVERCHARGE
+  DUPLICATE_PAYMENT
+  FRAUD
+  OTHER
+}
+
+enum DisputeResolution {
+  FULL_REFUND
+  PARTIAL_REFUND
+  NO_REFUND
+  OTHER_REMEDY // ej. descuento en un servicio futuro — no mueve plata en este pago, se registra
+  // igual para dejar rastro de que la disputa SÍ tuvo una resolución
+}
+
+/// Quién puede abrir: el cliente o el profesional del pago (`openedByUserId` debe ser uno de los
+/// dos — validado en el service, no a nivel de FK). Quién adjudica: staff con
+/// `PERMISSIONS.DISPUTES.ADJUDICATE`.
+model PaymentDisputes {
+  id                  Int                @id @default(autoincrement())
+  referenceId         String             @unique @default(uuid()) @map("reference_id")
+  paymentId           Int                @map("payment_id")
+  openedByUserId      Int                @map("opened_by_user_id")
+  reason              DisputeReason
+  description         String             @db.Text
+  evidenceKeys        String[]           @default([]) @map("evidence_keys") // S3 keys, mismo patrón que professional-documents
+  status              DisputeStatus      @default(OPEN)
+  adjudicatedByUserId Int?               @map("adjudicated_by_user_id")
+  resolution          DisputeResolution?
+  resolutionNotes     String?            @map("resolution_notes") @db.Text
+  refundAmount        Decimal?           @map("refund_amount") @db.Decimal(10, 2) // solo si resolution es FULL_REFUND/PARTIAL_REFUND
+  resolvedAt          DateTime?          @map("resolved_at")
+
+  payment       Payments @relation(fields: [paymentId], references: [id])
+  openedBy      Users    @relation("DisputeOpenedBy", fields: [openedByUserId], references: [id])
+  adjudicatedBy Users?   @relation("DisputeAdjudicatedBy", fields: [adjudicatedByUserId], references: [id])
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  // Sin `@@unique([paymentId])`: un mismo pago puede tener más de una disputa a lo largo del
+  // tiempo (una REJECTED no impide un reclamo distinto después). El service impide 2 disputas
+  // simultáneamente OPEN/UNDER_REVIEW sobre el mismo pago — regla de negocio, no expresable como
+  // constraint simple de DB.
+  @@index([paymentId])
+  @@index([status])
+  @@map("payment_disputes")
+}
+
+// =====================================================================================================================
+// PREFERENCIAS DE NOTIFICACIÓN (I-05, tarea 4 de la tanda platform-hardening-2026-09
+// 2026-09-14) — pedida por Mobile en notification-preferences-and-inbox.md: no había dónde
+// persistir "qué tipos de notificación quiere recibir el usuario X", ni en Postgres ni en Mongo.
+// =====================================================================================================================
+
+/// Una fila por usuario, creada perezosamente (no en el alta de `Users`) — ausencia de fila
+/// equivale a "sin exclusiones" (todo habilitado), mismo default que una fila con `mutedTypes=[]`.
+/// `mutedTypes` es `Json` (array de strings) en vez de una columna booleana por valor de
+/// `NotificationType` porque ese enum es de aplicación (TS, vive en
+/// `notifications-db/enums/notification-type.enum.ts`, respaldado por Mongo, no por un enum
+/// nativo de Postgres) y va a crecer con la tarea 5 de esta misma tanda (disparos de dominio) sin
+/// requerir tocar esta tabla cada vez que se agregue un tipo nuevo.
+model NotificationPreferences {
+  id          Int    @id @default(autoincrement())
+  referenceId String @unique @default(uuid()) @map("reference_id")
+  userId      Int    @unique @map("user_id")
+  /// Valores de `NotificationType` (string, ej. `"promotion"`) que el usuario desactivó
+  /// explícitamente. No hay validación de forma a nivel de DB — el service es quien valida
+  /// contra el enum real antes de escribir.
+  mutedTypes  Json   @default("[]") @map("muted_types") @db.JsonB
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  createdBy       String?   @map("created_by")
+  lastChangedAt   DateTime? @default(now()) @map("last_changed_at")
+  lastChangedBy   String?   @map("last_changed_by")
+  changedReason   String?   @map("changed_reason")
+  checksum        String?   @map("checksum")
+  changeSignature String?   @map("change_signature")
+
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
 
 // =====================================================================================================================

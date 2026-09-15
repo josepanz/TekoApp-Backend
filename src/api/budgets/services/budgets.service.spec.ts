@@ -10,6 +10,8 @@ import { BudgetsService } from './budgets.service';
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { MaterialCatalogDbService } from '@modules/material-catalog-db/services/material-catalog-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 
 const mockFindByRequestId = jest.fn();
 const mockFindByReferenceId = jest.fn();
@@ -18,7 +20,9 @@ const mockSelectOptionTransaction = jest.fn();
 const mockFindServiceByReferenceId = jest.fn();
 const mockFindServiceRequestByReferenceId = jest.fn();
 const mockFindProfessionalByUserId = jest.fn();
+const mockFindProfessionalById = jest.fn();
 const mockFindManyByReferenceIds = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 const SERVICE_REF = 'svc-1';
 const REQUEST_REF = 'req-1';
@@ -64,11 +68,16 @@ describe('BudgetsService', () => {
             findServiceRequestByReferenceId:
               mockFindServiceRequestByReferenceId,
             findProfessionalByUserId: mockFindProfessionalByUserId,
+            findProfessionalById: mockFindProfessionalById,
           },
         },
         {
           provide: MaterialCatalogDbService,
           useValue: { findManyByReferenceIds: mockFindManyByReferenceIds },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -131,6 +140,13 @@ describe('BudgetsService', () => {
           }),
         ],
       );
+      // I-05 (#9, IMPRESCINDIBLE): el cliente se entera de que ya puede revisar opciones.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.BUDGET_OPTIONS_READY,
+        }),
+        mockService.userId,
+      );
     });
 
     it('debe lanzar ForbiddenException cuando quien llama no es el autor de la propuesta', async () => {
@@ -147,6 +163,57 @@ describe('BudgetsService', () => {
           'prof-ref-1',
         ),
       ).rejects.toThrow(ForbiddenException);
+      expect(mockReplaceOptionsTransaction).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar ForbiddenException cuando quien llama no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.replaceOptions(
+          SERVICE_REF,
+          REQUEST_REF,
+          { options: [] },
+          20,
+          'prof-ref-1',
+        ),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockReplaceOptionsTransaction).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando el servicio no existe', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.replaceOptions(
+          SERVICE_REF,
+          REQUEST_REF,
+          { options: [] },
+          10,
+          'prof-ref-1',
+        ),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockFindServiceRequestByReferenceId).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando la solicitud no existe para ese servicio', async () => {
+      // Arrange
+      mockFindServiceRequestByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.replaceOptions(
+          SERVICE_REF,
+          REQUEST_REF,
+          { options: [] },
+          10,
+          'prof-ref-1',
+        ),
+      ).rejects.toThrow(NotFoundException);
       expect(mockReplaceOptionsTransaction).not.toHaveBeenCalled();
     });
 
@@ -295,6 +362,7 @@ describe('BudgetsService', () => {
         serviceRequestId: REQUEST_PK,
       });
       mockSelectOptionTransaction.mockResolvedValue(1);
+      mockFindProfessionalById.mockResolvedValue(mockProfessional);
       mockFindByRequestId.mockResolvedValue([
         { referenceId: 'option-1', isSelected: true, lineItems: [] },
       ]);
@@ -316,6 +384,16 @@ describe('BudgetsService', () => {
         REQUEST_PK,
         SERVICE_PK,
         mockRequest.professionalId,
+      );
+      // I-05 (#10, IMPRESCINDIBLE): el profesional autor de la opción se entera de la asignación.
+      expect(mockFindProfessionalById).toHaveBeenCalledWith(
+        mockRequest.professionalId,
+      );
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.BUDGET_OPTION_SELECTED,
+        }),
+        mockProfessional.userId,
       );
     });
   });

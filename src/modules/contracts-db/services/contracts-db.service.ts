@@ -151,6 +151,10 @@ export class ContractsDbService {
     });
   }
 
+  async countContracts(where: Prisma.ContractsWhereInput): Promise<number> {
+    return this.prisma.extended.contracts.count({ where });
+  }
+
   /** `status` es columna directa — se deja que `PrismaPaginationUtil` la mapee automáticamente. */
   async findAuditPaginated(
     query: PaginationQueryDTO & Record<string, unknown>,

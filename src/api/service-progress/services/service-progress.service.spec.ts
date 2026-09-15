@@ -125,6 +125,29 @@ describe('ServiceProgressService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
+    it('debe rechazar con 403 si quien llama no tiene perfil profesional', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(service_);
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.createEntry('svc-ref-1', { note: 'x' }, 1, 'user-ref-1'),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockCreateEntry).not.toHaveBeenCalled();
+    });
+
+    it('debe rechazar con 404 si el servicio no existe', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.createEntry('svc-ref-1', { note: 'x' }, 1, 'user-ref-1'),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockFindProfessionalByUserId).not.toHaveBeenCalled();
+    });
+
     it('debe rechazar con 409 si el servicio no está ACCEPTED/IN_PROGRESS', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
@@ -241,6 +264,37 @@ describe('ServiceProgressService', () => {
       expect(result.data).toEqual([]);
     });
 
+    it('debe permitir ver la bitácora al profesional asignado al servicio', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({
+        id: 10,
+        userId: 55,
+        professionalId: 99,
+      });
+      mockFindProfessionalByUserId.mockResolvedValue({ id: 99 });
+      mockFindActiveByServiceId.mockResolvedValue([]);
+
+      // Act
+      const result = await service.listByService('svc-ref-1', {
+        ...baseUser,
+        id: 1,
+      });
+
+      // Assert
+      expect(result.data).toEqual([]);
+    });
+
+    it('debe rechazar con 404 si el servicio no existe', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.listByService('svc-ref-1', baseUser),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockFindProfessionalByUserId).not.toHaveBeenCalled();
+    });
+
     it('debe permitir ver la bitácora a staff con permiso de auditoría aunque no sea participante', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
@@ -303,6 +357,22 @@ describe('ServiceProgressService', () => {
       await expect(
         service.deleteEntry('entry-ref-1', 1, 'user-ref-1'),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe rechazar con 404 si la entrada ya estaba eliminada (isActive=false)', async () => {
+      // Arrange
+      mockFindEntryByReferenceId.mockResolvedValue({
+        id: 3,
+        isActive: false,
+        professionalId: 99,
+        createdAt: new Date(),
+      });
+
+      // Act & Assert
+      await expect(
+        service.deleteEntry('entry-ref-1', 1, 'user-ref-1'),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockSoftDeleteEntry).not.toHaveBeenCalled();
     });
 
     it('debe rechazar con 403 si quien llama no es el autor de la entrada', async () => {

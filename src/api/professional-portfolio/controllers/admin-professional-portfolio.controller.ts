@@ -32,11 +32,20 @@ interface RequestWithUser {
 @ApiTags('professional-portfolio (staff)')
 @Controller()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
+// Este `@Permissions` de clase SÍ protege desde que `PermissionsGuard.canActivate` usa
+// `reflector.getAllAndOverride(KEY, [getHandler(), getClass()])` — antes leía SOLO el handler y
+// este decorador de clase era decorativo (ver openspec/decisions.md). Se mantiene el
+// `@Permissions` repetido en cada método de todos modos: si algún método cambia de permiso
+// requerido, el de método tiene precedencia sobre el de clase. Hallazgo real (2026-09-11): los 2
+// métodos de este controller estuvieron sin decorar, dejando `GET admin/professional-portfolio` y
+// `PATCH admin/professional-portfolio/:referenceId/review` accesibles a cualquier usuario logueado
+// — ver openspec/decisions.md.
 @Permissions(PERMISSIONS.PROFESSIONAL_PORTFOLIO.REVIEW, PERMISSIONS.ADMIN.ALL)
 export class AdminProfessionalPortfolioController {
   constructor(private readonly service: ProfessionalPortfolioService) {}
 
   @Get('admin/professional-portfolio')
+  @Permissions(PERMISSIONS.PROFESSIONAL_PORTFOLIO.REVIEW, PERMISSIONS.ADMIN.ALL)
   @ApiOperation({ summary: 'Cola de revisión de fotos de portafolio (staff)' })
   @ApiResponse({ status: 200, type: AdminPortfolioItemsListResponseDTO })
   async queue(
@@ -46,6 +55,7 @@ export class AdminProfessionalPortfolioController {
   }
 
   @Patch('admin/professional-portfolio/:referenceId/review')
+  @Permissions(PERMISSIONS.PROFESSIONAL_PORTFOLIO.REVIEW, PERMISSIONS.ADMIN.ALL)
   @ApiOperation({
     summary: 'Aprobar o rechazar una foto de portafolio (staff)',
   })

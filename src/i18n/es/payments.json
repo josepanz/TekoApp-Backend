@@ -4,13 +4,17 @@
   "CANNOT_DELETE_ONLY_METHOD": "No se puede eliminar el único método de pago",
   "METHOD_NOT_FOUND": "Método de pago no encontrado",
   "NOT_FOUND": "Pago no encontrado",
+  "NOTIFICATION_REFUNDED_TITLE": "Reembolso procesado",
+  "NOTIFICATION_REFUNDED_MESSAGE": "Se procesó un reembolso de {amount} sobre tu pago.",
   "ONLY_COMPLETED_CAN_BE_REFUNDED": "Solo se pueden reembolsar pagos completados",
   "ONLY_PENDING_CAN_BE_UPDATED": "Solo se pueden actualizar pagos pendientes",
+  "PAYMENT_METHOD_EXPIRED": "El medio de pago seleccionado está vencido",
   "PROFESSIONAL_NOT_FOUND": "Profesional no encontrado",
   "PROVIDER_NOT_SUPPORTED": "Proveedor de pagos no soportado",
   "REFUND_EXCEEDS_AVAILABLE": "El monto del reembolso excede el monto disponible",
   "SERVICE_NOT_FOUND": "Servicio no encontrado",
   "STATUS_CHANGED_BEFORE_CANCEL": "El pago cambió de estado antes de poder cancelarlo",
   "UNAUTHORIZED_CANCEL": "No tienes permisos para cancelar este pago",
+  "UNAUTHORIZED_REFUND": "No tienes permisos para reembolsar este pago",
   "UNAUTHORIZED_VIEW": "No tienes permisos para ver este pago"
 }

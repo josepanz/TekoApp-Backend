@@ -28,6 +28,10 @@ import { BudgetsModule } from '@/api/budgets/budgets.module';
 import { ContractsModule } from '@/api/contracts/contracts.module';
 import { TipsModule } from '@/api/tips/tips.module';
 import { TaxModule } from '@/api/tax/tax.module';
+import { AuditLogModule } from '@/api/audit-log/audit-log.module';
+import { AccountDeletionModule } from '@/api/account-deletion/account-deletion.module';
+import { PaymentDisputesModule } from '@/api/payment-disputes/payment-disputes.module';
+import { NotificationPreferencesModule } from '@/api/notification-preferences/notification-preferences.module';
 
 @Module({
   imports: [
@@ -60,6 +64,10 @@ import { TaxModule } from '@/api/tax/tax.module';
     ContractsModule,
     TipsModule,
     TaxModule,
+    AuditLogModule,
+    AccountDeletionModule,
+    PaymentDisputesModule,
+    NotificationPreferencesModule,
   ],
 })
 export class ApiModule {}
