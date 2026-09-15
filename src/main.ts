@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { VersioningType } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import { MiddlewareConfig } from './core/config/middleware.config';
@@ -10,7 +11,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // 1. ESTABLECER PREFIJO GLOBAL (Es crítico que sea lo primero para estructurar las rutas base)
-  app.enableVersioning();
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
   app.setGlobalPrefix('/tekoapp-backend/api');
 
   // 2. Configuración de middleware global y seguridad (Helmet, CORS, Redis-Rate-Limit)

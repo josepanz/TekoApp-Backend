@@ -1,5 +1,6 @@
 import { Tips } from '@prisma/client';
 import { mapTipToResponse } from '@api/tips/helpers/tips-response.helper';
+import { calculateProfessionalNetAmount } from './professional-net-amount.helper';
 import {
   PaymentDetailResponseDTO,
   PaymentMethodDetailResponseDTO,
@@ -10,12 +11,22 @@ import {
  * `serviceId` sigue siendo el referenceId (UUID) del servicio pagado — nunca la PK interna — esto
  * es independiente del id/referenceId del propio pago. `tip` (si el include lo trajo) se mapea a
  * su propio DTO — nunca se expone la fila cruda de `Tips` (PK interna, `userId`/`professionalId`
- * redundantes con el propio pago).
+ * redundantes con el propio pago). `professionalNetAmount` se calcula acá (D-03, ver
+ * `professional-net-amount.helper.ts`) — la columna de Prisma nunca se escribe, así que si no se
+ * pisara acá siempre llegaría `null`.
  */
 export function mapPaymentToResponse(payment: {
   id: number;
   referenceId: string;
   serviceId: number;
+  // `Decimal` en el tipo generado por Prisma; llegan como `number` en runtime vía
+  // `convertDecimals` (ver `prisma.service.ts`) — tipados `unknown` acá porque TypeScript no ve
+  // esa conversión, y `calculateProfessionalNetAmount` ya es defensivo ante lo que sea que llegue.
+  amount?: unknown;
+  platformFee?: unknown;
+  tax?: unknown;
+  totalAmount?: unknown;
+  refundDetails?: unknown;
   service?: { referenceId: string } | null;
   tip?: Tips | null;
   [key: string]: unknown;
@@ -24,6 +35,7 @@ export function mapPaymentToResponse(payment: {
   delete rest.service;
   rest.serviceId = payment.service?.referenceId ?? '';
   rest.tip = payment.tip ? mapTipToResponse(payment.tip) : null;
+  rest.professionalNetAmount = calculateProfessionalNetAmount(payment);
   return rest as unknown as PaymentDetailResponseDTO;
 }
 
@@ -32,6 +44,11 @@ export function mapPaymentsToResponse(
     id: number;
     referenceId: string;
     serviceId: number;
+    amount?: unknown;
+    platformFee?: unknown;
+    tax?: unknown;
+    totalAmount?: unknown;
+    refundDetails?: unknown;
     service?: { referenceId: string } | null;
     tip?: Tips | null;
     [key: string]: unknown;

@@ -1,0 +1,8 @@
+{
+  "NO_FILE_UPLOADED": "No photo was received",
+  "NOT_FOUND": "Portfolio photo not found",
+  "NOT_OWNER": "You can't modify a portfolio photo that isn't yours",
+  "ALREADY_REVIEWED": "This photo was already reviewed by another staff member",
+  "FILE_TOO_LARGE": "The file exceeds the maximum size of {maxSizeMb}MB",
+  "FILE_TYPE_NOT_ALLOWED": "Only images are allowed (JPG, PNG, WEBP)"
+}

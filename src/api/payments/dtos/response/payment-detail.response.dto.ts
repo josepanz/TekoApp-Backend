@@ -91,7 +91,13 @@ export class PaymentDetailResponseDTO {
   @ApiProperty({ example: 0 })
   platformFee!: number;
 
-  @ApiPropertyOptional({ example: 150000 })
+  @ApiPropertyOptional({
+    example: 88700,
+    description:
+      'Monto neto del profesional (amount - platformFee - tax, ajustado por reembolsos ' +
+      'acumulados). Calculado en la respuesta (D-03) — no implica que exista un payout real ' +
+      'todavía, ver I-02.',
+  })
   professionalNetAmount?: number | null;
 
   @ApiProperty({ example: false })

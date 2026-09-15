@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getQueueToken } from '@nestjs/bull';
 import { Types } from 'mongoose';
 import { DeviceType } from '@prisma/client';
+import { APP_CONFIG } from '@core/config/config-loader';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationsDbService } from '@modules/notifications-db/services/notifications-db.service';
 import { PushSubscriptionsDbService } from '@modules/push-notifications-db/services/push-subscriptions-db.service';
 import { FcmTokensDbService } from '@modules/push-notifications-db/services/fcm-tokens-db.service';
 import { WebPushProviderService } from '@modules/push-provider/services/web-push-provider.service';
 import { NotificationsSseService } from '@api/notifications/services/notifications-sse.service';
+import { NotificationPreferencesService } from '@api/notification-preferences/services/notification-preferences.service';
 import { NotificationStatus } from '@modules/notifications-db/enums/notification-status.enum';
 import { NotificationDocument } from '@modules/notifications-db/schemas/notification.schema';
 import { CreateNotificationRequestDTO } from '@api/notifications/dtos/request/create-notification-request.dto';
@@ -30,6 +32,7 @@ const mockUpsertFcmToken = jest.fn();
 const mockDeleteFcmTokenByReferenceId = jest.fn();
 const mockGetPublicKey = jest.fn();
 const mockSseSubscribe = jest.fn();
+const mockIsEnabled = jest.fn();
 
 const NOTIFICATIONS_QUEUE = 'notifications';
 
@@ -76,8 +79,16 @@ describe('NotificationsService', () => {
           useValue: { subscribe: mockSseSubscribe },
         },
         {
+          provide: NotificationPreferencesService,
+          useValue: { isEnabled: mockIsEnabled },
+        },
+        {
           provide: getQueueToken(NOTIFICATIONS_QUEUE),
           useValue: { add: mockQueueAdd },
+        },
+        {
+          provide: APP_CONFIG.KEY,
+          useValue: { notifications: { maxRetryAttempts: 3 } },
         },
       ],
     }).compile();
@@ -86,6 +97,12 @@ describe('NotificationsService', () => {
   });
 
   afterEach(() => jest.clearAllMocks());
+
+  beforeEach(() => {
+    // Default: preferencias habilitadas — los tests existentes no se ocupan de preferencias,
+    // solo los nuevos del describe('preferencias de notificación') las desactivan.
+    mockIsEnabled.mockResolvedValue(true);
+  });
 
   // ==================== create ====================
   describe('create', () => {
@@ -130,6 +147,7 @@ describe('NotificationsService', () => {
           userId: savedDoc.userId,
           type: savedDoc.type,
         }),
+        expect.objectContaining({ attempts: 3 }),
       );
       expect(result).toEqual(
         expect.objectContaining({
@@ -171,7 +189,28 @@ describe('NotificationsService', () => {
       expect(mockQueueAdd).toHaveBeenCalledWith(
         'send-notification',
         expect.objectContaining({ channels: ['in_app'] }),
+        expect.objectContaining({ attempts: 3 }),
       );
+    });
+
+    it('debe omitir la notificación sin persistir ni encolar cuando el usuario desactivó ese tipo', async () => {
+      // Arrange
+      const userId = 42;
+      const dto: CreateNotificationRequestDTO = {
+        type: 'PROMOTION',
+        title: 'Promo especial',
+        body: '20% de descuento',
+      } as unknown as CreateNotificationRequestDTO;
+      mockIsEnabled.mockResolvedValue(false);
+
+      // Act
+      const result = await service.create(dto, userId);
+
+      // Assert
+      expect(mockIsEnabled).toHaveBeenCalledWith(userId, dto.type);
+      expect(mockDbCreate).not.toHaveBeenCalled();
+      expect(mockQueueAdd).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
   });
 
@@ -414,7 +453,70 @@ describe('NotificationsService', () => {
       expect(mockQueueAdd).toHaveBeenCalledWith(
         'send-notification',
         expect.objectContaining({ channels: ['in_app'] }),
+        expect.objectContaining({ attempts: 3 }),
       );
+    });
+
+    it('debe excluir del insertMany y del encolado las entradas cuyo tipo está desactivado para ese usuario', async () => {
+      // Arrange
+      const userId1 = 42;
+      const userId2 = 43;
+      const notifications = [
+        {
+          type: 'SERVICE_REQUEST',
+          title: 'Notif 1',
+          body: 'Cuerpo 1',
+          userId: userId1,
+        } as unknown as CreateNotificationRequestDTO & { userId: number },
+        {
+          type: 'PROMOTION',
+          title: 'Notif 2',
+          body: 'Cuerpo 2',
+          userId: userId2,
+        } as unknown as CreateNotificationRequestDTO & { userId: number },
+      ];
+      mockIsEnabled.mockImplementation((userId: number, type: string) =>
+        Promise.resolve(!(userId === userId2 && type === 'PROMOTION')),
+      );
+      const created: NotificationDocument[] = [
+        {
+          _id: new Types.ObjectId(),
+          userId: new Types.ObjectId(userId1),
+          type: 'SERVICE_REQUEST',
+          channels: undefined,
+        } as unknown as NotificationDocument,
+      ];
+      mockDbInsertMany.mockResolvedValue(created);
+      mockQueueAdd.mockResolvedValue({});
+
+      // Act
+      await service.createBulk(notifications);
+
+      // Assert
+      expect(mockDbInsertMany).toHaveBeenCalledWith([
+        expect.objectContaining({ userId: userId1, type: 'SERVICE_REQUEST' }),
+      ]);
+      expect(mockQueueAdd).toHaveBeenCalledTimes(1);
+    });
+
+    it('no debe llamar a insertMany ni encolar cuando todas las entradas están desactivadas', async () => {
+      // Arrange
+      const notifications = [
+        {
+          type: 'PROMOTION',
+          title: 'Notif',
+          body: 'Cuerpo',
+          userId: 42,
+        } as unknown as CreateNotificationRequestDTO & { userId: number },
+      ];
+      mockIsEnabled.mockResolvedValue(false);
+
+      // Act
+      await service.createBulk(notifications);
+
+      // Assert
+      expect(mockDbInsertMany).not.toHaveBeenCalled();
+      expect(mockQueueAdd).not.toHaveBeenCalled();
     });
   });
 

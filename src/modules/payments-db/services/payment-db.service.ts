@@ -105,6 +105,10 @@ export class PaymentDbService {
     });
   }
 
+  async countPayments(where: Prisma.PaymentsWhereInput): Promise<number> {
+    return this.prisma.extended.payments.count({ where });
+  }
+
   /** Busca un pago por su PK interna (Int). Uso interno tras resolver el referenceId. */
   async findPaymentById(id: number) {
     return this.prisma.extended.payments.findUnique({
@@ -252,14 +256,27 @@ export class PaymentDbService {
    *
    * `paymentId` es la PK interna (Int) ya resuelta en la capa API; el `SELECT ... FOR UPDATE`
    * usa el valor directamente (sin cast `::uuid`, que rompería contra una columna integer).
+   *
+   * `disputeReferenceId` (I-03): cuando el reembolso es consecuencia de adjudicar una disputa,
+   * se persiste dentro del mismo `refundDetails` JSON para que el reembolso sea trazable hacia la
+   * disputa que lo justificó (recorrido inverso: desde `PaymentDisputes` ya se llega al pago por
+   * `paymentId`, no hace falta una FK nueva en `Payments`).
+   *
+   * `tx` (I-03): permite que `PaymentDisputesDbService.resolve` dispare este reembolso DENTRO de
+   * la misma transacción que marca la disputa como resuelta (mismo patrón de
+   * `UserRolesDBService.replaceUserRoles`/`UsersDbService`: `tx` opcional, cast
+   * `as unknown as Prisma.TransactionClient` en el caller). Sin `tx`, se abre una transacción
+   * propia — comportamiento sin cambios para los callers existentes (reembolso directo de staff).
    */
   async executeRefund(
     paymentId: number,
     refundAmount: number,
     reason: string,
+    disputeReferenceId?: string,
+    tx?: Prisma.TransactionClient,
   ): Promise<Payments> {
-    return this.prisma.extended.$transaction(async (tx) => {
-      const locked = await tx.$queryRaw<
+    const run = async (client: Prisma.TransactionClient): Promise<Payments> => {
+      const locked = await client.$queryRaw<
         {
           id: number;
           status: PaymentStatus;
@@ -299,7 +316,7 @@ export class PaymentDbService {
       const newTotalRefunded = currentlyRefunded + refundAmount;
       const isFullRefund = newTotalRefunded >= totalAmountNum;
 
-      await tx.paymentTransaction.create({
+      await client.paymentTransaction.create({
         data: {
           payment: { connect: { id: paymentId } },
           type: TransactionType.REFUND,
@@ -310,7 +327,7 @@ export class PaymentDbService {
         },
       });
 
-      return tx.payments.update({
+      return client.payments.update({
         where: { id: paymentId },
         data: {
           status: isFullRefund
@@ -320,10 +337,16 @@ export class PaymentDbService {
             refundedAmount: newTotalRefunded,
             refundReason: reason,
             refundedAt: new Date().toISOString(),
-          } as Prisma.InputJsonValue,
+            ...(disputeReferenceId ? { disputeReferenceId } : {}),
+          },
         },
       });
-    });
+    };
+
+    if (tx) return run(tx);
+    return this.prisma.extended.$transaction((innerTx) =>
+      run(innerTx as unknown as Prisma.TransactionClient),
+    );
   }
 
   async findTransactionByExternalId(

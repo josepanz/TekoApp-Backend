@@ -294,6 +294,25 @@ describe('RatingsService', () => {
       expect(result[0].referenceId).toBe(RATING_REF);
       expect(mockFindAll).toHaveBeenCalled();
     });
+
+    it('debe resolver userName/professionalName cuando las relaciones vienen incluidas (tarea 9)', async () => {
+      // Arrange — findAll() es el único endpoint sin masking (permiso de auditoría), por eso el
+      // viewer que arma el service es siempre isPrivileged=true.
+      mockFindAll.mockResolvedValue([
+        {
+          ...mockRating,
+          user: { firstName: 'Juan', lastName: 'Pérez' },
+          professional: { user: { firstName: 'Ana', lastName: 'Gómez' } },
+        },
+      ]);
+
+      // Act
+      const result = await service.findAll();
+
+      // Assert
+      expect(result[0].userName).toBe('Juan Pérez');
+      expect(result[0].professionalName).toBe('Ana Gómez');
+    });
   });
 
   describe('findOne', () => {

@@ -194,6 +194,43 @@ describe('UsersDBService', () => {
       // Assert — skip = (3-1)*10 = 20; verificado implícitamente con la llamada a transaction
       expect(mockTransaction).toHaveBeenCalled();
     });
+
+    it('debe filtrar por nombre/apellido y email con coincidencia parcial insensible a mayúsculas (W-03)', async () => {
+      // Arrange
+      mockTransaction.mockResolvedValue([[], 0]);
+
+      // Act
+      await service.findAll({
+        page: 1,
+        pageSize: 10,
+        orderBy: 'createdAt',
+        name: 'Juan Perez',
+        email: 'JUAN@example.com',
+      });
+
+      // Assert
+      expect(mockUsersFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: [
+              {
+                OR: [
+                  { firstName: { contains: 'Juan', mode: 'insensitive' } },
+                  { lastName: { contains: 'Juan', mode: 'insensitive' } },
+                ],
+              },
+              {
+                OR: [
+                  { firstName: { contains: 'Perez', mode: 'insensitive' } },
+                  { lastName: { contains: 'Perez', mode: 'insensitive' } },
+                ],
+              },
+            ],
+            email: { contains: 'JUAN@example.com', mode: 'insensitive' },
+          }) as unknown,
+        }),
+      );
+    });
   });
 
   // findAllUsers es alias de findAll — no se testea por separado

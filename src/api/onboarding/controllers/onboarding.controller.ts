@@ -1,4 +1,4 @@
-import { Controller, Post, Version, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBasicAuth } from '@nestjs/swagger';
 import { BasicAuthGuard } from '@modules/auth/guards/basic-auth.guard';
 import * as DTO from '@/api/onboarding/dtos';
@@ -11,7 +11,6 @@ export class OnboardingController {
   constructor(private readonly onboardingApiService: OnboardingApiService) {}
 
   @Post()
-  @Version('1')
   @ApiBasicAuth()
   @UseGuards(BasicAuthGuard)
   @OnboardingDocs('onboarding')

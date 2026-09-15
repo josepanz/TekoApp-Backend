@@ -181,6 +181,24 @@ describe('ContractsDbService', () => {
     });
   });
 
+  describe('countContracts', () => {
+    it('debe contar con el where recibido tal cual', async () => {
+      // Arrange
+      mockCount.mockResolvedValue(2);
+      const where: Prisma.ContractsWhereInput = {
+        status: { in: [ContractStatus.DRAFT] },
+        clientUserId: 1,
+      };
+
+      // Act
+      const result = await service.countContracts(where);
+
+      // Assert
+      expect(result).toBe(2);
+      expect(mockCount).toHaveBeenCalledWith({ where });
+    });
+  });
+
   describe('findAuditPaginated', () => {
     it('debe paginar incluyendo los referenceId de servicio, cliente y profesional', async () => {
       // Arrange

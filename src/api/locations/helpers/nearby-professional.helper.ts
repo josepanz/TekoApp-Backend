@@ -1,4 +1,4 @@
-import { NearbyProfessionalRow } from '@/modules/locations-db/interfaces/nearby-professional-row.interface';
+import { NearbyProfessionalRow } from '@/modules/professional-position-db/interfaces/nearby-professional-row.interface';
 import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professional-response.dto';
 
 export function mapNearbyProfessionalRow(

@@ -25,6 +25,7 @@ const mockProfessionalsFindUnique = jest.fn();
 const mockProfessionalsFindMany = jest.fn();
 const mockProfessionalsCreate = jest.fn();
 const mockProfessionalsUpdate = jest.fn();
+const mockProfessionalsUpdateMany = jest.fn();
 
 // ─── Mocks de category ────────────────────────────────────────────────────────
 const mockCategoryFindUnique = jest.fn();
@@ -46,6 +47,7 @@ const mockPrisma = {
       findMany: mockProfessionalsFindMany,
       create: mockProfessionalsCreate,
       update: mockProfessionalsUpdate,
+      updateMany: mockProfessionalsUpdateMany,
     },
     category: {
       findUnique: mockCategoryFindUnique,
@@ -222,6 +224,87 @@ describe('ProfessionalsDbService', () => {
           }) as unknown,
         }),
       );
+    });
+
+    it('debe aplicar búsqueda multi-palabra por nombre/apellido del usuario relacionado, parcial e insensible a mayúsculas (W-03)', async () => {
+      // Arrange
+      const paginatedResult = {
+        data: [],
+        pagination: { total: 0, page: 1, pageSize: 10, totalPages: 0 },
+      };
+      mockPaginate.mockResolvedValue(paginatedResult);
+      const filters = { search: 'Juan Perez' };
+      const query = { page: 1, pageSize: 10 } as never;
+
+      // Act
+      await service.findMany(filters, query);
+
+      // Assert
+      expect(mockPaginate).toHaveBeenCalledWith(
+        expect.anything(),
+        query,
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: [
+              {
+                OR: [
+                  {
+                    user: {
+                      firstName: { contains: 'Juan', mode: 'insensitive' },
+                    },
+                  },
+                  {
+                    user: {
+                      lastName: { contains: 'Juan', mode: 'insensitive' },
+                    },
+                  },
+                ],
+              },
+              {
+                OR: [
+                  {
+                    user: {
+                      firstName: { contains: 'Perez', mode: 'insensitive' },
+                    },
+                  },
+                  {
+                    user: {
+                      lastName: { contains: 'Perez', mode: 'insensitive' },
+                    },
+                  },
+                ],
+              },
+            ],
+          }) as unknown,
+        }),
+      );
+    });
+  });
+
+  // ─── findAllForExport ────────────────────────────────────────────────────
+  describe('findAllForExport', () => {
+    it('debe traer todas las filas que matchean el filtro, sin paginar', async () => {
+      // Arrange
+      const professionals = [{ id: 1 }, { id: 2 }];
+      mockProfessionalsFindMany.mockResolvedValue(professionals);
+
+      // Act
+      const result = await service.findAllForExport({
+        categoryId: 2,
+        isAvailable: true,
+      });
+
+      // Assert
+      expect(result).toBe(professionals);
+      expect(mockProfessionalsFindMany).toHaveBeenCalledWith({
+        where: expect.objectContaining({
+          isActive: true,
+          categoryId: 2,
+          isAvailable: true,
+        }) as unknown,
+        include: professionalWithRelationsInclude,
+        orderBy: { averageRating: 'desc' },
+      });
     });
   });
 
@@ -454,6 +537,44 @@ describe('ProfessionalsDbService', () => {
         data: { description: 'Nueva descripción' },
         include: professionalWithRelationsInclude,
       });
+    });
+  });
+
+  // ─── updateConditional ───────────────────────────────────────────────────
+  describe('updateConditional', () => {
+    it('debe actualizar y retornar la cantidad de filas afectadas cuando el estado coincide', async () => {
+      // Arrange
+      mockProfessionalsUpdateMany.mockResolvedValue({ count: 1 });
+
+      // Act
+      const result = await service.updateConditional(
+        1,
+        [ProfessionalStatus.PENDING],
+        { status: ProfessionalStatus.APPROVED },
+      );
+
+      // Assert
+      expect(result).toBe(1);
+      expect(mockProfessionalsUpdateMany).toHaveBeenCalledWith({
+        where: { id: 1, status: { in: [ProfessionalStatus.PENDING] } },
+        data: { status: ProfessionalStatus.APPROVED },
+      });
+    });
+
+    it('debe retornar 0 cuando el estado ya cambió (carrera entre dos transiciones concurrentes)', async () => {
+      // Arrange — otra escritura ya movió el profesional fuera de los estados esperados entre
+      // la lectura de validación y este updateMany.
+      mockProfessionalsUpdateMany.mockResolvedValue({ count: 0 });
+
+      // Act
+      const result = await service.updateConditional(
+        1,
+        [ProfessionalStatus.APPROVED],
+        { status: ProfessionalStatus.SUSPENDED },
+      );
+
+      // Assert
+      expect(result).toBe(0);
     });
   });
 

@@ -2,7 +2,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { TrackingApiService } from './tracking.service';
-import { TrackingDbService } from '@modules/tracking-db/services/tacking-db.service';
+import { GeoTrackingDbService } from '@modules/geo-tracking-db/services/geo-tracking-db.service';
 
 const mockSaveLocationPing = jest.fn();
 const mockFindInRadius = jest.fn();
@@ -16,7 +16,7 @@ describe('TrackingApiService', () => {
       providers: [
         TrackingApiService,
         {
-          provide: TrackingDbService,
+          provide: GeoTrackingDbService,
           useValue: {
             saveLocationPing: mockSaveLocationPing,
             findInRadius: mockFindInRadius,
