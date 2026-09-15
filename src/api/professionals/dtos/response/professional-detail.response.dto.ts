@@ -78,7 +78,10 @@ export class ProfessionalDetailResponseDTO {
   @ApiProperty({ example: false })
   isOnline!: boolean;
 
-  @ApiProperty({ example: 'verified' })
+  @ApiProperty({
+    example: 'VERIFIED',
+    enum: ['UNVERIFIED', 'VERIFIED', 'REJECTED'],
+  })
   verificationStatus!: string;
 
   @ApiProperty({

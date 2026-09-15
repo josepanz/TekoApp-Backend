@@ -12,6 +12,8 @@ import { FcmProviderService } from '@modules/push-provider/services/fcm-provider
 import { NotificationsSseService } from '@api/notifications/services/notifications-sse.service';
 import { NotificationStatus } from '@modules/notifications-db/enums/notification-status.enum';
 import { PushSendOutcome } from '@modules/push-provider/interfaces/push-provider.interface';
+import { UsersDBService } from '@modules/users-db/services/users-db.service';
+import { EmailService } from '@modules/email/services/email.service';
 
 const mockUpdateStatusByIdDirectly = jest.fn();
 const mockFindActivePushSubscriptions = jest.fn();
@@ -21,6 +23,8 @@ const mockDeactivateByToken = jest.fn();
 const mockWebPushSend = jest.fn();
 const mockFcmSend = jest.fn();
 const mockSseEmit = jest.fn();
+const mockUsersFindById = jest.fn();
+const mockEmailSend = jest.fn();
 
 const buildJob = (
   overrides: Partial<NotificationJobPayload> = {},
@@ -73,6 +77,14 @@ describe('NotificationsProcessor', () => {
         {
           provide: NotificationsSseService,
           useValue: { emit: mockSseEmit },
+        },
+        {
+          provide: UsersDBService,
+          useValue: { findById: mockUsersFindById },
+        },
+        {
+          provide: EmailService,
+          useValue: { send: mockEmailSend },
         },
       ],
     }).compile();
@@ -168,6 +180,81 @@ describe('NotificationsProcessor', () => {
 
       // Assert
       expect(mockDeactivateByToken).toHaveBeenCalledWith('token-1');
+    });
+  });
+
+  describe('canal email', () => {
+    it('envía el correo al email del usuario reusando EmailService', async () => {
+      // Arrange
+      const job = buildJob({
+        channels: ['email'],
+        title: 'Tu servicio fue aceptado',
+        message: 'Un profesional aceptó tu solicitud.',
+      });
+      mockUsersFindById.mockResolvedValue({
+        id: 42,
+        email: 'cliente@example.com',
+        firstName: 'Juan',
+        lastName: 'Pérez',
+      });
+      mockEmailSend.mockResolvedValue(undefined);
+
+      // Act
+      await processor.handleSendNotification(job);
+
+      // Assert
+      expect(mockUsersFindById).toHaveBeenCalledWith(42);
+      expect(mockEmailSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'cliente@example.com',
+          subject: 'Tu servicio fue aceptado',
+          content: expect.stringContaining(
+            'Un profesional aceptó tu solicitud.',
+          ) as string,
+        }),
+      );
+      expect(mockUpdateStatusByIdDirectly).toHaveBeenCalledWith(
+        'notif-1',
+        expect.objectContaining({ status: NotificationStatus.SENT }),
+      );
+    });
+
+    it('omite el envío sin lanzar cuando el usuario no tiene email registrado', async () => {
+      // Arrange
+      const job = buildJob({ channels: ['email'] });
+      mockUsersFindById.mockResolvedValue({ id: 42, email: null });
+
+      // Act
+      await processor.handleSendNotification(job);
+
+      // Assert
+      expect(mockEmailSend).not.toHaveBeenCalled();
+      expect(mockUpdateStatusByIdDirectly).toHaveBeenCalledWith(
+        'notif-1',
+        expect.objectContaining({ status: NotificationStatus.SENT }),
+      );
+    });
+
+    it('no relanza el error ni marca FAILED la notificación cuando el envío de email falla (resiliencia entre canales)', async () => {
+      // Arrange — mismo criterio que sendWebPush/sendFcm: un canal caído no debe tumbar los
+      // demás canales de la misma notificación.
+      const job = buildJob({ channels: ['email', 'in_app'] });
+      mockUsersFindById.mockResolvedValue({
+        id: 42,
+        email: 'cliente@example.com',
+        firstName: 'Juan',
+      });
+      mockEmailSend.mockRejectedValue(new Error('SMTP caído'));
+
+      // Act
+      await processor.handleSendNotification(job);
+
+      // Assert
+      expect(mockSseEmit).toHaveBeenCalledTimes(1);
+      expect(mockUpdateStatusByIdDirectly).toHaveBeenCalledWith(
+        'notif-1',
+        expect.objectContaining({ status: NotificationStatus.SENT }),
+      );
     });
   });
 

@@ -1,7 +1,7 @@
 // src/api/tracking/services/tracking.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TrackingDbService } from '@modules/tracking-db/services/tacking-db.service';
+import { GeoTrackingDbService } from '@modules/geo-tracking-db/services/geo-tracking-db.service';
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location.request.dto';
 import { UpdateLocationResponseDTO } from '../dtos/response/update-location.response.dto';
 import { GetNearbyProfessionalsRequestDTO } from '../dtos/request/get-nearby-professionals.request.dto';
@@ -12,7 +12,7 @@ export class TrackingApiService {
   private readonly logger = new Logger(TrackingApiService.name);
 
   constructor(
-    private readonly trackingDbService: TrackingDbService,
+    private readonly trackingDbService: GeoTrackingDbService,
     private readonly configService: ConfigService,
   ) {}
 

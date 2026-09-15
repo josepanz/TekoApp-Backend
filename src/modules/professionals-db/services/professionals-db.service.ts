@@ -68,13 +68,9 @@ export class ProfessionalsDbService {
     });
   }
 
-  async findMany(
+  private buildListWhere(
     filters: ProfessionalFilters,
-    query: PaginationQueryDTO & Record<string, unknown>,
-  ): Promise<{
-    data: ProfessionalWithRelations[];
-    pagination: PaginationResponseDTO;
-  }> {
+  ): Prisma.ProfessionalsWhereInput {
     const where: Prisma.ProfessionalsWhereInput = { isActive: true };
 
     if (filters.categoryId) where.categoryId = filters.categoryId;
@@ -97,11 +93,36 @@ export class ProfessionalsDbService {
       };
     }
 
+    // Búsqueda multi-palabra (AND de ORs) sobre el nombre del usuario relacionado — mismo
+    // patrón que `UsersDbService.findAll` usa para su propio filtro `name`.
+    if (filters.search) {
+      const ilike = Prisma.QueryMode.insensitive;
+      const terms = filters.search.trim().split(/\s+/).filter(Boolean);
+      if (terms.length > 0) {
+        where.AND = terms.map((term) => ({
+          OR: [
+            { user: { firstName: { contains: term, mode: ilike } } },
+            { user: { lastName: { contains: term, mode: ilike } } },
+          ],
+        }));
+      }
+    }
+
+    return where;
+  }
+
+  async findMany(
+    filters: ProfessionalFilters,
+    query: PaginationQueryDTO & Record<string, unknown>,
+  ): Promise<{
+    data: ProfessionalWithRelations[];
+    pagination: PaginationResponseDTO;
+  }> {
     return PrismaPaginationUtil.paginate<ProfessionalWithRelations>(
       this.prisma.extended.professionals,
       query,
       {
-        where,
+        where: this.buildListWhere(filters),
         include: professionalWithRelationsInclude,
         defaultOrderByField: 'averageRating',
         fieldMapping: {
@@ -115,6 +136,18 @@ export class ProfessionalsDbService {
         },
       },
     );
+  }
+
+  // Mismos filtros que findMany, sin paginar — usado por el export CSV del panel admin (el
+  // volumen lo controla el filtro, no una página).
+  async findAllForExport(
+    filters: ProfessionalFilters,
+  ): Promise<ProfessionalWithRelations[]> {
+    return this.prisma.extended.professionals.findMany({
+      where: this.buildListWhere(filters),
+      include: professionalWithRelationsInclude,
+      orderBy: { averageRating: 'desc' },
+    });
   }
 
   async findNearby(
@@ -206,6 +239,25 @@ export class ProfessionalsDbService {
       data,
       include: professionalWithRelationsInclude,
     });
+  }
+
+  /**
+   * Actualiza el profesional solo si su estado actual está entre `expectedStatuses` — evita
+   * la condición de carrera entre dos transiciones administrativas concurrentes sobre el mismo
+   * profesional (ej. verificar y suspender al mismo tiempo, o dos admins resolviendo la misma
+   * verificación). Devuelve la cantidad de filas afectadas: 0 significa que el estado cambió
+   * entre la lectura de validación y esta escritura.
+   */
+  async updateConditional(
+    id: number,
+    expectedStatuses: ProfessionalStatus[],
+    data: Prisma.ProfessionalsUpdateInput,
+  ): Promise<number> {
+    const result = await this.prisma.extended.professionals.updateMany({
+      where: { id, status: { in: expectedStatuses } },
+      data,
+    });
+    return result.count;
   }
 
   async findServices(

@@ -406,3 +406,8 @@ src/modules/<domain>-db/
   como terminada, correr `pnpm run format` (si existe) y `pnpm run lint` (con `--fix`), y
   **prohibido reportar "completado" si el lint queda en rojo** — no alcanza con la intención, hay
   que verificar el resultado del comando.
+
+## Versionado de API (NestJS VersioningType.URI)
+
+- El `defaultVersion: '1'` está configurado globalmente en `app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' })` en `src/main.ts` — todo controller nuevo hereda automáticamente `/v1` **sin necesidad de decorar con `@Version('1')`**. No agregar decoradores redundantes.
+- Si alguna vez hace falta un endpoint sin versión (solo infraestructura llamada por sistemas externos con path fijo, e.g. probes de Kubernetes contra `/healthcheck`), usar **`@Version(VERSION_NEUTRAL)` a nivel de método** (no de clase — el tipado actual de `@Version` es MethodDecorator y falla tsc si se aplica en clase). **Dato crítico**: bajo `VersioningType.URI`, un `VERSION_NEUTRAL` registra **únicamente** el path sin prefijo (`/healthcheck` responde; `/v1/healthcheck` da 404 deliberadamente). No es ambos — es contraintuitivo y debe verificarse empíricamente si en el futuro alguien duda.

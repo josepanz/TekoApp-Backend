@@ -64,4 +64,34 @@ describe('HttpExceptionFilter', () => {
     );
     expect(body.error.errorCode).toBe('CONSENT_REQUIRED');
   });
+
+  it('debe incluir details cuando la excepción lo define (ej. lista de bloqueantes)', () => {
+    // Arrange
+    const exception = new ForbiddenException({
+      message: 'No se puede eliminar la cuenta',
+      errorCode: 'DELETION_BLOCKED',
+      details: { blockers: [{ type: 'ACTIVE_SERVICE', count: 1 }] },
+    });
+
+    // Act
+    filter.catch(exception, buildHost());
+
+    // Assert
+    const body = extractJsonBody();
+    expect(body.error.details).toEqual({
+      blockers: [{ type: 'ACTIVE_SERVICE', count: 1 }],
+    });
+  });
+
+  it('no debe incluir details cuando la excepción no lo define', () => {
+    // Arrange
+    const exception = new NotFoundException('No encontrado');
+
+    // Act
+    filter.catch(exception, buildHost());
+
+    // Assert
+    const body = extractJsonBody();
+    expect(body.error).not.toHaveProperty('details');
+  });
 });

@@ -20,6 +20,14 @@ jest.mock('nodemailer', () => ({
 
 let mockSendMail: jest.Mock;
 
+// Referencia enlazada aparte: evita @typescript-eslint/unbound-method al pasar el mock
+// directamente a `expect(...)` — prettier envuelve `EmailHelper.createGenericNotificationTemplate`
+// en su propia línea cuando el nombre es largo, y el eslint-disable-next-line ya no cae sobre la
+// línea correcta.
+const genericTemplateMock = (
+  EmailHelper as unknown as { createGenericNotificationTemplate: jest.Mock }
+).createGenericNotificationTemplate;
+
 // ─── Mocks de CryptoHelper ────────────────────────────────────────────────────
 
 jest.mock('@common/helpers/crypto-helpers', () => ({
@@ -42,6 +50,12 @@ jest.mock('@modules/email/helpers/email.helper', () => ({
     createPasswordCreationTemplate: jest
       .fn()
       .mockReturnValue('<html>create</html>'),
+    createGenericNotificationTemplate: jest
+      .fn()
+      .mockReturnValue('<html>generic</html>'),
+    createPaymentReceiptTemplate: jest
+      .fn()
+      .mockReturnValue('<html>receipt</html>'),
   },
 }));
 
@@ -331,6 +345,247 @@ describe('EmailService', () => {
         service.sendEmailByType(
           'usuario@test.com',
           EmailTypeEnum.CREATE_PASSWORD,
+          undefined,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // sendEmailByType — LOGIN (tarea 6)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('sendEmailByType — LOGIN', () => {
+    it('debe enviar el aviso de nuevo inicio de sesión cuando el usuario existe', async () => {
+      // Arrange
+      mockSendMail.mockResolvedValue({ messageId: 'id-login' });
+      const user = buildUser();
+
+      // Act
+      await service.sendEmailByType(
+        'usuario@test.com',
+        EmailTypeEnum.LOGIN,
+        user,
+      );
+
+      // Assert
+      expect(genericTemplateMock).toHaveBeenCalledWith(
+        'Maria Perez',
+        'Nuevo inicio de sesión',
+        expect.any(String),
+      );
+      expect(mockSendMail).toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando no se proporciona usuario en LOGIN', async () => {
+      // Act & Assert
+      await expect(
+        service.sendEmailByType(
+          'usuario@test.com',
+          EmailTypeEnum.LOGIN,
+          undefined,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // sendEmailByType — PASSWORD_CHANGED (tarea 6)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('sendEmailByType — PASSWORD_CHANGED', () => {
+    it('debe enviar la confirmación de cambio de contraseña cuando el usuario existe', async () => {
+      // Arrange
+      mockSendMail.mockResolvedValue({ messageId: 'id-pwd-changed' });
+      const user = buildUser();
+
+      // Act
+      await service.sendEmailByType(
+        'usuario@test.com',
+        EmailTypeEnum.PASSWORD_CHANGED,
+        user,
+      );
+
+      // Assert
+      expect(genericTemplateMock).toHaveBeenCalledWith(
+        'Maria Perez',
+        'Tu contraseña cambió',
+        expect.any(String),
+      );
+      expect(mockSendMail).toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando no se proporciona usuario en PASSWORD_CHANGED', async () => {
+      // Act & Assert
+      await expect(
+        service.sendEmailByType(
+          'usuario@test.com',
+          EmailTypeEnum.PASSWORD_CHANGED,
+          undefined,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // sendEmailByType — PASSWORD_RESET (tarea 6)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('sendEmailByType — PASSWORD_RESET', () => {
+    it('debe enviar la confirmación de restablecimiento cuando el usuario existe', async () => {
+      // Arrange
+      mockSendMail.mockResolvedValue({ messageId: 'id-pwd-reset' });
+      const user = buildUser();
+
+      // Act
+      await service.sendEmailByType(
+        'usuario@test.com',
+        EmailTypeEnum.PASSWORD_RESET,
+        user,
+      );
+
+      // Assert
+      expect(genericTemplateMock).toHaveBeenCalledWith(
+        'Maria Perez',
+        'Tu contraseña fue restablecida',
+        expect.any(String),
+      );
+      expect(mockSendMail).toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando no se proporciona usuario en PASSWORD_RESET', async () => {
+      // Act & Assert
+      await expect(
+        service.sendEmailByType(
+          'usuario@test.com',
+          EmailTypeEnum.PASSWORD_RESET,
+          undefined,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // sendEmailByType — PAYMENT_METHOD_CREATED (tarea 6)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('sendEmailByType — PAYMENT_METHOD_CREATED', () => {
+    it('debe incluir el methodLabel en el mensaje cuando extraData.dto lo trae', async () => {
+      // Arrange
+      mockSendMail.mockResolvedValue({ messageId: 'id-method' });
+      const user = buildUser();
+
+      // Act
+      await service.sendEmailByType(
+        'usuario@test.com',
+        EmailTypeEnum.PAYMENT_METHOD_CREATED,
+        user,
+        undefined,
+        {
+          dto: { methodLabel: 'Visa •••• 4242' },
+          description: 'alta de método',
+        },
+      );
+
+      // Assert
+      expect(genericTemplateMock).toHaveBeenCalledWith(
+        'Maria Perez',
+        'Medio de pago agregado',
+        expect.stringContaining('Visa •••• 4242'),
+      );
+    });
+
+    it('debe usar un mensaje genérico cuando no viene methodLabel', async () => {
+      // Arrange
+      mockSendMail.mockResolvedValue({ messageId: 'id-method-2' });
+      const user = buildUser();
+
+      // Act
+      await service.sendEmailByType(
+        'usuario@test.com',
+        EmailTypeEnum.PAYMENT_METHOD_CREATED,
+        user,
+      );
+
+      // Assert
+      expect(mockSendMail).toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando no se proporciona usuario en PAYMENT_METHOD_CREATED', async () => {
+      // Act & Assert
+      await expect(
+        service.sendEmailByType(
+          'usuario@test.com',
+          EmailTypeEnum.PAYMENT_METHOD_CREATED,
+          undefined,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // sendEmailByType — PAYMENT_RECEIPT (tarea 6 — plumbing lista, sin caller real aún)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('sendEmailByType — PAYMENT_RECEIPT', () => {
+    const receiptData = {
+      operationNumber: 'OP-1',
+      authorizationCode: 'AUTH-1',
+      merchantName: 'TekoApp',
+      transactionDate: '2026-09-14',
+      amount: 50000,
+      paymentMethod: 'Visa •••• 4242',
+      description: 'Servicio de plomería',
+    };
+
+    it('debe enviar el comprobante usando los datos de extraData.dto', async () => {
+      // Arrange
+      mockSendMail.mockResolvedValue({ messageId: 'id-receipt' });
+      const user = buildUser();
+
+      // Act
+      await service.sendEmailByType(
+        'usuario@test.com',
+        EmailTypeEnum.PAYMENT_RECEIPT,
+        user,
+        undefined,
+        { dto: receiptData, description: 'comprobante de pago' },
+      );
+
+      // Assert
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(EmailHelper.createPaymentReceiptTemplate).toHaveBeenCalledWith(
+        receiptData.operationNumber,
+        receiptData.authorizationCode,
+        receiptData.merchantName,
+        receiptData.transactionDate,
+        receiptData.amount,
+        receiptData.paymentMethod,
+        receiptData.description,
+      );
+      expect(mockSendMail).toHaveBeenCalled();
+    });
+
+    it('debe lanzar InternalServerErrorException cuando falta extraData.dto', async () => {
+      // Arrange
+      const user = buildUser();
+
+      // Act & Assert
+      await expect(
+        service.sendEmailByType(
+          'usuario@test.com',
+          EmailTypeEnum.PAYMENT_RECEIPT,
+          user,
+        ),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+
+    it('debe lanzar NotFoundException cuando no se proporciona usuario en PAYMENT_RECEIPT', async () => {
+      // Act & Assert
+      await expect(
+        service.sendEmailByType(
+          'usuario@test.com',
+          EmailTypeEnum.PAYMENT_RECEIPT,
           undefined,
         ),
       ).rejects.toThrow(NotFoundException);

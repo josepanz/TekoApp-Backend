@@ -5,11 +5,11 @@ import { APP_CONFIG, AppConfigType } from '@core/config/config-loader';
 import { LocationsController } from './controllers/locations.controller';
 import { LocationsService } from './services/locations.service';
 import { LocationsGateway } from './gateway/locations.gateway';
-import { LocationsDbModule } from '@/modules/locations-db/locations-db.module';
+import { ProfessionalPositionDbModule } from '@/modules/professional-position-db/professional-position-db.module';
 
 @Module({
   imports: [
-    LocationsDbModule,
+    ProfessionalPositionDbModule,
     // El resto de la app firma/verifica JWT con el par RS256 real (JWT_PRIVATE_KEY/JWT_PUBLIC_KEY,
     // ver jwt.strategy.ts). Esta registración usaba `secret: configService.get('JWT_SECRET')` —
     // esa env var no existe en config-schema.ts/.env, así que el secreto siempre era `undefined` y

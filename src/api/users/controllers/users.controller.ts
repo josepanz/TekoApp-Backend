@@ -7,7 +7,6 @@ import {
   Param,
   Put,
   Query,
-  Version,
   UseGuards,
   Delete,
   ParseIntPipe,
@@ -38,7 +37,6 @@ export class UsersController {
   constructor(private readonly usersApiService: UsersApiService) {}
 
   @Get()
-  @Version('1')
   @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('findAll')
   async findAll(
@@ -49,7 +47,6 @@ export class UsersController {
   }
 
   @Get('reference/:referenceId/edit-context')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('getEditContext')
   async getEditContext(
@@ -59,7 +56,6 @@ export class UsersController {
   }
 
   @Put('reference/:referenceId/edit-context')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('updateEditContext')
   async updateEditContext(
@@ -75,7 +71,6 @@ export class UsersController {
   }
 
   @Get('reference/:referenceId')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('findOneByReference')
   async findOneByReference(
@@ -85,7 +80,6 @@ export class UsersController {
   }
 
   @Put('reference/:referenceId')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('updateByReference')
   async updateByReference(
@@ -101,7 +95,6 @@ export class UsersController {
   }
 
   @Delete('reference/:referenceId')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.DELETE, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('deleteByReference')
   async deleteByReference(
@@ -112,7 +105,6 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.READ, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('findOne')
   async findOne(
@@ -122,7 +114,6 @@ export class UsersController {
   }
 
   @Put(':id')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('update')
   async update(
@@ -134,7 +125,6 @@ export class UsersController {
   }
 
   @Patch(':id/block')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('block')
   async block(
@@ -146,7 +136,6 @@ export class UsersController {
   }
 
   @Patch(':id/unblock')
-  @Version('1')
   @Permissions(PERMISSIONS.USER.UPDATE, PERMISSIONS.ADMIN.ALL)
   @UsersDocs('unblock')
   async unblock(

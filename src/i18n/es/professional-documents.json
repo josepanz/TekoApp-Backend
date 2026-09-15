@@ -6,5 +6,9 @@
   "FILE_TOO_LARGE": "El archivo supera el tamaño máximo de {maxSizeMb}MB",
   "FILE_TYPE_NOT_ALLOWED": "Tipo de archivo no permitido",
   "EXPIRED_NOTIFICATION_TITLE": "Un documento venció",
-  "EXPIRED_NOTIFICATION_MESSAGE": "Uno de tus documentos cargados venció — subí uno nuevo para mantener tu verificación al día"
+  "EXPIRED_NOTIFICATION_MESSAGE": "Uno de tus documentos cargados venció — subí uno nuevo para mantener tu verificación al día",
+  "APPROVED_NOTIFICATION_TITLE": "Documento aprobado",
+  "APPROVED_NOTIFICATION_MESSAGE": "Uno de tus documentos fue aprobado.",
+  "REJECTED_NOTIFICATION_TITLE": "Documento rechazado",
+  "REJECTED_NOTIFICATION_MESSAGE": "Uno de tus documentos fue rechazado. Motivo: {reason}"
 }

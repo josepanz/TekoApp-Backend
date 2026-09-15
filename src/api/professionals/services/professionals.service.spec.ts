@@ -1,21 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, ConflictException } from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 
 const mockCreate = jest.fn();
 const mockFindMany = jest.fn();
+const mockFindAllForExport = jest.fn();
 const mockFindNearby = jest.fn();
 const mockFindById = jest.fn();
 const mockFindByUserId = jest.fn();
 const mockFindProfessionalIdByUserId = jest.fn();
 const mockFindProfessionalByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
+const mockUpdateConditional = jest.fn();
 const mockFindServices = jest.fn();
 const mockFindReviews = jest.fn();
 const mockGetStats = jest.fn();
 const mockSearchBySkills = jest.fn();
 const mockGetTopRated = jest.fn();
+const mockGenerate = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 const mockProfessional = {
   id: 1,
@@ -24,7 +31,7 @@ const mockProfessional = {
   categoryId: 2,
   isAvailable: true,
   status: 'APPROVED',
-  verificationStatus: 'verified',
+  verificationStatus: 'VERIFIED',
 };
 
 function fakeUser(overrides: { id?: number; permissions?: string[] } = {}) {
@@ -46,18 +53,28 @@ describe('ProfessionalsService', () => {
           useValue: {
             create: mockCreate,
             findMany: mockFindMany,
+            findAllForExport: mockFindAllForExport,
             findNearby: mockFindNearby,
             findById: mockFindById,
             findByUserId: mockFindByUserId,
             findProfessionalIdByUserId: mockFindProfessionalIdByUserId,
             findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             update: mockUpdate,
+            updateConditional: mockUpdateConditional,
             findServices: mockFindServices,
             findReviews: mockFindReviews,
             getStats: mockGetStats,
             searchBySkills: mockSearchBySkills,
             getTopRated: mockGetTopRated,
           },
+        },
+        {
+          provide: ReportService,
+          useValue: { generate: mockGenerate },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -108,6 +125,79 @@ describe('ProfessionalsService', () => {
         query,
       );
       expect(result).toEqual(mockResult);
+    });
+
+    it('debe pasar el filtro search tal cual (W-03)', async () => {
+      // Arrange
+      const query = { search: 'Juan Perez', page: 1, pageSize: 10 } as never;
+      const mockResult = { data: [], pagination: { total: 0 } };
+      mockFindMany.mockResolvedValue(mockResult);
+
+      // Act
+      await service.getProfessionals(query);
+
+      // Assert
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'Juan Perez' }),
+        query,
+      );
+    });
+  });
+
+  describe('exportToCsv', () => {
+    it('debe pedir los profesionales con los mismos filtros que getProfessionals, sin paginar', async () => {
+      // Arrange
+      const query = {
+        categoryId: 2,
+        minRating: 4,
+        isAvailable: true,
+      } as never;
+      mockFindAllForExport.mockResolvedValue([
+        {
+          referenceId: mockProfessional.referenceId,
+          user: {
+            firstName: 'Juan',
+            lastName: 'Pérez',
+            email: 'juan@example.com',
+          },
+          category: { name: 'Plomería' },
+          status: 'APPROVED',
+          verificationStatus: 'VERIFIED',
+          isAvailable: true,
+          averageRating: 4.5,
+          totalRatings: 10,
+          hourlyRate: 50000,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      mockGenerate.mockResolvedValue(Buffer.from('csv-content'));
+
+      // Act
+      const result = await service.exportToCsv(query);
+
+      // Assert
+      expect(mockFindAllForExport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categoryId: 2,
+          minRating: 4,
+          isAvailable: true,
+        }),
+      );
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
+            expect.objectContaining({
+              referenceId: mockProfessional.referenceId,
+              firstName: 'Juan',
+              lastName: 'Pérez',
+              category: 'Plomería',
+            }),
+          ],
+        }),
+        { format: 'csv' },
+      );
+      expect(result.format).toBe('csv');
+      expect(result.filename).toMatch(/^profesionales-\d{4}-\d{2}-\d{2}\.csv$/);
     });
   });
 
@@ -537,24 +627,40 @@ describe('ProfessionalsService', () => {
     it('debe marcar el profesional como verificado cuando isVerified=true', async () => {
       // Arrange
       const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
-      mockFindById.mockResolvedValue(mockProfessional);
-      mockUpdate.mockResolvedValue({
-        ...mockProfessional,
-        verificationStatus: 'verified',
-        status: 'APPROVED',
-      });
+      mockFindById
+        .mockResolvedValueOnce(mockProfessional)
+        .mockResolvedValueOnce({
+          ...mockProfessional,
+          verificationStatus: 'VERIFIED',
+          status: 'APPROVED',
+        });
+      mockUpdateConditional.mockResolvedValue(1);
 
       // Act
-      await service.verifyProfessional(1, dto, 99);
+      const result = await service.verifyProfessional(1, dto, 99);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
+        [mockProfessional.status],
         expect.objectContaining({
-          verificationStatus: 'verified',
+          verificationStatus: 'VERIFIED',
           status: 'APPROVED',
           changedReason: 'Documentos válidos',
         }),
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          status: 'APPROVED',
+          verificationStatus: 'VERIFIED',
+        }),
+      );
+      // I-05 (#33, IMPRESCINDIBLE): el profesional se entera de que ya puede operar.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_VERIFIED,
+        }),
+        mockProfessional.userId,
       );
     });
 
@@ -562,18 +668,43 @@ describe('ProfessionalsService', () => {
       // Arrange
       const dto = { isVerified: false, notes: 'Documentos inválidos' } as never;
       mockFindById.mockResolvedValue(mockProfessional);
-      mockUpdate.mockResolvedValue(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(1);
 
       // Act
       await service.verifyProfessional(1, dto, 99);
 
       // Assert
-      expect(mockUpdate).toHaveBeenCalledWith(
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
+        [mockProfessional.status],
         expect.objectContaining({
-          verificationStatus: 'rejected',
+          verificationStatus: 'REJECTED',
           status: 'REJECTED',
         }),
+      );
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_VERIFICATION_REJECTED,
+        }),
+        mockProfessional.userId,
+      );
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la lectura y la escritura (carrera)', async () => {
+      // Arrange — dos admins resolviendo la misma verificación al mismo tiempo: el segundo
+      // `updateMany` no encuentra ninguna fila con el estado leído, count() vuelve 0.
+      const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(service.verifyProfessional(1, dto, 99)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        [mockProfessional.status],
+        expect.objectContaining({ status: 'APPROVED' }),
       );
     });
   });
@@ -581,20 +712,27 @@ describe('ProfessionalsService', () => {
   describe('suspendProfessional', () => {
     it('debe suspender el profesional con la razón indicada', async () => {
       // Arrange
-      mockFindById.mockResolvedValue(mockProfessional);
-      mockUpdate.mockResolvedValue({
-        ...mockProfessional,
-        status: 'SUSPENDED',
-        isActive: false,
-      });
+      mockFindById
+        .mockResolvedValueOnce(mockProfessional)
+        .mockResolvedValueOnce({
+          ...mockProfessional,
+          status: 'SUSPENDED',
+          isActive: false,
+        });
+      mockUpdateConditional.mockResolvedValue(1);
 
       // Act
-      await service.suspendProfessional(1, 'Comportamiento inadecuado', 99);
+      const result = await service.suspendProfessional(
+        1,
+        'Comportamiento inadecuado',
+        99,
+      );
 
       // Assert
       expect(mockFindById).toHaveBeenCalledWith(1);
-      expect(mockUpdate).toHaveBeenCalledWith(
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
+        [mockProfessional.status],
         expect.objectContaining({
           status: 'SUSPENDED',
           isActive: false,
@@ -602,6 +740,28 @@ describe('ProfessionalsService', () => {
           lastChangedBy: '99',
         }),
       );
+      expect(result).toEqual(
+        expect.objectContaining({ status: 'SUSPENDED', isActive: false }),
+      );
+      // I-05 (#34, IMPRESCINDIBLE): necesita saber por qué dejó de poder operar.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_SUSPENDED,
+        }),
+        mockProfessional.userId,
+      );
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la lectura y la escritura (carrera)', async () => {
+      // Arrange — ej. el profesional ya fue suspendido por otro admin, o se reactivó, entre
+      // la lectura de validación y esta escritura: el `updateMany` condicional no afecta filas.
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(0);
+
+      // Act & Assert
+      await expect(
+        service.suspendProfessional(1, 'Comportamiento inadecuado', 99),
+      ).rejects.toThrow(ConflictException);
     });
   });
 });

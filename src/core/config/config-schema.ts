@@ -27,6 +27,10 @@ export const configSchema = Joi.object({
   SEQ_ENABLED: Joi.boolean().default(false),
   SEQ_URL: Joi.string().uri().required(),
 
+  // H-01: DSN de GlitchTip (mismo protocolo que Sentry, @sentry/nestjs). Opcional a propósito — si
+  // falta, el SDK queda desactivado y la app arranca igual (ver observability/services/sentry-reporter.service.ts).
+  GLITCHTIP_DSN: Joi.string().uri().allow('').optional(),
+
   DATABASE_URL: Joi.string().required(),
   DATABASE_CONNECTION_STRING: Joi.string().required(),
   AUDIT_SECRET_PEPPER: Joi.string().required(),
@@ -79,4 +83,8 @@ export const configSchema = Joi.object({
   PROGRESS_LOG_MAX_IMAGES_PER_ENTRY: Joi.number().integer().min(1).default(6),
   PROGRESS_LOG_EDIT_WINDOW_MINUTES: Joi.number().integer().min(1).default(15),
   PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE: Joi.boolean().default(true),
+
+  ACCOUNT_DELETION_GRACE_PERIOD_DAYS: Joi.number().integer().min(1).default(14),
+
+  NOTIFICATIONS_MAX_RETRY_ATTEMPTS: Joi.number().integer().min(1).default(3),
 });

@@ -364,6 +364,91 @@ export class EmailHelper {
   }
 
   /**
+   * Genera el contenido HTML para un correo de notificación de dominio genérica (I-05):
+   * `title`/`message` vienen tal cual de `NotificationsService.create()`, así que este
+   * template no asume ningún evento en particular — a diferencia de los de arriba, que están
+   * armados para un flujo puntual (verificación, recuperación de contraseña).
+   */
+  public static createGenericNotificationTemplate(
+    firstName: string,
+    title: string,
+    message: string,
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style type="text/css">
+              body {
+                  font-family: 'Gilroy', Arial, sans-serif;
+              }
+          </style>
+      </head>
+
+      <body style="margin: 0; padding: 0; width: 100%; -webkit-text-size-adjust: none; -webkit-font-smoothing: antialiased;">
+          <table width="100%" bgcolor="#FFFFFF" border="0" cellspacing="0" cellpadding="0" id="background" style="height: 100% !important; margin: 0; padding: 0; width: 100% !important; max-width: 700px;">
+              <tr>
+                  <td align="center" valign="top">
+                      <table width="100%" border="0" bgcolor="#8056B0" cellspacing="0" cellpadding="20" id="preheader">
+                          <tr>
+                              <td valign="top">
+                                  <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                          <td valign="top" width="600">
+                                              <div>
+                                                  <a style="width: 30%; padding: 0;">
+                                                      <img width="160" src="https://eqwedi-api-auth-bucket.s3.us-east-2.amazonaws.com/auth/correo/img/prueba.png" alt="Logo de Prueba">
+                                                  </a>
+                                              </div>
+                                          </td>
+                                      </tr>
+                                  </table>
+                              </td>
+                          </tr>
+                      </table>
+                      <table width="600" border="0" cellspacing="0" cellpadding="20" id="body_container">
+                          <tr>
+                              <td align="center" valign="top" class="body_content">
+                                  <table width="100%" border="0" cellspacing="0" cellpadding="20">
+                                      <tr>
+                                          <td valign="top">
+                                              <h2 style="color: #5F5D5D; font-size: 22px; text-align: left;">¡Hola, ${firstName}!</h2>
+                                              <h3 style="color: #5F5D5D; font-size: 18px; text-align: left;">${title}</h3>
+                                              <p style="color: #5F5D5D; font-size: 14px; line-height: 22px; text-align: left;">
+                                                  ${message}
+                                              </p>
+                                          </td>
+                                      </tr>
+                                  </table>
+                              </td>
+                          </tr>
+                      </table>
+                      <table width="100%" border="0" bgcolor="#F4F3F3" cellspacing="0" cellpadding="20" id="body_info_container">
+                          <tr>
+                              <td align="center" valign="top" class="body_info_content">
+                                  <table width="100%" border="0" cellspacing="0" cellpadding="10">
+                                      <tr>
+                                          <td valign="top">
+                                              <p style="color: #5F5D5D; font-size: 12px; line-height: 22px;">Este mensaje ha sido generado de forma automática a partir de tu actividad en TekoApp; favor no respondas el mismo. <strong>Si requerís asistencia, comunicate al CAC (Centro de Atención al Cliente) 021 620 6000.</strong></p>
+                                          </td>
+                                      </tr>
+                                  </table>
+                              </td>
+                          </tr>
+                      </table>
+                  </td>
+              </tr>
+          </table>
+      </body>
+
+      </html>
+    `;
+  }
+
+  /**
    * Genera el contenido HTML para el correo de comprobante de pago.
    * @param operationNumber Número de operación
    * @param authorizationCode Código de autorización
