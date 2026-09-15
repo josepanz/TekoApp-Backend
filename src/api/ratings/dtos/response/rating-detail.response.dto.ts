@@ -27,6 +27,17 @@ export class RatingDetailResponseDTO {
 
   @ApiProperty({
     description:
+      'Nombre completo del usuario de `userId` ("Nombre Apellido"). Mismo criterio de ' +
+      'anonimato que `userId`: null cuando `userId` es null (nunca se filtra la identidad por ' +
+      'esta vía aunque el id esté oculto). Tarea 9, platform-hardening-2026-09 — reemplaza el ' +
+      'id crudo que las tablas admin de Web mostraban ("Anónimo" era un parche de UI).',
+    example: 'Juan Pérez',
+    nullable: true,
+  })
+  userName!: string | null;
+
+  @ApiProperty({
+    description:
       'ID del profesional involucrado (calificado si type=CLIENT_TO_PROFESSIONAL, autor si ' +
       'type=PROFESSIONAL_TO_CLIENT). null cuando isAnonymous=true y quien consulta no es el ' +
       'autor ni tiene permiso de auditoría — nunca null para admin/staff.',
@@ -34,6 +45,15 @@ export class RatingDetailResponseDTO {
     nullable: true,
   })
   professionalId!: number | null;
+
+  @ApiProperty({
+    description:
+      'Nombre completo del profesional de `professionalId` ("Nombre Apellido"). Mismo ' +
+      'criterio de anonimato que `professionalId`. Tarea 9, platform-hardening-2026-09.',
+    example: 'Ana Gómez',
+    nullable: true,
+  })
+  professionalName!: string | null;
 
   @ApiProperty({
     description: 'ID de la solicitud de servicio asociada',

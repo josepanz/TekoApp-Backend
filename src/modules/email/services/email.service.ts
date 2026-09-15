@@ -190,6 +190,126 @@ export class EmailService {
         break;
       }
 
+      // Tarea 6 (platform-hardening-2026-09, 2026-09-14): avisos de seguridad — reusan
+      // `createGenericNotificationTemplate` (I-05) en vez de una plantilla propia por evento,
+      // porque ninguno lleva un link de acción (a diferencia de VERIFICATION/FORGOT_PASSWORD/
+      // CREATE_PASSWORD, que sí son botón-con-token).
+      case EmailTypeEnum.LOGIN: {
+        if (!user) {
+          this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
+        }
+        await this.send({
+          to,
+          subject: 'Nuevo inicio de sesión',
+          content: EmailHelper.createGenericNotificationTemplate(
+            `${user.firstName} ${user.lastName}`,
+            'Nuevo inicio de sesión',
+            'Detectamos un inicio de sesión en tu cuenta. Si fuiste vos, no necesitás hacer nada.',
+          ),
+        });
+        break;
+      }
+
+      case EmailTypeEnum.PASSWORD_CHANGED: {
+        if (!user) {
+          this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
+        }
+        await this.send({
+          to,
+          subject: 'Tu contraseña cambió',
+          content: EmailHelper.createGenericNotificationTemplate(
+            `${user.firstName} ${user.lastName}`,
+            'Tu contraseña cambió',
+            'Confirmamos que la contraseña de tu cuenta fue actualizada. Si no fuiste vos, contactanos de inmediato.',
+          ),
+        });
+        break;
+      }
+
+      case EmailTypeEnum.PASSWORD_RESET: {
+        if (!user) {
+          this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
+        }
+        await this.send({
+          to,
+          subject: 'Tu contraseña fue restablecida',
+          content: EmailHelper.createGenericNotificationTemplate(
+            `${user.firstName} ${user.lastName}`,
+            'Tu contraseña fue restablecida',
+            'Tu contraseña se restableció correctamente. Si no fuiste vos, contactanos de inmediato.',
+          ),
+        });
+        break;
+      }
+
+      case EmailTypeEnum.PAYMENT_METHOD_CREATED: {
+        if (!user) {
+          this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
+        }
+        const methodLabel =
+          typeof extraData?.dto?.methodLabel === 'string'
+            ? extraData.dto.methodLabel
+            : undefined;
+        await this.send({
+          to,
+          subject: 'Agregaste un nuevo medio de pago',
+          content: EmailHelper.createGenericNotificationTemplate(
+            `${user.firstName} ${user.lastName}`,
+            'Medio de pago agregado',
+            methodLabel
+              ? `Agregaste ${methodLabel} como medio de pago.`
+              : 'Agregaste un nuevo medio de pago a tu cuenta.',
+          ),
+        });
+        break;
+      }
+
+      // Comprobante de pago (I-05/tarea 6): el switch queda listo, pero HOY no hay ningún
+      // llamador real — `PaymentStatus.COMPLETED` no tiene ningún escritor en el código
+      // (bloqueado por I-02/0014-dinelco-checkout-integration, mismo motivo que dejó
+      // `PAYMENT_RECEIVED` sin implementar en la spec de notificaciones I-05). Se deja
+      // enganchado (no solo declarado) para no repetir este trabajo cuando el pago real exista.
+      case EmailTypeEnum.PAYMENT_RECEIPT: {
+        if (!user) {
+          this.logger.warn(`Usuario con email ${to} no encontrado o inactivo.`);
+          throw new NotFoundException(t('email.USER_NOT_FOUND_OR_INACTIVE'));
+        }
+        const receipt = extraData?.dto as
+          | {
+              operationNumber: string;
+              authorizationCode: string;
+              merchantName: string;
+              transactionDate: string;
+              amount: number | string;
+              paymentMethod: string;
+              description: string;
+            }
+          | undefined;
+        if (!receipt) {
+          throw new InternalServerErrorException(
+            t('email.PAYMENT_RECEIPT_DATA_REQUIRED'),
+          );
+        }
+        await this.send({
+          to,
+          subject: 'Comprobante de pago',
+          content: EmailHelper.createPaymentReceiptTemplate(
+            receipt.operationNumber,
+            receipt.authorizationCode,
+            receipt.merchantName,
+            receipt.transactionDate,
+            receipt.amount,
+            receipt.paymentMethod,
+            receipt.description,
+          ),
+        });
+        break;
+      }
+
       default: {
         this.logger.warn(`Tipo de email no reconocido`);
         throw new InternalServerErrorException(t('email.UNKNOWN_EMAIL_TYPE'));

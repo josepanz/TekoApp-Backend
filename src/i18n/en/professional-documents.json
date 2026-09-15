@@ -6,5 +6,9 @@
   "FILE_TOO_LARGE": "The file exceeds the maximum size of {maxSizeMb}MB",
   "FILE_TYPE_NOT_ALLOWED": "File type not allowed",
   "EXPIRED_NOTIFICATION_TITLE": "A document expired",
-  "EXPIRED_NOTIFICATION_MESSAGE": "One of your uploaded documents expired — upload a new one to keep your verification up to date"
+  "EXPIRED_NOTIFICATION_MESSAGE": "One of your uploaded documents expired — upload a new one to keep your verification up to date",
+  "APPROVED_NOTIFICATION_TITLE": "Document approved",
+  "APPROVED_NOTIFICATION_MESSAGE": "One of your documents was approved.",
+  "REJECTED_NOTIFICATION_TITLE": "Document rejected",
+  "REJECTED_NOTIFICATION_MESSAGE": "One of your documents was rejected. Reason: {reason}"
 }

@@ -22,6 +22,12 @@ export const APP_CONFIG = registerAs('config', () => {
       seqUrl: process.env.SEQ_URL,
       seqEnabled: process.env.SEQ_ENABLED === 'true',
     },
+    // H-01: GlitchTip (implementa el protocolo de Sentry). `glitchtipDsn` queda `undefined` si la
+    // env var no está seteada o viene vacía — ese es el estado normal hoy, sin cuenta creada
+    // todavía. `SentryReporterService` no inicializa el SDK sin este valor.
+    observability: {
+      glitchtipDsn: process.env.GLITCHTIP_DSN || undefined,
+    },
     project: {
       name: process.env.PROJECT_NAME ?? pkg?.name,
       description: process.env.PROJECT_DESCRIPTION ?? pkg?.description,
@@ -141,6 +147,24 @@ export const APP_CONFIG = registerAs('config', () => {
         : 15,
       requireNoteOrImage:
         process.env.PROGRESS_LOG_REQUIRE_NOTE_OR_IMAGE !== 'false',
+    },
+    accountDeletion: {
+      // Ventana de gracia (I-01): días entre pedir el borrado y la anonimización efectiva.
+      // Propuesta sin medir, no un número legal obligatorio — ver
+      // openspec/changes/platform-hardening-2026-09/I-01-account-deletion.md.
+      gracePeriodDays: process.env.ACCOUNT_DELETION_GRACE_PERIOD_DAYS
+        ? parseInt(process.env.ACCOUNT_DELETION_GRACE_PERIOD_DAYS)
+        : 14,
+    },
+    notifications: {
+      // Tarea 5 (I-05, platform-hardening-2026-09): reintentos del job `send-notification` de
+      // la cola `notifications` — decisión de José, "hasta N, 3 por defecto, configurable".
+      // Se pasa como `attempts` al encolar (`NotificationsService.create`/`createBulk`), no en
+      // `defaultJobOptions` de `BullModule.registerQueue`, porque ese registro es síncrono y
+      // este valor viene de `APP_CONFIG` (inyectado, no `process.env` directo fuera de acá).
+      maxRetryAttempts: process.env.NOTIFICATIONS_MAX_RETRY_ATTEMPTS
+        ? parseInt(process.env.NOTIFICATIONS_MAX_RETRY_ATTEMPTS)
+        : 3,
     },
   };
 });

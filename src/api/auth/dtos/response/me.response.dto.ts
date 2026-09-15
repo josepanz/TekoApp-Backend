@@ -54,4 +54,15 @@ export class MeResponseDTO {
     type: [String],
   })
   permissions!: string[];
+
+  @ApiPropertyOptional({
+    example: true,
+    description:
+      'Tarea 8 (platform-hardening-2026-09): si el email/teléfono de este usuario se exponen ' +
+      'en ServiceUserSummaryResponseDTO. Solo presente en la respuesta de PUT /auth/me (lectura ' +
+      'fresca de DB tras la edición) — GET /auth/me lee directo del JWT, que no lleva este ' +
+      'campo (deliberado: no se tocó el payload del token para esta tarea), así que ahí siempre ' +
+      'viene ausente.',
+  })
+  shareContactInfo?: boolean;
 }

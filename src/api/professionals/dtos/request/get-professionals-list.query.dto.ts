@@ -3,6 +3,7 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  IsString,
   Min,
   Max,
 } from 'class-validator';
@@ -77,4 +78,13 @@ export class GetProfessionalsListQueryDTO extends PaginatedRequest<GetProfession
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isAvailable?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'Buscar por nombre o apellido del profesional (parcial, insensible a mayúsculas)',
+    example: 'Juan',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

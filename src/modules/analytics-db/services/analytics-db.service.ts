@@ -5,6 +5,7 @@ import {
   ServiceStatus,
   PaymentStatus,
   UserStatus,
+  VerificationStatus,
 } from '@prisma/client';
 
 @Injectable()
@@ -50,7 +51,10 @@ export class AnalyticsDbService {
         where: { isAvailable: true, isActive: true },
       }),
       this.prisma.extended.professionals.count({
-        where: { verificationStatus: 'verified', isActive: true },
+        where: {
+          verificationStatus: VerificationStatus.VERIFIED,
+          isActive: true,
+        },
       }),
     ]);
 

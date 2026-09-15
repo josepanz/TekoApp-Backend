@@ -12,6 +12,9 @@ import {
   PushSendOutcome,
 } from '@modules/push-provider/interfaces/push-provider.interface';
 import { NotificationsSseService } from '@api/notifications/services/notifications-sse.service';
+import { UsersDBService } from '@modules/users-db/services/users-db.service';
+import { EmailService } from '@modules/email/services/email.service';
+import { EmailHelper } from '@modules/email/helpers/email.helper';
 
 export interface NotificationJobPayload {
   notificationId: string;
@@ -34,6 +37,8 @@ export class NotificationsProcessor {
     private readonly webPushProvider: WebPushProviderService,
     private readonly fcmProvider: FcmProviderService,
     private readonly sseService: NotificationsSseService,
+    private readonly usersDb: UsersDBService,
+    private readonly emailService: EmailService,
   ) {}
 
   @Process('send-notification')
@@ -89,11 +94,17 @@ export class NotificationsProcessor {
 
     switch (channel) {
       case 'email':
-        this.logger.log(
-          `[Canal Email] Despachando hacia AWS SES / SendGrid para el usuario: ${data.userId}`,
-        );
+        await this.sendEmail(data.userId, data.title, data.message);
         break;
       case 'sms':
+        // Pendiente: `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/`TWILIO_PHONE_NUMBER` están
+        // validados en `config-schema.ts` (Joi) pero eso es solo validación de env vars — no
+        // hay paquete `twilio` en package.json ni ningún cliente/wrapper en el repo (a
+        // diferencia de `modules/email`, que sí tiene un `EmailService` real detrás). Cablear
+        // este canal de verdad implica agregar una dependencia nueva y un módulo `sms`/`twilio`
+        // completo — fuera del alcance de "cablear el canal que ya existe" (tarea 3,
+        // `platform-hardening-2026-09`, 2026-09-14). Queda como stub explícito hasta que ese
+        // trabajo se planifique aparte.
         this.logger.log(
           `[Canal SMS] Despachando via Twilio API al usuario: ${data.userId}`,
         );
@@ -119,6 +130,48 @@ export class NotificationsProcessor {
         this.logger.warn(
           `Canal de comunicación no soportado en la infraestructura actual: ${channel}`,
         );
+    }
+  }
+
+  /**
+   * Canal `email` real (I-05): resuelve el correo del destinatario y reusa `EmailService.send`
+   * (mismo transporter SMTP que ya usan `auth-api`/`onboarding`/`users-db`).
+   *
+   * Nunca relanza: igual que `sendWebPush`/`sendFcm`, un fallo de este canal (usuario sin
+   * email, SMTP caído) no debe tumbar los demás canales de la misma notificación ni marcar
+   * toda la notificación como `FAILED` — se loguea y se sigue. `EmailService.send` ya lanza
+   * `InternalServerErrorException` en su propio catch, así que acá se la vuelve a atrapar en
+   * vez de dejarla propagar.
+   */
+  private async sendEmail(
+    userId: number,
+    title: string,
+    message: string,
+  ): Promise<void> {
+    const user = await this.usersDb.findById(userId);
+    if (!user?.email) {
+      this.logger.warn(
+        `[Canal Email] Usuario ${userId} sin email registrado — se omite el envío.`,
+      );
+      return;
+    }
+
+    try {
+      await this.emailService.send({
+        to: user.email,
+        subject: title,
+        content: EmailHelper.createGenericNotificationTemplate(
+          user.firstName,
+          title,
+          message,
+        ),
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.error(
+        `[Canal Email] Fallo al enviar a ${user.email}: ${errorMessage}`,
+      );
     }
   }
 

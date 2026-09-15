@@ -8,8 +8,14 @@ export class ServiceUserSummaryResponseDTO {
   @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
   referenceId!: string;
 
-  @ApiProperty({ example: 'juan@example.com' })
-  email!: string;
+  @ApiPropertyOptional({
+    example: 'juan@example.com',
+    description:
+      'Ausente (no `null`, la clave directamente no viaja) cuando el dueño de esta cuenta ' +
+      'desactivó `shareContactInfo` — ver services-response.helper.ts#maskContactIfNotShared. ' +
+      'Tarea 8, platform-hardening-2026-09.',
+  })
+  email?: string;
 
   @ApiProperty({ example: 'Juan' })
   firstName!: string;
@@ -17,7 +23,11 @@ export class ServiceUserSummaryResponseDTO {
   @ApiProperty({ example: 'Pérez' })
   lastName!: string;
 
-  @ApiPropertyOptional({ example: '+595981234567' })
+  @ApiPropertyOptional({
+    example: '+595981234567',
+    description:
+      'Mismo criterio de ausencia condicional que `email` (tarea 8).',
+  })
   phoneNumber?: string | null;
 }
 

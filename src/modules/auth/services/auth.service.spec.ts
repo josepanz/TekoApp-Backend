@@ -212,6 +212,8 @@ describe('AuthService', () => {
       expect(result.refreshToken).toBe('refresh_tok');
       expect(result.requiresPasswordCreation).toBe(false);
       expect(mockNonceConsume).toHaveBeenCalledWith('nonce-123');
+      // Tarea 6: el user se devuelve para el aviso de seguridad de nuevo login (AuthApiService).
+      expect(result.user).toEqual(credentials.user);
     });
 
     it('debe retornar requiresPasswordCreation true cuando existe usuario pero sin credenciales', async () => {
@@ -315,6 +317,31 @@ describe('AuthService', () => {
       await expect(service.login(loginPayload)).rejects.toThrow(
         UnauthorizedException,
       );
+    });
+
+    it('debe permitir el login normalmente durante la ventana de gracia de borrado de cuenta (I-01)', async () => {
+      // Arrange
+      const credentials = buildCredentials(UserStatus.PENDING_DELETION);
+      mockFindCredentialsByEmail.mockResolvedValue(credentials);
+      mockDecryptLoginPayload.mockReturnValue({
+        password: 'plain',
+        nonce: 'nonce-123',
+      });
+      mockNonceConsume.mockResolvedValue(true);
+      mockValidatePassword.mockReturnValue(true);
+      mockResetFailedAttempts.mockResolvedValue(undefined);
+      mockUpdateLastLogin.mockResolvedValue(undefined);
+      mockGenerateTokens.mockReturnValue({
+        accessToken: 'access_tok',
+        refreshToken: 'refresh_tok',
+      });
+
+      // Act
+      const result = await service.login(loginPayload);
+
+      // Assert
+      expect(result.success).toBe(true);
+      expect(result.accessToken).toBe('access_tok');
     });
   });
 
@@ -423,7 +450,8 @@ describe('AuthService', () => {
 
     it('debe retornar success true cuando el cambio de contraseña es exitoso', async () => {
       // Arrange
-      mockFindActiveUserByEmail.mockResolvedValue(buildUser());
+      const user = buildUser();
+      mockFindActiveUserByEmail.mockResolvedValue(user);
       mockFindCredentialsByEmail.mockResolvedValue(buildCredentials());
       mockChangeEncryptedPassword.mockResolvedValue(undefined);
 
@@ -433,6 +461,8 @@ describe('AuthService', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(mockChangeEncryptedPassword).toHaveBeenCalled();
+      // Tarea 6: el user se devuelve para el aviso de seguridad de cambio de contraseña.
+      expect(result.user).toEqual(user);
     });
 
     it('debe lanzar NotFoundException cuando el usuario no existe', async () => {
@@ -467,7 +497,8 @@ describe('AuthService', () => {
       mockDecryptPassword
         .mockReturnValueOnce('newpass')
         .mockReturnValueOnce('newpass');
-      mockFindActiveUserByEmail.mockResolvedValue(buildUser());
+      const user = buildUser();
+      mockFindActiveUserByEmail.mockResolvedValue(user);
       mockFindCredentialsByEmail.mockResolvedValue(buildCredentials());
       mockCreateOrUpdatePassword.mockResolvedValue(undefined);
 
@@ -481,6 +512,8 @@ describe('AuthService', () => {
       // Assert
       expect(result.success).toBe(true);
       expect(mockCreateOrUpdatePassword).toHaveBeenCalledWith(10, 'newpass');
+      // Tarea 6: el user se devuelve para el aviso de confirmación de reseteo de contraseña.
+      expect(result.user).toEqual(user);
     });
 
     it('debe lanzar UnauthorizedException cuando las contraseñas nuevas no coinciden', async () => {

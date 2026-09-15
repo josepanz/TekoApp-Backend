@@ -1,6 +1,7 @@
 // src/api/payments/services/payments.service.ts
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   ForbiddenException,
@@ -9,14 +10,16 @@ import {
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
 import { TaxService } from '@api/tax/services/tax.service';
+import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { UsersDBService } from '@modules/users-db/services/users-db.service';
+import { EmailService } from '@modules/email/services/email.service';
+import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
+import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
-import {
-  PaymentProvider,
-  PaymentStatus,
-  TransactionStatus,
-  Prisma,
-} from '@prisma/client';
+import { PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
 import { PaymentSummaryResponseDTO } from '../dtos/response/payment-summary.response.dto';
 import { PaymentTrendsResponseDTO } from '../dtos/response/payment-trends.response.dto';
 import {
@@ -30,20 +33,40 @@ import {
   RefundPaymentDto,
   UpdatePaymentMethodDto,
   CreatePaymentMethodRequestDTO,
+  PaymentListQueryDTO,
 } from '../dtos/request';
 import {
   mapPaymentToResponse,
   mapPaymentsToResponse,
   mapPaymentMethodToResponse,
 } from '../helpers/payments-response.helper';
+import {
+  PAYMENTS_EXPORT_COLUMNS,
+  mapPaymentsToExportRows,
+} from '../helpers/payments-export.helper';
 
 import { t } from '@common/i18n/i18n.helper';
+
+// Tarea 7 (platform-hardening-2026-09): tipos de PaymentMethod que efectivamente vencen — el
+// resto (CASH, QR, LINK, TRANSFER, WALLET, MOBILE_WALLET, CRYPTO) no tiene mes/año de expiración.
+const CARD_PAYMENT_METHODS = new Set<PaymentMethod>([
+  PaymentMethod.CREDIT_CARD,
+  PaymentMethod.DEBIT_CARD,
+  PaymentMethod.PREPAID_CARD,
+]);
+
 @Injectable()
 export class PaymentApiService {
+  private readonly logger = new Logger(PaymentApiService.name);
+
   constructor(
     private readonly dbService: PaymentDbService,
     private readonly feeCalculator: FeeCalculatorService,
     private readonly taxService: TaxService,
+    private readonly reportService: ReportService,
+    private readonly notificationsService: NotificationsService,
+    private readonly usersDb: UsersDBService,
+    private readonly emailService: EmailService,
   ) {}
 
   // ==================== PAGOS ====================
@@ -56,6 +79,64 @@ export class PaymentApiService {
     const payment = await this.dbService.findPaymentByReferenceId(referenceId);
     if (!payment) throw new NotFoundException(t('payments.NOT_FOUND'));
     return payment;
+  }
+
+  /**
+   * Fecha en la que vence una tarjeta a partir del mes/año impreso — válida hasta el último día
+   * del mes indicado, así que expira al primer día del mes siguiente (`new Date(year, month, 1)`,
+   * `month` en base 1 acá: si `month=12` da el 1° de enero del año siguiente).
+   */
+  private computeCardExpiresAt(month: unknown, year: unknown): Date | null {
+    if (typeof month !== 'number' || typeof year !== 'number') return null;
+    if (month < 1 || month > 12) return null;
+    return new Date(year, month, 1);
+  }
+
+  /**
+   * Tarea 7 (platform-hardening-2026-09): decisión de José — el backend rechaza el pago con un
+   * medio de pago vencido, con un `errorCode` tipado para que el cliente pueda deshabilitar el
+   * método en el selector en vez de mostrar un error genérico. Dos caminos: método guardado
+   * (`paymentMethodId`, chequea la columna `expiresAt` ya persistida) o tarjeta suelta sin
+   * guardar (`paymentDetails.cardExpMonth/cardExpYear`, calculado al vuelo).
+   */
+  private async assertPaymentMethodNotExpired(
+    userId: number,
+    dto: CreatePaymentDto,
+  ): Promise<void> {
+    const now = new Date();
+
+    if (dto.paymentMethodId) {
+      const method = await this.dbService.findPaymentMethodByReferenceId(
+        dto.paymentMethodId,
+        userId,
+      );
+      if (!method) throw new NotFoundException(t('payments.METHOD_NOT_FOUND'));
+
+      if (method.expiresAt && method.expiresAt <= now) {
+        throw new BadRequestException({
+          message: t('payments.PAYMENT_METHOD_EXPIRED'),
+          errorCode: 'PAYMENT_METHOD_EXPIRED',
+          details: {
+            paymentMethodId: dto.paymentMethodId,
+            expiresAt: method.expiresAt,
+          },
+        });
+      }
+      return;
+    }
+
+    if (!CARD_PAYMENT_METHODS.has(dto.paymentMethod)) return;
+    const expiresAt = this.computeCardExpiresAt(
+      dto.paymentDetails?.cardExpMonth,
+      dto.paymentDetails?.cardExpYear,
+    );
+    if (expiresAt && expiresAt <= now) {
+      throw new BadRequestException({
+        message: t('payments.PAYMENT_METHOD_EXPIRED'),
+        errorCode: 'PAYMENT_METHOD_EXPIRED',
+        details: { expiresAt },
+      });
+    }
   }
 
   async createPayment(
@@ -81,6 +162,9 @@ export class PaymentApiService {
     if (existingPayment) {
       throw new BadRequestException(t('payments.ALREADY_EXISTS_FOR_SERVICE'));
     }
+
+    // Tarea 7: rechazo temprano, antes de calcular fees/impuestos o tocar la DB de escritura.
+    await this.assertPaymentMethodNotExpired(userId, dto);
 
     const fee = await this.feeCalculator.calculateProviderFee(
       dto.amount,
@@ -129,6 +213,29 @@ export class PaymentApiService {
       status,
     );
     return mapPaymentsToResponse(payments);
+  }
+
+  // Mismos filtros y misma fuente de datos que getPayments — sin paginar, el volumen lo
+  // controla el filtro que mande el staff, no una página.
+  async exportToCsv(query: PaymentListQueryDTO): Promise<IDownloadResponse> {
+    const payments = await this.dbService.findAllPayments(
+      query.userId,
+      query.professionalId,
+      query.status,
+    );
+    const rows = mapPaymentsToExportRows(mapPaymentsToResponse(payments));
+    const buffer = await this.reportService.generate(
+      {
+        metadata: { title: 'Pagos', excelColumns: PAYMENTS_EXPORT_COLUMNS },
+        items: rows,
+      },
+      { format: 'csv' },
+    );
+    return {
+      buffer,
+      filename: `pagos-${new Date().toISOString().slice(0, 10)}.csv`,
+      format: 'csv',
+    };
   }
 
   async getPaymentById(id: string): Promise<PaymentDetailResponseDTO> {
@@ -202,12 +309,32 @@ export class PaymentApiService {
   async refundPayment(
     id: string,
     dto: RefundPaymentDto,
+    userId: number,
   ): Promise<PaymentDetailResponseDTO> {
     // 404 rápido si el pago no existe. La validación real de estado/monto disponible se hace
     // de forma atómica dentro de executeRefund (bajo lock de fila), no acá — un chequeo previo
     // sin lock sería una condición de carrera si dos reembolsos llegan al mismo tiempo.
     const payment = await this.getPaymentEntityByRef(id);
+    if (payment.userId !== userId) {
+      throw new ForbiddenException(t('payments.UNAUTHORIZED_REFUND'));
+    }
     await this.dbService.executeRefund(payment.id, dto.amount, dto.reason);
+
+    // I-05 (#16, IMPRESCINDIBLE): movimiento de dinero — el cliente necesita confirmación de
+    // que el reembolso se ejecutó y por cuánto. Después de que executeRefund ya resolvió (lock
+    // de fila liberado, ver comentario de ese método).
+    await this.notificationsService.create(
+      {
+        title: t('payments.NOTIFICATION_REFUNDED_TITLE'),
+        message: t('payments.NOTIFICATION_REFUNDED_MESSAGE', {
+          amount: dto.amount,
+        }),
+        type: NotificationType.PAYMENT_REFUNDED,
+        channels: ['in_app', 'push'],
+      },
+      payment.userId,
+    );
+
     return this.getPaymentById(id);
   }
 
@@ -224,6 +351,16 @@ export class PaymentApiService {
     userId: number,
     dto: CreatePaymentMethodRequestDTO,
   ): Promise<PaymentMethodDetailResponseDTO> {
+    // Tarea 7: persiste `expiresAt` a partir de mes/año de tarjeta en `details` (si vienen) —
+    // sin esto la columna quedaba siempre null y el rechazo de `createPayment` nunca podía
+    // encontrar un método realmente vencido.
+    const expiresAt = CARD_PAYMENT_METHODS.has(dto.type)
+      ? this.computeCardExpiresAt(
+          dto.details?.cardExpMonth,
+          dto.details?.cardExpYear,
+        )
+      : null;
+
     const created = await this.dbService.createPaymentMethod({
       userId,
       name: dto.name,
@@ -232,7 +369,32 @@ export class PaymentApiService {
       isDefault: dto.isDefault ?? false,
       details: dto.details ?? {},
       externalId: dto.externalId,
+      expiresAt,
     } as unknown as Prisma.PaymentMethodEntityUncheckedCreateInput);
+
+    // Tarea 6 (platform-hardening-2026-09): alta exitosa de medio de pago — fire-and-forget,
+    // un fallo de SMTP (o del lookup de usuario) nunca debe tumbar la respuesta de creación.
+    void (async () => {
+      try {
+        const user = await this.usersDb.findById(userId);
+        if (!user) return;
+        await this.emailService.sendEmailByType(
+          user.email,
+          EmailTypeEnum.PAYMENT_METHOD_CREATED,
+          user,
+          undefined,
+          {
+            dto: { methodLabel: dto.name },
+            description: 'alta de método de pago',
+          },
+        );
+      } catch (error) {
+        this.logger.error(
+          `Error enviando el aviso de alta de medio de pago a userId=${userId}: ${String(error)}`,
+        );
+      }
+    })();
+
     return mapPaymentMethodToResponse(created);
   }
 
@@ -274,67 +436,28 @@ export class PaymentApiService {
   }
 
   // ==================== WEBHOOKS ====================
-
-  async processWebhook(
-    provider: PaymentProvider,
-    payload: Record<string, unknown>,
-  ): Promise<void> {
-    switch (provider) {
-      case PaymentProvider.STRIPE:
-        await this.processStripeWebhook(payload);
-        break;
-      // Añadir PayPal, MercadoPago, etc.
-      default:
-        throw new BadRequestException(t('payments.PROVIDER_NOT_SUPPORTED'));
-    }
-  }
-
-  private async processStripeWebhook(
-    payload: Record<string, unknown>,
-  ): Promise<void> {
-    const type = payload.type as string;
-    const dataObj = payload.data as Record<string, Record<string, unknown>>;
-    const target = dataObj?.object;
-
-    if (!target || typeof target.id !== 'string') return;
-
-    if (type === 'payment_intent.succeeded') {
-      await this.handlePaymentResult(
-        target.id,
-        TransactionStatus.COMPLETED,
-        PaymentStatus.COMPLETED,
-      );
-    } else if (type === 'payment_intent.payment_failed') {
-      const error = target.last_payment_error as
-        | Record<string, string>
-        | undefined;
-      await this.handlePaymentResult(
-        target.id,
-        TransactionStatus.FAILED,
-        PaymentStatus.FAILED,
-        error?.message || 'Pago fallido',
-      );
-    }
-  }
-
-  private async handlePaymentResult(
-    externalId: string,
-    tStatus: TransactionStatus,
-    pStatus: PaymentStatus,
-    reason?: string,
-  ) {
-    const transaction =
-      await this.dbService.findTransactionByExternalId(externalId);
-    if (transaction) {
-      await this.dbService.updateTransactionAndPaymentStatus(
-        transaction.id,
-        transaction.paymentId,
-        tStatus,
-        pStatus,
-        reason,
-      );
-    }
-  }
+  //
+  // REMOVIDO 2026-09-04 (auditoría de plataforma, Fase A — ver
+  // openspec/specs/platform-audit-2026-09.md §2.1).
+  //
+  // Existía `POST /payments/webhooks/:provider` con un handler de Stripe. Tenía dos problemas:
+  //
+  //  1. Seguridad: el endpoint tomaba un `externalId` arbitrario del body y flipeaba el estado
+  //     del pago/transacción correspondiente, protegido ÚNICAMENTE por `JwtAuthGuard` — que exige
+  //     un JWT válido, no un permiso. Cualquier usuario logueado podía marcar cualquier pago como
+  //     COMPLETED. Nunca verificó firma: `stripe.webhooks.constructEvent()` no se llamaba en
+  //     ningún lado, pese a que `STRIPE_WEBHOOK_SECRET` es `required` en `config-schema.ts`.
+  //  2. No servía a nadie: el SDK de Stripe está en `package.json` pero no se importa en todo
+  //     `src/` — los pagos son internos/simulados. Ningún cliente (Web ni Mobile) llamaba la ruta.
+  //
+  // No se re-implementó la verificación de firma de Stripe porque la pasarela definida para
+  // Paraguay es **Dinelco Checkout (BEPSA)**, cuyo contrato de callback es distinto. Ver
+  // `openspec/changes/0014-dinelco-checkout-integration.md`: ahí va el webhook nuevo, con la
+  // verificación de autenticidad que exija Dinelco, como ruta pública explícita y no bajo el
+  // guard de sesión.
+  //
+  // `PaymentDbService.findTransactionByExternalId` se mantiene: es un primitivo genérico, ya
+  // testeado, que la integración de Dinelco va a necesitar igual.
 
   // ==================== ESTADÍSTICAS Y MATEMÁTICA ====================
 

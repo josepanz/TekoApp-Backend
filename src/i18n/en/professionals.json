@@ -1,6 +1,14 @@
 {
   "CATEGORY_DOES_NOT_EXIST": "The category does not exist",
   "NOT_FOUND": "Professional not found",
+  "NOTIFICATION_VERIFIED_TITLE": "Your account was verified",
+  "NOTIFICATION_VERIFIED_MESSAGE": "We approved your professional verification. You can now operate on the platform.",
+  "NOTIFICATION_VERIFICATION_REJECTED_TITLE": "Your verification was rejected",
+  "NOTIFICATION_VERIFICATION_REJECTED_MESSAGE": "We could not verify your professional account.",
+  "NOTIFICATION_SUSPENDED_TITLE": "Your professional account was suspended",
+  "NOTIFICATION_SUSPENDED_MESSAGE": "We suspended your professional account. Reason: {reason}",
+  "STATUS_CHANGED_BEFORE_SUSPEND": "The professional's status changed before it could be suspended, please try again",
+  "STATUS_CHANGED_BEFORE_VERIFY": "The professional's status changed before it could be verified, please try again",
   "UNAUTHORIZED_UPDATE": "You do not have permission to modify this professional",
   "USER_ALREADY_PROFESSIONAL": "The user is already a professional",
   "USER_NOT_FOUND": "User not found"

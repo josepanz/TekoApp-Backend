@@ -9,6 +9,8 @@ import { RequestStatus } from '@prisma/client';
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { MaterialCatalogDbService } from '@modules/material-catalog-db/services/material-catalog-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { t } from '@common/i18n/i18n.helper';
 import { ReplaceBudgetOptionsRequestDTO } from '../dtos/request';
 import {
@@ -30,6 +32,7 @@ export class BudgetsService {
     private readonly budgetsDb: BudgetsDbService,
     private readonly servicesDb: ServicesDbService,
     private readonly materialCatalogDb: MaterialCatalogDbService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   private async resolveServiceAndRequest(
@@ -126,6 +129,19 @@ export class BudgetsService {
       createdBy,
       options,
     );
+
+    // I-05 (#9, IMPRESCINDIBLE): el cliente no sabe que ya puede revisar opciones a menos que
+    // vuelva a abrir la app — avisar después de que la transacción ya commiteó.
+    await this.notificationsService.create(
+      {
+        title: t('budgets.NOTIFICATION_OPTIONS_READY_TITLE'),
+        message: t('budgets.NOTIFICATION_OPTIONS_READY_MESSAGE'),
+        type: NotificationType.BUDGET_OPTIONS_READY,
+        channels: ['in_app', 'push'],
+      },
+      service.userId,
+    );
+
     return { data: mapOptionsToResponse(created) };
   }
 
@@ -178,6 +194,23 @@ export class BudgetsService {
     );
     if (updatedCount === 0) {
       throw new ConflictException(t('budgets.NO_LONGER_AVAILABLE'));
+    }
+
+    // I-05 (#10, IMPRESCINDIBLE): ruta de asignación equivalente a #2 cuando el servicio pasó
+    // por presupuestos — avisar al profesional autor de la opción elegida, después del commit.
+    const professional = await this.servicesDb.findProfessionalById(
+      request.professionalId,
+    );
+    if (professional) {
+      await this.notificationsService.create(
+        {
+          title: t('budgets.NOTIFICATION_OPTION_SELECTED_TITLE'),
+          message: t('budgets.NOTIFICATION_OPTION_SELECTED_MESSAGE'),
+          type: NotificationType.BUDGET_OPTION_SELECTED,
+          channels: ['in_app', 'push'],
+        },
+        professional.userId,
+      );
     }
 
     const refreshedOptions = await this.budgetsDb.findByRequestId(request.id);

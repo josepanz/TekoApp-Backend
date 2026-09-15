@@ -1,0 +1,9 @@
+{
+  "DELETION_BLOCKED": "No se puede eliminar la cuenta: hay bloqueantes activos",
+  "DELETION_ALREADY_REQUESTED": "Ya existe una solicitud de borrado activa para esta cuenta",
+  "DELETION_NOT_REQUESTED": "No hay ninguna solicitud de borrado activa para cancelar",
+  "NOTIFICATION_REQUESTED_TITLE": "Solicitud de borrado de cuenta registrada",
+  "NOTIFICATION_REQUESTED_MESSAGE": "Registramos tu pedido de borrado. Tu cuenta se eliminará el {scheduledAt} si no cancelás antes desde la app.",
+  "NOTIFICATION_CANCELLED_TITLE": "Borrado de cuenta cancelado",
+  "NOTIFICATION_CANCELLED_MESSAGE": "Cancelamos tu pedido de borrado. Tu cuenta sigue activa."
+}

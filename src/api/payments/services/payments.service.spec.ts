@@ -12,11 +12,18 @@ import { PaymentApiService } from './payments.service';
 import { PaymentDbService } from '@modules/payments-db/services/payment-db.service';
 import { FeeCalculatorService } from '@modules/payments-db/services/fee-calculator.service';
 import { TaxService } from '@api/tax/services/tax.service';
+import { ReportService } from '@modules/report/services/report.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { UsersDBService } from '@modules/users-db/services/users-db.service';
+import { EmailService } from '@modules/email/services/email.service';
+import { EmailTypeEnum } from '@modules/email/enum/email-type.enum';
 import { RefundReason } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentDto } from '../dtos/request/create-payment.dto';
 import type { RefundPaymentDto } from '../dtos/request/refund-payment.dto';
 import type { CreatePaymentMethodRequestDTO } from '../dtos/request/create-payment-method.request.dto';
 import type { UpdatePaymentMethodDto } from '../dtos/request/update-payment-method.dto';
+import type { PaymentListQueryDTO } from '../dtos/request/payment-list.query.dto';
 
 // ============================================================
 // Mocks a nivel de módulo — nunca inline en useValue
@@ -49,6 +56,16 @@ const mockCalculatePlatformFee = jest.fn();
 
 // TaxService
 const mockCalculateTax = jest.fn();
+
+// ReportService
+const mockGenerate = jest.fn();
+
+// NotificationsService
+const mockNotificationsCreate = jest.fn();
+
+// UsersDBService / EmailService (tarea 6 — alta de medio de pago)
+const mockUsersFindById = jest.fn();
+const mockSendEmailByType = jest.fn();
 
 // ============================================================
 // Fixtures reutilizables
@@ -159,6 +176,22 @@ describe('PaymentApiService', () => {
         {
           provide: TaxService,
           useValue: { calculateTax: mockCalculateTax },
+        },
+        {
+          provide: ReportService,
+          useValue: { generate: mockGenerate },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
+        },
+        {
+          provide: UsersDBService,
+          useValue: { findById: mockUsersFindById },
+        },
+        {
+          provide: EmailService,
+          useValue: { sendEmailByType: mockSendEmailByType },
         },
       ],
     }).compile();
@@ -277,6 +310,118 @@ describe('PaymentApiService', () => {
       await expect(service.createPayment(BASE_USER_ID, dto)).rejects.toThrow(
         BadRequestException,
       );
+    });
+
+    // ── Tarea 7 (I-05, platform-hardening-2026-09): rechazar el pago con un medio vencido ──
+
+    it('debe rechazar con errorCode PAYMENT_METHOD_EXPIRED cuando el método guardado ya venció', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto({ paymentMethodId: 'pm-ref-1' });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+      mockFindPaymentMethodByReferenceId.mockResolvedValue({
+        id: 5,
+        referenceId: 'pm-ref-1',
+        userId: BASE_USER_ID,
+        expiresAt: new Date('2020-01-01'),
+      });
+
+      // Act & Assert
+      await expect(
+        service.createPayment(BASE_USER_ID, dto),
+      ).rejects.toMatchObject({
+        response: { errorCode: 'PAYMENT_METHOD_EXPIRED' },
+      });
+      expect(mockFindPaymentMethodByReferenceId).toHaveBeenCalledWith(
+        'pm-ref-1',
+        BASE_USER_ID,
+      );
+      expect(mockCreatePaymentWithTransaction).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar NotFoundException cuando paymentMethodId no resuelve a un método del usuario', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto({ paymentMethodId: 'pm-ajeno' });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+      mockFindPaymentMethodByReferenceId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.createPayment(BASE_USER_ID, dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('debe permitir el pago cuando el método guardado no está vencido', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto({ paymentMethodId: 'pm-ref-1' });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+      mockFindPaymentMethodByReferenceId.mockResolvedValue({
+        id: 5,
+        referenceId: 'pm-ref-1',
+        userId: BASE_USER_ID,
+        expiresAt: new Date('2099-01-01'),
+      });
+      mockCalculateProviderFee.mockResolvedValue(3);
+      mockCalculatePlatformFee.mockResolvedValue(10.3);
+      mockCalculateTax.mockResolvedValue(0);
+      mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
+
+      // Act & Assert
+      await expect(
+        service.createPayment(BASE_USER_ID, dto),
+      ).resolves.toBeDefined();
+    });
+
+    it('debe rechazar con errorCode PAYMENT_METHOD_EXPIRED cuando la tarjeta suelta (sin guardar) ya venció', async () => {
+      // Arrange — sin paymentMethodId, mes/año vienen en paymentDetails.
+      const dto = buildCreatePaymentDto({
+        paymentDetails: { cardExpMonth: 1, cardExpYear: 2020 },
+      });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.createPayment(BASE_USER_ID, dto),
+      ).rejects.toMatchObject({
+        response: { errorCode: 'PAYMENT_METHOD_EXPIRED' },
+      });
+      expect(mockFindPaymentMethodByReferenceId).not.toHaveBeenCalled();
+    });
+
+    it('no debe validar expiración para métodos que no son tarjeta (ej. TRANSFER)', async () => {
+      // Arrange
+      const dto = buildCreatePaymentDto({
+        paymentMethod: PaymentMethod.TRANSFER,
+      });
+      mockFindServiceByReferenceId.mockResolvedValue({ id: BASE_SERVICE_PK });
+      mockFindProfessionalByReferenceId.mockResolvedValue({
+        id: BASE_PROFESSIONAL_PK,
+      });
+      mockFindExistingPayment.mockResolvedValue(null);
+      mockCalculateProviderFee.mockResolvedValue(3);
+      mockCalculatePlatformFee.mockResolvedValue(10.3);
+      mockCalculateTax.mockResolvedValue(0);
+      mockCreatePaymentWithTransaction.mockResolvedValue(buildPayment());
+
+      // Act & Assert
+      await expect(
+        service.createPayment(BASE_USER_ID, dto),
+      ).resolves.toBeDefined();
     });
 
     it('debe crear el pago con la PK interna del servicio, fee, platformFee, tax y totalAmount calculados', async () => {
@@ -583,23 +728,49 @@ describe('PaymentApiService', () => {
 
       // Act & Assert
       await expect(
-        service.refundPayment(BASE_PAYMENT_REF, dto),
+        service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID),
       ).rejects.toThrow(NotFoundException);
+      expect(mockExecuteRefund).not.toHaveBeenCalled();
+    });
+
+    it('debe lanzar ForbiddenException si el userId no coincide con el dueño del pago', async () => {
+      // Arrange
+      const payment = buildPayment({
+        userId: 99,
+        status: PaymentStatus.COMPLETED,
+      });
+      mockFindPaymentByReferenceId.mockResolvedValue(payment);
+      const dto = buildRefundDto({ amount: 50 });
+
+      // Act & Assert
+      await expect(
+        service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID), // BASE_USER_ID = 42, owner = 99
+      ).rejects.toThrow(ForbiddenException);
       expect(mockExecuteRefund).not.toHaveBeenCalled();
     });
 
     it('debe delegar el reembolso a executeRefund con la PK interna, monto y motivo', async () => {
       // Arrange
-      const completed = buildPayment({ status: PaymentStatus.COMPLETED });
-      const partial = buildPayment({ status: PaymentStatus.PARTIAL_REFUNDED });
+      const completed = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.COMPLETED,
+      });
+      const partial = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.PARTIAL_REFUNDED,
+      });
       mockFindPaymentByReferenceId
-        .mockResolvedValueOnce(completed) // 404 check
+        .mockResolvedValueOnce(completed) // 404 + ownership check
         .mockResolvedValueOnce(partial); // re-fetch tras el reembolso
       mockExecuteRefund.mockResolvedValue(partial);
       const dto = buildRefundDto({ amount: 50 });
 
       // Act
-      const result = await service.refundPayment(BASE_PAYMENT_REF, dto);
+      const result = await service.refundPayment(
+        BASE_PAYMENT_REF,
+        dto,
+        BASE_USER_ID,
+      );
 
       // Assert
       expect(mockExecuteRefund).toHaveBeenCalledWith(
@@ -608,11 +779,19 @@ describe('PaymentApiService', () => {
         dto.reason,
       );
       expect(result.status).toBe(PaymentStatus.PARTIAL_REFUNDED);
+      // I-05 (#16, IMPRESCINDIBLE): el cliente necesita confirmación del reembolso.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.PAYMENT_REFUNDED }),
+        BASE_USER_ID,
+      );
     });
 
     it('debe propagar el BadRequestException que lance executeRefund (ej. monto excede disponible)', async () => {
       // Arrange
-      const payment = buildPayment({ status: PaymentStatus.COMPLETED });
+      const payment = buildPayment({
+        userId: BASE_USER_ID,
+        status: PaymentStatus.COMPLETED,
+      });
       mockFindPaymentByReferenceId.mockResolvedValue(payment);
       mockExecuteRefund.mockRejectedValue(
         new BadRequestException(
@@ -623,8 +802,60 @@ describe('PaymentApiService', () => {
 
       // Act & Assert
       await expect(
-        service.refundPayment(BASE_PAYMENT_REF, dto),
+        service.refundPayment(BASE_PAYMENT_REF, dto, BASE_USER_ID),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  // ============================================================
+  // exportToCsv
+  // ============================================================
+  describe('exportToCsv', () => {
+    it('debe pedir los pagos con los mismos filtros que getPayments, sin paginar', async () => {
+      // Arrange
+      mockFindAllPayments.mockResolvedValue([buildPayment()]);
+      mockGenerate.mockResolvedValue(Buffer.from('csv'));
+      const query = {
+        userId: 1,
+        professionalId: 2,
+        status: PaymentStatus.COMPLETED,
+      } as PaymentListQueryDTO;
+
+      // Act
+      await service.exportToCsv(query);
+
+      // Assert
+      expect(mockFindAllPayments).toHaveBeenCalledWith(
+        1,
+        2,
+        PaymentStatus.COMPLETED,
+      );
+    });
+
+    it('debe generar un CSV con una fila por pago y devolver el buffer del reportService', async () => {
+      // Arrange
+      mockFindAllPayments.mockResolvedValue([buildPayment()]);
+      const csvBuffer = Buffer.from('csv-content');
+      mockGenerate.mockResolvedValue(csvBuffer);
+
+      // Act
+      const result = await service.exportToCsv({});
+
+      // Assert
+      expect(mockGenerate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
+            expect.objectContaining({
+              referenceId: BASE_PAYMENT_REF,
+              serviceId: BASE_SERVICE_REF,
+            }),
+          ],
+        }),
+        { format: 'csv' },
+      );
+      expect(result.buffer).toBe(csvBuffer);
+      expect(result.format).toBe('csv');
+      expect(result.filename).toMatch(/^pagos-\d{4}-\d{2}-\d{2}\.csv$/);
     });
   });
 
@@ -681,6 +912,118 @@ describe('PaymentApiService', () => {
       expect(mockCreatePaymentMethod).toHaveBeenCalledTimes(1);
       expect(result.id).toBe(BASE_PM_PK);
       expect(result.referenceId).toBe(BASE_PM_REF);
+    });
+
+    it('debe disparar el aviso de alta de medio de pago sin bloquear la respuesta (tarea 6)', async () => {
+      // Arrange
+      const dto: CreatePaymentMethodRequestDTO = {
+        name: 'Mi tarjeta VISA',
+        type: 'CREDIT_CARD',
+        provider: PaymentProvider.STRIPE,
+        isDefault: false,
+        details: { cardLast4: '4242' },
+        externalId: 'pm_stripe_001',
+      } as unknown as CreatePaymentMethodRequestDTO;
+      const createdMethod = {
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+        ...dto,
+      };
+      const user = { id: BASE_USER_ID, email: 'cliente@example.com' };
+      mockCreatePaymentMethod.mockResolvedValue(createdMethod);
+      mockUsersFindById.mockResolvedValue(user);
+      mockSendEmailByType.mockResolvedValue(undefined);
+
+      // Act
+      await service.createPaymentMethod(BASE_USER_ID, dto);
+      // fire-and-forget: encadena un findById antes del sendEmailByType — un solo microtask
+      // flush no alcanza, se espera un macrotask (setImmediate) para que ambos hayan corrido.
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Assert
+      expect(mockUsersFindById).toHaveBeenCalledWith(BASE_USER_ID);
+      expect(mockSendEmailByType).toHaveBeenCalledWith(
+        user.email,
+        EmailTypeEnum.PAYMENT_METHOD_CREATED,
+        user,
+        undefined,
+        expect.objectContaining({ dto: { methodLabel: dto.name } }),
+      );
+    });
+
+    it('debe calcular y persistir expiresAt para una tarjeta con mes/año en details (tarea 7)', async () => {
+      // Arrange
+      const dto: CreatePaymentMethodRequestDTO = {
+        name: 'Mi tarjeta VISA',
+        type: 'CREDIT_CARD',
+        provider: PaymentProvider.STRIPE,
+        details: { cardLast4: '4242', cardExpMonth: 12, cardExpYear: 2030 },
+      } as unknown as CreatePaymentMethodRequestDTO;
+      mockCreatePaymentMethod.mockResolvedValue({
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+        ...dto,
+      });
+      mockUsersFindById.mockResolvedValue(null);
+
+      // Act
+      await service.createPaymentMethod(BASE_USER_ID, dto);
+
+      // Assert — vence el 1° de enero de 2031 (último día válido: 31/12/2030).
+      expect(mockCreatePaymentMethod).toHaveBeenCalledWith(
+        expect.objectContaining({ expiresAt: new Date(2030, 12, 1) }),
+      );
+    });
+
+    it('no debe calcular expiresAt para un método que no es tarjeta', async () => {
+      // Arrange
+      const dto: CreatePaymentMethodRequestDTO = {
+        name: 'Transferencia bancaria',
+        type: 'TRANSFER',
+        provider: PaymentProvider.STRIPE,
+        details: { bankName: 'Banco X' },
+      } as unknown as CreatePaymentMethodRequestDTO;
+      mockCreatePaymentMethod.mockResolvedValue({
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+        ...dto,
+      });
+      mockUsersFindById.mockResolvedValue(null);
+
+      // Act
+      await service.createPaymentMethod(BASE_USER_ID, dto);
+
+      // Assert
+      expect(mockCreatePaymentMethod).toHaveBeenCalledWith(
+        expect.objectContaining({ expiresAt: null }),
+      );
+    });
+
+    it('no debe fallar la creación ni intentar enviar el email cuando el usuario no se encuentra', async () => {
+      // Arrange
+      const dto: CreatePaymentMethodRequestDTO = {
+        name: 'Mi tarjeta VISA',
+        type: 'CREDIT_CARD',
+        provider: PaymentProvider.STRIPE,
+      } as unknown as CreatePaymentMethodRequestDTO;
+      mockCreatePaymentMethod.mockResolvedValue({
+        id: BASE_PM_PK,
+        referenceId: BASE_PM_REF,
+        userId: BASE_USER_ID,
+        ...dto,
+      });
+      mockUsersFindById.mockResolvedValue(null);
+
+      // Act
+      const result = await service.createPaymentMethod(BASE_USER_ID, dto);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Assert
+      expect(result.id).toBe(BASE_PM_PK);
+      expect(mockSendEmailByType).not.toHaveBeenCalled();
     });
   });
 

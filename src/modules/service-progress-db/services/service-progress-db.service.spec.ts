@@ -99,6 +99,43 @@ describe('ServiceProgressDbService', () => {
     });
   });
 
+  describe('createEntry', () => {
+    it('debe crear la entrada con los datos recibidos', async () => {
+      // Arrange
+      const data = {
+        serviceId: 10,
+        professionalId: 99,
+        note: 'Avance',
+        images: [] as string[],
+        entryOrder: 1,
+        createdBy: 'user-ref-1',
+      };
+      mockCreate.mockResolvedValue({ id: 1, ...data });
+
+      // Act
+      await service.createEntry(data);
+
+      // Assert
+      expect(mockCreate).toHaveBeenCalledWith({ data });
+    });
+  });
+
+  describe('findEntryByReferenceId', () => {
+    it('debe devolver null si no existe ninguna entrada con ese referenceId', async () => {
+      // Arrange
+      mockFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findEntryByReferenceId('inexistente');
+
+      // Assert
+      expect(result).toBeNull();
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'inexistente' },
+      });
+    });
+  });
+
   describe('softDeleteEntry', () => {
     it('debe marcar isActive en false sin borrar el registro', async () => {
       // Arrange

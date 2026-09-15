@@ -2,10 +2,10 @@
 import { Module } from '@nestjs/common';
 import { TrackingController } from './controllers/tracking.controller';
 import { TrackingApiService } from './services/tracking.service';
-import { TrackingDbModule } from '../../modules/tracking-db/tracking-db.module';
+import { GeoTrackingDbModule } from '../../modules/geo-tracking-db/geo-tracking-db.module';
 
 @Module({
-  imports: [TrackingDbModule],
+  imports: [GeoTrackingDbModule],
   controllers: [TrackingController],
   providers: [TrackingApiService],
 })

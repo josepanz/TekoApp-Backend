@@ -10,6 +10,8 @@ import { ProfessionalVerificationHelper } from '@modules/professional-documents-
 import { ProfessionalDocumentTypesDbService } from '@modules/professional-document-types-db/services/professional-document-types-db.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { StorageService } from '@modules/storage/services/storage.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { ProfessionalDocumentsService } from './professional-documents.service';
 
 const mockCreate = jest.fn();
@@ -24,9 +26,11 @@ const mockFindDocTypeByReferenceId = jest.fn();
 
 const mockFindByUserId = jest.fn();
 const mockFindProfessionalByReferenceId = jest.fn();
+const mockFindById = jest.fn();
 
 const mockRecompute = jest.fn();
 const mockUploadFilesQueue = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 const professional = { id: 100, userId: 5, categoryId: 3 };
 
@@ -83,6 +87,7 @@ describe('ProfessionalDocumentsService', () => {
           useValue: {
             findByUserId: mockFindByUserId,
             findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
+            findById: mockFindById,
           },
         },
         {
@@ -92,6 +97,10 @@ describe('ProfessionalDocumentsService', () => {
         {
           provide: StorageService,
           useValue: { uploadFilesQueue: mockUploadFilesQueue },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -381,6 +390,7 @@ describe('ProfessionalDocumentsService', () => {
           status: DocumentReviewStatus.APPROVED,
         });
       mockUpdateStatusConditional.mockResolvedValue(1);
+      mockFindById.mockResolvedValue(professional);
 
       // Act
       await service.review(
@@ -403,6 +413,11 @@ describe('ProfessionalDocumentsService', () => {
         }),
       );
       expect(mockRecompute).toHaveBeenCalledWith(100);
+      // I-05 (#22, IMPRESCINDIBLE): el profesional se entera de que ya puede operar.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.DOCUMENT_APPROVED }),
+        professional.userId,
+      );
     });
 
     it('debe rechazar con el motivo cuando status=REJECTED', async () => {
@@ -421,6 +436,7 @@ describe('ProfessionalDocumentsService', () => {
           status: DocumentReviewStatus.REJECTED,
         });
       mockUpdateStatusConditional.mockResolvedValue(1);
+      mockFindById.mockResolvedValue(professional);
 
       // Act
       await service.review(
@@ -438,6 +454,11 @@ describe('ProfessionalDocumentsService', () => {
           status: DocumentReviewStatus.REJECTED,
           rejectionReason: 'Foto ilegible',
         }),
+      );
+      // I-05 (#23, IMPRESCINDIBLE): sin el aviso (y el motivo) no sabe qué corregir.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.DOCUMENT_REJECTED }),
+        professional.userId,
       );
     });
   });

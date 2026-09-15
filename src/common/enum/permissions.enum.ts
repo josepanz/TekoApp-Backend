@@ -59,6 +59,12 @@ export const PERMISSIONS = {
   PROFESSIONAL_DOCUMENTS: {
     REVIEW: 'professional-documents.review:manage',
   },
+  PROFESSIONAL_PORTFOLIO: {
+    REVIEW: 'professional-portfolio.review:manage',
+  },
+  PROFESSIONALS: {
+    VERIFY: 'professionals.verification:manage',
+  },
   MATERIAL_CATALOG: {
     MANAGE: 'material-catalog.catalog:manage',
   },
@@ -70,6 +76,12 @@ export const PERMISSIONS = {
   },
   PAYMENTS: {
     AUDIT_VIEW: 'payments.audit:read',
+  },
+  DISPUTES: {
+    ADJUDICATE: 'disputes.adjudication:manage',
+  },
+  SYSTEM: {
+    AUDIT_VIEW: 'system.audit:read',
   },
 } as const;
 

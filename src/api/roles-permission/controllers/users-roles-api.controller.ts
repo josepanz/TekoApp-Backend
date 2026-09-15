@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Version,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import * as RequestDTO from '@api/roles-permission/dtos/request';
@@ -26,7 +18,6 @@ export class UsersRolesApiController {
   constructor(private readonly rolesApiService: RolesApiService) {}
 
   @Post(':userId/roles')
-  @Version('1')
   @UserRolesDocs('assignRolesToUser')
   @Permissions(PERMISSIONS.ASSIGNMENT.ROLE_PERMISSION, PERMISSIONS.ADMIN.ALL)
   async assignRolesToUser(
@@ -41,7 +32,6 @@ export class UsersRolesApiController {
   }
 
   @Get(':userId/roles')
-  @Version('1')
   @UserRolesDocs('getUserWithRoles')
   @Permissions(
     PERMISSIONS.USER.READ,
@@ -55,7 +45,6 @@ export class UsersRolesApiController {
   }
 
   @Post(':userId/permissions')
-  @Version('1')
   @UserRolesDocs('assignPermissionsToUser')
   @Permissions(PERMISSIONS.ASSIGNMENT.USER_PERMISSION, PERMISSIONS.ADMIN.ALL)
   async assignPermissionsToUser(

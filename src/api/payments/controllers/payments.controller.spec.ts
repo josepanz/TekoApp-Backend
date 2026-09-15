@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
+import { PERMISSIONS_KEY } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { PaymentController } from '@api/payments/controllers/payments.controller';
 import { PaymentApiService } from '@api/payments/services/payments.service';
 import {
@@ -9,7 +12,6 @@ import {
   UpdatePaymentMethodDto,
   PaymentIdParamDTO,
   PaymentMethodIdParamDTO,
-  PaymentWebhookParamDTO,
   PaymentListQueryDTO,
   PaymentSummaryQueryDTO,
   PaymentTrendsQueryDTO,
@@ -39,7 +41,6 @@ const mockGetPaymentMethods = jest.fn();
 const mockCreatePaymentMethod = jest.fn();
 const mockUpdatePaymentMethod = jest.fn();
 const mockDeletePaymentMethod = jest.fn();
-const mockProcessWebhook = jest.fn();
 
 const mockUser = {
   id: 1,
@@ -77,7 +78,6 @@ describe('PaymentController', () => {
             createPaymentMethod: mockCreatePaymentMethod,
             updatePaymentMethod: mockUpdatePaymentMethod,
             deletePaymentMethod: mockDeletePaymentMethod,
-            processWebhook: mockProcessWebhook,
           },
         },
       ],
@@ -279,7 +279,22 @@ describe('PaymentController', () => {
 
   // ==================== refund ====================
   describe('refund', () => {
-    it('debe procesar un reembolso y retornar el pago actualizado', async () => {
+    it('debe requerir el permiso de auditoría de pagos o admin:all', () => {
+      // Arrange & Act
+      const requiredPermissions = new Reflector().get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata, nunca se invoca desatado de la instancia
+        controller.refund,
+      );
+
+      // Assert
+      expect(requiredPermissions).toEqual([
+        PERMISSIONS.PAYMENTS.AUDIT_VIEW,
+        PERMISSIONS.ADMIN.ALL,
+      ]);
+    });
+
+    it('debe procesar un reembolso acotado al usuario autenticado y retornar el pago actualizado', async () => {
       // Arrange
       const param: PaymentIdParamDTO = { id: 'pay-1' };
       const dto = {
@@ -292,10 +307,14 @@ describe('PaymentController', () => {
       mockRefundPayment.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.refund(param, dto);
+      const result = await controller.refund(param, dto, { user: mockUser });
 
       // Assert
-      expect(mockRefundPayment).toHaveBeenCalledWith(param.id, dto);
+      expect(mockRefundPayment).toHaveBeenCalledWith(
+        param.id,
+        dto,
+        mockUser.id,
+      );
       expect(result).toBe(expected);
     });
   });
@@ -393,24 +412,14 @@ describe('PaymentController', () => {
   });
 
   // ==================== handleWebhooks ====================
-  describe('handleWebhooks', () => {
-    it('debe procesar el webhook del proveedor indicado', async () => {
-      // Arrange
-      const param: PaymentWebhookParamDTO = {
-        provider: PaymentProvider.STRIPE,
-      };
-      const payload: Record<string, unknown> = {
-        type: 'payment_intent.succeeded',
-        data: { object: { id: 'pi_123' } },
-      };
-      mockProcessWebhook.mockResolvedValue(undefined);
-
-      // Act
-      const result = await controller.handleWebhooks(param, payload);
-
-      // Assert
-      expect(mockProcessWebhook).toHaveBeenCalledWith(param.provider, payload);
-      expect(result).toBeUndefined();
-    });
+  // Removido junto con la ruta (auditoría 2026-09-04, Fase A): el endpoint permitía a cualquier
+  // usuario con sesión flipear el estado de un pago desde un `externalId` del body, sin verificar
+  // firma. El webhook de la pasarela real se especifica en
+  // openspec/changes/0014-dinelco-checkout-integration.md.
+  it('no expone un endpoint de webhook: la ruta fue removida por seguridad', () => {
+    // Arrange & Act & Assert
+    expect(
+      (controller as unknown as Record<string, unknown>).handleWebhooks,
+    ).toBeUndefined();
   });
 });
