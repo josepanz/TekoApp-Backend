@@ -56,6 +56,50 @@ describe('BudgetsDbService', () => {
     });
   });
 
+  describe('findByReferenceId', () => {
+    it('debe devolver null si no existe ninguna opción con ese referenceId', async () => {
+      // Arrange
+      mockFindUnique.mockResolvedValue(null);
+
+      // Act
+      const result = await service.findByReferenceId('inexistente');
+
+      // Assert
+      expect(result).toBeNull();
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'inexistente' },
+      });
+    });
+  });
+
+  describe('findByReferenceIdWithFullContext', () => {
+    it('debe incluir servicio, categoría, profesional y usuario para el snapshot del contrato', async () => {
+      // Arrange
+      mockFindUnique.mockResolvedValue(null);
+
+      // Act
+      await service.findByReferenceIdWithFullContext('option-1');
+
+      // Assert
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { referenceId: 'option-1' },
+        include: {
+          lineItems: {
+            include: {
+              catalogItem: { select: { referenceId: true, name: true } },
+            },
+          },
+          serviceRequest: {
+            include: {
+              service: { include: { category: true } },
+              professional: { include: { user: true } },
+            },
+          },
+        },
+      });
+    });
+  });
+
   describe('findSelectedOptionForService', () => {
     it('debe buscar la opción marcada como seleccionada para el servicio', async () => {
       // Arrange

@@ -320,6 +320,9 @@ export class UsersDBService {
       isLdap?: boolean;
       status?: UserStatus;
       changedReason?: string;
+      // Tarea 8 (platform-hardening-2026-09): opt-out de exponer email/teléfono en
+      // ServiceUserSummaryResponseDTO — ver el comentario del campo en schema.prisma.
+      shareContactInfo?: boolean;
     },
     updatedBy: string,
   ): Promise<Users> {

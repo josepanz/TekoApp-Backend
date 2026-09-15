@@ -42,6 +42,9 @@ export class AuthService {
     accessToken?: string;
     refreshToken?: string;
     requiresPasswordCreation: boolean;
+    // Tarea 6 (platform-hardening-2026-09): el caller (AuthApiService) lo usa para el aviso de
+    // seguridad "nuevo inicio de sesión" — evita un segundo lookup, el user ya está resuelto acá.
+    user?: Users;
   }> {
     // Buscar credenciales
     const userCredentials = await this.userRepository.findCredentialsByEmail(
@@ -110,6 +113,7 @@ export class AuthService {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       requiresPasswordCreation: false,
+      user: userCredentials.user,
     };
   }
 
@@ -144,7 +148,7 @@ export class AuthService {
     email: string;
     encryptedOldPassword: string;
     encryptedNewPassword: string;
-  }): Promise<{ success: boolean; message: string }> {
+  }): Promise<{ success: boolean; message: string; user: Users }> {
     const user = await this.userRepository.findActiveUserByEmail(payload.email);
 
     if (!user) {
@@ -168,6 +172,7 @@ export class AuthService {
     return {
       success: true,
       message: t('auth.PASSWORD_UPDATED'),
+      user,
     };
   }
 
@@ -187,7 +192,7 @@ export class AuthService {
     email: string;
     encryptedOldPassword: string;
     encryptedNewPassword: string;
-  }): Promise<{ success: boolean; message: string }> {
+  }): Promise<{ success: boolean; message: string; user: Users }> {
     return await this.changePassword(payload);
   }
 
@@ -206,7 +211,7 @@ export class AuthService {
     email: string;
     encryptedNewPassword: string;
     encryptedConfirmPassword: string;
-  }): Promise<{ success: boolean; message: string }> {
+  }): Promise<{ success: boolean; message: string; user: Users }> {
     // Desencriptar y validar que coincidan
     const newPassword = this.authPasswordService.decryptPassword(
       payload.encryptedNewPassword,
@@ -238,6 +243,7 @@ export class AuthService {
     return {
       success: true,
       message: t('auth.PASSWORD_UPDATED'),
+      user,
     };
   }
 
@@ -321,6 +327,10 @@ export class AuthService {
         throw new UnauthorizedException(t('auth.USER_DELETED'));
       case UserStatus.PENDING_VERIFICATION:
         this.logger.warn('El usuario no ha verificado su cuenta.');
+        return;
+      case UserStatus.PENDING_DELETION:
+        // Ventana de gracia de borrado de cuenta (I-01) — login permitido a propósito: alguien
+        // que se arrepiente necesita poder entrar para cancelar el pedido.
         return;
       case UserStatus.ACTIVE:
         return;

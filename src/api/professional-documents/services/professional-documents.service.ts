@@ -11,6 +11,8 @@ import { ProfessionalDocumentsDbService } from '@modules/professional-documents-
 import { ProfessionalVerificationHelper } from '@modules/professional-documents-db/helpers/professional-verification.helper';
 import { ProfessionalDocumentTypesDbService } from '@modules/professional-document-types-db/services/professional-document-types-db.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import {
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE,
@@ -42,6 +44,7 @@ export class ProfessionalDocumentsService {
     private readonly professionalsDb: ProfessionalsDbService,
     private readonly verificationHelper: ProfessionalVerificationHelper,
     private readonly storageService: StorageService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async uploadDocument(
@@ -203,6 +206,35 @@ export class ProfessionalDocumentsService {
     }
 
     await this.verificationHelper.recompute(document.professionalId);
+
+    // I-05 (#22/#23, IMPRESCINDIBLE): gatea `requiredDocumentsVerified` — sin este aviso el
+    // profesional no sabe que ya puede operar (aprobado) o qué corregir (rechazado). Después
+    // de confirmar la transición y de recomputar la verificación.
+    const professional = await this.professionalsDb.findById(
+      document.professionalId,
+    );
+    if (professional) {
+      const isApproved = status === DocumentReviewStatus.APPROVED;
+      await this.notificationsService.create(
+        {
+          title: t(
+            isApproved
+              ? 'professional-documents.APPROVED_NOTIFICATION_TITLE'
+              : 'professional-documents.REJECTED_NOTIFICATION_TITLE',
+          ),
+          message: isApproved
+            ? t('professional-documents.APPROVED_NOTIFICATION_MESSAGE')
+            : t('professional-documents.REJECTED_NOTIFICATION_MESSAGE', {
+                reason: rejectionReason ?? '',
+              }),
+          type: isApproved
+            ? NotificationType.DOCUMENT_APPROVED
+            : NotificationType.DOCUMENT_REJECTED,
+          channels: ['in_app', 'push'],
+        },
+        professional.userId,
+      );
+    }
 
     const updated =
       await this.documentsDb.findByReferenceId(documentReferenceId);

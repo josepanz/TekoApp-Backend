@@ -23,12 +23,13 @@ const mockCheckStorage = jest.fn();
 // ─── Mock de ioredis ──────────────────────────────────────────────────────────
 
 const mockRedisPing = jest.fn();
+const mockRedisDisconnect = jest.fn();
 
 jest.mock('ioredis', () => {
   return jest.fn().mockImplementation(() => ({
     ping: mockRedisPing,
     quit: jest.fn(),
-    disconnect: jest.fn(),
+    disconnect: mockRedisDisconnect,
   }));
 });
 
@@ -192,6 +193,20 @@ describe('HealthController', () => {
 
       // Assert
       expect(mockRedisPing).toHaveBeenCalled();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // onModuleDestroy
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('onModuleDestroy', () => {
+    it('debe desconectar el cliente Redis aislado al destruir el módulo', () => {
+      // Act
+      controller.onModuleDestroy();
+
+      // Assert
+      expect(mockRedisDisconnect).toHaveBeenCalled();
     });
   });
 });

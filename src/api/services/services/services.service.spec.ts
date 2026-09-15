@@ -10,6 +10,8 @@ import { ServicesService } from './services.service';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { ServiceProgressDbService } from '@modules/service-progress-db/services/service-progress-db.service';
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 
 const mockFindCategoryById = jest.fn();
 const mockCreateService = jest.fn();
@@ -32,6 +34,7 @@ const mockUpdateServiceRequest = jest.fn();
 const mockAcceptRequestTransaction = jest.fn();
 const mockCountActiveByServiceId = jest.fn();
 const mockFindSelectedOptionForService = jest.fn();
+const mockNotificationsCreate = jest.fn();
 
 // PK interna (Int) = 100; UUID público (referenceId) = 'svc-001' (el valor que viaja en la URL).
 const SERVICE_REF = 'svc-001';
@@ -93,6 +96,10 @@ describe('ServicesService', () => {
           useValue: {
             findSelectedOptionForService: mockFindSelectedOptionForService,
           },
+        },
+        {
+          provide: NotificationsService,
+          useValue: { create: mockNotificationsCreate },
         },
       ],
     }).compile();
@@ -309,6 +316,52 @@ describe('ServicesService', () => {
         [ServiceStatus.PENDING, ServiceStatus.ACCEPTED],
         expect.objectContaining({ status: ServiceStatus.CANCELLED }),
       );
+      // I-05 (#8): sin profesional asignado no hay a quién avisar.
+      expect(mockNotificationsCreate).not.toHaveBeenCalled();
+    });
+
+    it('debe avisar al profesional asignado cuando el cliente cancela (I-05 #8)', async () => {
+      // Arrange
+      const svc = {
+        ...mockService,
+        status: ServiceStatus.ACCEPTED,
+        userId: 1,
+        professionalId: 5,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindProfessionalById.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(1);
+
+      // Act
+      await service.cancelService(SERVICE_REF, 'Ya no lo necesito', 1);
+
+      // Assert
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.SERVICE_CANCELLED }),
+        mockProfessional.userId,
+      );
+    });
+
+    it('debe avisar al cliente cuando el profesional cancela (I-05 #8)', async () => {
+      // Arrange
+      const svc = {
+        ...mockService,
+        status: ServiceStatus.ACCEPTED,
+        userId: 1,
+        professionalId: 5,
+      };
+      mockFindServiceByReferenceId.mockResolvedValue(svc);
+      mockFindProfessionalById.mockResolvedValue(mockProfessional);
+      mockUpdateServiceConditional.mockResolvedValue(1);
+
+      // Act — llama el userId del profesional (10), no el del cliente
+      await service.cancelService(SERVICE_REF, 'No puedo asistir', 10);
+
+      // Assert
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.SERVICE_CANCELLED }),
+        svc.userId,
+      );
     });
 
     it('debe lanzar BadRequestException cuando el servicio ya está completado', async () => {
@@ -379,6 +432,11 @@ describe('ServicesService', () => {
         }),
       );
       expect(result).toBeDefined();
+      // I-05 (#5, IMPRESCINDIBLE): el cliente se entera de que ya tiene profesional asignado.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.SERVICE_ACCEPTED }),
+        svcPending.userId,
+      );
     });
 
     it('debe lanzar BadRequestException cuando el servicio no está en estado PENDING', async () => {
@@ -512,6 +570,11 @@ describe('ServicesService', () => {
         SERVICE_PK,
         [ServiceStatus.IN_PROGRESS],
         expect.objectContaining({ status: ServiceStatus.COMPLETED }),
+      );
+      // I-05 (#7, IMPRESCINDIBLE): el cliente necesita saber que terminó para pagar/calificar.
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.SERVICE_COMPLETED }),
+        svcInProgress.userId,
       );
     });
 
@@ -764,6 +827,7 @@ describe('ServicesService', () => {
       mockFindServiceByReferenceId.mockResolvedValue(svc);
       mockFindServiceRequestByReferenceId.mockResolvedValue(mockRequest);
       mockAcceptRequestTransaction.mockResolvedValue(1);
+      mockFindProfessionalById.mockResolvedValue(mockProfessional);
       mockFindServiceRequestById.mockResolvedValue({
         ...mockRequest,
         status: RequestStatus.ACCEPTED,
@@ -790,6 +854,12 @@ describe('ServicesService', () => {
       );
       expect(result.id).toBe(200);
       expect(result.referenceId).toBe('req-001');
+      // I-05 (#2, IMPRESCINDIBLE): el profesional se entera de que su solicitud fue aceptada.
+      expect(mockFindProfessionalById).toHaveBeenCalledWith(5);
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ type: NotificationType.SERVICE_ACCEPTED }),
+        mockProfessional.userId,
+      );
     });
 
     it('debe lanzar ConflictException cuando el servicio ya no está disponible para aceptar la solicitud', async () => {

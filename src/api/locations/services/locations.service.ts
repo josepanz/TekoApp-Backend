@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { LocationsDbService } from '@/modules/locations-db/services/locations-db.service';
+import { ProfessionalPositionDbService } from '@/modules/professional-position-db/services/professional-position-db.service';
 import { UpdateLocationRequestDTO } from '../dtos/request/update-location-request.dto';
 import { FindNearbyQueryDTO } from '../dtos/request/find-nearby-query.dto';
 import { ProfessionalLocationResponseDTO } from '../dtos/response/professional-location-response.dto';
@@ -8,13 +8,13 @@ import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professio
 import { mapNearbyProfessionalRow } from '../helpers/nearby-professional.helper';
 import { GetProfessionalsAreaQueryDTO } from '../dtos/request/get-professionals-area-query.dto';
 import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-query.dto';
-import { Professionals } from '@prisma/client';
+import { Professionals, VerificationStatus } from '@prisma/client';
 
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class LocationsService {
   constructor(
-    private readonly locationsDb: LocationsDbService,
+    private readonly locationsDb: ProfessionalPositionDbService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -95,7 +95,7 @@ export class LocationsService {
       isOnline: true,
       isAvailable: true,
       status: 'APPROVED',
-      verificationStatus: 'verified',
+      verificationStatus: VerificationStatus.VERIFIED,
     });
   }
 

@@ -9,6 +9,8 @@ import { Prisma, ServiceStatus, RequestStatus } from '@prisma/client';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { ServiceProgressDbService } from '@modules/service-progress-db/services/service-progress-db.service';
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
+import { NotificationsService } from '@api/notifications/services/notifications.service';
+import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
 import { CreateServiceRequestDTO } from '../dtos/request/create-service.request.dto';
 import { UpdateServiceRequestDTO } from '../dtos/request/update-service.request.dto';
 import { CreateServiceRequestRequestDTO } from '../dtos/request/create-service-request.request.dto';
@@ -44,6 +46,7 @@ export class ServicesService {
     private readonly db: ServicesDbService,
     private readonly serviceProgressDb: ServiceProgressDbService,
     private readonly budgetsDb: BudgetsDbService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -221,6 +224,36 @@ export class ServicesService {
     if (updatedCount === 0) {
       throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_CANCEL'));
     }
+
+    // I-05 (#8, IMPRESCINDIBLE): avisar a la contraparte de quien canceló — después de
+    // confirmar la transición (updatedCount > 0), nunca antes.
+    if (isProfessionalOwner) {
+      await this.notificationsService.create(
+        {
+          title: t('services.NOTIFICATION_CANCELLED_BY_PROFESSIONAL_TITLE'),
+          message: t('services.NOTIFICATION_CANCELLED_BY_PROFESSIONAL_MESSAGE'),
+          type: NotificationType.SERVICE_CANCELLED,
+          channels: ['in_app', 'push'],
+        },
+        service.userId,
+      );
+    } else if (service.professionalId) {
+      const professional = await this.db.findProfessionalById(
+        service.professionalId,
+      );
+      if (professional) {
+        await this.notificationsService.create(
+          {
+            title: t('services.NOTIFICATION_CANCELLED_BY_CLIENT_TITLE'),
+            message: t('services.NOTIFICATION_CANCELLED_BY_CLIENT_MESSAGE'),
+            type: NotificationType.SERVICE_CANCELLED,
+            channels: ['in_app', 'push'],
+          },
+          professional.userId,
+        );
+      }
+    }
+
     return this.getServiceById(id);
   }
 
@@ -247,6 +280,19 @@ export class ServicesService {
     if (updatedCount === 0) {
       throw new ConflictException(t('services.NO_LONGER_PENDING'));
     }
+
+    // I-05 (#5, IMPRESCINDIBLE): el cliente no sabe que ya tiene un profesional asignado a
+    // menos que vuelva a abrir la app — avisar después de confirmar la transición.
+    await this.notificationsService.create(
+      {
+        title: t('services.NOTIFICATION_SERVICE_ACCEPTED_TITLE'),
+        message: t('services.NOTIFICATION_SERVICE_ACCEPTED_MESSAGE'),
+        type: NotificationType.SERVICE_ACCEPTED,
+        channels: ['in_app', 'push'],
+      },
+      service.userId,
+    );
+
     return this.getServiceById(id);
   }
 
@@ -335,6 +381,19 @@ export class ServicesService {
     if (updatedCount === 0) {
       throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_COMPLETE'));
     }
+
+    // I-05 (#7, IMPRESCINDIBLE): cierra el loop — el cliente necesita saber que terminó para
+    // pagar y calificar.
+    await this.notificationsService.create(
+      {
+        title: t('services.NOTIFICATION_SERVICE_COMPLETED_TITLE'),
+        message: t('services.NOTIFICATION_SERVICE_COMPLETED_MESSAGE'),
+        type: NotificationType.SERVICE_COMPLETED,
+        channels: ['in_app', 'push'],
+      },
+      service.userId,
+    );
+
     return this.getServiceById(id);
   }
 
@@ -404,6 +463,25 @@ export class ServicesService {
       if (updatedCount === 0) {
         throw new ConflictException(t('services.NO_LONGER_ACCEPTING_REQUESTS'));
       }
+
+      // I-05 (#2, IMPRESCINDIBLE): la transacción de Postgres ya commiteó (acceptRequestTransaction
+      // resolvió) — el disparo va después, no puede participar de esa transacción (Mongo/Redis
+      // son motores distintos, ver I-05-notification-triggers.md §"Dónde engancha").
+      const professional = await this.db.findProfessionalById(
+        request.professionalId,
+      );
+      if (professional) {
+        await this.notificationsService.create(
+          {
+            title: t('services.NOTIFICATION_REQUEST_ACCEPTED_TITLE'),
+            message: t('services.NOTIFICATION_REQUEST_ACCEPTED_MESSAGE'),
+            type: NotificationType.SERVICE_ACCEPTED,
+            channels: ['in_app', 'push'],
+          },
+          professional.userId,
+        );
+      }
+
       const accepted = await this.db.findServiceRequestById(request.id);
       if (!accepted)
         throw new NotFoundException(t('services.REQUEST_NOT_FOUND'));

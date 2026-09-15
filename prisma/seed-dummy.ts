@@ -13,6 +13,7 @@ import {
   PromotionStatus,
   PaymentChannelType,
   CommissionTarget,
+  VerificationStatus,
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
@@ -362,7 +363,9 @@ async function main() {
           isAvailable: status === ProfessionalStatus.APPROVED,
           isOnline,
           verificationStatus:
-            status === ProfessionalStatus.APPROVED ? 'verified' : 'unverified',
+            status === ProfessionalStatus.APPROVED
+              ? VerificationStatus.VERIFIED
+              : VerificationStatus.UNVERIFIED,
           currentLatitude: isOnline ? jitter(ASUNCION_LAT, 0.1) : null,
           currentLongitude: isOnline ? jitter(ASUNCION_LNG, 0.1) : null,
           lastLocationUpdate: isOnline ? new Date() : null,

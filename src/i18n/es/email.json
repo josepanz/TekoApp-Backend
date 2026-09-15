@@ -1,5 +1,6 @@
 {
   "SET_PASSWORD_SEND_ERROR": "Error al enviar el correo de creación de contraseña.",
   "UNKNOWN_EMAIL_TYPE": "Tipo de email no reconocido.",
-  "USER_NOT_FOUND_OR_INACTIVE": "Usuario no encontrado o inactivo."
+  "USER_NOT_FOUND_OR_INACTIVE": "Usuario no encontrado o inactivo.",
+  "PAYMENT_RECEIPT_DATA_REQUIRED": "Faltan los datos del comprobante de pago para generar el correo."
 }

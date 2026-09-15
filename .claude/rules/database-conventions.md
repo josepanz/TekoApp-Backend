@@ -64,3 +64,49 @@ Resultó ser un breaking change real para los clientes (no "aditivo sin breaking
 preveía esta nota) — `id` cambia de tipo (de UUID string a Int), así que Mobile/Web deben migrar
 toda navegación que leía `entity.id` a `entity.referenceId`. Sin shim de compatibilidad, decisión
 explícita dado que el proyecto no tiene usuarios reales todavía.
+
+## Conexión a Postgres detrás de un pooler (Supabase) — dos URLs, no una
+
+Supabase expone el mismo Postgres por dos puertos, y **cada uno sirve para algo distinto**:
+
+| Puerto | Modo | Para qué | Requisito |
+|---|---|---|---|
+| `6543` | transacción (pooler) | la app en runtime | **obligatorio** `?pgbouncer=true` |
+| `5432` | sesión | `prisma migrate`, psql, scripts sueltos | sin parámetros extra |
+
+- **`?pgbouncer=true` no es opcional en el puerto 6543.** Le dice a Prisma que no use prepared
+  statements. Sin él, el pooler reasigna la conexión entre requests y Postgres tira
+  `26000: prepared statement "sN" does not exist` de forma **intermitente** — o sea, funciona un
+  rato y después empieza a fallar (típicamente después de que el pooler recicla conexiones, ej.
+  tras suspender la máquina o un rato de inactividad). Bug real encontrado el 2026-09-06 probando
+  la app Flutter en un dispositivo físico: `/auth/public-key` empezó a devolver 403 sin que nadie
+  tocara código. **Afecta cualquier ambiente que apunte al pooler, producción incluida** — si se
+  agrega el parámetro en `.env` local, hay que agregarlo también en las env vars del deploy.
+- `prisma migrate` **no funciona** contra el puerto 6543 (ver `WORKPLAN` de
+  `platform-hardening-2026-09`, §1.2): migrar siempre pasando la URL de sesión (5432) solo para
+  ese comando, nunca cambiando el `DATABASE_URL` de la app.
+- **`CREATE INDEX CONCURRENTLY` no se puede aplicar con `prisma migrate deploy`** (envuelve cada
+  migración en una transacción, y Postgres lo prohíbe ahí: error `25001`). Verificado el
+  2026-09-05: la migración queda registrada como fallida con `applied_steps_count=0` sin haber
+  tocado la tabla. Opciones: índice tradicional (lo que se eligió para
+  `professionals_nearby_idx`, aceptando el lock breve durante el build), o aplicar el SQL a mano
+  fuera de Prisma y reconciliar con `prisma migrate resolve --applied`.
+
+## `PaymentMethodEntity.details` — nunca dato de tarjeta (alcance PCI-DSS)
+
+`payment_methods.details` es `Json @db.JsonB` sin contrato de forma, así que el schema **no**
+impide escribir ahí lo que no debe ir. Regla, decidida el 2026-09-07:
+
+- **Prohibido almacenar PAN completo, CVV/CVC o datos de banda/chip.** Ni cifrados, ni "solo un
+  rato", ni en `metadata`. Un PAN persistido mete al backend entero en alcance PCI-DSS (auditoría
+  anual, segmentación de red, escaneos trimestrales) — costo desproporcionado y evitable.
+- El dato de tarjeta viaja del cliente **directo al proveedor** (checkout/SDK). Lo único que se
+  persiste es el token que devuelve, en `externalId`.
+- En `details` van solo datos no sensibles de presentación: marca, últimos 4 dígitos, mes/año de
+  vencimiento, y el nombre que el usuario le puso al método. Marca + últimos 4 no son PAN y son
+  el estándar de la industria para mostrar "Visa ···· 4242".
+- **Datos bancarios de payout son otra cosa**: una cuenta destino no es dato de tarjeta y no cae
+  bajo PCI-DSS, así que sí se puede almacenar (con cifrado en reposo y acceso restringido). Hoy
+  no existe ningún modelo de datos bancarios en el schema — ver
+  `openspec/changes/platform-hardening-2026-09/I-02-payout-open-questions.md`, y no modelarlo
+  antes de elegir el proveedor de pagos salientes, porque su API define el formato de cuenta.
