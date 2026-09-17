@@ -213,7 +213,8 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
           HUSKY: 0
-        run: npx semantic-release
+          DEBUG: semantic-release:*
+        run: npx semantic-release --dry-run
 
       # Captura el tag recién creado para pasar a los pasos siguientes
       - name: Capture released version
