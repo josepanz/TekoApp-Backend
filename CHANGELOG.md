@@ -1,3 +1,14 @@
+## 2.0.0 (2026-09-18)
+
+* fix(api): corregir el nivel de version del corte a /v1 en master (#49) ([43c6641](https://github.com/josepanz/TekoApp-Backend/commit/43c6641)), closes [#49](https://github.com/josepanz/TekoApp-Backend/issues/49)
+
+### BREAKING CHANGE
+
+* todas las rutas de la API pasan a servirse bajo /v1. El
+healthcheck queda deliberadamente sin version por las probes de
+Kubernetes y de Render. Los clientes Web y Mobile requieren su version
+correspondiente ya promovida.
+
 ## <small>1.0.1 (2026-09-18)</small>
 
 * fix(ci): disparar el release pendiente de master (corte a /v1) (#48) ([03d3f52](https://github.com/josepanz/TekoApp-Backend/commit/03d3f52)), closes [#48](https://github.com/josepanz/TekoApp-Backend/issues/48)
