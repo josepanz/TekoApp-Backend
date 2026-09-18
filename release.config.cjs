@@ -8,54 +8,71 @@
  */
 
 /**
- * CAUSA RAIZ: en el pipeline de release de `qa`, `@semantic-release/release-notes-generator`
- * crasheaba con `RangeError: Invalid time value` dentro de `defaultCommitTransform`
- * de conventional-changelog-writer, que hace `new Date(commit.committerDate).toISOString()`
- * sin try/catch cada vez que `commit.committerDate` es truthy.
+ * CAUSA RAIZ (corregida — ver nota de corrección más abajo): en el pipeline de
+ * release de `qa`, `@semantic-release/release-notes-generator` crasheaba con
+ * `RangeError: Invalid time value` dentro de `defaultCommitTransform` de
+ * conventional-changelog-writer, que hace `new Date(commit.committerDate).toISOString()`
+ * sin try/catch cada vez que `commit.committerDate` es truthy. Más tarde
+ * apareció un crash hermano en `@semantic-release/github` (paso "success"):
+ * un error de parseo de GraphQL porque `commit.hash` venía con basura en vez
+ * de un SHA.
  *
- * `commit.committerDate` lo produce el propio fetcher de commits de semantic-release
- * (lib/git.js), que usa el paquete `git-log-parser`: arma un `git log` con un formato
- * que empaqueta ~16 campos por commit, separados por los literales `==FIELD==` y
- * `==END==`, y reconstruye cada registro haciendo split() de esos literales sobre el
- * stdout crudo del child process (ver git-log-parser/src/index.js). Ese approach no
- * tiene framing ni checksum, así que depende de que ese stream de stdout nunca caiga
- * en un límite de buffer del pipe del SO de una forma que confunda el split.
+ * Ambos campos (`committerDate` y `hash`) los produce el propio fetcher de
+ * commits de semantic-release (lib/git.js), que usa el paquete `git-log-parser`:
+ * arma un `git log` con un formato que empaqueta ~16 campos por commit,
+ * separados por dos literales de texto legible (ver el código de
+ * `git-log-parser` para los valores exactos — no se repiten aquí a propósito,
+ * ver la nota de corrección), y reconstruye cada registro haciendo split() de
+ * esos literales sobre el stdout crudo del child process. Ese approach no
+ * tiene framing ni checksum: si el %B (mensaje completo) de CUALQUIER commit
+ * del rango contiene esos mismos literales como texto, el split() encuentra
+ * delimitadores de más ahí adentro y desincroniza los campos que vienen
+ * después en el formato (hash/mensaje/tags/fecha quedan con el valor de otro
+ * campo, o se pierde un commit entero si el literal de fin-de-registro cae en
+ * medio del cuerpo).
  *
- * Esto se reprodujo de forma determinística en el job real "Version & Publish" de
- * GitHub Actions para `qa` (run 35010595510 y un re-run manual posterior), pero NO
- * se reprodujo en más de 20 clones fieles de ese mismo job (mismo rango de commits,
- * mismas versiones de dependencias fijadas por pnpm-lock.yaml, mismo runner
- * ubuntu-latest, tanto parseando el git log crudo como corriendo el binario real de
- * semantic-release hasta completar generateNotes con éxito todas las veces) — ver la
- * investigación que quedó documentada en .claude/rules/infra.md. Eso apunta fuerte a
- * una carrera de timing/chunking de stream en la dependencia `git-log-parser` (sin
- * mantenimiento activo), no a una fecha malformada en un commit puntual (el propio
- * git, y el valor crudo `%ci` de cada commit, se verificaron limpios de punta a punta).
+ * NOTA DE CORRECCIÓN: la primera versión de este comentario (y del PR/README
+ * que lo acompañaba) atribuía esto a "una carrera de timing/chunking de
+ * stream" — evidencia real (20+ clones fieles del job real en ubuntu-latest
+ * sin reproducirlo) pero conclusión incorrecta. La causa real, confirmada
+ * reproduciendo el crash de `@semantic-release/github` de forma 100%
+ * determinística: el commit que introdujo el primer fix (el que agregó este
+ * mismo archivo) describía el mecanismo de `git-log-parser` citando sus dos
+ * literales textualmente en el cuerpo del commit/PR — y ESE mensaje, al
+ * volver a pasar por `git-log-parser` en el siguiente release, colisionó con
+ * sus propios delimitadores. No es timing: es 100% determinístico y depende
+ * únicamente del contenido del mensaje de commit. Por eso esta clase de bug
+ * no se veía en el rango original (ningún commit de esa tanda citaba esos
+ * literales) y sí apareció en cuanto un commit los citó.
  *
- * En vez de reescribir historia ya publicada de qa/develop/master buscando un "commit
- * malo" que no se reproduce a demanda, esto hace que release-notes-generator tolere
- * un committerDate corrupto/no parseable: intenta recuperar la fecha de otros campos
- * que git-log-parser trajo para el mismo commit (committer.date / author.date anidados,
- * que vienen de placeholders %ci/%ai separados en el mismo formato y por lo tanto no
- * necesariamente sufren la misma corrupción), y solo omite la fecha si ninguno parsea.
- * Nunca lanza excepción.
+ * FIX REAL (además de la tolerancia de abajo): se aplicó un patch de pnpm a
+ * `git-log-parser` (ver patches/git-log-parser@1.2.1.patch) que cambia esos
+ * dos literales de texto legible por caracteres de control ASCII (Record/Unit
+ * Separator) que nunca aparecen en texto escrito por una persona. Eso cierra
+ * la colisión de raíz para CUALQUIER campo (no solo `committerDate`) y para
+ * CUALQUIER plugin que lea `context.commits` (no solo release-notes-generator),
+ * incluido el crash de `@semantic-release/github`. Verificado: con el patch,
+ * tanto el rango original como el rango que incluía el commit "contaminado"
+ * parsean 0 registros corruptos.
  *
- * ADVERTENCIA — esto tolera el crash, NO arregla la causa raíz:
- * cuando la carrera de git-log-parser se dispara, no solo corrompe una fecha: PIERDE
- * UN COMMIT ENTERO del stream (verificado: "Found 112 commits" en vez de los 113 reales
- * del rango). Esta tolerancia evita que el pipeline muera, pero el commit perdido sigue
- * faltando en:
- *   1. Las release notes generadas por este mismo plugin (entrada faltante).
- *   2. El release type que calcula @semantic-release/commit-analyzer, que consume la
- *      MISMA lista de commits — si el commit perdido es justo el que trae el footer
- *      BREAKING CHANGE, el bump puede salir "minor" o "patch" cuando correspondía
- *      "major". Ya pasó algo análogo en `master` (salió 1.0.1 en vez de 2.0.0, PR #49),
- *      así que no es hipotético.
- * Mitigación manual mientras esta dependencia no se reemplace: si el release incluye
- * cambios incompatibles, verificar a mano la versión publicada contra lo esperado; y si
- * el log del job "Version & Publish" reporta un "Found N commits" con N menor a la
- * cantidad real de commits del rango (`git rev-list <ultimoTag>..HEAD | wc -l`),
- * re-ejecutar el job antes de dar esa versión por buena.
+ * Con el patch aplicado, el `writerOpts.transform` de abajo debería ser
+ * puro colchón de seguridad (nunca debería activarse), pero se deja puesto
+ * por las dudas: es barato y cubre cualquier otra clase de corrupción que no
+ * hayamos previsto. Si en algún momento se ve el warning de más abajo en un
+ * log real, es señal de que el patch dejó de aplicar o de que aparece una
+ * colisión distinta — no ignorarlo.
+ *
+ * ADVERTENCIA que sigue vigente aunque el patch esté aplicado: el commit que
+ * disparó esto (la promoción del primer fix) ya quedó publicado con sus
+ * campos corruptos en el historial de `qa` — no se reescribe. Su entrada en
+ * el CHANGELOG/release notes de v1.0.0-qa.6 quedó con el hash/subject mal
+ * formados (cosmético, ya publicado); las corridas FUTURAS que necesiten
+ * re-leer ese commit (por ejemplo, un rango que lo vuelva a incluir) ya lo
+ * van a parsear bien gracias al patch. Regla para no repetir esto: nunca
+ * citar textualmente los delimitadores de `git-log-parser` (los del código
+ * fuente del paquete) en un mensaje de commit o cuerpo de PR — citarlos en
+ * comentarios de código (como este) es inocuo, porque `git log %B` solo lee
+ * el mensaje del commit, no el contenido de los archivos.
  */
 function safeDate(...candidates) {
   for (const candidate of candidates) {
@@ -78,10 +95,12 @@ function safeCommitTransform(commit, _context, options) {
     if (Number.isNaN(original.getTime())) {
       // eslint-disable-next-line no-console
       console.warn(
-        `[release-notes] commit ${hash}: committerDate no parseable (probable desync de stream de git-log-parser); ` +
+        `[release-notes] commit ${hash}: committerDate no parseable. Con el patch de git-log-parser ` +
+          "esto no debería pasar más — si aparece, revisar si el patch sigue aplicando " +
+          "(pnpm.patchedDependencies en package.json) o si hay una colisión de delimitador nueva. " +
           (resolvedDate
-            ? "se usó una fecha de respaldo (committer.date/author.date)."
-            : "se omitió la fecha en esta entrada.") +
+            ? "Por ahora se usó una fecha de respaldo (committer.date/author.date)."
+            : "Por ahora se omitió la fecha en esta entrada.") +
           " Si el log de este job reporta menos commits que el rango real, revisar el bump de versión antes de confiar en el release.",
       );
     }

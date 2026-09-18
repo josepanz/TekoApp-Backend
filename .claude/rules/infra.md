@@ -17,17 +17,31 @@
   la config de health check en Render (fuera del repo). Motivo: un health check en 404 hace que el
   pod nunca llegue a Ready y el deploy falla con rollback inmediato; además, un rollback a una
   imagen anterior también fallaría si solo cambiaron los manifiestos y no se revierte la app.
-- `release.config.cjs` (semantic-release) tolera un `committerDate` corrupto en
-  `release-notes-generator` para que el pipeline de release no muera con
-  `RangeError: Invalid time value` (causa raíz: una carrera de timing/chunking de stream en la
-  dependencia sin mantenimiento `git-log-parser`, que en el job real de `qa` perdió 1 commit del
-  rango — "Found 112 commits" cuando el rango real tenía 113; reproducido de forma determinística
-  en el job real dos veces, pero NO en más de 20 clones fieles del mismo job en `ubuntu-latest`
-  con las mismas dependencias exactas, ver PR #50). Esa tolerancia **enmascara el crash, no la
-  pérdida de commits**: si el commit que se pierde trae el footer `BREAKING CHANGE`,
-  `commit-analyzer` (que consume la misma lista) puede calcular un bump menor al que
-  correspondía — ya pasó algo análogo en `master` por otra razón (salió `1.0.1` en vez de `2.0.0`,
-  PR #49), no es hipotético. Mitigación manual: si un release de `qa`/`develop`/`master` incluye
-  cambios incompatibles, verificar a mano la versión publicada contra lo esperado; y si el log del
-  job "Version & Publish" reporta un "Found N commits" menor a `git rev-list <ultimoTag>..HEAD | wc -l`,
-  re-ejecutar el job antes de dar esa versión por buena.
+- CAUSA RAIZ real de los crashes de `semantic-release` en "Version & Publish" (PR #50 y su
+  seguimiento): la dependencia `git-log-parser` reconstruye cada commit haciendo split() de dos
+  literales de texto legible (ver su código fuente) sobre el stdout crudo de `git log`, sin
+  framing ni checksum. Si el **mensaje de CUALQUIER commit** contiene esos mismos literales como
+  texto (por ejemplo, un commit que documenta ese mecanismo citándolos tal cual — nos pasó a
+  nosotros mismos: el commit que agregó el primer fix citaba los delimitadores en su propio cuerpo,
+  y el siguiente release lo volvió a parsear y colisionó), el split() encuentra delimitadores de
+  más y desincroniza los campos de ese commit (hash/fecha/mensaje quedan con el valor de otro
+  campo, o se pierde un commit entero — "Found 112 commits" en vez de 113 fue exactamente eso).
+  **No es una carrera de timing** (esa fue la hipótesis inicial, descartada con evidencia: el bug
+  es 100% determinístico y depende solo del contenido del mensaje). Consumidores afectados
+  distintos según qué campo se corrompe: `release-notes-generator` con `committerDate` (crashea con
+  `RangeError: Invalid time value`) y `@semantic-release/github` (paso "success") con `hash`
+  (crashea con un error de parseo de GraphQL al armar una query con ese hash corrupto como alias).
+  FIX REAL: patch de pnpm a `git-log-parser` (`patches/git-log-parser@1.2.1.patch`, declarado en
+  `pnpm.patchedDependencies` de `package.json`) que cambia esos dos literales por caracteres de
+  control ASCII que no aparecen en texto humano — cierra la colisión de raíz para cualquier campo
+  y cualquier plugin, no solo para `release-notes-generator`. `release.config.cjs` además deja un
+  `writerOpts.transform` de respaldo (no debería activarse nunca con el patch puesto).
+  Consecuencia que NO se puede arreglar sin reescribir historia: el commit que disparó esto ya
+  quedó publicado en `qa` con esos campos corruptos, y su entrada en el CHANGELOG/release notes de
+  v1.0.0-qa.6 quedó mal formada (cosmético). Regla para no repetirlo: nunca citar textualmente los
+  delimitadores de `git-log-parser` en un mensaje de commit o cuerpo de PR — citarlos en
+  comentarios de código (como en `release.config.cjs`) es inocuo, porque `git log %B` solo lee el
+  mensaje del commit, no el contenido de los archivos. Si alguna vez el log de "Version & Publish"
+  vuelve a reportar menos commits que `git rev-list <ultimoTag>..HEAD | wc -l`, verificar primero
+  si `pnpm.patchedDependencies` sigue aplicando (un bump de versión de `git-log-parser` puede hacer
+  que el patch deje de matchear) antes de asumir que es un caso nuevo.
