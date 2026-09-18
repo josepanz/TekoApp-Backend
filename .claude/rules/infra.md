@@ -17,3 +17,17 @@
   la config de health check en Render (fuera del repo). Motivo: un health check en 404 hace que el
   pod nunca llegue a Ready y el deploy falla con rollback inmediato; además, un rollback a una
   imagen anterior también fallaría si solo cambiaron los manifiestos y no se revierte la app.
+- `release.config.cjs` (semantic-release) tolera un `committerDate` corrupto en
+  `release-notes-generator` para que el pipeline de release no muera con
+  `RangeError: Invalid time value` (causa raíz: una carrera de timing/chunking de stream en la
+  dependencia sin mantenimiento `git-log-parser`, que en el job real de `qa` perdió 1 commit del
+  rango — "Found 112 commits" cuando el rango real tenía 113; reproducido de forma determinística
+  en el job real dos veces, pero NO en más de 20 clones fieles del mismo job en `ubuntu-latest`
+  con las mismas dependencias exactas, ver PR #50). Esa tolerancia **enmascara el crash, no la
+  pérdida de commits**: si el commit que se pierde trae el footer `BREAKING CHANGE`,
+  `commit-analyzer` (que consume la misma lista) puede calcular un bump menor al que
+  correspondía — ya pasó algo análogo en `master` por otra razón (salió `1.0.1` en vez de `2.0.0`,
+  PR #49), no es hipotético. Mitigación manual: si un release de `qa`/`develop`/`master` incluye
+  cambios incompatibles, verificar a mano la versión publicada contra lo esperado; y si el log del
+  job "Version & Publish" reporta un "Found N commits" menor a `git rev-list <ultimoTag>..HEAD | wc -l`,
+  re-ejecutar el job antes de dar esa versión por buena.
