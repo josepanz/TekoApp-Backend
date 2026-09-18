@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  git-log-parser@1.2.1:
+    hash: bf73d440d4d3671abdae26a707743a9cd098cc027775093339fa06d79ae97e9a
+    path: patches/git-log-parser@1.2.1.patch
+
 importers:
 
   .:
@@ -14665,7 +14670,7 @@ snapshots:
       nypm: 0.6.6
       pathe: 2.0.3
 
-  git-log-parser@1.2.1:
+  git-log-parser@1.2.1(patch_hash=bf73d440d4d3671abdae26a707743a9cd098cc027775093339fa06d79ae97e9a):
     dependencies:
       argv-formatter: 1.0.0
       spawn-error-forwarder: 1.0.0
@@ -17372,7 +17377,7 @@ snapshots:
       figures: 6.1.0
       find-versions: 6.0.0
       get-stream: 6.0.1
-      git-log-parser: 1.2.1
+      git-log-parser: 1.2.1(patch_hash=bf73d440d4d3671abdae26a707743a9cd098cc027775093339fa06d79ae97e9a)
       hook-std: 4.0.0
       hosted-git-info: 8.1.0
       import-from-esm: 2.0.0

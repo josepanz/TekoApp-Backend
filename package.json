@@ -177,7 +177,10 @@
       "nestjs-pino",
       "prisma",
       "odbc"
-    ]
+    ],
+    "patchedDependencies": {
+      "git-log-parser@1.2.1": "patches/git-log-parser@1.2.1.patch"
+    }
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

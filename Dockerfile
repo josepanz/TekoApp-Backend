@@ -8,8 +8,13 @@ RUN corepack enable && corepack use pnpm@10.4
 WORKDIR /app
 
 # Copiar manifiestos de dependencias primero — optimiza cache de capas.
-# Docker solo re-ejecuta pnpm install si package.json o pnpm-lock.yaml cambian.
+# Docker solo re-ejecuta pnpm install si package.json, pnpm-lock.yaml o patches/ cambian.
+# patches/ es obligatorio: pnpm resuelve pnpm.patchedDependencies (package.json) leyendo
+# el .patch referenciado ANTES de instalar — sin esta línea, `pnpm install` en esta capa
+# rompe con ENOENT porque el patch todavía no existe en el build context de esta etapa
+# (recién se copiaba con el resto del código fuente unas líneas más abajo).
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile
 
 # Copiar schema de Prisma antes de generate (separado del código fuente)
