@@ -1,3 +1,7 @@
+## 1.0.0-qa.7 (2026-09-18)
+
+* fix(release): corregir la causa real del choque de commits en git-log-parser (#51) ([f72a365](https://github.com/josepanz/TekoApp-Backend/commit/f72a365)), closes [#51](https://github.com/josepanz/TekoApp-Backend/issues/51) [#50](https://github.com/josepanz/TekoApp-Backend/issues/50) [#50](https://github.com/josepanz/TekoApp-Backend/issues/50) [#50](https://github.com/josepanz/TekoApp-Backend/issues/50) [#50](https://github.com/josepanz/TekoApp-Backend/issues/50)
+
 ## 1.0.0-qa.6 (2026-09-18)
 
 * c6f840909b4201c50dad4d9ffd359a8a337f3772 ([` /
