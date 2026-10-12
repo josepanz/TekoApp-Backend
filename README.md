@@ -115,7 +115,6 @@ src/
 │   └── *-db/               # Abstracción Prisma por dominio
 │       ├── analytics-db/
 │       ├── categories-db/
-│       ├── geo-tracking-db/    # Histórico de posiciones (Mongo)
 │       ├── payments-db/
 │       ├── professional-position-db/  # Última posición conocida (Postgres)
 │       ├── professionals-db/
@@ -137,7 +136,7 @@ src/
 | DB | Propósito | Por qué |
 |----|-----------|---------|
 | **PostgreSQL** (Prisma) | Transacciones financieras, perfiles, roles, facturación | ACID garantizado |
-| **MongoDB** (Mongoose) | Telemetría, GeoTracking (`2dsphere`), logs de notificaciones | Writes masivos, schema flexible |
+| **MongoDB** (Mongoose) | Telemetría, logs de notificaciones | Writes masivos, schema flexible |
 | **Redis** (BullMQ) | Colas asíncronas: webhooks Stripe, push notifications, presigned URL cache | Desacopla procesamiento pesado del request cycle |
 
 ### Proveedores externos
