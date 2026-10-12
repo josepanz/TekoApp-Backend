@@ -6,7 +6,6 @@
  */
 import { PrismaClient, VerificationStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import { PERMISSIONS } from '../src/common/enum/permissions.enum';
 
 const prisma = new PrismaClient();
 
@@ -73,41 +72,10 @@ async function main(): Promise<void> {
     where: { slug: 'plomeria' },
   });
 
-  // Rol COMPLIANCE: mismo upsert que prisma/seed.ts de la rama fix/hallazgos-exploracion-e2e;
-  // duplicado a proposito para que el merge de ambas ramas no genere conflicto (es idempotente).
-  const complianceRole = await prisma.roles.upsert({
+  // El rol COMPLIANCE y sus permisos los siembra prisma/seed.ts (corre antes).
+  const complianceRole = await prisma.roles.findUniqueOrThrow({
     where: { name: 'COMPLIANCE' },
-    update: {},
-    create: {
-      name: 'COMPLIANCE',
-      displayName: 'Compliance',
-      description:
-        'Auditoría legal: versiones de documentos, retención y consentimientos',
-      createdBy: 'seed',
-    },
   });
-  for (const code of [
-    PERMISSIONS.LEGAL.CONFIG_MANAGE,
-    PERMISSIONS.LEGAL.CONSENT_AUDIT_VIEW,
-  ]) {
-    const permission = await prisma.permissions.findUniqueOrThrow({
-      where: { name: code },
-    });
-    await prisma.rolePermissions.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: complianceRole.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: complianceRole.id,
-        permissionId: permission.id,
-        createdBy: 'seed',
-      },
-    });
-  }
 
   for (const [index, fx] of FIXTURES.entries()) {
     const user = await prisma.users.upsert({
