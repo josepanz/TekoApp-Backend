@@ -25,14 +25,22 @@ export class NearbyProfessionalResponseDTO {
   @ApiProperty({ description: 'Tarifa por hora', example: 50000 })
   hourlyRate!: number;
 
-  @ApiProperty({ description: 'Latitud actual', example: -25.2637 })
+  @ApiProperty({
+    description:
+      'Latitud APROXIMADA (ofuscada ~200-300 m, determinista por día)',
+    example: -25.2637,
+  })
   latitude!: number;
 
-  @ApiProperty({ description: 'Longitud actual', example: -57.5759 })
+  @ApiProperty({
+    description:
+      'Longitud APROXIMADA (ofuscada ~200-300 m, determinista por día)',
+    example: -57.5759,
+  })
   longitude!: number;
 
   @ApiProperty({
-    description: 'Distancia al punto de búsqueda en km',
+    description: 'Distancia en km calculada sobre la posición aproximada',
     example: 2.34,
   })
   distanceKm!: number;

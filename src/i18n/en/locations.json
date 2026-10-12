@@ -1,6 +1,8 @@
 {
   "PROFESSIONAL_NOT_FOUND": "Professional not found in the master records",
   "PROFESSIONAL_WITHOUT_COORDINATES": "The requested professional has no active positioning coordinates",
+  "EXACT_LOCATION_FORBIDDEN": "You are not allowed to see this professional's exact location",
+  "INVALID_PROFESSIONAL_ID": "Invalid professional identifier",
   "SUBSCRIBED": "Subscribed to location updates",
   "UNSUBSCRIBED": "Unsubscribed from location updates",
   "WEBSOCKET_CONNECTED": "Connected to the TekoApp server"

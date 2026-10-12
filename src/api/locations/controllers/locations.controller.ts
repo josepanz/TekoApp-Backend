@@ -28,17 +28,19 @@ import { CalculateDistanceQueryDTO } from '../dtos/request/calculate-distance-qu
 import { SetOnlineStatusRequestDTO } from '../dtos/request/set-online-status-request.dto';
 import { ProfessionalLocationResponseDTO } from '../dtos/response/professional-location-response.dto';
 import { NearbyProfessionalResponseDTO } from '../dtos/response/nearby-professional-response.dto';
+import { AreaProfessionalResponseDTO } from '../dtos/response/area-professional-response.dto';
 import { OnlineCountResponseDTO } from '../dtos/response/online-count-response.dto';
 import { DistanceResponseDTO } from '../dtos/response/distance-response.dto';
 
 @ApiTags('Ubicaciones')
+@ApiBearerAuth('JWT-auth')
+// Guard a nivel de clase: ningún endpoint de locations es público.
+@UseGuards(JwtAuthGuard)
 @Controller('locations')
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
   @Post('update')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Actualizar ubicación del profesional',
@@ -63,8 +65,6 @@ export class LocationsController {
   }
 
   @Patch('online')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Cambiar el estado online del profesional autenticado',
@@ -86,7 +86,7 @@ export class LocationsController {
   @ApiOperation({
     summary: 'Buscar profesionales cercanos via Haversine',
     description:
-      'Retorna profesionales optimizados basados en radio y disponibilidad.',
+      'Solo profesionales en línea, con posición APROXIMADA (ofuscada ~200-300 m).',
   })
   @ApiResponse({
     status: 200,
@@ -102,9 +102,20 @@ export class LocationsController {
   @Get('professional/:id')
   @ApiOperation({ summary: 'Obtener coordenadas activas de un profesional' })
   @ApiResponse({ status: 200, type: ProfessionalLocationResponseDTO })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Solo el propio profesional, un admin o un cliente con servicio activo.',
+  })
   async getProfessionalLocation(
+    @Request() req: { user: IUserDataOnJwt },
     @Param() param: GetProfessionalLocationParamDTO,
   ): Promise<ProfessionalLocationResponseDTO> {
+    await this.locationsService.assertCanViewExactLocation(
+      req.user.referenceId,
+      param.id,
+      req.user.permissions,
+    );
     return this.locationsService.getProfessionalLocation(param.id);
   }
 
@@ -119,9 +130,12 @@ export class LocationsController {
   @Get('area')
   @ApiOperation({
     summary:
-      'Filtrar profesionales inscritos dentro de un área bounding-box cuadrangular',
+      'Profesionales en línea dentro de un bounding-box, con posición APROXIMADA',
   })
-  async getProfessionalsByArea(@Query() query: GetProfessionalsAreaQueryDTO) {
+  @ApiResponse({ status: 200, type: [AreaProfessionalResponseDTO] })
+  async getProfessionalsByArea(
+    @Query() query: GetProfessionalsAreaQueryDTO,
+  ): Promise<AreaProfessionalResponseDTO[]> {
     return this.locationsService.getProfessionalsByArea(query);
   }
 
