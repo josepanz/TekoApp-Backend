@@ -1,3 +1,10 @@
+/**
+ * Suite: ofuscación de coordenadas: determinista por profesional/día, no promediable y desplazamiento acotado
+ * Casos: CP-BE-LOC-002, CP-BE-LOC-003 (ver test/qa/casos/CP-LOC.md)
+ * Tipo: unitaria   Prioridad: P1
+ * Precondiciones: función pura, sin mocks
+ * Trazabilidad: blindaje de /locations (commit f9b53da)
+ */
 import {
   haversineKm,
   obfuscateCoordinates,

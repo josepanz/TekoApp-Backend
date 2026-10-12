@@ -1,3 +1,10 @@
+/**
+ * Suite: controller de /locations: delegación al servicio, 403 propagado en ubicación exacta y JwtAuthGuard a nivel de clase
+ * Casos: CP-BE-LOC-001, CP-BE-LOC-005 (ver test/qa/casos/CP-LOC.md)
+ * Tipo: unitaria   Prioridad: P1
+ * Precondiciones: servicio y guards mockeados (sin infraestructura)
+ * Trazabilidad: blindaje de /locations (commit f9b53da)
+ */
 import { Test, TestingModule } from '@nestjs/testing';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { ForbiddenException } from '@nestjs/common';

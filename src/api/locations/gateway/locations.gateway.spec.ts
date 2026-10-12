@@ -1,3 +1,10 @@
+/**
+ * Suite: gateway WS de ubicación: subscribe/unsubscribe con regla de coordenada exacta, WsJwtGuard y canales locationUpdated (aproximada) vs exactLocationUpdated (sala)
+ * Casos: CP-BE-LOC-006, CP-BE-LOC-007 (ver test/qa/casos/CP-LOC.md)
+ * Tipo: unitaria   Prioridad: P1
+ * Precondiciones: LocationsService y socket mockeados
+ * Trazabilidad: blindaje de /locations (commit f9b53da)
+ */
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { WsJwtGuard } from '@auth/guards/ws-jwt.guard';

@@ -1,3 +1,10 @@
+/**
+ * Suite: servicio de locations: posición aproximada en nearby y las 3 reglas de coordenada exacta (propio, admin, servicio activo) con 403
+ * Casos: CP-BE-LOC-003, CP-BE-LOC-004, CP-BE-LOC-005 (ver test/qa/casos/CP-LOC.md)
+ * Tipo: unitaria   Prioridad: P1
+ * Precondiciones: repositorios de posición y servicios mockeados
+ * Trazabilidad: blindaje de /locations (commit f9b53da)
+ */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

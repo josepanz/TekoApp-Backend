@@ -29,6 +29,8 @@
     "e2e:seed": "ts-node scripts/e2e/cli.ts seed",
     "e2e:down": "ts-node scripts/e2e/cli.ts down",
     "test:e2e:real": "ts-node scripts/e2e/cli.ts test",
+    "qa:unit": "ts-node scripts/qa/report.ts unit",
+    "qa:e2e": "ts-node scripts/qa/report.ts e2e",
     "prepare": "husky || true",
     "seed": "ts-node prisma/seed.ts",
     "seed:dummy": "ts-node prisma/seed-dummy.ts",

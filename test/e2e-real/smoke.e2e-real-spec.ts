@@ -1,8 +1,10 @@
 /* eslint-disable */
 /**
- * Smoke E2E REAL: levanta la app completa (AppModule + MiddlewareConfig, igual que main.ts) en el
- * proceso de Jest, contra el stack Docker local de `docker-compose.e2e.yml` (Postgres, Mongo,
- * Redis, MinIO, MailHog). Sin mocks. Se lanza con `pnpm test:e2e:real` (que carga `.env.e2e`).
+ * Suite: smoke e2e real de auth contra el stack docker-compose.e2e.yml (AppModule + MiddlewareConfig, sin mocks)
+ * Casos: CP-BE-AUTH-001..006 y CP-BE-ENV-001 (beforeAll) (ver test/qa/casos/CP-AUTH.md y CP-ENV.md)
+ * Tipo: smoke / e2e   Prioridad: P0
+ * Precondiciones: pnpm e2e:up + e2e:seed (o pnpm qa:e2e); usuarios fixture admin y cliente_a
+ * Trazabilidad: M0/M1 del plan maestro (TEKOAPP-E2E-MASTER-PLAN.md)
  */
 import { Test } from '@nestjs/testing';
 import { INestApplication, VersioningType } from '@nestjs/common';

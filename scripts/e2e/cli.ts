@@ -106,6 +106,7 @@ function test(): void {
     './test/jest-e2e-real.json',
     '--runInBand',
     '--forceExit',
+    ...process.argv.slice(3),
   ]);
 }
 

@@ -1,3 +1,10 @@
+/**
+ * Suite: RateLimitConfig: prefijos Redis por limitador y RATE_LIMIT_MULTIPLIER (ignorado con NODE_ENV=production)
+ * Casos: CP-BE-ENV-003 (ver test/qa/casos/CP-ENV.md)
+ * Tipo: unitaria   Prioridad: P0
+ * Precondiciones: Redis y express-rate-limit mockeados
+ * Trazabilidad: M0 del plan maestro: rate-limit relajado solo en e2e
+ */
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
