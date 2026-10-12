@@ -119,7 +119,12 @@ function loadCaseMap(): Map<string, string> {
 }
 
 function totalsOf(results: TestResult[]): Totals {
-  const t: Totals = { suites: results.length, passed: 0, failed: 0, skipped: 0 };
+  const t: Totals = {
+    suites: results.length,
+    passed: 0,
+    failed: 0,
+    skipped: 0,
+  };
   for (const r of results) {
     // suite que no compiló o no arrancó: cuenta como un fallo
     if (r.assertionResults.length === 0 && r.status === 'failed') t.failed += 1;
@@ -393,7 +398,8 @@ function main(): void {
     let code = 1;
     try {
       if (runInherit('npx', [...CLI, 'up']) !== 0) throw new Error('e2e up');
-      if (runInherit('npx', [...CLI, 'seed']) !== 0) throw new Error('e2e seed');
+      if (runInherit('npx', [...CLI, 'seed']) !== 0)
+        throw new Error('e2e seed');
       code = runInherit('npx', [
         ...CLI,
         'test',
