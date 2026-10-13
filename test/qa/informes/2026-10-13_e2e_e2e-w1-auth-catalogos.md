@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 00:29 |
+| Fecha y hora | 2026-10-13 00:33 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w1-auth-catalogos` |
-| Commit | `69f80ca` (árbol con cambios sin commitear) |
+| Commit | `29ef432` |
 | Entorno | compose e2e (docker-compose.e2e.yml, .env.e2e), Node v22.16.0, Docker 29.6.2, build dfc4efb |
 | Comando | `pnpm qa:e2e` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 5 (0 con fallo) | 119 | 119 | 0 | 0 | 27.1 s |
+| 5 (0 con fallo) | 119 | 119 | 0 | 0 | 38.4 s |
 
 ## 2. Resultados por caso
 
@@ -146,35 +146,16 @@ Ninguno.
 
 ## 3. Defectos encontrados
 
-Defectos heredados del informe `2026-10-12_e2e_e2e-w1-auth-catalogos.md`; en esta ejecución (segunda corrida de la rama, tras implementar DEF-BE-006; sobrescribe el informe de la primera corrida del mismo día) los 10 están corregidos y sus casos son `it` normales. Defecto nuevo: DEF-BE-011 (Bajo, abierto, `it.failing` unitario CP-BE-AUTH-039): `JwtRefreshStrategy` busca por `payload.email`, que el refresh no lleva; no explotable porque el service revalida por `sub`.
-
-| ID | Severidad | Casos | Estado |
-|---|---|---|---|
-| DEF-BE-001 | Alta | CP-BE-AUTH-010, 014; CP-BE-CAT-015, 026, 033; CP-BE-ERR-009 | Corregido (2dd5228): `exceptionFactory` lanza `BadRequestException` (400) |
-| DEF-BE-002 | Crítica | CP-BE-CAT-010..014 | Corregido (f92e95a): `PermissionsGuard` + `categories.catalog:manage` o `admin:all` |
-| DEF-BE-003 | Media | CP-BE-AUTH-013 | Corregido (1cdcbce): email inexistente -> 401 `INVALID_CREDENTIALS` |
-| DEF-BE-004 | Baja | CP-BE-AUTH-026 | Corregido (ad9f0d8): `error` sale del status si la excepción no lo trae |
-| DEF-BE-005 | Baja | CP-BE-ERR-006 | Corregido (bbfac18): el 429 usa el envelope uniforme |
-| DEF-BE-006 | Media | CP-BE-AUTH-027, 036..038 | Corregido (69f80ca): refresh con `jti`, `POST /auth/logout` y denylist `revoked:jti:<jti>` en Redis con TTL |
-| DEF-BE-007 | Baja | CP-BE-ERR-008 | Corregido (a24fea1): el 400 incluye `error.error:"Bad Request"` |
-| DEF-BE-008 | Baja | CP-BE-CAT-016, 016b | Corregido (dcf2657): detalle por id oculto para no-admin (`OptionalJwtAuthGuard`) |
-| DEF-BE-009 | Media | CP-BE-CAT-031, 032 | Corregido (c0c7d8f): `pageSize` máximo 100 (`PaginationQueryDTO` y `ListUsersRequestDTO`) |
-| DEF-BE-010 | Media | CP-BE-CAT-025 | Corregido (9b11879): P2002 -> 409 |
+_COMPLETAR A MANO: ID `DEF-BE-NNN`, severidad, caso que lo detectó, repro y estado (o "Ninguno")._
 
 ## 4. Desvíos y observaciones
 
-- **Sin fallos ni flakies:** la suite (5 suites, 119 casos) pasó 3 veces seguidas con `pnpm test:e2e:real` y una cuarta vía `pnpm qa:e2e`. No queda ningún `it.failing` e2e.
-- **Unitarias:** `pnpm test` (144 suites, 1603 tests), `pnpm lint` (0 errores) y `pnpm check:types` en verde. `pnpm qa:unit` sale con código 1 por umbrales de cobertura global (branches 67,17% < 70%, functions 76,32% < 80%): ya incumplían antes de esta rama (66,85% / 75,74%).
-- **Diseño de DEF-BE-006:** un refresh legacy sin `jti` se acepta hasta expirar; si Redis cae, el refresh sigue (warning) y el logout falla con 500 (fail-closed).
-- **Observación, no corregida:** el login de un usuario existente sin credencial sigue devolviendo 200 `{login:false, requiredNewPassword:true}` (flujo de migración de usuarios legacy), lo que aún permite distinguir ese caso; además el login de email inexistente no ejecuta la verificación de hash (diferencia de tiempo). Fuera de alcance de DEF-BE-003.
-- `qa:e2e` levantó y bajó el stack (`pnpm e2e:down` incluido; sin contenedores `tekoapp-e2e-*` al terminar).
-- La marca "árbol con cambios sin commitear" del encabezado se debe a que este informe aún no estaba commiteado; el código ejecutado es el de `69f80ca`.
+_COMPLETAR A MANO: flakies, timeouts, entorno y omitidos con su motivo._
 
 ## 5. Evidencia
 
-- Specs: `test/e2e-real/{auth,auth-rate-limit,catalogos,error-contract,smoke}.e2e-real-spec.ts`; casos en `test/qa/casos/CP-AUTH.md` y `CP-CAT.md`; informe unitario `2026-10-13_unit_e2e-w1-auth-catalogos.md`.
 - Salida JSON de jest en `coverage/jest-e2e.json` (ignorado por git).
 
 ## 6. Veredicto
 
-APROBADO CON OBSERVACIONES: 119/119 casos pasan en 4 corridas y los 10 defectos DEF-BE-001..010 están corregidos; queda abierto DEF-BE-011 (bajo).
+_COMPLETAR A MANO: APROBADO / APROBADO CON OBSERVACIONES / RECHAZADO, con su criterio._

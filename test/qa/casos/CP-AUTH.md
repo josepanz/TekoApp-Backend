@@ -462,14 +462,14 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-039 |
-| Título | La estrategia `jwt-refresh` no busca usuarios con `email` undefined [DEF-BE-011: Abierto, caso `it.failing` unitario] |
+| Título | La estrategia `jwt-refresh` no busca usuarios con `email` undefined [DEF-BE-011: Corregido (29ef432)] |
 | Tipo / Nivel | unitaria |
 | Prioridad | P2 |
 | Trazabilidad | DEF-BE-011 (hallazgo al implementar DEF-BE-006) |
 | Precondiciones | `UsersDBService` mockeado. |
 | Pasos | 1. `validate({sub, tokenType:'refreshToken'})` (el refresh no lleva `email`). |
 | Datos de prueba | payload sin email |
-| Resultado esperado | No se llama `findActiveUserByEmail(undefined)`. Hoy sí: Prisma ignora `email: undefined` y devuelve cualquier usuario activo; la estrategia no valida al dueño del token (el service lo revalida por `sub`, por eso no es explotable hoy). |
+| Resultado esperado | No se llama `findActiveUserByEmail(undefined)`: la estrategia resuelve al usuario por `sub` (`findActiveUserByReferenceId`) y lanza 401 si falta `sub` o el usuario no está activo. Además `findActiveUserByEmail` rechaza email vacío/undefined devolviendo null. |
 | Automatizado en | `src/modules/auth/strategies/jwt-refresh.strategy.spec.ts` — `DEF-BE-011: no debe consultar usuarios por un email undefined` |
 
 ### CP-BE-AUTH-028 — Endpoints pre-login sin Authorization responden 401
@@ -735,4 +735,4 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 | DEF-BE-005 | Medio | Corregido (bbfac18) |
 | DEF-BE-006 | Alto | Corregido (69f80ca): refresh con `jti` + `POST /auth/logout` + denylist `revoked:jti:<jti>` en Redis con TTL. Refresh legacy sin `jti` se acepta hasta expirar; Redis caído: refresh sigue (warning), logout falla 500 |
 | DEF-BE-007 | Bajo | Corregido (a24fea1) |
-| DEF-BE-011 | Bajo | Abierto (`it.failing` unitario, CP-BE-AUTH-039): `JwtRefreshStrategy` busca por `payload.email`, que el refresh token no lleva; no es explotable porque el service revalida por `sub`. Corregir cambiando la búsqueda a `sub` (fuera del alcance de DEF-BE-006) |
+| DEF-BE-011 | Bajo | Corregido (29ef432, CP-BE-AUTH-039): `JwtRefreshStrategy` buscaba por `payload.email`, que el refresh no lleva; ahora resuelve por `sub` y `findActiveUserByEmail` rechaza email vacío |
