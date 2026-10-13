@@ -158,7 +158,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
   describe('Documentos de identidad del profesional', () => {
     // CP-BE-UPL-001
-    it.failing('DEF-BE-024: cliente_b no puede obtener el URL presignado de un documento de un profesional ni descargar sus bytes', async () => {
+    it('DEF-BE-024: cliente_b no puede obtener el URL presignado de un documento de un profesional ni descargar sus bytes', async () => {
       const res = await presigned(clienteB, docKey);
       // demostración del defecto: con el URL se bajan los bytes reales del documento
       const leaked =
@@ -171,7 +171,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-002
-    it.failing('DEF-BE-024: otro profesional tampoco puede; el dueño y el admin sí, con los mismos bytes', async () => {
+    it('DEF-BE-024: otro profesional tampoco puede; el dueño y el admin sí, con los mismos bytes', async () => {
       expect((await presigned(otherPro.token, docKey)).status).toBe(403);
       for (const token of [pro.token, admin]) {
         const res = await presigned(token, docKey);
@@ -183,13 +183,13 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-003
-    it.failing('DEF-BE-024: un documento aprobado y visible al cliente lo ve cualquier autenticado; uno aprobado no visible, no', async () => {
+    it('DEF-BE-024: un documento aprobado y visible al cliente lo ve cualquier autenticado; uno aprobado no visible, no', async () => {
       expect((await presigned(clienteB, publicDocKey)).status).toBe(200);
       expect((await presigned(clienteB, privateApprovedDocKey)).status).toBe(403);
     });
 
     // CP-BE-UPL-004
-    it.failing('DEF-BE-024: GET /uploads/info/:filename aplica la misma regla', async () => {
+    it('DEF-BE-024: GET /uploads/info/:filename aplica la misma regla', async () => {
       expect((await info(clienteB, docKey)).status).toBe(403);
       expect((await info(pro.token, docKey)).status).toBe(200);
     });
@@ -197,7 +197,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
   describe('Portafolio', () => {
     // CP-BE-UPL-005
-    it.failing('DEF-BE-024: una foto PENDING u oculta (isVisible:false) solo la ven el dueño y el admin', async () => {
+    it('DEF-BE-024: una foto PENDING u oculta (isVisible:false) solo la ven el dueño y el admin', async () => {
       for (const key of [pendingPortfolioKey, hiddenPortfolioKey]) {
         expect((await presigned(clienteB, key)).status).toBe(403);
         expect((await presigned(pro.token, key)).status).toBe(200);
@@ -232,7 +232,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-008
-    it.failing('DEF-BE-024: una key que ninguna fila referencia (inventada o recién subida sin guardar) -> 404', async () => {
+    it('DEF-BE-024: una key que ninguna fila referencia (inventada o recién subida sin guardar) -> 404', async () => {
       expect((await presigned(clienteB, `${uniqueSuffix()}${uniqueSuffix()}.pdf`)).status).toBe(404);
       const loose = await uploadImage(clienteB);
       expect((await presigned(clienteB, loose)).status).toBe(404);
@@ -240,7 +240,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-009
-    it.failing('DEF-BE-024: el URL presignado expira en 5 minutos como máximo', async () => {
+    it('DEF-BE-024: el URL presignado expira en 5 minutos como máximo', async () => {
       const url = unwrap((await presigned(pro.token, docKey)).body).url as string;
       const expires = Number(new URL(url).searchParams.get('X-Amz-Expires'));
       expect(expires).toBeGreaterThan(0);
@@ -275,7 +275,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-011
-    it.failing('DEF-BE-024: la foto de un servicio PENDING la ven el cliente, un profesional aprobado y el admin; no un tercero', async () => {
+    it('DEF-BE-024: la foto de un servicio PENDING la ven el cliente, un profesional aprobado y el admin; no un tercero', async () => {
       expect((await presigned(client, serviceImage)).status).toBe(200);
       expect((await presigned(assigned.token, serviceImage)).status).toBe(200);
       expect((await presigned(admin, serviceImage)).status).toBe(200);
@@ -283,7 +283,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-012
-    it.failing('DEF-BE-024: tras asignarse, la foto del servicio y las de la bitácora solo las ven el cliente, el profesional asignado y el admin', async () => {
+    it('DEF-BE-024: tras asignarse, la foto del servicio y las de la bitácora solo las ven el cliente, el profesional asignado y el admin', async () => {
       await http.post(`${PREFIX}/services/${serviceRef}/accept`).set(bearer(assigned.token)).expect(201);
       await http.post(`${PREFIX}/services/${serviceRef}/start`).set(bearer(assigned.token)).expect(201);
       progressImage = await uploadImage(assigned.token);
@@ -302,7 +302,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-013
-    it.failing('DEF-BE-024: adjuntar la key de un documento ajeno a una entrada de bitácora no da acceso a ese documento', async () => {
+    it('DEF-BE-024: adjuntar la key de un documento ajeno a una entrada de bitácora no da acceso a ese documento', async () => {
       const svc = unwrap(
         (await createService(http, clienteA, categoryId, serviceTypeId).expect(201)).body,
       );

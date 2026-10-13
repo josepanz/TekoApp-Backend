@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { UploadsController } from './uploads.controller';
 import { UploadsService } from '../services/uploads.service';
+import { UploadsAccessService } from '../services/uploads-access.service';
 import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 import { FileInfoResponseDTO } from '../dtos/response';
 
@@ -13,6 +14,8 @@ const mockUploadMerchantDocs = jest.fn();
 const mockGetPresignedUrl = jest.fn();
 const mockDeleteFile = jest.fn();
 const mockValidateFile = jest.fn();
+const mockAssertCanRead = jest.fn();
+const mockAssertCanDelete = jest.fn();
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 const buildMulterFile = (
@@ -52,6 +55,13 @@ describe('UploadsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UploadsController],
       providers: [
+        {
+          provide: UploadsAccessService,
+          useValue: {
+            assertCanRead: mockAssertCanRead,
+            assertCanDelete: mockAssertCanDelete,
+          },
+        },
         {
           provide: UploadsService,
           useValue: {
@@ -220,18 +230,44 @@ describe('UploadsController', () => {
       );
 
       // Act
-      const result = await controller.getPresignedUrl(key);
+      mockAssertCanRead.mockResolvedValue(undefined);
+      const result = await controller.getPresignedUrl(key, makeUser() as never);
 
       // Assert
+      expect(mockAssertCanRead).toHaveBeenCalledWith(key, makeUser());
       expect(mockGetPresignedUrl).toHaveBeenCalledWith(key);
       expect(result).toEqual({ url: 'https://s3.example.com/abc123?signed=1' });
     });
 
     it('debe lanzar BadRequestException si key es vacío', async () => {
       // Act & Assert
-      await expect(controller.getPresignedUrl('')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        controller.getPresignedUrl('', makeUser() as never),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('autorización de archivos (DEF-BE-024)', () => {
+    it('no firma el URL si el usuario no tiene acceso a la key', async () => {
+      // Arrange
+      mockAssertCanRead.mockRejectedValue(new ForbiddenException('no'));
+
+      // Act & Assert
+      await expect(
+        controller.getPresignedUrl('doc.pdf', makeUser(2) as never),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockGetPresignedUrl).not.toHaveBeenCalled();
+    });
+
+    it('info/:filename aplica la misma regla antes de firmar', async () => {
+      // Arrange
+      mockAssertCanRead.mockRejectedValue(new ForbiddenException('no'));
+
+      // Act & Assert
+      await expect(
+        controller.getFileInfo({ filename: 'doc.pdf' }, makeUser(2) as never),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockGetPresignedUrl).not.toHaveBeenCalled();
     });
   });
 

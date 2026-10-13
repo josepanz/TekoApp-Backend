@@ -5,6 +5,8 @@ import { StorageModule } from '@modules/storage/storage.module';
 import { UsersDBModule } from '@modules/users-db/users-db.module';
 import { UploadsController } from './controllers/uploads.controller';
 import { UploadsService } from './services/uploads.service';
+import { UploadsAccessService } from './services/uploads-access.service';
+import { StorageAccessDbModule } from '@modules/storage-access-db/storage-access-db.module';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './const/uploads.const';
 
 @Module({
@@ -25,9 +27,10 @@ import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from './const/uploads.const';
     }),
     StorageModule,
     UsersDBModule,
+    StorageAccessDbModule,
   ],
   controllers: [UploadsController],
-  providers: [UploadsService],
+  providers: [UploadsService, UploadsAccessService],
   exports: [UploadsService],
 })
 export class UploadsModule {}
