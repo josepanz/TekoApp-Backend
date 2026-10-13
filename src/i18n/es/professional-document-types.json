@@ -1,3 +1,4 @@
 {
-  "NOT_FOUND": "Tipo de documento no encontrado"
+  "NOT_FOUND": "Tipo de documento no encontrado",
+  "CODE_ALREADY_EXISTS": "Ya existe un tipo de documento con ese código"
 }

@@ -414,22 +414,19 @@ describe('M2 Catálogos (e2e real)', () => {
         .expect(404);
     });
     // CP-BE-CAT-025
-    it.failing(
-      'DEF-BE-010: código de tipo de documento duplicado debe dar 409 (hoy 500: el P2002 de Prisma no se mapea)',
-      async () => {
-        const b = body();
-        await http
-          .post(`${PREFIX}/admin/professional-document-types`)
-          .set(bearer(admin))
-          .send(b)
-          .expect(201);
-        await http
-          .post(`${PREFIX}/admin/professional-document-types`)
-          .set(bearer(admin))
-          .send(b)
-          .expect(409);
-      },
-    );
+    it('DEF-BE-010: código de tipo de documento duplicado debe dar 409', async () => {
+      const b = body();
+      await http
+        .post(`${PREFIX}/admin/professional-document-types`)
+        .set(bearer(admin))
+        .send(b)
+        .expect(201);
+      await http
+        .post(`${PREFIX}/admin/professional-document-types`)
+        .set(bearer(admin))
+        .send(b)
+        .expect(409);
+    });
     // CP-BE-CAT-026
     it('DEF-BE-001: body inválido en alta de tipo de documento debe dar 400/422', async () => {
       const res = await http
