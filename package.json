@@ -28,6 +28,7 @@
     "e2e:up": "ts-node scripts/e2e/cli.ts up",
     "e2e:seed": "ts-node scripts/e2e/cli.ts seed",
     "e2e:down": "ts-node scripts/e2e/cli.ts down",
+    "e2e:serve": "ts-node scripts/e2e/cli.ts serve",
     "test:e2e:real": "ts-node scripts/e2e/cli.ts test",
     "qa:unit": "ts-node scripts/qa/report.ts unit",
     "qa:e2e": "ts-node scripts/qa/report.ts e2e",
