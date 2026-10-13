@@ -2,7 +2,7 @@
 /**
  * Suite: M3 Onboarding profesional contra el stack real (postulación, documentos con subida real a MinIO,
  * cola y revisión de admin, consentimiento, verify/suspend con efecto real, portafolio, job de expiración).
- * Casos: CP-BE-ONB-001..032 (ver test/qa/casos/CP-ONB.md)
+ * Casos: CP-BE-ONB-001..033 (ver test/qa/casos/CP-ONB.md)
  * Tipo: e2e   Prioridad: P1
  * Precondiciones: pnpm e2e:up + e2e:seed (versiones legales sembradas con countryId null); fixtures admin y
  *        cliente_a. Los usuarios/profesionales se crean por API en cada corrida (email único).
@@ -396,7 +396,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
     });
 
     // CP-BE-ONB-031
-    it.failing('DEF-BE-016: rechazar con motivo vacío o solo espacios debe dar 400 y no cambiar el estado', async () => {
+    it('DEF-BE-016: rechazar con motivo vacío o solo espacios debe dar 400 y no cambiar el estado', async () => {
       const up = unwrap(
         (await uploadDoc(proA.user.token, qual.referenceId).expect(201)).body,
       );
@@ -858,6 +858,25 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .delete(`${PREFIX}/professionals/me/portfolio/${item.referenceId}`)
         .set(bearer(owner.user.token))
         .expect(404);
+    });
+
+    // CP-BE-ONB-033
+    it('DEF-BE-016: rechazar un item de portafolio con motivo vacío o solo espacios -> 400 y sigue PENDING', async () => {
+      const item = unwrap((await upload(owner.user.token, 'blank')).body);
+      for (const rejectionReason of ['', '   ']) {
+        const res = await http
+          .patch(
+            `${PREFIX}/admin/professional-portfolio/${item.referenceId}/review`,
+          )
+          .set(bearer(admin))
+          .send({ status: 'REJECTED', rejectionReason });
+        expect(res.status).toBe(400);
+      }
+      expect(
+        (await mine(owner.user.token)).find(
+          (i) => i.referenceId === item.referenceId,
+        ).status,
+      ).toBe('PENDING');
     });
 
     // CP-BE-ONB-030
