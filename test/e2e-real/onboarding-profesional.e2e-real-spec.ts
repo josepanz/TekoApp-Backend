@@ -1,13 +1,13 @@
 /* eslint-disable */
 /**
  * Suite: M3 Onboarding profesional contra el stack real (postulación, documentos con subida real a MinIO,
- * cola y revisión de admin, consentimiento, verify/suspend con efecto real, portafolio, job de expiración).
- * Casos: CP-BE-ONB-001..037 (ver test/qa/casos/CP-ONB.md)
+ * cola y revisión de admin, consentimiento, verify/suspend/reactivate con efecto real, auditoría e historial de estados, portafolio, job de expiración).
+ * Casos: CP-BE-ONB-001..047 (ver test/qa/casos/CP-ONB.md)
  * Tipo: e2e   Prioridad: P1
  * Precondiciones: pnpm e2e:up + e2e:seed (versiones legales sembradas con countryId null); fixtures admin y
  *        cliente_a. Los usuarios/profesionales se crean por API en cada corrida (email único).
  * Trazabilidad: M3 del plan maestro (TEKOAPP-E2E-MASTER-PLAN.md §3); openspec/specs/e2e-test-plan.md Tier 3;
- *        DEF-BE-014..018 y DEF-BE-023.
+ *        DEF-BE-014..018, DEF-BE-023 y reactivación/auditoría/historial (2026-10-13).
  */
 import { PrismaClient } from '@prisma/client';
 import { ProfessionalDocumentsExpirationJob } from '../../src/api/professional-documents/jobs/professional-documents-expiration.job';

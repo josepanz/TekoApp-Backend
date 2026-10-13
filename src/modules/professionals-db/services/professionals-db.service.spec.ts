@@ -602,7 +602,7 @@ describe('ProfessionalsDbService', () => {
       const result = await service.findStatusHistory(5, 3, 10);
 
       // Assert
-      const args = mockAuditFindMany.mock.calls[0][0] as {
+      const args = (mockAuditFindMany.mock.calls as unknown[][])[0][0] as {
         where: { OR: unknown[]; tableName: string; recordId: string };
         skip: number;
         take: number;

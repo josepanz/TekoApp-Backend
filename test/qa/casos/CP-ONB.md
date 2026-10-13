@@ -1,6 +1,6 @@
 # CP-ONB — M3 Onboarding profesional (Backend)
 
-Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-001..039 de la ola W2 (Tier 3 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal; DEF-BE-023 también quedó corregido.
+Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-001..047 de la ola W2 (040..047: reactivación, auditoría de estados e historial) (Tier 3 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal; DEF-BE-023 también quedó corregido.
 
 ## Decisiones y casos no automatizables
 
@@ -9,7 +9,10 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 - **Job de expiración:** `ProfessionalDocumentsExpirationJob.run()` es público y se invoca directo con `app.get(...)`; el test vence un documento en la DB y verifica EXPIRED y el recálculo (CP-BE-ONB-020). El disparo por cron (`EVERY_DAY_AT_3AM`) no se prueba: caso manual, ejecutar con `NODE_ENV` normal y comprobar el log "Venciendo N documento(s)".
 - **Consentimiento:** los consentimientos solo consideran versiones `countryId: null` (los usuarios no tienen país). Antes del fix de DEF-BE-014 el seed las creaba con país y nadie podía aceptarlas.
 - **Visibilidad (DEF-BE-023):** un cliente solo ve profesionales APPROVED y activos; admin y quien tenga `professionals.verification:manage` ven todos y el propio profesional se ve a sí mismo. El backoffice de Web (`features/professionals`) usa `GET /professionals`, `/professionals/reference/:ref`, `verify` y `suspend` con sesión admin y no cambia. Excepción (DEF-BE-030, CP-BE-MKT-039): un cliente con un servicio ACCEPTED o IN_PROGRESS con el profesional lo sigue viendo aunque lo suspendan.
-- **Máquina de estados verify/suspend (DEF-BE-028/029):** `POST /professionals/:id/verify` solo desde PENDING o REJECTED (APPROVED y SUSPENDED -> 409); `POST /professionals/:id/suspend` solo desde APPROVED (PENDING, REJECTED y SUSPENDED -> 409). No existe endpoint de reactivación (`reactivate`/`unsuspend`): un SUSPENDED no se puede volver a aprobar por API y queda como alcance de un cambio futuro; `verify` sobre SUSPENDED no es esa vía.
+- **Máquina de estados verify/suspend (DEF-BE-028/029):** `POST /professionals/:id/verify` solo desde PENDING o REJECTED (APPROVED y SUSPENDED -> 409); `POST /professionals/:id/suspend` solo desde APPROVED (PENDING, REJECTED y SUSPENDED -> 409). La reactivación es `POST /professionals/:id/reactivate` (SUSPENDED -> APPROVED, 409 desde cualquier otro estado; `verify` sobre SUSPENDED sigue siendo 409).
+- **Reactivación (CP-BE-ONB-040..043):** mismos permisos que suspend (`professionals.verification:manage` o `admin:all`); body `{ reason }` obligatorio (se recorta, vacío -> 400). Deja al profesional como un APPROVED normal: `isActive` true y `isAvailable`/`isOnline` false (tiene que volver a marcarse disponible). `verify` no exige `requiredDocumentsVerified`, así que reactivar tampoco; sí se revalida que la cuenta del usuario no esté DELETED, PENDING_DELETION ni BLOCKED (409). Avisa al profesional con una notificación `professional_verified` (sin tipo nuevo: evita migrar el enum).
+- **Auditoría de estados (CP-BE-ONB-044/045):** sin migración ni tabla nueva. `audit_logs` ya tiene `old_data`, `new_data`, `reason`, `ip_address`, `user_agent` y el trigger `fn_audit_generic_trigger` registra cada UPDATE de `professionals`. Cada transición (verify, reject, suspend, reactivate) escribe `last_changed_by` = referenceId del admin y `changed_reason`, y corre dentro de `auditStorage` para que el trigger guarde IP y user-agent (el `AuditInterceptor` global no está registrado, así que de otro modo quedarían la IP del cliente de DB y `unknown`). `notes` de verify es opcional al verificar y obligatorio al rechazar (400). El trigger hace `COALESCE(NEW.changed_reason, OLD.changed_reason)`: por eso el historial lee el motivo de `new_data.changed_reason` y no de la columna `reason`.
+- **Historial (CP-BE-ONB-046/047):** `GET /professionals/:id/status-history` (`page`, `pageSize` hasta 100). Solo UPDATE con `old_data.status != new_data.status`; un re-rechazo REJECTED -> REJECTED no cambia de estado y no figura. `GET /admin/audit-logs` no lo reemplaza (ver CP-BE-ONB-046).
 - **Archivos:** la autorización de `GET /uploads/presigned-url`, `info` y `DELETE` está en `CP-UPL.md`.
 - **Datos que cambian de forma observable pero no se prueban acá:** notificaciones de revisión/verify/suspend (M11).
 
@@ -599,6 +602,126 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 | Resultado esperado | PENDING -> suspend: 409; APPROVED -> 201; SUSPENDED -> suspend: 409 y `changedReason` sigue "primero". |
 | Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-029: suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original` |
 
+### CP-BE-ONB-040 — reactivate: SUSPENDED -> APPROVED con motivo; vuelve a ser visible y queda como un APPROVED normal (isActive, no disponible hasta re-marcarse)
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-040 |
+| Título | reactivate: SUSPENDED -> APPROVED con motivo; vuelve a ser visible y queda como un APPROVED normal (isActive, no disponible hasta re-marcarse) |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 (reactivar suspendidos con auditoría y motivos) |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Verificar un profesional, ponerlo disponible/en línea con ubicación y suspenderlo (desaparece de `GET /professionals/:id` para un cliente y de `/locations/nearby`).<br>`POST /professionals/:id/reactivate` con `{ "reason": "  Apelación aceptada  " }` como admin.<br>Consultar como cliente `GET /professionals/:id` y `/locations/nearby`.<br>Re-marcarse disponible y en línea. |
+| Datos de prueba | reason con espacios alrededor (se recorta) |
+| Resultado esperado | 201; `status` APPROVED, `isActive` true, `isAvailable` false, `isOnline` false (igual que un APPROVED recién verificado), `verificationStatus` VERIFIED, `changedReason` "Apelación aceptada". El cliente vuelve a ver el perfil (200); no aparece en `/locations/nearby` hasta volver a marcarse disponible y en línea, y entonces sí. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `reactivate: SUSPENDED -> APPROVED con motivo; vuelve a ser visible y queda como un APPROVED normal (isActive, no disponible hasta re-marcarse)` |
+
+### CP-BE-ONB-041 — reactivate sobre PENDING, REJECTED, APPROVED o ya reactivado -> 409 con envelope y no cambia el estado ni el motivo
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-041 |
+| Título | reactivate sobre PENDING, REJECTED, APPROVED o ya reactivado -> 409 con envelope y no cambia el estado ni el motivo |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Con profesionales PENDING, REJECTED y APPROVED, `POST /professionals/:id/reactivate`.<br>Suspender y reactivar el APPROVED con motivo "primera"; reactivar de nuevo con "segunda". |
+| Datos de prueba | reason "Apelación aceptada" / "primera" / "segunda" |
+| Resultado esperado | 409 con envelope `{success:false, error.code:409}` desde PENDING, REJECTED, APPROVED y desde un ya reactivado; el estado no cambia y `changedReason` sigue "primera". Solo SUSPENDED -> APPROVED es 201. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `reactivate sobre PENDING, REJECTED, APPROVED o ya reactivado -> 409 con envelope y no cambia el estado ni el motivo` |
+
+### CP-BE-ONB-042 — reactivate exige motivo (400 si falta, vacío o solo espacios), permiso (403), JWT (401) y existencia (404)
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-042 |
+| Título | reactivate exige motivo (400 si falta, vacío o solo espacios), permiso (403), JWT (401) y existencia (404) |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Suspender un profesional.<br>`POST .../reactivate` con body `{}`, `{reason:""}` y `{reason:"   "}` como admin.<br>Repetir con token de cliente y del propio profesional, sin JWT, y con un id inexistente. |
+| Datos de prueba | reason ausente / vacío / solo espacios; ids 99999999 |
+| Resultado esperado | 400 por motivo ausente, vacío o en blanco; 403 sin permiso (mismos permisos que suspend: `professionals.verification:manage` o `admin:all`); 401 sin JWT; 404 si el id no existe; el profesional sigue SUSPENDED. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `reactivate exige motivo (400 si falta, vacío o solo espacios), permiso (403), JWT (401) y existencia (404)` |
+
+### CP-BE-ONB-043 — reactivate con la cuenta del usuario no ACTIVE (bloqueada) -> 409 y sigue SUSPENDED
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-043 |
+| Título | reactivate con la cuenta del usuario no ACTIVE (bloqueada) -> 409 y sigue SUSPENDED |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | M3 del plan maestro (§3); revalidación al reactivar |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Suspender un profesional.<br>Poner la cuenta de su usuario en BLOCKED (directo en DB).<br>`POST .../reactivate`.<br>Restaurar la cuenta ACTIVE y reactivar. |
+| Datos de prueba | users.status BLOCKED (también aplica a DELETED y PENDING_DELETION: el borrado de cuenta deja al profesional SUSPENDED a propósito) |
+| Resultado esperado | 409 y sigue SUSPENDED mientras la cuenta esté bloqueada, eliminada o en borrado; con la cuenta ACTIVE, 201. `verify` no exige `requiredDocumentsVerified`, así que reactivar tampoco. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `reactivate con la cuenta del usuario no ACTIVE (bloqueada) -> 409 y sigue SUSPENDED` |
+
+### CP-BE-ONB-044 — auditoría: verify, suspend y reactivate registran actor (referenceId), estado anterior/nuevo, motivo, IP y user-agent en audit_logs
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-044 |
+| Título | auditoría: verify, suspend y reactivate registran actor (referenceId), estado anterior/nuevo, motivo, IP y user-agent en audit_logs |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 (auditoría uniforme) |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Con `User-Agent: e2e-qa-audit/1.0`: verificar con nota "Docs OK", suspender con "Reportes" y reactivar con "Apelación".<br>Leer `audit_logs` (tabla `professionals`, id del profesional, UPDATE) con Prisma. |
+| Datos de prueba | notas/motivos indicados; el actor es el admin fixture |
+| Resultado esperado | Tres transiciones PENDING>APPROVED, APPROVED>SUSPENDED, SUSPENDED>APPROVED con `old_data.status`/`new_data.status`, motivo en `new_data.changed_reason`, `changed_by` = referenceId del admin, `user_agent` = el enviado e `ip_address` de loopback, y `changed_at`. Sin migración: el trigger `fn_audit_generic_trigger` ya registra todo; el servicio solo le pasa actor, motivo, IP y user-agent. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `auditoría: verify, suspend y reactivate registran actor (referenceId), estado anterior/nuevo, motivo, IP y user-agent en audit_logs` |
+
+### CP-BE-ONB-045 — rechazar exige motivo (400 si falta o está en blanco); verify sin nota no arrastra el motivo previo
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-045 |
+| Título | rechazar exige motivo (400 si falta o está en blanco); verify sin nota no arrastra el motivo previo |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | `POST .../verify` con `{isVerified:false}`, con `notes` vacío y con `notes` en blanco.<br>Rechazar con "Documentación ilegible".<br>Verificar sin nota. |
+| Datos de prueba | isVerified false con notes ausente / "" / "   " |
+| Resultado esperado | 400 al rechazar sin motivo no vacío y el profesional sigue PENDING; con motivo, 201 REJECTED y `changedReason` "Documentación ilegible". Verificar es opcional con nota: sin nota, `changedReason` queda null (no arrastra el motivo del rechazo) y `new_data.changed_reason` del audit-log es null. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `rechazar exige motivo (400 si falta o está en blanco); verify sin nota no arrastra el motivo previo` |
+
+### CP-BE-ONB-046 — status-history: lista paginada de transiciones (más reciente primero) con actor, de->a, motivo, fecha, IP y user-agent
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-046 |
+| Título | status-history: lista paginada de transiciones (más reciente primero) con actor, de->a, motivo, fecha, IP y user-agent |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 (historial de estados) |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Rechazar, verificar, suspender y reactivar un profesional con `User-Agent: e2e-qa-history/1.0`.<br>`GET /professionals/:id/status-history` como admin.<br>Repetir con `pageSize=3` y `page=2&pageSize=3`. |
+| Datos de prueba | motivos "Ilegible", sin nota, "Reportes", "Apelación" |
+| Resultado esperado | 200 `{data, pagination}`; 4 entradas, la más reciente primero: REACTIVATE SUSPENDED>APPROVED, SUSPEND, VERIFY REJECTED>APPROVED, REJECT PENDING>REJECTED; cada una con `reason`, `changedAt`, `ipAddress`, `userAgent` y `actor {referenceId, name, email}` (email del admin). `pagination` {total 4, page 1, pageSize 10, totalPages 1}; con pageSize 3 hay 2 páginas y la segunda trae solo REJECT. `GET /admin/audit-logs?tableName=professionals&recordId=<id>` no sirve para esto: devuelve toda actualización (no solo cambios de estado), snapshots completos `oldData`/`newData` y `changedBy` crudo, sin nombre/email del actor ni IP/user-agent, y exige `system.audit:read`; por eso existe el endpoint dedicado. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `status-history: lista paginada de transiciones (más reciente primero) con actor, de->a, motivo, fecha, IP y user-agent` |
+
+### CP-BE-ONB-047 — status-history: pageSize > 100 -> 400, sin permiso 403, sin JWT 401, inexistente 404; una actualización sin cambio de estado no genera entrada
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-047 |
+| Título | status-history: pageSize > 100 -> 400, sin permiso 403, sin JWT 401, inexistente 404; una actualización sin cambio de estado no genera entrada |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | M3 del plan maestro (§3); decisión de José 2026-10-13 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | `GET /professionals/:id/status-history` con `pageSize=101`, con token de cliente y del propio profesional, sin JWT y con id inexistente.<br>Sobre un profesional sin transiciones, editar su descripción (UPDATE sin cambio de estado) y volver a consultar. |
+| Datos de prueba | pageSize 101; id 99999999 |
+| Resultado esperado | 400 por pageSize > 100; 403 sin permiso (`professionals.verification:manage` o `admin:all`); 401 sin JWT; 404 si no existe; `data: []`, `total: 0` sin transiciones y una actualización que no cambia el estado no genera entrada. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `status-history: pageSize > 100 -> 400, sin permiso 403, sin JWT 401, inexistente 404; una actualización sin cambio de estado no genera entrada` |
+
 ## Estado de defectos (rama test/e2e-w2-onboarding-marketplace)
 
 | DEF | Sev. | Caso | Estado |
@@ -611,3 +734,4 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 | DEF-BE-023 | Medio | CP-BE-ONB-034..037 | Corregido (8420fa2): lista, cercanos, skills, top-rated, id, referenceId, stats y services ocultan no aprobados a clientes |
 | DEF-BE-028 | Medio | CP-BE-ONB-038 | Corregido (6ef4c40): verify solo desde PENDING/REJECTED; sobre SUSPENDED o APPROVED responde 409 (antes 201 y reactivaba) |
 | DEF-BE-029 | Bajo | CP-BE-ONB-039 | Corregido (a7f3d3b): suspend solo desde APPROVED; sobre SUSPENDED responde 409 (antes 201) |
+| DEF-BE-031 | Bajo | CP-BE-ENV-004 | Corregido (367a5c2): el log de un 4xx manejado salía como ERROR y con el status del handler ("201 - CREATED"); ahora status real, WARN para 4xx y ERROR solo para 5xx (ver CP-ENV.md) |

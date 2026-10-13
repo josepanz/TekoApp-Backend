@@ -8,8 +8,9 @@
  * Sin dependencias nuevas. Las secciones 3-6 (defectos, desvíos, evidencia, veredicto) quedan con
  * marcadores para completarse a mano. Escribe test/qa/informes/AAAA-MM-DD_<tipo>_<rama-corta>.md.
  */
-import { execFileSync, spawnSync } from 'child_process';
+import { execFileSync, spawn, spawnSync } from 'child_process';
 import {
+  createWriteStream,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -18,9 +19,11 @@ import {
 } from 'fs';
 import { relative, resolve } from 'path';
 import jestConfig from '../../jest.config';
+import { buildLogsSection, captureDockerLogs, summarizeLogsDir } from './logs';
 
 const ROOT = resolve(__dirname, '..', '..');
 const OUT_DIR = resolve(ROOT, 'test', 'qa', 'informes');
+const ARTEFACTOS_DIR = resolve(OUT_DIR, 'artefactos');
 const CASOS_DIR = resolve(ROOT, 'test', 'qa', 'casos');
 const COVERAGE_DIR = resolve(ROOT, 'coverage');
 const isWin = process.platform === 'win32';
@@ -77,6 +80,17 @@ function branchShort(branch: string): string {
       .slice(0, 40) || 'sin-rama'
   );
 }
+
+/** AAAA-MM-DD_<tipo>_<rama-corta>: nombre del informe (sin .md) y de su carpeta de artefactos. */
+function corridaName(kind: Kind, now = new Date()): string {
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const branch = sh('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+  return `${date}_${kind}_${branchShort(branch)}`;
+}
+
+const logsDirOf = (kind: Kind): string =>
+  resolve(ARTEFACTOS_DIR, corridaName(kind), 'logs');
 
 const rel = (p: string): string => relative(ROOT, p).split('\\').join('/');
 
@@ -366,7 +380,8 @@ export function buildReport(
     '',
     kind === 'unit'
       ? '- `coverage/lcov-report/index.html` y `coverage/coverage-summary.json` (ignorados por git; se regeneran con el comando).'
-      : '- Salida JSON de jest en `coverage/jest-e2e.json` (ignorado por git).',
+      : `- Salida JSON de jest en \`coverage/jest-e2e.json\` (ignorado por git).
+- Logs de la corrida en \`${rel(logsDirOf('e2e'))}/\` (ignorado por git; ver sección 7).`,
     '',
   );
   L.push(
@@ -375,8 +390,12 @@ export function buildReport(
     '_COMPLETAR A MANO: APROBADO / APROBADO CON OBSERVACIONES / RECHAZADO, con su criterio._',
     '',
   );
+  if (kind === 'e2e') {
+    const logsDir = logsDirOf('e2e');
+    L.push(buildLogsSection(summarizeLogsDir(logsDir), `${rel(logsDir)}/`));
+  }
   return {
-    name: `${date}_${kind}_${branchShort(branch)}.md`,
+    name: `${corridaName(kind, now)}.md`,
     body: L.join('\n'),
   };
 }
@@ -410,9 +429,44 @@ function runInherit(
   return r.status ?? 1;
 }
 
+/**
+ * Como `runInherit`, pero además de mostrarlo copia stdout y stderr del proceso a archivos: es la captura de
+ * logs de la app in-process de jest (pino va a stdout; el resumen de jest y los console.* van a stderr).
+ */
+function runTee(
+  cmd: string,
+  args: string[],
+  stdoutFile: string,
+  stderrFile: string,
+): Promise<number> {
+  mkdirSync(resolve(stdoutFile, '..'), { recursive: true });
+  const out = createWriteStream(stdoutFile);
+  const err = createWriteStream(stderrFile);
+  return new Promise((done) => {
+    const child = spawn(cmd, args, {
+      cwd: ROOT,
+      stdio: ['inherit', 'pipe', 'pipe'],
+      shell: isWin,
+      env: process.env,
+    });
+    child.stdout?.on('data', (d: Buffer) => {
+      process.stdout.write(d);
+      out.write(d);
+    });
+    child.stderr?.on('data', (d: Buffer) => {
+      process.stderr.write(d);
+      err.write(d);
+    });
+    child.on('close', (code) => {
+      out.end();
+      err.end(() => done(code ?? 1));
+    });
+  });
+}
+
 const CLI = ['ts-node', 'scripts/e2e/cli.ts'];
 
-function main(): void {
+async function main(): Promise<void> {
   const [mode, a1, a2, a3] = process.argv.slice(2);
   mkdirSync(COVERAGE_DIR, { recursive: true });
   if (mode === 'from' && a1 && a2) {
@@ -448,12 +502,16 @@ function main(): void {
       if (runInherit('npx', [...CLI, 'up']) !== 0) throw new Error('e2e up');
       if (runInherit('npx', [...CLI, 'seed']) !== 0)
         throw new Error('e2e seed');
-      code = runInherit('npx', [
-        ...CLI,
-        'test',
-        '--json',
-        `--outputFile=${json}`,
-      ]);
+      const logsDir = logsDirOf('e2e');
+      mkdirSync(logsDir, { recursive: true });
+      code = await runTee(
+        'npx',
+        [...CLI, 'test', '--json', `--outputFile=${json}`],
+        resolve(logsDir, 'app.log'),
+        resolve(logsDir, 'app-stderr.log'),
+      );
+      // Antes del `down`: después los contenedores y sus logs ya no existen.
+      captureDockerLogs(logsDir, ROOT);
       if (existsSync(json)) writeReport('e2e', json, 'pnpm qa:e2e', false);
     } finally {
       runInherit('npx', [...CLI, 'down']);
@@ -463,4 +521,9 @@ function main(): void {
   throw new Error('Uso: report.ts <unit|e2e|from <tipo> <json> [comando]>');
 }
 
-if (require.main === module) main();
+if (require.main === module) {
+  main().catch((e: unknown) => {
+    console.error(e instanceof Error ? e.message : e);
+    process.exit(1);
+  });
+}
