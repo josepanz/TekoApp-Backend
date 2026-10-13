@@ -3,7 +3,7 @@
  * Suite: M2 Catálogos contra el stack real (categorías CRUD + visibilidad pública, service-types,
  * countries/currencies/languages públicos, tipos de documento profesional, TaxConfig/TipConfig sin
  * fila, paginación). Defectos de producto con `it.failing` y su DEF-BE en el nombre.
- * Casos: CP-BE-CAT-001..032 (ver test/qa/casos/CP-CAT.md)
+ * Casos: CP-BE-CAT-001..035 (ver test/qa/casos/CP-CAT.md)
  * Tipo: e2e   Prioridad: P0/P1
  * Precondiciones: pnpm e2e:up + e2e:seed; fixtures admin y cliente_a. Los nombres/códigos creados
  *        son únicos por corrida; las categorías se borran al final (los tipos de documento no
@@ -527,6 +527,26 @@ describe('M2 Catálogos (e2e real)', () => {
         const res = await http.get(`${PREFIX}/countries?pageSize=${v}`);
         expect([400, 422]).toContain(res.status);
       }
+    });
+  });
+
+  describe('Categorías: paginación admin y nombre vacío', () => {
+    // CP-BE-CAT-035
+    it('DEF-BE-013: POST /categories con name vacío o solo espacios -> 400', async () => {
+      for (const name of ['', '   ']) {
+        const res = await http
+          .post(`${PREFIX}/categories`)
+          .set(bearer(admin))
+          .send({ name });
+        expect(res.status).toBe(400);
+      }
+      // el DTO de update hereda la validación
+      const cat = await createCategory();
+      await http
+        .patch(`${PREFIX}/categories/${cat.id}`)
+        .set(bearer(admin))
+        .send({ name: '  ' })
+        .expect(400);
     });
   });
 });
