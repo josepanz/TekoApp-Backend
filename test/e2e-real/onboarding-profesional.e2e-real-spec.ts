@@ -823,6 +823,22 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       expect(unwrap(re.body).status).toBe('APPROVED');
     });
 
+    // CP-BE-ONB-039
+    it('DEF-BE-029: suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original', async () => {
+      const { user, pro } = await newPro();
+      await suspend(pro.id, admin).expect(409); // PENDING
+      expect((await myProfile(user.token)).status).toBe('PENDING');
+      await verify(pro.id, admin).expect(201);
+      await suspend(pro.id, admin, { reason: 'primero' }).expect(201);
+      const res = await suspend(pro.id, admin, { reason: 'segundo' });
+      expect(res.status).toBe(409);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe(409);
+      const me = await myProfile(user.token);
+      expect(me.status).toBe('SUSPENDED');
+      expect(me.changedReason).toBe('primero');
+    });
+
     // CP-BE-ONB-032
     it('DEF-BE-017: suspender con motivo solo espacios debe dar 400 y no suspender', async () => {
       const { user, pro } = await newPro();

@@ -409,6 +409,11 @@ export class ProfessionalsService {
     adminId: number,
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
+    // Máquina de estados (DEF-BE-029): solo se suspende un APPROVED. Re-suspender pisaría el
+    // motivo y reenviaría la notificación; PENDING/REJECTED se resuelven con verify.
+    if (professional.status !== ProfessionalStatus.APPROVED) {
+      throw new ConflictException(t('professionals.INVALID_STATE_FOR_SUSPEND'));
+    }
     const updatedCount = await this.professionalsDb.updateConditional(
       id,
       [professional.status],

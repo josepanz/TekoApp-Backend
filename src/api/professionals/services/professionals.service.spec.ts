@@ -850,6 +850,19 @@ describe('ProfessionalsService', () => {
   });
 
   describe('suspendProfessional', () => {
+    it.each(['SUSPENDED', 'PENDING', 'REJECTED'])(
+      'debe lanzar ConflictException (DEF-BE-029) y no escribir si el profesional está %s',
+      async (status) => {
+        mockFindById.mockResolvedValue({ ...mockProfessional, status });
+
+        await expect(
+          service.suspendProfessional(1, 'motivo', 99),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+        expect(mockNotificationsCreate).not.toHaveBeenCalled();
+      },
+    );
+
     it('debe suspender el profesional con la razón indicada', async () => {
       // Arrange
       mockFindById
