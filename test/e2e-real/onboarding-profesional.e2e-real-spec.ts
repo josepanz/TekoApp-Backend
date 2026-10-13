@@ -186,7 +186,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
 
   describe('Consentimiento previo a subir documentos', () => {
     // CP-BE-ONB-007
-    it.failing('DEF-BE-014: las versiones legales activas aparecen como pendientes para un usuario nuevo', async () => {
+    it('DEF-BE-014: las versiones legales activas aparecen como pendientes para un usuario nuevo', async () => {
       const user = await registerUser(http, 'onb');
       const pending = unwrap(
         (
