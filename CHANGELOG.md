@@ -1,3 +1,7 @@
+## 1.0.0-develop.19 (2026-10-13)
+
+* feat: W1 auth y catálogos contra backend real, logout con revocación y corrección de 13 defectos (#5 ([1f989d8](https://github.com/josepanz/TekoApp-Backend/commit/1f989d8)), closes [#53](https://github.com/josepanz/TekoApp-Backend/issues/53)
+
 ## 1.0.0-develop.18 (2026-10-13)
 
 * feat: entorno E2E real, blindaje de /locations y documentación QA (#52) ([7a9d3dd](https://github.com/josepanz/TekoApp-Backend/commit/7a9d3dd)), closes [#52](https://github.com/josepanz/TekoApp-Backend/issues/52)
