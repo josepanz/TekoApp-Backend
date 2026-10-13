@@ -1,3 +1,16 @@
+## 1.0.0-develop.18 (2026-10-13)
+
+* feat: entorno E2E real, blindaje de /locations y documentación QA (#52) ([7a9d3dd](https://github.com/josepanz/TekoApp-Backend/commit/7a9d3dd)), closes [#52](https://github.com/josepanz/TekoApp-Backend/issues/52)
+* feat(rate-limit): agregar RATE_LIMIT_MULTIPLIER ignorado en producción ([04d77cc](https://github.com/josepanz/TekoApp-Backend/commit/04d77cc))
+* feat(seed): agregar rol COMPLIANCE con permisos de auditoría legal ([2856a70](https://github.com/josepanz/TekoApp-Backend/commit/2856a70))
+* style(qa): formatear generador de informes con prettier ([daad5ef](https://github.com/josepanz/TekoApp-Backend/commit/daad5ef))
+* docs(qa): documentación de pruebas QA, generador de informes e informes de ejecución ([623f1c6](https://github.com/josepanz/TekoApp-Backend/commit/623f1c6))
+* refactor(e2e): reutilizar rol COMPLIANCE de seed.ts en seed-e2e ([7b9ce8f](https://github.com/josepanz/TekoApp-Backend/commit/7b9ce8f))
+* refactor(geo-tracking): eliminar módulo geo-tracking-db sin uso tras quitar tracking ([5239119](https://github.com/josepanz/TekoApp-Backend/commit/5239119))
+* refactor(tracking): eliminar módulo tracking sin registrar, reemplazado por locations ([41c2d66](https://github.com/josepanz/TekoApp-Backend/commit/41c2d66))
+* fix(locations): exigir JWT y restringir coordenadas exactas a vínculo de servicio activo ([f9b53da](https://github.com/josepanz/TekoApp-Backend/commit/f9b53da))
+* test(e2e): entorno E2E aislado con docker-compose, seed de fixtures y smoke real ([aa56f9a](https://github.com/josepanz/TekoApp-Backend/commit/aa56f9a))
+
 ## 1.0.0-develop.17 (2026-09-15)
 
 * Platform hardening 2026-09: corte a /v1, fixes de seguridad, disputas, borrado de cuenta y notificac ([4586dde](https://github.com/josepanz/TekoApp-Backend/commit/4586dde)), closes [#43](https://github.com/josepanz/TekoApp-Backend/issues/43)
