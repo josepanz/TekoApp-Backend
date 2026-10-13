@@ -95,15 +95,12 @@ describe('M1 Auth y sesión (e2e real)', () => {
     });
 
     // CP-BE-AUTH-010
-    it.failing(
-      'DEF-BE-001: body inválido debe responder 400/422 (hoy 500)',
-      async () => {
-        const res = await basic(http.post(`${PREFIX}/onboarding`)).send({
-          email: 'nope',
-        });
-        expect([400, 422]).toContain(res.status);
-      },
-    );
+    it('DEF-BE-001: body inválido debe responder 400/422', async () => {
+      const res = await basic(http.post(`${PREFIX}/onboarding`)).send({
+        email: 'nope',
+      });
+      expect([400, 422]).toContain(res.status);
+    });
 
     // CP-BE-AUTH-011
     it('un usuario recién registrado inicia sesión con estado PENDING_VERIFICATION y sin acceso admin', async () => {
@@ -146,13 +143,10 @@ describe('M1 Auth y sesión (e2e real)', () => {
     );
 
     // CP-BE-AUTH-014
-    it.failing(
-      'DEF-BE-001: login con body vacío debe dar 400/422 (hoy 500)',
-      async () => {
-        const res = await basic(http.post(`${PREFIX}/auth/login`)).send({});
-        expect([400, 422]).toContain(res.status);
-      },
-    );
+    it('DEF-BE-001: login con body vacío debe dar 400/422', async () => {
+      const res = await basic(http.post(`${PREFIX}/auth/login`)).send({});
+      expect([400, 422]).toContain(res.status);
+    });
 
     // CP-BE-AUTH-015
     it('reutilizar un nonce no permite un segundo login', async () => {

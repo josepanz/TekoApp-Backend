@@ -124,14 +124,11 @@ describe('Contrato de error uniforme (e2e real)', () => {
   );
 
   // CP-BE-ERR-009
-  it.failing(
-    'DEF-BE-001: un body inválido debe usar el mismo envelope de error (hoy 500 {statusCode,message})',
-    async () => {
-      const res = await basic(http.post(`${PREFIX}/onboarding`)).send({
-        email: 'nope',
-      });
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe(res.status);
-    },
-  );
+  it('DEF-BE-001: un body inválido debe usar el mismo envelope de error', async () => {
+    const res = await basic(http.post(`${PREFIX}/onboarding`)).send({
+      email: 'nope',
+    });
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe(res.status);
+  });
 });

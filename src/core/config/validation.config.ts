@@ -1,4 +1,4 @@
-import { ValidationPipeOptions } from '@nestjs/common';
+import { BadRequestException, ValidationPipeOptions } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
 
 import { t, translateValidationConstraints } from '@common/i18n/i18n.helper';
@@ -32,7 +32,7 @@ export class ValidationConfig {
       skipNullProperties: false,
       skipUndefinedProperties: false,
       skipEmptyValues: false,
-      errorHttpStatusCode: 422,
+      errorHttpStatusCode: 400,
       // Los mensajes producidos por `i18nValidationMessage()` llegan acá como
       // `clave|{args}` y se resuelven al idioma del request; los mensajes por
       // defecto de `class-validator` pasan sin tocar.
@@ -47,12 +47,14 @@ export class ValidationConfig {
               : undefined,
         }));
 
-        return {
-          statusCode: 422,
-          message: t('validation.VALIDATION_ERROR'),
-          errors: formattedErrors,
-          timestamp: new Date().toISOString(),
-        };
+        // DEF-BE-001: devolver un objeto plano terminaba en 500 (el pipe lo relanza tal cual y
+        // ningún filtro lo reconoce). `BadRequestException` con `message` como array es lo que
+        // `ValidationExceptionFilter` convierte en `error.errors[]` del envelope uniforme (400).
+        return new BadRequestException({
+          statusCode: 400,
+          message: formattedErrors,
+          error: 'Bad Request',
+        });
       },
     };
   }

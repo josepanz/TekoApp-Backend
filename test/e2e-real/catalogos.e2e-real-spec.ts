@@ -186,74 +186,56 @@ describe('M2 Catálogos (e2e real)', () => {
     // DEF-BE-002 (corregido): mutar categorías exige categories.catalog:manage o admin:all (CP-BE-CAT-010..014).
     describe('cliente sin permiso admin (403 esperado)', () => {
       // CP-BE-CAT-010
-      it(
-        'DEF-BE-002: cliente_a NO debe poder crear una categoría',
-        async () => {
-          const name = `E2E Cat cliente ${uniqueSuffix()}`;
-          const res = await http
-            .post(`${PREFIX}/categories`)
-            .set(bearer(cliente))
-            .send({ name });
-          if (res.status === 201) createdCategoryIds.push(unwrap(res.body).id);
-          expect(res.status).toBe(403);
-        },
-      );
+      it('DEF-BE-002: cliente_a NO debe poder crear una categoría', async () => {
+        const name = `E2E Cat cliente ${uniqueSuffix()}`;
+        const res = await http
+          .post(`${PREFIX}/categories`)
+          .set(bearer(cliente))
+          .send({ name });
+        if (res.status === 201) createdCategoryIds.push(unwrap(res.body).id);
+        expect(res.status).toBe(403);
+      });
       // CP-BE-CAT-011
-      it(
-        'DEF-BE-002: cliente_a NO debe poder editar una categoría',
-        async () => {
-          const cat = await createCategory();
-          const res = await http
-            .patch(`${PREFIX}/categories/${cat.id}`)
-            .set(bearer(cliente))
-            .send({ description: 'hack' });
-          expect(res.status).toBe(403);
-        },
-      );
+      it('DEF-BE-002: cliente_a NO debe poder editar una categoría', async () => {
+        const cat = await createCategory();
+        const res = await http
+          .patch(`${PREFIX}/categories/${cat.id}`)
+          .set(bearer(cliente))
+          .send({ description: 'hack' });
+        expect(res.status).toBe(403);
+      });
       // CP-BE-CAT-012
-      it(
-        'DEF-BE-002: cliente_a NO debe poder ocultar una categoría',
-        async () => {
-          const cat = await createCategory();
-          const res = await http
-            .patch(`${PREFIX}/categories/${cat.id}/toggle-visibility`)
-            .set(bearer(cliente));
-          expect(res.status).toBe(403);
-        },
-      );
+      it('DEF-BE-002: cliente_a NO debe poder ocultar una categoría', async () => {
+        const cat = await createCategory();
+        const res = await http
+          .patch(`${PREFIX}/categories/${cat.id}/toggle-visibility`)
+          .set(bearer(cliente));
+        expect(res.status).toBe(403);
+      });
       // CP-BE-CAT-013
-      it(
-        'DEF-BE-002: cliente_a NO debe poder cambiar el estado de una categoría',
-        async () => {
-          const cat = await createCategory();
-          const res = await http
-            .patch(`${PREFIX}/categories/${cat.id}/status`)
-            .query({ status: 'INACTIVE' })
-            .set(bearer(cliente));
-          expect(res.status).toBe(403);
-        },
-      );
+      it('DEF-BE-002: cliente_a NO debe poder cambiar el estado de una categoría', async () => {
+        const cat = await createCategory();
+        const res = await http
+          .patch(`${PREFIX}/categories/${cat.id}/status`)
+          .query({ status: 'INACTIVE' })
+          .set(bearer(cliente));
+        expect(res.status).toBe(403);
+      });
       // CP-BE-CAT-014
-      it(
-        'DEF-BE-002: cliente_a NO debe poder borrar una categoría',
-        async () => {
-          const cat = await createCategory();
-          const res = await http
-            .delete(`${PREFIX}/categories/${cat.id}`)
-            .set(bearer(cliente));
-          expect(res.status).toBe(403);
-        },
-      );
+      it('DEF-BE-002: cliente_a NO debe poder borrar una categoría', async () => {
+        const cat = await createCategory();
+        const res = await http
+          .delete(`${PREFIX}/categories/${cat.id}`)
+          .set(bearer(cliente));
+        expect(res.status).toBe(403);
+      });
     });
 
     // CP-BE-CAT-015
-    it.failing(
-      'DEF-BE-001: GET /categories/abc debe dar 400/422 (hoy 500 por el exceptionFactory del ValidationPipe)',
-      async () => {
-        const res = await http.get(`${PREFIX}/categories/abc`);
-        expect([400, 422]).toContain(res.status);
-      },
-    );
+    it('DEF-BE-001: GET /categories/abc debe dar 400/422', async () => {
+      const res = await http.get(`${PREFIX}/categories/abc`);
+      expect([400, 422]).toContain(res.status);
+    });
 
     // CP-BE-CAT-016
     it.failing(
@@ -422,16 +404,13 @@ describe('M2 Catálogos (e2e real)', () => {
       },
     );
     // CP-BE-CAT-026
-    it.failing(
-      'DEF-BE-001: body inválido en alta de tipo de documento debe dar 400/422 (hoy 500)',
-      async () => {
-        const res = await http
-          .post(`${PREFIX}/admin/professional-document-types`)
-          .set(bearer(admin))
-          .send({});
-        expect([400, 422]).toContain(res.status);
-      },
-    );
+    it('DEF-BE-001: body inválido en alta de tipo de documento debe dar 400/422', async () => {
+      const res = await http
+        .post(`${PREFIX}/admin/professional-document-types`)
+        .set(bearer(admin))
+        .send({});
+      expect([400, 422]).toContain(res.status);
+    });
   });
 
   describe('TaxConfig / TipConfig sin fila -> fallback seguro', () => {
@@ -529,14 +508,11 @@ describe('M2 Catálogos (e2e real)', () => {
       },
     );
     // CP-BE-CAT-033
-    it.failing(
-      'DEF-BE-001: pageSize inválido (-1 / abc) debe dar 400/422 (hoy 500)',
-      async () => {
-        for (const v of ['-1', 'abc']) {
-          const res = await http.get(`${PREFIX}/countries?pageSize=${v}`);
-          expect([400, 422]).toContain(res.status);
-        }
-      },
-    );
+    it('DEF-BE-001: pageSize inválido (-1 / abc) debe dar 400/422', async () => {
+      for (const v of ['-1', 'abc']) {
+        const res = await http.get(`${PREFIX}/countries?pageSize=${v}`);
+        expect([400, 422]).toContain(res.status);
+      }
+    });
   });
 });
