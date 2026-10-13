@@ -216,7 +216,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-011
-    it.failing('DEF-BE-019: no se puede cancelar un servicio IN_PROGRESS, COMPLETED ni CANCELLED: 409 con envelope uniforme', async () => {
+    it('DEF-BE-019: no se puede cancelar un servicio IN_PROGRESS, COMPLETED ni CANCELLED: 409 con envelope uniforme', async () => {
       const { svc } = await acceptedVia(proX);
       await start(svc.referenceId, proX.token).expect(201);
       const inProgress = await cancel(svc.referenceId, clienteA);
@@ -234,7 +234,7 @@ describe('M4 Marketplace (e2e real)', () => {
 
   describe('Transiciones inválidas', () => {
     // CP-BE-MKT-012
-    it.failing('DEF-BE-019: completar sin iniciar -> 409 con envelope uniforme', async () => {
+    it('DEF-BE-019: completar sin iniciar -> 409 con envelope uniforme', async () => {
       const { svc } = await acceptedVia(proX);
       const res = await complete(svc.referenceId, proX.token);
       expect(res.status).toBe(409);
@@ -243,7 +243,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-013
-    it.failing('DEF-BE-019: iniciar un servicio ya iniciado, o aceptar uno no PENDING -> 409', async () => {
+    it('DEF-BE-019: iniciar un servicio ya iniciado, o aceptar uno no PENDING -> 409', async () => {
       const { svc } = await acceptedVia(proX);
       await start(svc.referenceId, proX.token).expect(201);
       expect((await start(svc.referenceId, proX.token)).status).toBe(409);
@@ -262,7 +262,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-015
-    it.failing('DEF-BE-019: enviar una oferta a un servicio que ya no está PENDING -> 409', async () => {
+    it('DEF-BE-019: enviar una oferta a un servicio que ya no está PENDING -> 409', async () => {
       const { svc } = await acceptedVia(proX);
       const res = await offer(svc.referenceId, proY.token);
       expect(res.status).toBe(409);
@@ -270,7 +270,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-016
-    it.failing('DEF-BE-019: la oferta duplicada del mismo profesional -> 409', async () => {
+    it('DEF-BE-019: la oferta duplicada del mismo profesional -> 409', async () => {
       const svc = await newService();
       await offer(svc.referenceId, proX.token).expect(201);
       const res = await offer(svc.referenceId, proX.token);
@@ -301,7 +301,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-019
-    it.failing('DEF-BE-019: PUT /services/:id: el dueño edita en PENDING; fuera de PENDING/ACCEPTED -> 409', async () => {
+    it('DEF-BE-019: PUT /services/:id: el dueño edita en PENDING; fuera de PENDING/ACCEPTED -> 409', async () => {
       const svc = await newService();
       const ok = await http.put(`${PREFIX}/services/${svc.referenceId}`).set(bearer(clienteA)).send({ title: 'Nuevo título' }).expect(200);
       expect(unwrap(ok.body).title).toBe('Nuevo título');

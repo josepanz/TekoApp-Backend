@@ -263,7 +263,7 @@ describe('ServicesService', () => {
       expect(mockUpdateServiceConditional).not.toHaveBeenCalled();
     });
 
-    it('debe lanzar BadRequestException cuando el estado no es modificable (COMPLETED)', async () => {
+    it('debe lanzar ConflictException cuando el estado no es modificable (COMPLETED)', async () => {
       // Arrange
       const svcCompleted = {
         ...mockService,
@@ -274,7 +274,7 @@ describe('ServicesService', () => {
 
       // Act & Assert
       await expect(service.updateService(SERVICE_REF, {}, 1)).rejects.toThrow(
-        BadRequestException,
+        ConflictException,
       );
     });
 
@@ -364,7 +364,7 @@ describe('ServicesService', () => {
       );
     });
 
-    it('debe lanzar BadRequestException cuando el servicio ya está completado', async () => {
+    it('debe lanzar ConflictException cuando el servicio ya está completado', async () => {
       // Arrange
       const svcCompleted = { ...mockService, status: ServiceStatus.COMPLETED };
       mockFindServiceByReferenceId.mockResolvedValue(svcCompleted);
@@ -372,7 +372,7 @@ describe('ServicesService', () => {
       // Act & Assert
       await expect(
         service.cancelService(SERVICE_REF, 'razón', 1),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ConflictException);
     });
 
     it('debe lanzar ForbiddenException cuando ni el cliente ni el profesional son el solicitante', async () => {
@@ -439,7 +439,7 @@ describe('ServicesService', () => {
       );
     });
 
-    it('debe lanzar BadRequestException cuando el servicio no está en estado PENDING', async () => {
+    it('debe lanzar ConflictException cuando el servicio no está en estado PENDING', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
@@ -448,7 +448,7 @@ describe('ServicesService', () => {
 
       // Act & Assert
       await expect(service.acceptService(SERVICE_REF, 10)).rejects.toThrow(
-        BadRequestException,
+        ConflictException,
       );
     });
 
@@ -533,7 +533,7 @@ describe('ServicesService', () => {
       );
     });
 
-    it('debe lanzar BadRequestException cuando el servicio no está ACCEPTED', async () => {
+    it('debe lanzar ConflictException cuando el servicio no está ACCEPTED', async () => {
       // Arrange
       const svc = {
         ...mockService,
@@ -545,7 +545,7 @@ describe('ServicesService', () => {
 
       // Act & Assert
       await expect(service.startService(SERVICE_REF, 10)).rejects.toThrow(
-        BadRequestException,
+        ConflictException,
       );
     });
   });
@@ -665,7 +665,7 @@ describe('ServicesService', () => {
       );
     });
 
-    it('debe lanzar BadRequestException cuando el servicio no está IN_PROGRESS', async () => {
+    it('debe lanzar ConflictException cuando el servicio no está IN_PROGRESS', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
@@ -676,7 +676,7 @@ describe('ServicesService', () => {
 
       // Act & Assert
       await expect(service.completeService(SERVICE_REF, 10)).rejects.toThrow(
-        BadRequestException,
+        ConflictException,
       );
     });
 
@@ -749,7 +749,7 @@ describe('ServicesService', () => {
       expect(result.serviceId).toBe(SERVICE_REF);
     });
 
-    it('debe lanzar BadRequestException cuando el servicio no está en estado PENDING', async () => {
+    it('debe lanzar ConflictException cuando el servicio no está en estado PENDING', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
         ...mockService,
@@ -759,7 +759,7 @@ describe('ServicesService', () => {
       // Act & Assert
       await expect(
         service.createServiceRequest(SERVICE_REF, {}, 10),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ConflictException);
     });
 
     it('debe lanzar ForbiddenException cuando el usuario no tiene perfil profesional', async () => {
@@ -773,7 +773,7 @@ describe('ServicesService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('debe lanzar BadRequestException cuando el profesional ya envió una solicitud', async () => {
+    it('debe lanzar ConflictException cuando el profesional ya envió una solicitud', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue(mockService);
       mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
@@ -782,7 +782,7 @@ describe('ServicesService', () => {
       // Act & Assert
       await expect(
         service.createServiceRequest(SERVICE_REF, {}, 10),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(ConflictException);
     });
   });
 

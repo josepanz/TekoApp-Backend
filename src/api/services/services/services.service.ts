@@ -177,7 +177,7 @@ export class ServicesService {
     }
 
     if (!CANCELLABLE.has(service.status)) {
-      throw new BadRequestException(t('services.CANNOT_UPDATE_IN_STATUS'));
+      throw new ConflictException(t('services.CANNOT_UPDATE_IN_STATUS'));
     }
 
     const updatedCount = await this.db.updateServiceConditional(
@@ -199,7 +199,7 @@ export class ServicesService {
     const service = await this.getServiceEntityByRef(id);
 
     if (!CANCELLABLE.has(service.status)) {
-      throw new BadRequestException(t('services.CANNOT_CANCEL_IN_STATUS'));
+      throw new ConflictException(t('services.CANNOT_CANCEL_IN_STATUS'));
     }
 
     const isProfessionalOwner = service.professionalId
@@ -263,7 +263,7 @@ export class ServicesService {
   ): Promise<ServiceDetailResponseDTO> {
     const service = await this.getServiceEntityByRef(id);
     if (service.status !== ServiceStatus.PENDING) {
-      throw new BadRequestException(t('services.CANNOT_BE_ACCEPTED_IN_STATUS'));
+      throw new ConflictException(t('services.CANNOT_BE_ACCEPTED_IN_STATUS'));
     }
     // `userId` es el id de `Users` (JWT) — se resuelve al `Professionals.id` correspondiente
     // antes de usarlo, igual que ya hacen `getMyServices`/`getDashboardStats` en este mismo
@@ -308,7 +308,7 @@ export class ServicesService {
       );
     }
     if (service.status !== ServiceStatus.ACCEPTED) {
-      throw new BadRequestException(t('services.CANNOT_BE_STARTED_IN_STATUS'));
+      throw new ConflictException(t('services.CANNOT_BE_STARTED_IN_STATUS'));
     }
 
     const updatedCount = await this.db.updateServiceConditional(
@@ -334,9 +334,7 @@ export class ServicesService {
       );
     }
     if (service.status !== ServiceStatus.IN_PROGRESS) {
-      throw new BadRequestException(
-        t('services.CANNOT_BE_COMPLETED_IN_STATUS'),
-      );
+      throw new ConflictException(t('services.CANNOT_BE_COMPLETED_IN_STATUS'));
     }
 
     if (service.category.requiresProgressLog) {
@@ -404,7 +402,7 @@ export class ServicesService {
   ): Promise<ServiceRequestDetailResponseDTO> {
     const service = await this.getServiceEntityByRef(serviceId);
     if (service.status !== ServiceStatus.PENDING) {
-      throw new BadRequestException(t('services.ONLY_PENDING_ACCEPT_REQUESTS'));
+      throw new ConflictException(t('services.ONLY_PENDING_ACCEPT_REQUESTS'));
     }
 
     const professional = await this.db.findProfessionalByUserId(userId);
@@ -416,7 +414,7 @@ export class ServicesService {
       professional.id,
     );
     if (existing)
-      throw new BadRequestException(t('services.REQUEST_ALREADY_SENT'));
+      throw new ConflictException(t('services.REQUEST_ALREADY_SENT'));
 
     const created = await this.db.createServiceRequest({
       ...dto,
