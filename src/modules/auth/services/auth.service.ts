@@ -63,7 +63,10 @@ export class AuthService {
       this.logger.log(
         'No se encontraron datos para los parámetros proporcionados.',
       );
-      return { success: false, requiresPasswordCreation: false };
+      // DEF-BE-003: misma respuesta que una password incorrecta (401 genérico) para no revelar
+      // si el email existe. Verificado contra Web y Mobile: ambos tratan el 401 como credenciales
+      // inválidas y ninguno depende de `login:false` para este caso.
+      throw new UnauthorizedException(t('auth.INVALID_CREDENTIALS'));
     }
 
     // Validar estado

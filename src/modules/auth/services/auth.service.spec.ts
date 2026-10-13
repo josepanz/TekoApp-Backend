@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { t } from '@common/i18n/i18n.helper';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Users, UserProfileStatus, UserStatus } from '@prisma/client';
 
@@ -229,17 +230,19 @@ describe('AuthService', () => {
       expect(result.requiresPasswordCreation).toBe(true);
     });
 
-    it('debe retornar success false cuando no hay credenciales ni usuario activo', async () => {
+    // DEF-BE-003: antes devolvía 200 {login:false}, distinguible del 401 de password incorrecta
+    it('debe lanzar UnauthorizedException (mismo mensaje que password incorrecta) cuando no hay credenciales ni usuario activo', async () => {
       // Arrange
       mockFindCredentialsByEmail.mockResolvedValue(null);
       mockFindActiveUserByEmail.mockResolvedValue(null);
 
-      // Act
-      const result = await service.login(loginPayload);
-
-      // Assert
-      expect(result.success).toBe(false);
-      expect(result.requiresPasswordCreation).toBe(false);
+      // Act & Assert
+      await expect(service.login(loginPayload)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.login(loginPayload)).rejects.toThrow(
+        t('auth.INVALID_CREDENTIALS'),
+      );
     });
 
     it('debe lanzar UnauthorizedException cuando el nonce es inválido o ya fue usado', async () => {

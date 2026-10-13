@@ -134,13 +134,10 @@ describe('M1 Auth y sesión (e2e real)', () => {
     });
 
     // CP-BE-AUTH-013
-    it.failing(
-      'DEF-BE-003: email inexistente debe dar 401 como la password incorrecta (hoy 200 {login:false})',
-      async () => {
-        const res = await rawLogin(http, newEmail(), 'Cualquiera-1!');
-        expect(res.status).toBe(401);
-      },
-    );
+    it('DEF-BE-003: email inexistente debe dar 401 como la password incorrecta', async () => {
+      const res = await rawLogin(http, newEmail(), 'Cualquiera-1!');
+      expect(res.status).toBe(401);
+    });
 
     // CP-BE-AUTH-014
     it('DEF-BE-001: login con body vacío debe dar 400/422', async () => {
