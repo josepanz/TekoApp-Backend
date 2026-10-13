@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
 } from '@nestjs/common';
+import { STATUS_CODES } from 'http';
 import { Request, Response } from 'express';
 
 import { t } from '@common/i18n/i18n.helper';
@@ -18,7 +19,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const exceptionResponse = exception.getResponse();
 
     let message = t('common.INTERNAL_SERVER_ERROR');
-    let error = 'Internal Server Error';
+    // DEF-BE-004: el nombre por defecto sale del status real (ej. el 401 de `AuthGuard` viene sin
+    // `error` y salía como 'Internal Server Error').
+    let error = STATUS_CODES[status] ?? 'Internal Server Error';
     // `errorCode` es un identificador MÁQUINA-legible opcional (ej. `CONSENT_REQUIRED`,
     // `LEGAL_HOLD_ACTIVE`) — a diferencia de `message` (texto humano, cambia con el idioma) y
     // `error` (nombre genérico de la excepción HTTP, ej. "Forbidden"), este campo es estable y

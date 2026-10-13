@@ -38,6 +38,7 @@
   "ORDER_BY_FORMAT": "orderBy must be in the format 'field:asc' or 'field:desc'",
   "PAGE_MIN": "The page cannot be lower than 0",
   "PAGE_SIZE_MIN": "The page size cannot be lower than 0",
+  "PAGE_SIZE_MAX": "The page size cannot be greater than 100",
   "PASSWORD_POLICY": "The password must be at least 8 characters long and contain an uppercase letter, a lowercase letter, a number and a special character",
   "PHONE_FORMAT_INVALID": "The phone number format is not valid",
   "PRICE_INVALID": "The price must be greater than 0 and have at most 2 decimals",

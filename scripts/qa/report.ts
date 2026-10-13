@@ -118,6 +118,47 @@ function loadCaseMap(): Map<string, string> {
   return map;
 }
 
+interface SourceCase {
+  re: RegExp;
+  cp: string;
+}
+
+/**
+ * Respaldo para los `it` que no se pueden listar uno a uno en la fila "Automatizado en" (p. ej.
+ * `it.each`): lee del propio spec el comentario `// CP-XX-YYY-NNN` que precede a cada
+ * `it(`/`it.failing(`/`it.each(...)(` y asocia ese ID al título (los `%s`/`%i` se vuelven comodines).
+ */
+function loadSourceCases(specAbsPath: string): SourceCase[] {
+  const out: SourceCase[] = [];
+  if (!existsSync(specAbsPath)) return out;
+  let cp = '';
+  const lines = readFileSync(specAbsPath, 'utf8').split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const c = /^\s*\/\/\s*(CP-[A-Z]+-[A-Z]+-\d+)/.exec(lines[i]);
+    if (c) {
+      cp = c[1];
+      continue;
+    }
+    if (cp && /^\s*it(\.failing|\.each\b|\()/.test(lines[i])) {
+      // El título es el primer literal de string desde el `it` (o tras `)(` en it.each).
+      const raw = lines.slice(i, i + 16).join('\n');
+      const eachAt = lines[i].includes('it.each')
+        ? raw.search(/\)\(\s*['"`]/)
+        : -1;
+      const chunk = eachAt >= 0 ? raw.slice(eachAt + 2) : raw;
+      const t = /(['"`])((?:\\.|(?!\1)[^\\])*)\1/.exec(chunk);
+      if (t) {
+        const pattern = t[2]
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          .replace(/%[sid]/g, '.*');
+        out.push({ re: new RegExp(`^${pattern}$`), cp });
+        cp = '';
+      }
+    }
+  }
+  return out;
+}
+
 function totalsOf(results: TestResult[]): Totals {
   const t: Totals = {
     suites: results.length,
@@ -196,6 +237,13 @@ export function buildReport(
   const executor =
     process.env.QA_EXECUTOR ?? 'agente Claude Code (modelo claude-sonnet-5-5)';
   const caseMap = loadCaseMap();
+  const sourceCases = new Map<string, SourceCase[]>();
+  const caseOf = (file: string, title: string): string => {
+    const direct = caseMap.get(title);
+    if (direct) return direct;
+    if (!sourceCases.has(file)) sourceCases.set(file, loadSourceCases(file));
+    return sourceCases.get(file)!.find((x) => x.re.test(title))?.cp ?? '-';
+  };
 
   const t = totalsOf(json.testResults);
   const wallMs =
@@ -270,7 +318,7 @@ export function buildReport(
     for (const r of sorted) {
       for (const a of r.assertionResults) {
         L.push(
-          `| ${caseMap.get(a.title) ?? '-'} | \`${rel(r.name)}\` | ${cell(a.fullName)} | ${a.status} |`,
+          `| ${caseOf(r.name, a.title)} | \`${rel(r.name)}\` | ${cell(a.fullName)} | ${a.status} |`,
         );
       }
     }
@@ -291,7 +339,7 @@ export function buildReport(
     L.push('| Estado | Suite | Caso | CP |', '|---|---|---|---|');
     for (const { r, a } of bad) {
       L.push(
-        `| ${a.status} | \`${rel(r.name)}\` | ${cell(a.fullName)} | ${caseMap.get(a.title) ?? '-'} |`,
+        `| ${a.status} | \`${rel(r.name)}\` | ${cell(a.fullName)} | ${caseOf(r.name, a.title)} |`,
       );
     }
     for (const r of crashed) {

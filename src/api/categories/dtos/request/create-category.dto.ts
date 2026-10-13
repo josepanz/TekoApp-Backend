@@ -1,5 +1,6 @@
 import {
   IsString,
+  IsNotEmpty,
   IsOptional,
   IsBoolean,
   IsInt,
@@ -11,6 +12,7 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CategoryStatus } from '@prisma/client';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class CreateCategoryDto {
   @ApiProperty({
@@ -18,7 +20,11 @@ export class CreateCategoryDto {
     example: 'Plomería',
     maxLength: 100,
   })
+  @Transform(({ value }: TransformFnParams): unknown =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString()
+  @IsNotEmpty()
   @MaxLength(100)
   name!: string;
 

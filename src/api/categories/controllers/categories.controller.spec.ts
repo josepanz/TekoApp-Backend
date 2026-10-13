@@ -4,6 +4,13 @@ import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from '@api/categories/services/categories.service';
 import { CategoryStatus } from '@prisma/client';
+import { Reflector } from '@nestjs/core';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
+import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+
+const PERMISSIONS_KEY = 'permissions';
+const GUARDS_KEY = '__guards__';
 
 // ── mocks de nivel de módulo ─────────────────────────────────────────────────
 const mockCreate = jest.fn();
@@ -13,6 +20,7 @@ const mockFindMainCategories = jest.fn();
 const mockFindSubcategories = jest.fn();
 const mockSearchCategories = jest.fn();
 const mockFindOne = jest.fn();
+const mockFindOneForViewer = jest.fn();
 const mockFindBySlug = jest.fn();
 const mockGetCategoryStats = jest.fn();
 const mockUpdate = jest.fn();
@@ -37,6 +45,7 @@ describe('CategoriesController', () => {
             findSubcategories: mockFindSubcategories,
             searchCategories: mockSearchCategories,
             findOne: mockFindOne,
+            findOneForViewer: mockFindOneForViewer,
             findBySlug: mockFindBySlug,
             getCategoryStats: mockGetCategoryStats,
             update: mockUpdate,
@@ -47,6 +56,8 @@ describe('CategoriesController', () => {
         },
       ],
     })
+      .overrideGuard(PermissionsGuard)
+      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .compile();
@@ -55,6 +66,50 @@ describe('CategoriesController', () => {
   });
 
   afterEach(() => jest.clearAllMocks());
+
+  // ── DEF-BE-002: las rutas de escritura y `all` exigen permiso de categorías o admin:all ──
+  describe('permisos (DEF-BE-002)', () => {
+    const protectedHandlers = [
+      'create',
+      'findAllWithRelations',
+      'update',
+      'changeStatus',
+      'toggleVisibility',
+      'remove',
+    ] as const;
+
+    it.each(protectedHandlers)(
+      '%s requiere categories.catalog:manage o admin:all y usa PermissionsGuard',
+      (name) => {
+        const handler = CategoriesController.prototype[name];
+        const required = new Reflector().get<string[]>(
+          PERMISSIONS_KEY,
+          handler,
+        );
+        const guards = Reflect.getMetadata(GUARDS_KEY, handler) as unknown[];
+        expect(required).toEqual([
+          PERMISSIONS.CATEGORIES.MANAGE,
+          PERMISSIONS.ADMIN.ALL,
+        ]);
+        expect(guards).toEqual(expect.arrayContaining([PermissionsGuard]));
+      },
+    );
+
+    it('las lecturas públicas no exigen permisos', () => {
+      for (const name of [
+        'findAll',
+        'findMainCategories',
+        'findOne',
+      ] as const) {
+        expect(
+          new Reflector().get(
+            PERMISSIONS_KEY,
+            CategoriesController.prototype[name],
+          ),
+        ).toBeUndefined();
+      }
+    });
+  });
 
   // ── create ────────────────────────────────────────────────────────────────
   describe('create', () => {
@@ -104,15 +159,21 @@ describe('CategoriesController', () => {
   describe('findAllWithRelations', () => {
     it('debe retornar todas las categorías con sus relaciones', async () => {
       // Arrange
-      const expected = [{ id: 1, name: 'Plomería', subcategories: [] }];
+      const expected = {
+        data: [{ id: 1, name: 'Plomería', subcategories: [] }],
+        pagination: { total: 1, page: 2, pageSize: 5, totalPages: 1 },
+      };
       mockFindAllWithRelations.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.findAllWithRelations();
+      const result = await controller.findAllWithRelations({
+        page: 2,
+        pageSize: 5,
+      });
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindAllWithRelations).toHaveBeenCalled();
+      expect(mockFindAllWithRelations).toHaveBeenCalledWith(2, 5);
     });
   });
 
@@ -180,29 +241,51 @@ describe('CategoriesController', () => {
 
   // ── findOne ───────────────────────────────────────────────────────────────
   describe('findOne', () => {
+    const param = { id: 1 } as never;
+    const userWith = (...permissions: string[]) =>
+      ({ permissions }) as unknown as IUserDataOnJwt;
+
     it('debe retornar la categoría correspondiente al id proporcionado', async () => {
       // Arrange
-      const param = { id: 1 } as never;
       const expected = { id: 1, name: 'Plomería' };
-      mockFindOne.mockResolvedValue(expected);
+      mockFindOneForViewer.mockResolvedValue(expected);
 
       // Act
       const result = await controller.findOne(param);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindOne).toHaveBeenCalledWith(1);
+      expect(mockFindOneForViewer).toHaveBeenCalledWith(1, false);
     });
+
+    it('anónimo o sin permiso de categorías no puede ver ocultas (canSeeHidden=false)', async () => {
+      mockFindOneForViewer.mockResolvedValue({ id: 1 });
+
+      await controller.findOne(param, userWith('dashboard:read'));
+      await controller.findOne(param, undefined);
+
+      expect(mockFindOneForViewer).toHaveBeenNthCalledWith(1, 1, false);
+      expect(mockFindOneForViewer).toHaveBeenNthCalledWith(2, 1, false);
+    });
+
+    it.each([PERMISSIONS.ADMIN.ALL, PERMISSIONS.CATEGORIES.MANAGE])(
+      'con el permiso %s puede ver ocultas (canSeeHidden=true)',
+      async (permission) => {
+        mockFindOneForViewer.mockResolvedValue({ id: 1 });
+
+        await controller.findOne(param, userWith(permission));
+
+        expect(mockFindOneForViewer).toHaveBeenCalledWith(1, true);
+      },
+    );
 
     it('debe propagar NotFoundException cuando la categoría no existe', async () => {
       // Arrange
-      const param = { id: 999 } as never;
-      mockFindOne.mockRejectedValue(new NotFoundException());
+      const p = { id: 999 } as never;
+      mockFindOneForViewer.mockRejectedValue(new NotFoundException());
 
       // Act & Assert
-      await expect(controller.findOne(param)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(controller.findOne(p)).rejects.toThrow(NotFoundException);
     });
   });
 

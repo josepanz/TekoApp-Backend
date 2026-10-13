@@ -30,6 +30,10 @@ export class CategoriesDbService {
     return this.prisma.category.findMany(args);
   }
 
+  async count(where?: Prisma.CategoryWhereInput): Promise<number> {
+    return this.prisma.category.count({ where });
+  }
+
   async update(
     id: number,
     data: Prisma.CategoryUpdateInput,

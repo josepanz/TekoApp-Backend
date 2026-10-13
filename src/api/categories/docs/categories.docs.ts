@@ -50,7 +50,7 @@ export function ApiGetAllCategoriesWithRelations() {
     ApiOperation({
       summary: 'Obtener todas las categorías (incluyendo inactivas)',
       description:
-        'Retorna todo el árbol de categorías para panel de administración.',
+        'Listado paginado para panel de administración. Query: page (>=1, default 1), pageSize (1..100, default 10). Respuesta: { data, pagination: { total, page, pageSize, totalPages } }.',
     }),
     ApiResponse({
       status: 200,

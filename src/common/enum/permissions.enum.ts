@@ -65,6 +65,9 @@ export const PERMISSIONS = {
   PROFESSIONALS: {
     VERIFY: 'professionals.verification:manage',
   },
+  CATEGORIES: {
+    MANAGE: 'categories.catalog:manage',
+  },
   MATERIAL_CATALOG: {
     MANAGE: 'material-catalog.catalog:manage',
   },

@@ -1,6 +1,7 @@
 import {
   ArgumentsHost,
   ForbiddenException,
+  UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
 import { HttpExceptionFilter } from './http-exception.filter';
@@ -93,5 +94,18 @@ describe('HttpExceptionFilter', () => {
     // Assert
     const body = extractJsonBody();
     expect(body.error).not.toHaveProperty('details');
+  });
+
+  // DEF-BE-004: `AuthGuard` lanza `new UnauthorizedException()` sin `error` en el body.
+  it('debe derivar error del status cuando la excepción no trae `error` (401 sin Internal Server Error)', () => {
+    // Arrange
+    const exception = new UnauthorizedException();
+
+    // Act
+    filter.catch(exception, buildHost());
+
+    // Assert
+    expect(mockStatus).toHaveBeenCalledWith(401);
+    expect(extractJsonBody().error.error).toBe('Unauthorized');
   });
 });

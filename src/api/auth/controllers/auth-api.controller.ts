@@ -13,6 +13,8 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBasicAuth, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -168,6 +170,28 @@ export class AuthApiController {
     this.cookieService.setAccessToken(res, accessToken);
 
     return { message: t('auth.TOKEN_REFRESHED'), accessToken };
+  }
+
+  /**
+   * DEF-BE-006: revoca el refresh token de la cookie (denylist de `jti`). Misma autenticación
+   * que `refresh-token` (cookie de refresh + Basic Auth): la posesión del refresh es la
+   * credencial, así que funciona aunque el access token ya haya vencido. Idempotente: repetirlo
+   * con el mismo refresh responde 204 igual. Limpia las cookies de sesión.
+   */
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBasicAuth()
+  @UseGuards(AuthGuard('jwt-refresh'), BasicAuthGuard)
+  async logout(
+    @Req() req: IAuthenticatedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedException(t('auth.TOKEN_NOT_PROVIDED'));
+    }
+    await this.authApiService.logout(refreshToken);
+    this.cookieService.clearSession(res);
   }
 
   @Get('scope')

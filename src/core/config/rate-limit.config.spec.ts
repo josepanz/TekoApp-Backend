@@ -159,7 +159,7 @@ describe('RateLimitConfig', () => {
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        send: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis(),
       };
       const optionsUsed = {
         statusCode: 429,
@@ -183,7 +183,18 @@ describe('RateLimitConfig', () => {
         expect.stringContaining('ip=127.0.0.1'),
       );
       expect(res.status).toHaveBeenCalledWith(429);
-      expect(res.send).toHaveBeenCalledWith(optionsUsed.message);
+      // DEF-BE-005: envelope uniforme de error, no el {error,retryAfter} crudo
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 429,
+          message: 'Demasiados intentos',
+          error: 'Too Many Requests',
+          retryAfter: 900,
+          timestamp: expect.any(String) as string,
+          path: '/tekoapp-backend/api/v1/auth/nonce',
+        },
+      });
 
       warnSpy.mockRestore();
     });

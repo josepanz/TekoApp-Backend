@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { MAX_PAGE_SIZE } from '@common/dtos/pagination.dto';
 import { UserStatus } from '@prisma/client';
 
 export class ListUsersRequestDTO {
@@ -16,6 +17,7 @@ export class ListUsersRequestDTO {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(MAX_PAGE_SIZE)
   pageSize?: number = 10;
 
   @ApiPropertyOptional({ example: 'createdAt' })

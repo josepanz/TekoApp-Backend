@@ -38,6 +38,7 @@
   "ORDER_BY_FORMAT": "orderBy debe tener el formato 'campo:asc' o 'campo:desc'",
   "PAGE_MIN": "La pagina no puede ser menor a 0",
   "PAGE_SIZE_MIN": "El tamaño de pagina no puede ser menor a 0",
+  "PAGE_SIZE_MAX": "El tamaño de página no puede ser mayor a 100",
   "PASSWORD_POLICY": "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
   "PHONE_FORMAT_INVALID": "El formato del número de teléfono no es válido",
   "PRICE_INVALID": "El precio debe ser mayor a 0 y tener máximo 2 decimales",

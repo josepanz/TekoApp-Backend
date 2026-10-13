@@ -254,9 +254,33 @@ export class UsersDBService {
   async findActiveUserByEmail(
     email: string,
   ): Promise<UserWithSecurities | null> {
+    // Defensa en profundidad (DEF-BE-011): Prisma ignora `email: undefined` y devolvería
+    // cualquier usuario activo.
+    if (typeof email !== 'string' || email.trim() === '') {
+      return null;
+    }
     return await this.prisma.extended.users.findFirst({
       where: {
         email,
+        status: { in: [UserStatus.ACTIVE, UserStatus.PENDING_VERIFICATION] },
+      },
+      include: {
+        roles: true,
+        permissions: true,
+        credentials: true,
+      },
+    });
+  }
+
+  async findActiveUserByReferenceId(
+    referenceId: string,
+  ): Promise<UserWithSecurities | null> {
+    if (typeof referenceId !== 'string' || referenceId.trim() === '') {
+      return null;
+    }
+    return await this.prisma.extended.users.findFirst({
+      where: {
+        referenceId,
         status: { in: [UserStatus.ACTIVE, UserStatus.PENDING_VERIFICATION] },
       },
       include: {

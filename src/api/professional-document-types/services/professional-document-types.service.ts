@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProfessionalDocumentTypes } from '@prisma/client';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, ProfessionalDocumentTypes } from '@prisma/client';
+import { PrismaErrorCodes } from '@common/enum/prisma-error-codes.enum';
 import { ProfessionalDocumentTypesDbService } from '@modules/professional-document-types-db/services/professional-document-types-db.service';
 import { t } from '@common/i18n/i18n.helper';
 import {
@@ -27,7 +32,12 @@ export class ProfessionalDocumentTypesService {
     dto: CreateProfessionalDocumentTypeRequestDTO,
     createdBy: string,
   ): Promise<ProfessionalDocumentTypes> {
-    return this.db.create({ ...dto, createdBy });
+    try {
+      return await this.db.create({ ...dto, createdBy });
+    } catch (error) {
+      this.rethrowIfDuplicateCode(error);
+      throw error;
+    }
   }
 
   async update(
@@ -39,6 +49,23 @@ export class ProfessionalDocumentTypesService {
     if (!existing) {
       throw new NotFoundException(t('professional-document-types.NOT_FOUND'));
     }
-    return this.db.update(existing.id, { ...dto, lastChangedBy });
+    try {
+      return await this.db.update(existing.id, { ...dto, lastChangedBy });
+    } catch (error) {
+      this.rethrowIfDuplicateCode(error);
+      throw error;
+    }
+  }
+
+  /** DEF-BE-010: `code` es único; el P2002 de Prisma se traduce a 409 en vez de caer en 500. */
+  private rethrowIfDuplicateCode(error: unknown): void {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === (PrismaErrorCodes.UniqueConstraintFailed as string)
+    ) {
+      throw new ConflictException(
+        t('professional-document-types.CODE_ALREADY_EXISTS'),
+      );
+    }
   }
 }

@@ -13,6 +13,14 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@modules/auth/guards/optional-jwt-auth.guard';
+import { User } from '@common/decorators/user.decorator';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
+import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
+import { Permissions } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
+import { PaginatedResponse } from '@common/dtos/response-with-pagination.dto';
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dtos/request/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/request/update-category.dto';
@@ -48,7 +56,8 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiCreateCategory()
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
@@ -67,12 +76,16 @@ export class CategoriesController {
   }
 
   @Get('all')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiGetAllCategoriesWithRelations()
-  async findAllWithRelations(): Promise<CategoryDetailResponseDTO[]> {
-    return this.categoriesService.findAllWithRelations() as unknown as Promise<
-      CategoryDetailResponseDTO[]
-    >;
+  async findAllWithRelations(
+    @Query() query: PaginationQueryDTO,
+  ): Promise<PaginatedResponse<CategoryDetailResponseDTO>> {
+    return this.categoriesService.findAllWithRelations(
+      query.page,
+      query.pageSize,
+    ) as unknown as Promise<PaginatedResponse<CategoryDetailResponseDTO>>;
   }
 
   @Get('main')
@@ -104,12 +117,21 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiGetCategoryById()
   async findOne(
     @Param() param: CategoryIdParamDTO,
+    @User() user?: IUserDataOnJwt,
   ): Promise<CategoryDetailResponseDTO> {
-    return this.categoriesService.findOne(
+    // DEF-BE-008: las categorías ocultas/inactivas solo las ve quien puede administrarlas.
+    const canSeeHidden =
+      user?.permissions?.some(
+        (p) =>
+          p === PERMISSIONS.CATEGORIES.MANAGE || p === PERMISSIONS.ADMIN.ALL,
+      ) ?? false;
+    return this.categoriesService.findOneForViewer(
       param.id,
+      canSeeHidden,
     ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
@@ -132,7 +154,8 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiUpdateCategory()
   async update(
     @Param() param: CategoryIdParamDTO,
@@ -145,7 +168,8 @@ export class CategoriesController {
   }
 
   @Patch(':id/status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiChangeCategoryStatus()
   async changeStatus(
     @Param() param: CategoryIdParamDTO,
@@ -158,7 +182,8 @@ export class CategoriesController {
   }
 
   @Patch(':id/toggle-visibility')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiToggleCategoryVisibility()
   async toggleVisibility(
     @Param() param: CategoryIdParamDTO,
@@ -169,7 +194,8 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiDeleteCategory()
   async remove(@Param() param: CategoryIdParamDTO): Promise<void> {

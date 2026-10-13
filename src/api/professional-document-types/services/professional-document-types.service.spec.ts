@@ -1,4 +1,5 @@
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfessionalDocumentTypesDbService } from '@modules/professional-document-types-db/services/professional-document-types-db.service';
 import { ProfessionalDocumentTypesService } from './professional-document-types.service';
@@ -72,6 +73,39 @@ describe('ProfessionalDocumentTypesService', () => {
         isActive: false,
         lastChangedBy: 'staff-ref',
       });
+    });
+  });
+
+  // DEF-BE-010: code duplicado => 409 (no 500)
+  describe('código duplicado (P2002)', () => {
+    const p2002 = () =>
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+      });
+
+    it('create lanza ConflictException ante P2002', async () => {
+      mockCreate.mockRejectedValue(p2002());
+
+      await expect(
+        service.create({ code: 'X' } as never, 'admin'),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('update lanza ConflictException ante P2002', async () => {
+      mockFindByReferenceId.mockResolvedValue({ id: 1 });
+      mockUpdate.mockRejectedValue(p2002());
+
+      await expect(
+        service.update('ref', { code: 'X' }, 'admin'),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('propaga cualquier otro error sin convertirlo', async () => {
+      const boom = new Error('db caída');
+      mockCreate.mockRejectedValue(boom);
+
+      await expect(service.create({} as never, 'admin')).rejects.toBe(boom);
     });
   });
 });

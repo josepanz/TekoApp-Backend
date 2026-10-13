@@ -9,8 +9,24 @@ en el proceso de Jest, conectada a un stack Docker descartable. Sin mocks. No co
 pnpm e2e:up         # docker compose + espera de health + prisma migrate deploy + seed
 pnpm e2e:seed       # re-sembrar (idempotente)
 pnpm test:e2e:real  # smoke
+pnpm e2e:serve      # backend HTTP real contra el stack e2e (puerto 3100), para Web y Mobile
 pnpm e2e:down       # baja el stack y borra volúmenes
 ```
+
+## Backend HTTP real para Web y Mobile (`pnpm e2e:serve`)
+
+Requiere `pnpm e2e:up` previo. Corre `src/main.ts` con `.env.e2e` (nunca `.env`) en el puerto **3100**
+(el 3000 puede estar ocupado por el dev local; se cambia con `E2E_SERVE_PORT`). Escucha en todas las
+interfaces (0.0.0.0), por lo que el emulador Android lo alcanza por `http://10.0.2.2:3100`. El comando
+espera el healthcheck (200, o 503 solo por `storage_disk`) y recién entonces imprime `backend LISTO`
+(el primer arranque con ts-node tarda ~1-2 min). Ctrl+C lo baja.
+
+- URL base: `http://localhost:3100/tekoapp-backend/api` (versionado URI: `/tekoapp-backend/api/v1/...`)
+- OpenAPI JSON: `http://localhost:3100/tekoapp-backend/api/swagger-json` (UI en `/tekoapp-backend/api/swagger`)
+- Clientes Basic Auth (cabecera `Authorization: Basic base64(id:secret)` en endpoints pre-login):
+  web `tekoapp-web` / `e2e-web-secret`; mobile `tekoapp-mobile` / `e2e-mobile-secret`.
+- Usuarios fixture: ver tabla de abajo (password `E2e-Passw0rd!`; admin `Tekoapp123!`).
+- La clave RSA se genera por proceso: la pública se obtiene siempre de `GET /auth/public-key`.
 
 ## Aislamiento (leer antes de tocar)
 

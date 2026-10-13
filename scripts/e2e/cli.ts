@@ -1,8 +1,8 @@
 /**
- * CLI del entorno E2E aislado: `ts-node scripts/e2e/cli.ts <up|seed|down|test>`.
+ * CLI del entorno E2E aislado: `ts-node scripts/e2e/cli.ts <up|seed|down|test|serve>`.
  * Todos los comandos cargan SOLO `.env.e2e` y abortan ante cualquier rastro de Supabase.
  */
-import { execFileSync, spawnSync } from 'child_process';
+import { execFileSync, spawn, spawnSync } from 'child_process';
 import { resolve } from 'path';
 import { loadE2eEnv } from './env';
 
@@ -110,6 +110,56 @@ function test(): void {
   ]);
 }
 
+/**
+ * Levanta el backend HTTP real (ts-node src/main.ts) contra el stack e2e, en 0.0.0.0:3100
+ * (el emulador Android entra por 10.0.2.2). Espera el health antes de declararse listo y
+ * baja el proceso hijo con Ctrl+C. Requiere `pnpm e2e:up` previo.
+ */
+async function serve(): Promise<void> {
+  const port = process.env.E2E_SERVE_PORT ?? '3100';
+  const child = spawn(
+    'npx',
+    ['ts-node', '-r', 'tsconfig-paths/register', 'src/main.ts'],
+    {
+      cwd: ROOT,
+      stdio: 'inherit',
+      shell: isWin,
+      env: {
+        ...process.env,
+        PORT: port,
+        BASE_URL: `http://localhost:${port}`,
+      },
+    },
+  );
+  const stop = () => {
+    if (isWin && child.pid) {
+      spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f']);
+    } else child.kill('SIGTERM');
+  };
+  process.on('SIGINT', () => {
+    stop();
+    process.exit(0);
+  });
+  process.on('SIGTERM', () => {
+    stop();
+    process.exit(0);
+  });
+  child.on('exit', (code) => process.exit(code ?? 1));
+  const base = `http://localhost:${port}/tekoapp-backend/api`;
+  await waitFor(
+    'backend HTTP (healthcheck)',
+    async () => {
+      const res = await fetch(`${base}/healthcheck`);
+      // 503 válido si solo falla storage_disk (ver README)
+      return res.status === 200 || res.status === 503;
+    },
+    180_000,
+  );
+  console.log(
+    `[e2e] backend LISTO en 0.0.0.0:${port} -> ${base} (swagger-json: ${base}/swagger-json)`,
+  );
+}
+
 async function main(): Promise<void> {
   const cmd = process.argv[2];
   loadE2eEnv();
@@ -117,7 +167,8 @@ async function main(): Promise<void> {
   else if (cmd === 'seed') seed();
   else if (cmd === 'down') down();
   else if (cmd === 'test') test();
-  else throw new Error(`Comando desconocido: ${cmd} (up|seed|down|test)`);
+  else if (cmd === 'serve') await serve();
+  else throw new Error(`Comando desconocido: ${cmd} (up|seed|down|test|serve)`);
 }
 
 main().catch((e: unknown) => {

@@ -417,6 +417,18 @@ describe('UsersDBService', () => {
 
   // ── findActiveUserByEmail ────────────────────────────────────────────────────
   describe('findActiveUserByEmail', () => {
+    it.each([undefined, null, '', '   '])(
+      'DEF-BE-011: rechaza email vacío (%p) sin consultar la BD',
+      async (email) => {
+        mockUsersFindFirst.mockClear();
+
+        const result = await service.findActiveUserByEmail(email);
+
+        expect(result).toBeNull();
+        expect(mockUsersFindFirst).not.toHaveBeenCalled();
+      },
+    );
+
     it('debe retornar usuario activo o pendiente por email incluyendo seguridades', async () => {
       // Arrange
       const userWithSecurities = {

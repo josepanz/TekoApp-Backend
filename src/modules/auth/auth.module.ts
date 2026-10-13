@@ -5,6 +5,7 @@ import { UsersDBModule } from '@modules/users-db/users-db.module';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { AuthTokenService } from '@modules/auth/services/auth-token.service';
 import { AuthPasswordService } from '@modules/auth/services/auth-password.service';
+import { TokenRevocationService } from '@modules/auth/services/token-revocation.service';
 import { NonceService } from '@modules/auth/services/nonce.service';
 
 import { CredentialsRepository } from '@modules/auth/repositories';
@@ -17,6 +18,7 @@ import { nonceRedisProvider } from '@modules/auth/providers/nonce-redis.provider
     AuthTokenService,
     AuthPasswordService,
     NonceService,
+    TokenRevocationService,
     nonceRedisProvider,
 
     CredentialsRepository,
