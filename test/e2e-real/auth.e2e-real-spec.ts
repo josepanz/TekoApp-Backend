@@ -304,16 +304,59 @@ describe('M1 Auth y sesión (e2e real)', () => {
     });
 
     // CP-BE-AUTH-027
-    it.failing(
-      'DEF-BE-006: existe logout que invalide la sesión (hoy POST /auth/logout -> 404)',
-      async () => {
-        const s = await login(http, FIXTURE.clienteB.email, E2E_PASSWORD);
-        const res = await http
-          .post(`${PREFIX}/auth/logout`)
-          .set(bearer(s.accessToken));
-        expect([200, 201, 204]).toContain(res.status);
-      },
-    );
+    it('DEF-BE-006: logout revoca el refresh; refresh posterior -> 401 en envelope uniforme', async () => {
+      const s = await login(http, FIXTURE.clienteB.email, E2E_PASSWORD);
+      await basic(http.post(`${PREFIX}/auth/refresh-token`))
+        .set('Cookie', s.refreshCookie!)
+        .expect((r) => expect([200, 201]).toContain(r.status));
+
+      await basic(http.post(`${PREFIX}/auth/logout`))
+        .set('Cookie', s.refreshCookie!)
+        .expect(204);
+
+      const res = await basic(http.post(`${PREFIX}/auth/refresh-token`))
+        .set('Cookie', s.refreshCookie!)
+        .expect(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe(401);
+      expect(res.body.error.error).toBe('Unauthorized');
+    });
+
+    // CP-BE-AUTH-036
+    it('DEF-BE-006: un segundo logout con el mismo refresh es idempotente (204)', async () => {
+      const s = await login(http, FIXTURE.clienteB.email, E2E_PASSWORD);
+      await basic(http.post(`${PREFIX}/auth/logout`))
+        .set('Cookie', s.refreshCookie!)
+        .expect(204);
+      await basic(http.post(`${PREFIX}/auth/logout`))
+        .set('Cookie', s.refreshCookie!)
+        .expect(204);
+    });
+
+    // CP-BE-AUTH-037
+    it('DEF-BE-006: logout solo revoca ese refresh; otra sesión del mismo usuario sigue válida', async () => {
+      const s1 = await login(http, FIXTURE.clienteB.email, E2E_PASSWORD);
+      const s2 = await login(http, FIXTURE.clienteB.email, E2E_PASSWORD);
+      await basic(http.post(`${PREFIX}/auth/logout`))
+        .set('Cookie', s1.refreshCookie!)
+        .expect(204);
+      await basic(http.post(`${PREFIX}/auth/refresh-token`))
+        .set('Cookie', s2.refreshCookie!)
+        .expect((r) => expect([200, 201]).toContain(r.status));
+    });
+
+    // CP-BE-AUTH-038
+    it('DEF-BE-006: logout sin cookie, con cookie basura o sin Basic Auth -> 401', async () => {
+      await basic(http.post(`${PREFIX}/auth/logout`)).expect(401);
+      await basic(http.post(`${PREFIX}/auth/logout`))
+        .set('Cookie', 'refreshToken=no-es-un-jwt')
+        .expect(401);
+      const s = await login(http, FIXTURE.clienteB.email, E2E_PASSWORD);
+      await http
+        .post(`${PREFIX}/auth/logout`)
+        .set('Cookie', s.refreshCookie!)
+        .expect(401);
+    });
   });
 
   describe('Basic Auth inválido o ausente en endpoints pre-login', () => {

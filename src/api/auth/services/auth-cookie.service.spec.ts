@@ -6,7 +6,7 @@ import { APP_CONFIG } from '@core/config/config-loader';
 
 describe('AuthCookieService', () => {
   let service: AuthCookieService;
-  let res: { cookie: jest.Mock };
+  let res: { cookie: jest.Mock; clearCookie: jest.Mock };
 
   const mockConfig = {
     authentication: {
@@ -17,7 +17,7 @@ describe('AuthCookieService', () => {
   };
 
   beforeEach(async () => {
-    res = { cookie: jest.fn() };
+    res = { cookie: jest.fn(), clearCookie: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -129,6 +129,21 @@ describe('AuthCookieService', () => {
         secure: true,
         sameSite: 'strict',
       });
+    });
+  });
+
+  describe('clearSession', () => {
+    it('borra accessToken y refreshToken con los mismos atributos con que se setean', () => {
+      service.clearSession(res as unknown as Response);
+
+      for (const name of ['accessToken', 'refreshToken']) {
+        expect(res.clearCookie).toHaveBeenCalledWith(name, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+          path: '/',
+        });
+      }
     });
   });
 });

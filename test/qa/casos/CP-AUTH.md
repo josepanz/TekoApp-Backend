@@ -95,7 +95,7 @@ CP-BE-AUTH-001..006: smoke real. CP-BE-AUTH-007..038 y CP-BE-ERR-001..009: ola W
 
 ## Ola W1 — registro, login, scope, refresh, Basic Auth, guards y COMPLIANCE
 
-Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-BE-006, Abierto); la invalidación posterior al logout queda como caso `it.failing`.
+Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-BE-006, Corregido); la invalidación posterior al logout queda como caso `it.failing`.
 
 ### CP-BE-AUTH-007 — Registra un usuario nuevo por POST /onboarding
 
@@ -397,20 +397,80 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Resultado esperado | `error.error` = "Unauthorized". Antes del fix: "Internal Server Error" con `message` "Unauthorized" (sin localizar). |
 | Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-004: el 401 de refresh debe llamarse "Unauthorized"...` |
 
-### CP-BE-AUTH-027 — Existe logout que invalida la sesión
+### CP-BE-AUTH-027 — Logout revoca el refresh token
 
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-027 |
-| Título | Existe logout que invalida la sesión [DEF-BE-006: Abierto, caso `it.failing` (ver tabla de defectos al final)] |
+| Título | Logout revoca el refresh token y el refresh posterior da 401 [DEF-BE-006: Corregido; caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
-| Trazabilidad | M1 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 1; DEF-BE-006 |
-| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
-| Pasos | 1. Login.<br>2. `POST /auth/logout` con Bearer. |
+| Trazabilidad | M1 del plan maestro (§3); DEF-BE-006 |
+| Precondiciones | Stack e2e arriba y sembrado; Basic Auth web `tekoapp-web`. |
+| Pasos | 1. Login.<br>2. `POST /auth/refresh-token` con la cookie (OK).<br>3. `POST /auth/logout` (Basic Auth + cookie `refreshToken`).<br>4. `POST /auth/refresh-token` con la misma cookie. |
 | Datos de prueba | cliente_b |
-| Resultado esperado | 200/204 e invalidación del refresh token. Hoy: 404 (el endpoint no existe; no hay forma server-side de revocar sesiones). |
-| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-006: existe logout que invalide la sesión` |
+| Resultado esperado | Logout 204 (y limpia cookies). El refresh del paso 4: 401 con envelope `{success:false,error:{code:401,error:"Unauthorized",...}}`. |
+| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-006: logout revoca el refresh; refresh posterior -> 401 en envelope uniforme` |
+
+### CP-BE-AUTH-036 — Un segundo logout es idempotente
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-AUTH-036 |
+| Título | Un segundo logout es idempotente |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | DEF-BE-006 (logout con denylist de `jti` en Redis) |
+| Precondiciones | Stack e2e arriba y sembrado; Basic Auth web `tekoapp-web`. |
+| Pasos | 1. Login.<br>2. `POST /auth/logout` dos veces con la misma cookie. |
+| Datos de prueba | cliente_b |
+| Resultado esperado | 204 en ambas. |
+| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-006: un segundo logout con el mismo refresh es idempotente (204)` |
+
+### CP-BE-AUTH-037 — El logout solo revoca ese refresh, no otras sesiones
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-AUTH-037 |
+| Título | El logout solo revoca ese refresh, no otras sesiones |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | DEF-BE-006 (logout con denylist de `jti` en Redis) |
+| Precondiciones | Stack e2e arriba y sembrado; Basic Auth web `tekoapp-web`. |
+| Pasos | 1. Dos logins del mismo usuario.<br>2. Logout de la sesión 1.<br>3. Refresh con la sesión 2. |
+| Datos de prueba | cliente_b |
+| Resultado esperado | El refresh de la sesión 2 sigue funcionando. |
+| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-006: logout solo revoca ese refresh; otra sesión del mismo usuario sigue válida` |
+
+### CP-BE-AUTH-038 — Logout sin credenciales válidas responde 401
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-AUTH-038 |
+| Título | Logout sin credenciales válidas responde 401 |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | DEF-BE-006 (logout con denylist de `jti` en Redis) |
+| Precondiciones | Stack e2e arriba y sembrado; Basic Auth web `tekoapp-web`. |
+| Pasos | 1. Logout sin cookie.<br>2. Con cookie basura.<br>3. Con cookie válida pero sin Basic Auth. |
+| Datos de prueba | cliente_b |
+| Resultado esperado | 401 en los tres casos. |
+| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-006: logout sin cookie, con cookie basura o sin Basic Auth -> 401` |
+
+### CP-BE-AUTH-039 — La estrategia de refresh no consulta usuarios por email undefined
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-AUTH-039 |
+| Título | La estrategia `jwt-refresh` no busca usuarios con `email` undefined [DEF-BE-011: Abierto, caso `it.failing` unitario] |
+| Tipo / Nivel | unitaria |
+| Prioridad | P2 |
+| Trazabilidad | DEF-BE-011 (hallazgo al implementar DEF-BE-006) |
+| Precondiciones | `UsersDBService` mockeado. |
+| Pasos | 1. `validate({sub, tokenType:'refreshToken'})` (el refresh no lleva `email`). |
+| Datos de prueba | payload sin email |
+| Resultado esperado | No se llama `findActiveUserByEmail(undefined)`. Hoy sí: Prisma ignora `email: undefined` y devuelve cualquier usuario activo; la estrategia no valida al dueño del token (el service lo revalida por `sub`, por eso no es explotable hoy). |
+| Automatizado en | `src/modules/auth/strategies/jwt-refresh.strategy.spec.ts` — `DEF-BE-011: no debe consultar usuarios por un email undefined` |
 
 ### CP-BE-AUTH-028 — Endpoints pre-login sin Authorization responden 401
 
@@ -673,5 +733,6 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 | DEF-BE-003 | Medio | Corregido (1cdcbce) |
 | DEF-BE-004 | Bajo | Corregido (ad9f0d8) |
 | DEF-BE-005 | Medio | Corregido (bbfac18) |
-| DEF-BE-006 | Alto | Abierto: los refresh tokens son JWT RS256 stateless sin `jti` ni persistencia; revocar exige una denylist de `jti` en Redis con TTL (decisión de diseño pendiente del orquestador) |
+| DEF-BE-006 | Alto | Corregido (HASH006): refresh con `jti` + `POST /auth/logout` + denylist `revoked:jti:<jti>` en Redis con TTL. Refresh legacy sin `jti` se acepta hasta expirar; Redis caído: refresh sigue (warning), logout falla 500 |
 | DEF-BE-007 | Bajo | Corregido (a24fea1) |
+| DEF-BE-011 | Bajo | Abierto (`it.failing` unitario, CP-BE-AUTH-039): `JwtRefreshStrategy` busca por `payload.email`, que el refresh token no lleva; no es explotable porque el service revalida por `sub`. Corregir cambiando la búsqueda a `sub` (fuera del alcance de DEF-BE-006) |

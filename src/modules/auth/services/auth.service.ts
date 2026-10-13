@@ -262,6 +262,11 @@ export class AuthService {
     return { accessToken: newAccessToken };
   }
 
+  /** Revoca el refresh token (logout). Ver `AuthTokenService.revokeRefreshToken`. */
+  async logout(refreshToken: string): Promise<void> {
+    await this.authTokenService.revokeRefreshToken(refreshToken);
+  }
+
   /**
    * Obtiene el scope del usuario (roles y permisos)
    */

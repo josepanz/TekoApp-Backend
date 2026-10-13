@@ -35,4 +35,16 @@ export class AuthCookieService {
       maxAge: parseTime(expiry),
     });
   }
+
+  /** Borra las cookies de sesión (mismos atributos que al setearlas para que el navegador las quite). */
+  clearSession(res: Response): void {
+    for (const name of ['accessToken', 'refreshToken']) {
+      res.clearCookie(name, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+      });
+    }
+  }
 }

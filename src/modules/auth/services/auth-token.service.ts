@@ -1,10 +1,12 @@
 import {
   Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import { Users, UserStatus } from '@prisma/client';
 
 import { PrismaDatasource } from '@core/database/services/prisma.service';
@@ -12,6 +14,7 @@ import { APP_CONFIG, AppConfigType } from '@core/config/config-loader';
 import { CryptoHelper } from '@common/helpers/crypto-helpers';
 import { PasswordExpirationHelper } from '@modules/auth/helpers';
 
+import { TokenRevocationService } from './token-revocation.service';
 import { t } from '@common/i18n/i18n.helper';
 /**
  * Servicio especializado en gestión de tokens de autenticación JWT (stateless)
@@ -24,6 +27,7 @@ export class AuthTokenService {
     private readonly prisma: PrismaDatasource,
     @Inject(APP_CONFIG.KEY)
     private configService: ConfigType<AppConfigType>,
+    private readonly tokenRevocation: TokenRevocationService,
   ) {
     CryptoHelper.initConfigService(configService);
   }
@@ -61,6 +65,8 @@ export class AuthTokenService {
         {
           sub: payload.user.referenceId,
           type: 'refresh',
+          // DEF-BE-006: identificador único para poder revocarlo (denylist en Redis)
+          jti: randomUUID(),
         },
         'RS256',
         refreshTokenExpiry,
@@ -68,6 +74,37 @@ export class AuthTokenService {
     ];
 
     return { accessToken, refreshToken };
+  }
+
+  /**
+   * Logout: revoca el refresh token (denylist de `jti` con TTL = vida restante). Idempotente:
+   * revocar dos veces no es error. Un token legacy sin `jti` no se puede revocar (se registra
+   * un warning y se responde igual: expira solo). Si Redis falla, el logout falla con 500
+   * (fail-closed: no se debe aparentar una sesión cerrada que sigue viva).
+   */
+  async revokeRefreshToken(refreshToken: string): Promise<void> {
+    const payload = CryptoHelper.verifyRefreshToken(refreshToken);
+    if (payload.tokenType !== 'refreshToken') {
+      throw new UnauthorizedException(t('auth.INVALID_REFRESH_TOKEN'));
+    }
+    if (!payload.jti) {
+      this.logger.warn(
+        'Logout con refresh token legacy sin jti: no se puede revocar, expira por su cuenta.',
+      );
+      return;
+    }
+    const ttl = payload.exp - Math.floor(Date.now() / 1000);
+    if (ttl <= 0) return;
+    try {
+      await this.tokenRevocation.revoke(payload.jti, ttl);
+    } catch (error) {
+      this.logger.error(
+        `No se pudo revocar el refresh token: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+      throw new InternalServerErrorException(t('auth.LOGOUT_FAILED'));
+    }
   }
 
   /**
@@ -81,6 +118,12 @@ export class AuthTokenService {
     // Validar que sea un refresh token
     if (payload.tokenType !== 'refreshToken') {
       throw new UnauthorizedException(t('auth.INVALID_REFRESH_TOKEN'));
+    }
+
+    // DEF-BE-006: refresh revocado por logout. Los tokens emitidos antes de este cambio no
+    // tienen `jti` y se aceptan hasta que expiren (evita desloguear a todos en el deploy).
+    if (payload.jti && (await this.tokenRevocation.isRevoked(payload.jti))) {
+      throw new UnauthorizedException(t('auth.REFRESH_TOKEN_REVOKED'));
     }
 
     // Buscar usuario por referenceId (del payload)

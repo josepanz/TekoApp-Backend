@@ -1,8 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Users, UserStatus } from '@prisma/client';
 
 import { AuthTokenService } from './auth-token.service';
+import { TokenRevocationService } from './token-revocation.service';
 import { CryptoHelper } from '@common/helpers/crypto-helpers';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { APP_CONFIG } from '@core/config/config-loader';
@@ -11,6 +15,8 @@ import { APP_CONFIG } from '@core/config/config-loader';
 
 const mockFindUnique = jest.fn();
 const mockFindFirstCredentials = jest.fn();
+const mockIsRevoked = jest.fn();
+const mockRevoke = jest.fn();
 
 jest.mock('@common/helpers/crypto-helpers', () => ({
   CryptoHelper: {
@@ -79,6 +85,10 @@ describe('AuthTokenService', () => {
         {
           provide: APP_CONFIG.KEY,
           useValue: mockAppConfig,
+        },
+        {
+          provide: TokenRevocationService,
+          useValue: { isRevoked: mockIsRevoked, revoke: mockRevoke },
         },
       ],
     }).compile();
@@ -266,6 +276,123 @@ describe('AuthTokenService', () => {
       await expect(
         service.generateAccessTokenFromRefresh('valid_token'),
       ).rejects.toMatchObject({ response: { code: 'PASSWORD_EXPIRED' } });
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // DEF-BE-006: jti + revocación
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('refresh token con jti (DEF-BE-006)', () => {
+    it('generateTokens agrega un jti UUID distinto a cada refresh token', () => {
+      (CryptoHelper.generateToken as jest.Mock).mockReturnValue('tok');
+
+      service.generateTokens({ user: buildUser(), rememberMe: false });
+      service.generateTokens({ user: buildUser(), rememberMe: false });
+
+      const refreshPayloads = (
+        CryptoHelper.generateToken as jest.Mock
+      ).mock.calls
+        .filter(([type]: [string]) => type === 'refreshToken')
+        .map(([, payload]: [string, { jti: string }]) => payload.jti);
+      expect(refreshPayloads).toHaveLength(2);
+      expect(refreshPayloads[0]).toMatch(/^[0-9a-f-]{36}$/);
+      expect(refreshPayloads[0]).not.toBe(refreshPayloads[1]);
+    });
+
+    it('rechaza con 401 un refresh cuyo jti está revocado, sin consultar al usuario', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        sub: 'ref-uuid-123',
+        jti: 'j1',
+      });
+      mockIsRevoked.mockResolvedValue(true);
+
+      await expect(
+        service.generateAccessTokenFromRefresh('rt'),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(mockIsRevoked).toHaveBeenCalledWith('j1');
+      expect(mockFindUnique).not.toHaveBeenCalled();
+    });
+
+    it('acepta un refresh legacy sin jti (hasta que expire) sin consultar la denylist', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        sub: 'ref-uuid-123',
+      });
+      mockFindUnique.mockResolvedValue(buildUser());
+      mockFindFirstCredentials.mockResolvedValue({ expiredAt: null });
+      (CryptoHelper.generateToken as jest.Mock).mockReturnValue('new');
+
+      await expect(service.generateAccessTokenFromRefresh('rt')).resolves.toBe(
+        'new',
+      );
+      expect(mockIsRevoked).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('revokeRefreshToken (logout)', () => {
+    const inOneHour = () => Math.floor(Date.now() / 1000) + 3600;
+
+    it('revoca el jti con el TTL restante del token', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        jti: 'j1',
+        exp: inOneHour(),
+      });
+
+      await service.revokeRefreshToken('rt');
+
+      const [jti, ttl] = mockRevoke.mock.calls[0] as [string, number];
+      expect(jti).toBe('j1');
+      expect(ttl).toBeGreaterThan(3590);
+      expect(ttl).toBeLessThanOrEqual(3600);
+    });
+
+    it('es idempotente: revocar dos veces no lanza', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        jti: 'j1',
+        exp: inOneHour(),
+      });
+
+      await service.revokeRefreshToken('rt');
+      await expect(service.revokeRefreshToken('rt')).resolves.toBeUndefined();
+    });
+
+    it('token legacy sin jti: no revoca y no lanza', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        exp: inOneHour(),
+      });
+
+      await expect(service.revokeRefreshToken('rt')).resolves.toBeUndefined();
+      expect(mockRevoke).not.toHaveBeenCalled();
+    });
+
+    it('rechaza con 401 un token que no es de refresh', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'accessToken',
+        jti: 'j1',
+        exp: inOneHour(),
+      });
+
+      await expect(service.revokeRefreshToken('at')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('Redis caído: 500 explícito (fail-closed)', async () => {
+      (CryptoHelper.verifyRefreshToken as jest.Mock).mockReturnValue({
+        tokenType: 'refreshToken',
+        jti: 'j1',
+        exp: inOneHour(),
+      });
+      mockRevoke.mockRejectedValue(new Error('down'));
+
+      await expect(service.revokeRefreshToken('rt')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

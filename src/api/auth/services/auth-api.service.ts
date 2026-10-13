@@ -219,6 +219,10 @@ export class AuthApiService {
     return await this.authService.refreshAccessToken(refreshToken);
   }
 
+  async logout(refreshToken: string): Promise<void> {
+    await this.authService.logout(refreshToken);
+  }
+
   async scope(user: IUserDataOnJwt): Promise<DTO.UserScopeResponseDTO> {
     const [fullUser, { roles, permissions }] = await Promise.all([
       this.userService.findUserById(user.id),

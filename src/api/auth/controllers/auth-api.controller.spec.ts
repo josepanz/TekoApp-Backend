@@ -29,6 +29,8 @@ const mockPublicKey = jest.fn();
 const mockMe = jest.fn();
 const mockUpdateMe = jest.fn();
 const mockRefreshAccessToken = jest.fn();
+const mockLogout = jest.fn();
+const mockClearSession = jest.fn();
 const mockScope = jest.fn();
 const mockUserVerify = jest.fn();
 const mockUserVerificationStatus = jest.fn();
@@ -62,6 +64,7 @@ describe('AuthApiController', () => {
             me: mockMe,
             updateMe: mockUpdateMe,
             refreshAccessToken: mockRefreshAccessToken,
+            logout: mockLogout,
             scope: mockScope,
             userVerify: mockUserVerify,
             userVerificationStatus: mockUserVerificationStatus,
@@ -75,6 +78,7 @@ describe('AuthApiController', () => {
           useValue: {
             setAccessToken: mockSetAccessToken,
             setRefreshToken: mockSetRefreshToken,
+            clearSession: mockClearSession,
           },
         },
       ],
@@ -544,6 +548,40 @@ describe('AuthApiController', () => {
       expect(result).toEqual({
         message: 'Email para recuperación de cuenta enviado correctamente.',
       });
+    });
+  });
+
+  // ── logout (DEF-BE-006) ─────────────────────────────────────────────────────
+
+  describe('logout', () => {
+    it('revoca el refresh de la cookie y limpia las cookies de sesión', async () => {
+      const req = {
+        cookies: { refreshToken: 'rt' },
+      } as unknown as IAuthenticatedRequest;
+      mockLogout.mockResolvedValue(undefined);
+
+      await controller.logout(req, res as unknown as Response);
+
+      expect(mockLogout).toHaveBeenCalledWith('rt');
+      expect(mockClearSession).toHaveBeenCalledWith(res);
+    });
+
+    it('lanza UnauthorizedException si no hay cookie refreshToken', async () => {
+      const req = { cookies: {} } as unknown as IAuthenticatedRequest;
+
+      await expect(
+        controller.logout(req, res as unknown as Response),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(mockLogout).not.toHaveBeenCalled();
+    });
+
+    it('responde 204', () => {
+      const code = Reflect.getMetadata(
+        '__httpCode__',
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata
+        AuthApiController.prototype.logout,
+      ) as number;
+      expect(code).toBe(204);
     });
   });
 });
