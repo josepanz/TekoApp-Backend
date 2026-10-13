@@ -16,7 +16,8 @@ scripts/qa/report.ts     generador de informes (ts-node, sin dependencias nuevas
 | Archivo | Módulo | Casos |
 |---|---|---|
 | `casos/CP-ENV.md` | M0 Entorno E2E | CP-BE-ENV-001..003 |
-| `casos/CP-AUTH.md` | M1 Auth, smoke real | CP-BE-AUTH-001..006 |
+| `casos/CP-AUTH.md` | M1 Auth y sesión (smoke + W1) y contrato de error | CP-BE-AUTH-001..038, CP-BE-ERR-001..009 |
+| `casos/CP-CAT.md` | M2 Catálogos | CP-BE-CAT-001..033 |
 | `casos/CP-LOC.md` | Blindaje de `/locations` | CP-BE-LOC-001..007 |
 | `casos/CP-SEED.md` | Seed del rol COMPLIANCE | CP-BE-SEED-001..002 |
 
@@ -25,7 +26,7 @@ scripts/qa/report.ts     generador de informes (ts-node, sin dependencias nuevas
 | Nivel | Comando | Requisitos |
 |---|---|---|
 | Unitario (Jest, ~138 suites, mocks) | `pnpm test` (o `pnpm test:cov`) | Node, `pnpm install` |
-| Smoke / e2e real | `pnpm e2e:up` · `pnpm e2e:seed` · `pnpm test:e2e:real` · `pnpm e2e:down` | Docker, `docker-compose.e2e.yml`, `.env.e2e` (ver `test/e2e-real/README.md`) |
+| Smoke / e2e real | `pnpm e2e:up` · `pnpm e2e:seed` · `pnpm test:e2e:real` · `pnpm e2e:down` (y `pnpm e2e:serve` para levantar el backend HTTP en el puerto 3100) | Docker, `docker-compose.e2e.yml`, `.env.e2e` (ver `test/e2e-real/README.md`) |
 | E2E legacy (health mockeado) | `pnpm test:e2e` (`test/app.e2e-spec.ts`, `test/jest-e2e.json`) | Solo Node |
 
 ## Cómo generar los informes
