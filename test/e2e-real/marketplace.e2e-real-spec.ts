@@ -278,7 +278,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-017
-    it.failing('DEF-BE-020: una oferta ya aceptada no se puede rechazar después (la oferta y el servicio no quedan incoherentes)', async () => {
+    it('DEF-BE-020: una oferta ya aceptada no se puede rechazar después (la oferta y el servicio no quedan incoherentes)', async () => {
       const { svc, req } = await acceptedVia(proX);
       const res = await respond(svc.referenceId, req.referenceId, clienteA, 'REJECTED');
       expect(res.status).toBe(409);

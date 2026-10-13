@@ -862,6 +862,27 @@ describe('ServicesService', () => {
       );
     });
 
+    it.each([RequestStatus.ACCEPTED, RequestStatus.REJECTED])(
+      'DEF-BE-020: debe lanzar ConflictException al responder una oferta ya %s, sin tocar la oferta',
+      async (answered) => {
+        // Arrange
+        const svc = { ...mockService, userId: 1 };
+        mockFindServiceByReferenceId.mockResolvedValue(svc);
+        mockFindServiceRequestByReferenceId.mockResolvedValue({
+          ...mockRequest,
+          status: answered,
+        });
+        const dto = { status: RequestStatus.REJECTED } as never;
+
+        // Act & Assert
+        await expect(
+          service.respondToServiceRequest(SERVICE_REF, 'req-001', dto, 1),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateServiceRequest).not.toHaveBeenCalled();
+        expect(mockAcceptRequestTransaction).not.toHaveBeenCalled();
+      },
+    );
+
     it('debe lanzar ConflictException cuando el servicio ya no está disponible para aceptar la solicitud', async () => {
       // Arrange
       const svc = { ...mockService, userId: 1 };

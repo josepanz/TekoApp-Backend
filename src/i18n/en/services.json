@@ -16,6 +16,7 @@
   "NOTIFICATION_CANCELLED_BY_CLIENT_MESSAGE": "The client cancelled the service you were assigned to.",
   "NOTIFICATION_CANCELLED_BY_PROFESSIONAL_TITLE": "The professional cancelled the service",
   "NOTIFICATION_CANCELLED_BY_PROFESSIONAL_MESSAGE": "The professional cancelled the service you had in progress.",
+  "REQUEST_ALREADY_ANSWERED": "The offer has already been answered",
   "NO_LONGER_ACCEPTING_REQUESTS": "The service is no longer available to accept requests",
   "NO_LONGER_PENDING": "The service is no longer pending — someone else accepted it first",
   "ONLY_ASSIGNED_PROFESSIONAL_CAN_COMPLETE": "Only the assigned professional can complete the service",

@@ -451,6 +451,11 @@ export class ServicesService {
       service.id,
     );
     if (!request) throw new NotFoundException(t('services.REQUEST_NOT_FOUND'));
+    // Solo una oferta PENDING admite respuesta: sin esto, rechazar una oferta ya aceptada la dejaba
+    // REJECTED mientras el servicio seguía ACCEPTED con ese profesional (DEF-BE-020).
+    if (request.status !== RequestStatus.PENDING) {
+      throw new ConflictException(t('services.REQUEST_ALREADY_ANSWERED'));
+    }
 
     if (dto.status === RequestStatus.ACCEPTED) {
       const updatedCount = await this.db.acceptRequestTransaction(
