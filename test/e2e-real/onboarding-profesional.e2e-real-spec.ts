@@ -2,12 +2,12 @@
 /**
  * Suite: M3 Onboarding profesional contra el stack real (postulación, documentos con subida real a MinIO,
  * cola y revisión de admin, consentimiento, verify/suspend con efecto real, portafolio, job de expiración).
- * Casos: CP-BE-ONB-001..033 (ver test/qa/casos/CP-ONB.md)
+ * Casos: CP-BE-ONB-001..034 (ver test/qa/casos/CP-ONB.md)
  * Tipo: e2e   Prioridad: P1
  * Precondiciones: pnpm e2e:up + e2e:seed (versiones legales sembradas con countryId null); fixtures admin y
  *        cliente_a. Los usuarios/profesionales se crean por API en cada corrida (email único).
  * Trazabilidad: M3 del plan maestro (TEKOAPP-E2E-MASTER-PLAN.md §3); openspec/specs/e2e-test-plan.md Tier 3;
- *        DEF-BE-014..018.
+ *        DEF-BE-014..018 y DEF-BE-023 (abierto).
  */
 import { PrismaClient } from '@prisma/client';
 import { ProfessionalDocumentsExpirationJob } from '../../src/api/professional-documents/jobs/professional-documents-expiration.job';
@@ -181,6 +181,25 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .set(bearer(clienteA))
         .expect(404);
       expect(res.body.success).toBe(false);
+    });
+  });
+
+  describe('Visibilidad pública de postulantes', () => {
+    // CP-BE-ONB-034
+    it.failing('DEF-BE-023: un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId)', async () => {
+      const { pro } = await newPro();
+      const byId = await http
+        .get(`${PREFIX}/professionals/${pro.id}`)
+        .set(bearer(clienteA));
+      const byRef = await http
+        .get(`${PREFIX}/professionals/reference/${pro.referenceId}`)
+        .set(bearer(clienteA));
+      expect([byId.status, byRef.status]).toEqual([404, 404]);
+      // admin sí lo ve (backoffice)
+      await http
+        .get(`${PREFIX}/professionals/${pro.id}`)
+        .set(bearer(admin))
+        .expect(200);
     });
   });
 
