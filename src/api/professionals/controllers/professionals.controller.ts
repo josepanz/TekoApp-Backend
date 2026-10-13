@@ -20,7 +20,11 @@ import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
 import { Permissions } from '@common/decorators/permissions.decorator';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
-import { ProfessionalsService } from '../services/professionals.service';
+import {
+  ProfessionalsService,
+  RequestMeta,
+  StatusChangeActor,
+} from '../services/professionals.service';
 import {
   ProfessionalIdParamDTO,
   ProfessionalReferenceIdParamDTO,
@@ -45,6 +49,25 @@ import {
   ProfessionalReviewsListResponseDTO,
   ProfessionalStatsResponseDTO,
 } from '../dtos/response';
+
+type AuditedRequest = {
+  user: IUserDataOnJwt;
+  ip?: string;
+  headers?: Record<string, string | string[] | undefined>;
+};
+
+const auditActor = (req: AuditedRequest): StatusChangeActor => ({
+  id: req.user.id,
+  referenceId: req.user.referenceId,
+});
+
+const requestMeta = (req: AuditedRequest): RequestMeta => {
+  const userAgent = req.headers?.['user-agent'];
+  return {
+    ip: req.ip,
+    userAgent: Array.isArray(userAgent) ? userAgent[0] : userAgent,
+  };
+};
 
 @ApiTags('Professionals')
 @Controller('professionals')
@@ -241,17 +264,22 @@ export class ProfessionalsController {
 
   @Post(':id/verify')
   @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
-  @ApiOperation({ summary: 'Verificar identidad del profesional (solo admin)' })
+  @ApiOperation({
+    summary: 'Verificar o rechazar al profesional (solo admin)',
+    description:
+      'PENDING/REJECTED -> APPROVED (isVerified=true, nota opcional) o REJECTED (isVerified=false, nota obligatoria).',
+  })
   @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async verifyProfessional(
     @Param() param: ProfessionalIdParamDTO,
     @Body() dto: VerifyProfessionalRequestDTO,
-    @Request() req: { user: IUserDataOnJwt },
+    @Request() req: AuditedRequest,
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.verifyProfessional(
       param.id,
       dto,
-      req.user.id,
+      auditActor(req),
+      requestMeta(req),
     );
   }
 
@@ -262,12 +290,13 @@ export class ProfessionalsController {
   async suspendProfessional(
     @Param() param: ProfessionalIdParamDTO,
     @Body() dto: SuspendProfessionalRequestDTO,
-    @Request() req: { user: IUserDataOnJwt },
+    @Request() req: AuditedRequest,
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.suspendProfessional(
       param.id,
       dto.reason,
-      req.user.id,
+      auditActor(req),
+      requestMeta(req),
     );
   }
 
@@ -283,12 +312,13 @@ export class ProfessionalsController {
   async reactivateProfessional(
     @Param() param: ProfessionalIdParamDTO,
     @Body() dto: ReactivateProfessionalRequestDTO,
-    @Request() req: { user: IUserDataOnJwt },
+    @Request() req: AuditedRequest,
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.reactivateProfessional(
       param.id,
       dto.reason,
-      req.user.id,
+      auditActor(req),
+      requestMeta(req),
     );
   }
 }

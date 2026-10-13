@@ -295,7 +295,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       const suspended = await setup();
       for (const [x, body] of [
         [approved, { isVerified: true }],
-        [rejected, { isVerified: false }],
+        [rejected, { isVerified: false, notes: 'Documentación incompleta' }],
         [suspended, { isVerified: true }],
       ] as const) {
         await http
@@ -827,7 +827,10 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       expect(me.isActive).toBe(false);
 
       const other = await newPro();
-      await verify(other.pro.id, admin, { isVerified: false }).expect(201);
+      await verify(other.pro.id, admin, {
+        isVerified: false,
+        notes: 'Documentación incompleta',
+      }).expect(201);
       const re = await verify(other.pro.id, admin, { isVerified: true }).expect(
         201,
       );
@@ -1039,6 +1042,84 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .expect(401);
       expect((await reactivate(99999999, admin)).status).toBe(404);
       expect((await myProfile(user.token)).status).toBe('SUSPENDED');
+    });
+
+    // CP-BE-ONB-044
+    it('auditoría: verify, suspend y reactivate registran actor (referenceId), estado anterior/nuevo, motivo, IP y user-agent en audit_logs', async () => {
+      const adminRow = await prisma.users.findUniqueOrThrow({
+        where: { email: FIXTURE.admin.email },
+      });
+      const { pro } = await newPro();
+      const UA = 'e2e-qa-audit/1.0';
+      await verify(pro.id, admin, { isVerified: true, notes: 'Docs OK' })
+        .set('User-Agent', UA)
+        .expect(201);
+      await suspend(pro.id, admin, { reason: 'Reportes' })
+        .set('User-Agent', UA)
+        .expect(201);
+      await reactivate(pro.id, admin, { reason: 'Apelación' })
+        .set('User-Agent', UA)
+        .expect(201);
+
+      const rows = await prisma.auditLogs.findMany({
+        where: {
+          tableName: 'professionals',
+          recordId: String(pro.id),
+          operationType: 'UPDATE',
+        },
+        orderBy: { id: 'asc' },
+      });
+      const transitions = rows
+        .map((r) => ({
+          from: (r.oldData as any)?.status,
+          to: (r.newData as any)?.status,
+          reason: (r.newData as any)?.changed_reason,
+          row: r,
+        }))
+        .filter((t) => t.from !== t.to);
+      expect(transitions.map((t) => `${t.from}>${t.to}`)).toEqual([
+        'PENDING>APPROVED',
+        'APPROVED>SUSPENDED',
+        'SUSPENDED>APPROVED',
+      ]);
+      expect(transitions.map((t) => t.reason)).toEqual([
+        'Docs OK',
+        'Reportes',
+        'Apelación',
+      ]);
+      for (const t of transitions) {
+        expect(t.row.changedBy).toBe(adminRow.referenceId);
+        expect(t.row.userAgent).toBe(UA);
+        expect(t.row.ipAddress).toMatch(/127\.0\.0\.1|::1/);
+        expect(t.row.changedAt).toBeInstanceOf(Date);
+      }
+    });
+
+    // CP-BE-ONB-045
+    it('rechazar exige motivo (400 si falta o está en blanco); verify sin nota no arrastra el motivo previo', async () => {
+      const a = await newPro();
+      for (const body of [
+        { isVerified: false },
+        { isVerified: false, notes: '' },
+        { isVerified: false, notes: '   ' },
+      ]) {
+        expect((await verify(a.pro.id, admin, body)).status).toBe(400);
+      }
+      expect((await myProfile(a.user.token)).status).toBe('PENDING');
+      const rej = await verify(a.pro.id, admin, {
+        isVerified: false,
+        notes: 'Documentación ilegible',
+      }).expect(201);
+      expect(unwrap(rej.body).changedReason).toBe('Documentación ilegible');
+      // re-revisión sin nota: el motivo del rechazo anterior no debe figurar como motivo de la aprobación
+      const ok = await verify(a.pro.id, admin).expect(201);
+      expect(unwrap(ok.body).changedReason).toBeNull();
+      const last = await prisma.auditLogs.findFirstOrThrow({
+        where: { tableName: 'professionals', recordId: String(a.pro.id) },
+        orderBy: { id: 'desc' },
+      });
+      expect((last.newData as any).status).toBe('APPROVED');
+      expect((last.newData as any).changed_reason).toBeNull();
     });
 
     // CP-BE-ONB-043

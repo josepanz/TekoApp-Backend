@@ -42,6 +42,15 @@ const mockReactivateProfessional = jest.fn();
 
 const mockUser = { id: 1 } as unknown as IUserDataOnJwt;
 const mockReq = { user: mockUser };
+const mockAuditReq = {
+  user: { id: 1, referenceId: 'admin-ref' } as unknown as IUserDataOnJwt,
+  ip: '10.0.0.7',
+  headers: { 'user-agent': 'jest-agent' },
+};
+const AUDIT_ARGS = [
+  { id: 1, referenceId: 'admin-ref' },
+  { ip: '10.0.0.7', userAgent: 'jest-agent' },
+];
 const mockParam = { id: 10 };
 const mockReferenceParam = {
   referenceId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -467,12 +476,16 @@ describe('ProfessionalsController', () => {
       const result = await controller.verifyProfessional(
         mockParam,
         dto,
-        mockReq,
+        mockAuditReq,
       );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockVerifyProfessional).toHaveBeenCalledWith(10, dto, 1);
+      expect(mockVerifyProfessional).toHaveBeenCalledWith(
+        10,
+        dto,
+        ...AUDIT_ARGS,
+      );
     });
   });
 
@@ -504,7 +517,7 @@ describe('ProfessionalsController', () => {
       const result = await controller.suspendProfessional(
         mockParam,
         dto,
-        mockReq,
+        mockAuditReq,
       );
 
       // Assert
@@ -512,7 +525,7 @@ describe('ProfessionalsController', () => {
       expect(mockSuspendProfessional).toHaveBeenCalledWith(
         10,
         'Comportamiento inapropiado',
-        1,
+        ...AUDIT_ARGS,
       );
     });
   });
@@ -545,14 +558,14 @@ describe('ProfessionalsController', () => {
       const result = await controller.reactivateProfessional(
         mockParam,
         { reason: 'Apelación aceptada' },
-        mockReq,
+        mockAuditReq,
       );
 
       expect(result).toEqual(expected);
       expect(mockReactivateProfessional).toHaveBeenCalledWith(
         10,
         'Apelación aceptada',
-        1,
+        ...AUDIT_ARGS,
       );
     });
   });

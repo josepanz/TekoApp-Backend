@@ -11,6 +11,7 @@ import {
   VerificationStatus,
 } from '@prisma/client';
 import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
+import { auditStorage } from '@core/database/services/prisma.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
@@ -58,6 +59,18 @@ const REACTIVATION_BLOCKING_USER_STATUSES: UserStatus[] = [
   UserStatus.PENDING_DELETION,
   UserStatus.BLOCKED,
 ];
+
+/** Quien ejecuta una transición de estado: su `referenceId` queda en `changed_by` del audit-log. */
+export interface StatusChangeActor {
+  id: number;
+  referenceId: string;
+}
+
+/** IP y user-agent de la request, para que el trigger de auditoría los registre. */
+export interface RequestMeta {
+  ip?: string;
+  userAgent?: string;
+}
 
 @Injectable()
 export class ProfessionalsService {
@@ -365,10 +378,35 @@ export class ProfessionalsService {
     return result as unknown as ProfessionalDetailResponseDTO[];
   }
 
+  /**
+   * UPDATE condicional del estado dentro del contexto de auditoría (`auditStorage`): la extensión de
+   * Prisma lo envuelve en una transacción que fija `app.client_ip`/`app.user_agent`, y el trigger
+   * `fn_audit_generic_trigger` registra en `audit_logs` el estado anterior/nuevo (`old_data`/`new_data`),
+   * el motivo (`changed_reason`), el actor (`last_changed_by` = referenceId), IP y user-agent.
+   */
+  private applyTransition(
+    id: number,
+    expectedStatuses: ProfessionalStatus[],
+    actor: StatusChangeActor,
+    meta: RequestMeta,
+    data: Prisma.ProfessionalsUpdateInput,
+  ): Promise<number> {
+    return auditStorage.run(
+      {
+        userId: actor.referenceId,
+        ip: meta.ip ?? 'unknown',
+        userAgent: meta.userAgent ?? 'unknown',
+        applicationName: 'tekoapp-backend',
+      },
+      () => this.professionalsDb.updateConditional(id, expectedStatuses, data),
+    );
+  }
+
   async verifyProfessional(
     id: number,
     dto: VerifyProfessionalRequestDTO,
-    adminId: number,
+    actor: StatusChangeActor,
+    meta: RequestMeta = {},
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     // Máquina de estados (DEF-BE-028): solo se resuelve una verificación PENDING o se revisa una
@@ -381,9 +419,11 @@ export class ProfessionalsService {
     // administrativas concurrentes sobre el mismo profesional (ej. dos admins resolviendo la
     // misma verificación) se pisen sin detectar el conflicto — mismo patrón que
     // services/payments/professional-documents — ver .claude/rules/typescript.md.
-    const updatedCount = await this.professionalsDb.updateConditional(
+    const updatedCount = await this.applyTransition(
       id,
       [professional.status],
+      actor,
+      meta,
       {
         verificationStatus: dto.isVerified
           ? VerificationStatus.VERIFIED
@@ -391,8 +431,8 @@ export class ProfessionalsService {
         status: dto.isVerified
           ? ProfessionalStatus.APPROVED
           : ProfessionalStatus.REJECTED,
-        lastChangedBy: String(adminId),
-        changedReason: dto.notes,
+        lastChangedBy: actor.referenceId,
+        changedReason: dto.notes ?? null,
       },
     );
     if (updatedCount === 0) {
@@ -431,7 +471,8 @@ export class ProfessionalsService {
   async suspendProfessional(
     id: number,
     reason: string,
-    adminId: number,
+    actor: StatusChangeActor,
+    meta: RequestMeta = {},
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     // Máquina de estados (DEF-BE-029): solo se suspende un APPROVED. Re-suspender pisaría el
@@ -439,13 +480,15 @@ export class ProfessionalsService {
     if (professional.status !== ProfessionalStatus.APPROVED) {
       throw new ConflictException(t('professionals.INVALID_STATE_FOR_SUSPEND'));
     }
-    const updatedCount = await this.professionalsDb.updateConditional(
+    const updatedCount = await this.applyTransition(
       id,
       [professional.status],
+      actor,
+      meta,
       {
         status: ProfessionalStatus.SUSPENDED,
         isActive: false,
-        lastChangedBy: String(adminId),
+        lastChangedBy: actor.referenceId,
         changedReason: reason,
       },
     );
@@ -481,7 +524,8 @@ export class ProfessionalsService {
   async reactivateProfessional(
     id: number,
     reason: string,
-    adminId: number,
+    actor: StatusChangeActor,
+    meta: RequestMeta = {},
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     if (professional.status !== ProfessionalStatus.SUSPENDED) {
@@ -496,15 +540,17 @@ export class ProfessionalsService {
         t('professionals.USER_NOT_ACTIVE_FOR_REACTIVATE'),
       );
     }
-    const updatedCount = await this.professionalsDb.updateConditional(
+    const updatedCount = await this.applyTransition(
       id,
       [ProfessionalStatus.SUSPENDED],
+      actor,
+      meta,
       {
         status: ProfessionalStatus.APPROVED,
         isActive: true,
         isAvailable: false,
         isOnline: false,
-        lastChangedBy: String(adminId),
+        lastChangedBy: actor.referenceId,
         changedReason: reason,
       },
     );
