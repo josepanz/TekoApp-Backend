@@ -25,12 +25,12 @@ export interface NewUser {
 }
 
 /** Registra un usuario por POST /onboarding y devuelve su sesión. */
-export async function registerUser(http: Http, prefix = 'w2'): Promise<NewUser> {
+export async function registerUser(http: Http, prefix = 'w2', firstName = 'W2'): Promise<NewUser> {
   const pem = await getPublicKey(http);
   const email = `${prefix}_${uniqueSuffix()}@e2e.tekoapp.local`;
   const res = await basic(http.post(`${PREFIX}/onboarding`))
     .send({
-      firstName: 'W2',
+      firstName,
       lastName: 'Prueba',
       email,
       phoneNumber: `09${randomInt(10000000, 99999999)}`,

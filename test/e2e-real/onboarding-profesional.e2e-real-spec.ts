@@ -2,7 +2,7 @@
 /**
  * Suite: M3 Onboarding profesional contra el stack real (postulación, documentos con subida real a MinIO,
  * cola y revisión de admin, consentimiento, verify/suspend con efecto real, portafolio, job de expiración).
- * Casos: CP-BE-ONB-001..034 (ver test/qa/casos/CP-ONB.md)
+ * Casos: CP-BE-ONB-001..037 (ver test/qa/casos/CP-ONB.md)
  * Tipo: e2e   Prioridad: P1
  * Precondiciones: pnpm e2e:up + e2e:seed (versiones legales sembradas con countryId null); fixtures admin y
  *        cliente_a. Los usuarios/profesionales se crean por API en cada corrida (email único).
@@ -200,6 +200,140 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .get(`${PREFIX}/professionals/${pro.id}`)
         .set(bearer(admin))
         .expect(200);
+    });
+  });
+
+  describe('Visibilidad pública: listados de postulantes', () => {
+    const ids = (res: any, wrap = false) =>
+      ((wrap ? unwrap(res.body).data : unwrap(res.body)) as any[]).map(
+        (p) => p.referenceId,
+      );
+    const setup = async () => {
+      const name = `Pend${uniqueSuffix()}`;
+      const skill = `skill-${uniqueSuffix()}`;
+      const user = await registerUser(http, 'vis', name);
+      const pro = unwrap(
+        (
+          await applyAsProfessional(http, user.token, categoryId, {
+            skills: [skill],
+          }).expect(201)
+        ).body,
+      );
+      await http
+        .post(`${PREFIX}/professionals/${pro.id}/availability`)
+        .set(bearer(user.token))
+        .send({ isAvailable: true })
+        .expect(201);
+      await http
+        .post(`${PREFIX}/professionals/${pro.id}/location`)
+        .set(bearer(user.token))
+        .send({ latitude: -25.4, longitude: -57.7 })
+        .expect(201);
+      return { name, skill, user, pro };
+    };
+    const listFor = (token: string, name: string) =>
+      http
+        .get(`${PREFIX}/professionals`)
+        .query({ search: name, pageSize: 100 })
+        .set(bearer(token));
+
+    // CP-BE-ONB-035
+    it.failing('DEF-BE-023: el listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente', async () => {
+      const { name, skill, pro } = await setup();
+      expect(ids(await listFor(clienteA, name), true)).not.toContain(
+        pro.referenceId,
+      );
+      const bySkills = await http
+        .get(`${PREFIX}/professionals/search/skills`)
+        .query({ skills: skill })
+        .set(bearer(clienteA));
+      expect(ids(bySkills, true)).not.toContain(pro.referenceId);
+      const nearby = await http
+        .get(`${PREFIX}/professionals/nearby`)
+        .query({ latitude: -25.4, longitude: -57.7, radius: 5 })
+        .set(bearer(clienteA));
+      expect(ids(nearby)).not.toContain(pro.referenceId);
+    });
+
+    // CP-BE-ONB-036
+    it.failing('DEF-BE-023: admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo', async () => {
+      const { name, user, pro } = await setup();
+      expect(ids(await listFor(admin, name), true)).toContain(pro.referenceId);
+      for (const token of [admin, user.token]) {
+        await http
+          .get(`${PREFIX}/professionals/${pro.id}`)
+          .set(bearer(token))
+          .expect(200);
+        await http
+          .get(`${PREFIX}/professionals/reference/${pro.referenceId}`)
+          .set(bearer(token))
+          .expect(200);
+        await http
+          .get(`${PREFIX}/professionals/${pro.id}/stats`)
+          .set(bearer(token))
+          .expect(200);
+        await http
+          .get(`${PREFIX}/professionals/${pro.id}/services`)
+          .set(bearer(token))
+          .expect(200);
+      }
+      // el cliente no ve ni stats ni servicios de un postulante
+      await http
+        .get(`${PREFIX}/professionals/${pro.id}/stats`)
+        .set(bearer(clienteA))
+        .expect(404);
+      await http
+        .get(`${PREFIX}/professionals/${pro.id}/services`)
+        .set(bearer(clienteA))
+        .expect(404);
+    });
+
+    // CP-BE-ONB-037
+    it.failing('DEF-BE-023: un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado)', async () => {
+      const approved = await setup();
+      const rejected = await setup();
+      const suspended = await setup();
+      for (const [x, body] of [
+        [approved, { isVerified: true }],
+        [rejected, { isVerified: false }],
+        [suspended, { isVerified: true }],
+      ] as const) {
+        await http
+          .post(`${PREFIX}/professionals/${x.pro.id}/verify`)
+          .set(bearer(admin))
+          .send(body)
+          .expect(201);
+      }
+      await http
+        .post(`${PREFIX}/professionals/${suspended.pro.id}/suspend`)
+        .set(bearer(admin))
+        .send({ reason: 'e2e' })
+        .expect(201);
+      await http
+        .get(`${PREFIX}/professionals/${approved.pro.id}`)
+        .set(bearer(clienteA))
+        .expect(200);
+      expect(
+        ids(await listFor(clienteA, approved.name), true),
+      ).toContain(approved.pro.referenceId);
+      for (const x of [rejected, suspended]) {
+        await http
+          .get(`${PREFIX}/professionals/${x.pro.id}`)
+          .set(bearer(clienteA))
+          .expect(404);
+        await http
+          .get(`${PREFIX}/professionals/reference/${x.pro.referenceId}`)
+          .set(bearer(clienteA))
+          .expect(404);
+        expect(ids(await listFor(clienteA, x.name), true)).not.toContain(
+          x.pro.referenceId,
+        );
+        // admin sigue viéndolos (el backoffice reutiliza estos endpoints)
+        await http
+          .get(`${PREFIX}/professionals/${x.pro.id}`)
+          .set(bearer(admin))
+          .expect(200);
+      }
     });
   });
 
