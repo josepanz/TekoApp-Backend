@@ -319,7 +319,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
   describe('Borrado de archivos', () => {
     // CP-BE-UPL-014
-    it.failing('DEF-BE-025: cliente_b no puede borrar un documento ajeno (403) y el archivo sigue ahí', async () => {
+    it('DEF-BE-025: cliente_b no puede borrar un documento ajeno (403) y el archivo sigue ahí', async () => {
       const d = await uploadDocument(pro.token, 'QUALIFICATION_CERTIFICATE');
       const res = await remove(clienteB, d.fileKey);
       expect(res.status).toBe(403);
@@ -329,7 +329,7 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     });
 
     // CP-BE-UPL-015
-    it.failing('DEF-BE-025: borrar una key no referenciada -> 404', async () => {
+    it('DEF-BE-025: borrar una key no referenciada -> 404', async () => {
       expect((await remove(clienteB, `${uniqueSuffix()}${uniqueSuffix()}.pdf`)).status).toBe(404);
     });
 

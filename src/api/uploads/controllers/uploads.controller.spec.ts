@@ -279,11 +279,27 @@ describe('UploadsController', () => {
       mockDeleteFile.mockResolvedValue(undefined);
 
       // Act
-      const result = await controller.deleteFile(param);
+      mockAssertCanDelete.mockResolvedValue(undefined);
+      const result = await controller.deleteFile(param, makeUser() as never);
 
       // Assert
+      expect(mockAssertCanDelete).toHaveBeenCalledWith(
+        'abc123.jpg',
+        makeUser(),
+      );
       expect(mockDeleteFile).toHaveBeenCalledWith('abc123.jpg');
       expect(result).toEqual({ message: 'Archivo eliminado exitosamente' });
+    });
+
+    it('DEF-BE-025: no borra el archivo si el usuario no es el dueño', async () => {
+      // Arrange
+      mockAssertCanDelete.mockRejectedValue(new ForbiddenException('no'));
+
+      // Act & Assert
+      await expect(
+        controller.deleteFile({ filename: 'abc123.jpg' }, makeUser(2) as never),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockDeleteFile).not.toHaveBeenCalled();
     });
   });
 });

@@ -132,7 +132,9 @@ export class UploadsController {
   @DeleteFileDocs()
   async deleteFile(
     @Param() param: UploadFileParamDTO,
+    @User() user: IUserDataOnJwt,
   ): Promise<{ message: string }> {
+    await this.uploadsAccessService.assertCanDelete(param.filename, user);
     await this.uploadsService.deleteFile(param.filename);
     return { message: t('uploads.FILE_DELETED') };
   }
