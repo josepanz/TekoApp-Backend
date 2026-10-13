@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 00:33 |
+| Fecha y hora | 2026-10-13 01:17 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w1-auth-catalogos` |
-| Commit | `29ef432` |
+| Commit | `dec067a` |
 | Entorno | compose e2e (docker-compose.e2e.yml, .env.e2e), Node v22.16.0, Docker 29.6.2, build dfc4efb |
 | Comando | `pnpm qa:e2e` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 5 (0 con fallo) | 119 | 119 | 0 | 0 | 38.4 s |
+| 5 (0 con fallo) | 121 | 121 | 0 | 0 | 27.6 s |
 
 ## 2. Resultados por caso
 
@@ -122,6 +122,8 @@
 | CP-BE-CAT-031 | `test/e2e-real/catalogos.e2e-real-spec.ts` | M2 Catálogos (e2e real) Paginación: pageSize enorme DEF-BE-009: GET /countries?pageSize=100000 debe dar 400 (tope 100) | passed |
 | CP-BE-CAT-032 | `test/e2e-real/catalogos.e2e-real-spec.ts` | M2 Catálogos (e2e real) Paginación: pageSize enorme DEF-BE-009: GET /users?pageSize=100000 (admin) debe dar 400 (tope 100) | passed |
 | CP-BE-CAT-033 | `test/e2e-real/catalogos.e2e-real-spec.ts` | M2 Catálogos (e2e real) Paginación: pageSize enorme DEF-BE-001: pageSize inválido (-1 / abc) debe dar 400/422 | passed |
+| CP-BE-CAT-034 | `test/e2e-real/catalogos.e2e-real-spec.ts` | M2 Catálogos (e2e real) Categorías: paginación admin y nombre vacío DEF-BE-012: GET /categories/all respeta page/pageSize y devuelve {data, pagination} | passed |
+| CP-BE-CAT-035 | `test/e2e-real/catalogos.e2e-real-spec.ts` | M2 Catálogos (e2e real) Categorías: paginación admin y nombre vacío DEF-BE-013: POST /categories con name vacío o solo espacios -> 400 | passed |
 | CP-BE-ERR-001 | `test/e2e-real/error-contract.e2e-real-spec.ts` | Contrato de error uniforme (e2e real) 400 (onboarding con passwords distintas): envelope {success:false, error:{code,message,timestamp,path}} | passed |
 | CP-BE-ERR-001 | `test/e2e-real/error-contract.e2e-real-spec.ts` | Contrato de error uniforme (e2e real) 401 (endpoint protegido sin token): envelope {success:false, error:{code,message,timestamp,path}} | passed |
 | CP-BE-ERR-001 | `test/e2e-real/error-contract.e2e-real-spec.ts` | Contrato de error uniforme (e2e real) 403 (cliente en endpoint admin): envelope {success:false, error:{code,message,timestamp,path}} | passed |
