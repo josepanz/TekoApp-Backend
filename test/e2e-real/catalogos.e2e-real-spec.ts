@@ -89,7 +89,7 @@ describe('M2 Catálogos (e2e real)', () => {
             .set(bearer(admin))
             .expect(200)
         ).body,
-      ) as any[];
+      ).data as any[];
       expect(all.map((c) => c.name)).toContain(cat.name);
     });
 
@@ -540,8 +540,10 @@ describe('M2 Catálogos (e2e real)', () => {
         .get(`${PREFIX}/categories/all?page=1&pageSize=2`)
         .set(bearer(admin))
         .expect(200);
-      expect(res.body.data).toHaveLength(2);
-      const { total, page, pageSize, totalPages } = res.body.pagination;
+      // envelope del repo: TransformInterceptor envuelve en `data` el {data, pagination} del service
+      const body = unwrap(res.body);
+      expect(body.data).toHaveLength(2);
+      const { total, page, pageSize, totalPages } = body.pagination;
       expect(total).toBeGreaterThanOrEqual(3);
       expect(page).toBe(1);
       expect(pageSize).toBe(2);
@@ -550,7 +552,7 @@ describe('M2 Catálogos (e2e real)', () => {
         .get(`${PREFIX}/categories/all?page=${totalPages}&pageSize=2`)
         .set(bearer(admin))
         .expect(200);
-      expect(last.body.data.length).toBe(total - (totalPages - 1) * 2);
+      expect(unwrap(last.body).data.length).toBe(total - (totalPages - 1) * 2);
       // pageSize > 100 se rechaza
       await http
         .get(`${PREFIX}/categories/all?pageSize=101`)
