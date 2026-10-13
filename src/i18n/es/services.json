@@ -33,5 +33,6 @@
   "UNAUTHORIZED_CANCEL": "No tienes permisos para cancelar este servicio",
   "UNAUTHORIZED_UPDATE": "No tienes permisos para modificar este servicio",
   "USER_NOT_FOUND": "Usuario no encontrado",
+  "PROFESSIONAL_NOT_APPROVED": "Tu perfil profesional todavía no está aprobado o está suspendido",
   "USER_NOT_PROFESSIONAL": "Usuario no es un profesional"
 }

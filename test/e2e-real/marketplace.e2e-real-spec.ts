@@ -460,7 +460,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-031
-    it.failing('DEF-BE-022: un profesional PENDING o SUSPENDIDO no puede aceptar ni ofertar (403)', async () => {
+    it('DEF-BE-022: un profesional PENDING o SUSPENDIDO no puede aceptar ni ofertar (403)', async () => {
       const pending = await registerUser(http, 'pend');
       await applyAsProfessional(http, pending.token, categoryId).expect(201);
       const suspended = await createApprovedPro(http, admin, categoryId);

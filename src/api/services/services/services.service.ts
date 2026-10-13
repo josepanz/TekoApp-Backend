@@ -5,7 +5,12 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { Prisma, ServiceStatus, RequestStatus } from '@prisma/client';
+import {
+  Prisma,
+  ProfessionalStatus,
+  ServiceStatus,
+  RequestStatus,
+} from '@prisma/client';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { ServiceProgressDbService } from '@modules/service-progress-db/services/service-progress-db.service';
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
@@ -60,6 +65,22 @@ export class ServicesService {
     const service = await this.db.findServiceByReferenceId(referenceId);
     if (!service) throw new NotFoundException(t('services.NOT_FOUND'));
     return service;
+  }
+
+  /**
+   * Solo un profesional APPROVED y activo puede aceptar o ofertar: sin este chequeo un profesional
+   * PENDING, rechazado o suspendido (DEF-BE-022) seguía operando en el marketplace.
+   */
+  private assertProfessionalCanOperate(professional: {
+    status: ProfessionalStatus;
+    isActive: boolean;
+  }): void {
+    if (
+      professional.status !== ProfessionalStatus.APPROVED ||
+      !professional.isActive
+    ) {
+      throw new ForbiddenException(t('services.PROFESSIONAL_NOT_APPROVED'));
+    }
   }
 
   async createService(
@@ -271,6 +292,7 @@ export class ServicesService {
     const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional)
       throw new ForbiddenException(t('services.USER_NOT_PROFESSIONAL'));
+    this.assertProfessionalCanOperate(professional);
 
     const updatedCount = await this.db.updateServiceConditional(
       service.id,
@@ -408,6 +430,7 @@ export class ServicesService {
     const professional = await this.db.findProfessionalByUserId(userId);
     if (!professional)
       throw new ForbiddenException(t('services.USER_NOT_PROFESSIONAL'));
+    this.assertProfessionalCanOperate(professional);
 
     const existing = await this.db.findDuplicateRequest(
       service.id,

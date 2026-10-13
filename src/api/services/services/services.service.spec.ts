@@ -5,7 +5,11 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { ServiceStatus, RequestStatus } from '@prisma/client';
+import {
+  ProfessionalStatus,
+  ServiceStatus,
+  RequestStatus,
+} from '@prisma/client';
 import { ServicesService } from './services.service';
 import { ServicesDbService } from '@modules/services-db/services/services-db.service';
 import { ServiceProgressDbService } from '@modules/service-progress-db/services/service-progress-db.service';
@@ -52,7 +56,12 @@ const mockService = {
   category: { requiresProgressLog: false },
 };
 
-const mockProfessional = { id: 5, userId: 10 };
+const mockProfessional = {
+  id: 5,
+  userId: 10,
+  status: ProfessionalStatus.APPROVED,
+  isActive: true,
+};
 const mockCategory = { id: 2, name: 'Plomería' };
 
 describe('ServicesService', () => {
@@ -439,6 +448,48 @@ describe('ServicesService', () => {
       );
     });
 
+    it.each([
+      ProfessionalStatus.PENDING,
+      ProfessionalStatus.REJECTED,
+      ProfessionalStatus.SUSPENDED,
+    ])(
+      'DEF-BE-022: debe lanzar ForbiddenException si el profesional está %s, sin tocar el servicio',
+      async (status) => {
+        // Arrange
+        mockFindServiceByReferenceId.mockResolvedValue({
+          ...mockService,
+          status: ServiceStatus.PENDING,
+        });
+        mockFindProfessionalByUserId.mockResolvedValue({
+          ...mockProfessional,
+          status,
+        });
+
+        // Act & Assert
+        await expect(service.acceptService(SERVICE_REF, 10)).rejects.toThrow(
+          ForbiddenException,
+        );
+        expect(mockUpdateServiceConditional).not.toHaveBeenCalled();
+      },
+    );
+
+    it('DEF-BE-022: debe lanzar ForbiddenException si el profesional está inactivo', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        status: ServiceStatus.PENDING,
+      });
+      mockFindProfessionalByUserId.mockResolvedValue({
+        ...mockProfessional,
+        isActive: false,
+      });
+
+      // Act & Assert
+      await expect(service.acceptService(SERVICE_REF, 10)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
     it('debe lanzar ConflictException cuando el servicio no está en estado PENDING', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue({
@@ -723,6 +774,21 @@ describe('ServicesService', () => {
   });
 
   describe('createServiceRequest', () => {
+    it('DEF-BE-022: debe lanzar ForbiddenException si el profesional no está APPROVED, sin crear la solicitud', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue({
+        ...mockProfessional,
+        status: ProfessionalStatus.SUSPENDED,
+      });
+
+      // Act & Assert
+      await expect(
+        service.createServiceRequest(SERVICE_REF, {}, 10),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockCreateServiceRequest).not.toHaveBeenCalled();
+    });
+
     it('debe crear la solicitud de servicio (usando la PK interna del servicio) cuando el profesional no ha enviado una antes', async () => {
       // Arrange
       mockFindServiceByReferenceId.mockResolvedValue(mockService);
