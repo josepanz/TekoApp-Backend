@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 07:35 |
+| Fecha y hora | 2026-10-13 08:01 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w2-onboarding-marketplace` |
-| Commit | `4cc9975` (árbol con cambios sin commitear) |
+| Commit | `8420fa2` (árbol con cambios sin commitear) |
 | Entorno | compose e2e (docker-compose.e2e.yml, .env.e2e), Node v22.16.0, Docker 29.6.2, build dfc4efb |
 | Comando | `pnpm qa:e2e` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 7 (0 con fallo) | 193 | 193 | 0 | 0 | 1 min 4 s |
+| 8 (0 con fallo) | 214 | 214 | 0 | 0 | 1 min 21 s |
 
 ## 2. Resultados por caso
 
@@ -180,6 +180,9 @@
 | CP-BE-ONB-005 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Postulación POST /professionals sin JWT -> 401 | passed |
 | CP-BE-ONB-006 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Postulación POST /professionals un usuario sin perfil profesional recibe 404 en GET /professionals/me | passed |
 | CP-BE-ONB-034 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Visibilidad pública de postulantes DEF-BE-023: un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId) | passed |
+| CP-BE-ONB-035 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Visibilidad pública: listados de postulantes DEF-BE-023: el listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente | passed |
+| CP-BE-ONB-036 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Visibilidad pública: listados de postulantes DEF-BE-023: admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo | passed |
+| CP-BE-ONB-037 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Visibilidad pública: listados de postulantes DEF-BE-023: un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado) | passed |
 | CP-BE-ONB-007 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Consentimiento previo a subir documentos DEF-BE-014: las versiones legales activas aparecen como pendientes para un usuario nuevo | passed |
 | CP-BE-ONB-008 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Consentimiento previo a subir documentos sin DATA_PROCESSING_CONSENT subir un documento da 403 CONSENT_REQUIRED; tras aceptarlo funciona | passed |
 | CP-BE-ONB-009 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Consentimiento previo a subir documentos aceptar dos veces la misma versión -> 409 y deja de figurar como pendiente | passed |
@@ -213,6 +216,24 @@
 | CP-BE-AUTH-004 | `test/e2e-real/smoke.e2e-real-spec.ts` | Smoke E2E real nonce + RSA -> login admin -> /auth/scope | passed |
 | CP-BE-AUTH-005 | `test/e2e-real/smoke.e2e-real-spec.ts` | Smoke E2E real endpoint protegido sin token -> 401 | passed |
 | CP-BE-AUTH-006 | `test/e2e-real/smoke.e2e-real-spec.ts` | Smoke E2E real usuario sin permiso -> 403 en endpoint de staff | passed |
+| CP-BE-UPL-001 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Documentos de identidad del profesional DEF-BE-024: cliente_b no puede obtener el URL presignado de un documento de un profesional ni descargar sus bytes | passed |
+| CP-BE-UPL-002 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Documentos de identidad del profesional DEF-BE-024: otro profesional tampoco puede; el dueño y el admin sí, con los mismos bytes | passed |
+| CP-BE-UPL-003 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Documentos de identidad del profesional DEF-BE-024: un documento aprobado y visible al cliente lo ve cualquier autenticado; uno aprobado no visible, no | passed |
+| CP-BE-UPL-004 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Documentos de identidad del profesional DEF-BE-024: GET /uploads/info/:filename aplica la misma regla | passed |
+| CP-BE-UPL-005 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Portafolio DEF-BE-024: una foto PENDING u oculta (isVisible:false) solo la ven el dueño y el admin | passed |
+| CP-BE-UPL-006 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Portafolio una foto aprobada y visible la ve cualquier usuario autenticado y los bytes se descargan | passed |
+| CP-BE-UPL-007 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Avatar, claves no referenciadas, TTL y sin JWT el avatar de un usuario lo ve cualquier autenticado | passed |
+| CP-BE-UPL-008 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Avatar, claves no referenciadas, TTL y sin JWT DEF-BE-024: una key que ninguna fila referencia (inventada o recién subida sin guardar) -> 404 | passed |
+| CP-BE-UPL-009 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Avatar, claves no referenciadas, TTL y sin JWT DEF-BE-024: el URL presignado expira en 5 minutos como máximo | passed |
+| CP-BE-UPL-010 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Avatar, claves no referenciadas, TTL y sin JWT sin JWT o sin key -> 401 / 400 | passed |
+| CP-BE-UPL-011 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Fotos de servicio y de bitácora DEF-BE-024: la foto de un servicio PENDING la ven el cliente, un profesional aprobado y el admin; no un tercero | passed |
+| CP-BE-UPL-012 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Fotos de servicio y de bitácora DEF-BE-024: tras asignarse, la foto del servicio y las de la bitácora solo las ven el cliente, el profesional asignado y el admin | passed |
+| CP-BE-UPL-013 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Fotos de servicio y de bitácora DEF-BE-024: adjuntar la key de un documento ajeno a una entrada de bitácora no da acceso a ese documento | passed |
+| CP-BE-UPL-014 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Borrado de archivos DEF-BE-025: cliente_b no puede borrar un documento ajeno (403) y el archivo sigue ahí | passed |
+| CP-BE-UPL-015 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Borrado de archivos DEF-BE-025: borrar una key no referenciada -> 404 | passed |
+| CP-BE-UPL-016 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Borrado de archivos el dueño y el admin pueden borrar el archivo | passed |
+| CP-BE-UPL-017 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Auditoría de IDOR en /services/:id/progress y /budget-options (regresión) bitácora: un tercero (cliente_b, otro profesional) no puede leer ni escribir; el dueño, el asignado y el admin leen | passed |
+| CP-BE-UPL-018 | `test/e2e-real/uploads-presigned.e2e-real-spec.ts` | Autorización de archivos S3 (e2e real) Auditoría de IDOR en /services/:id/progress y /budget-options (regresión) presupuestos: un tercero no puede leer, reemplazar ni elegir opciones; solo el autor edita y solo el cliente dueño elige | passed |
 
 ### Casos fallidos u omitidos
 
@@ -233,21 +254,25 @@ Detectados por los specs W2 (cada uno se escribió primero como `it.failing`, se
 | DEF-BE-020 | Medio | CP-BE-MKT-017 | Rechazar una oferta ya aceptada -> 200: la oferta quedaba REJECTED y el servicio ACCEPTED con ese profesional. | Corregido (8742cb6): 409 |
 | DEF-BE-021 | Crítico | CP-BE-MKT-025, 026, 032 | cliente_b: `GET /services/:id` (dirección y coordenadas), `GET /services/:id/requests` (precios y mensajes) y `GET /services` de cliente_a -> 200. | Corregido (5a38afb): 403 |
 | DEF-BE-022 | Alto | CP-BE-MKT-031 | Un profesional PENDING, rechazado o suspendido podía aceptar un servicio u ofertar. | Corregido (fce2887): 403 |
-| DEF-BE-023 | Medio | CP-BE-ONB-034 | `GET /professionals/:id` y `/reference/:ref` devuelven a cualquier cliente el perfil de un postulante PENDING (y el listado `GET /professionals` no filtra por estado). | **ABIERTO** (`it.failing`): el endpoint lo reutiliza el backoffice de Web; arreglarlo bien exige filtrar por rol en 6 consultas (list, nearby, skills, top-rated, id, referenceId) y decidir qué ve cada rol |
+| DEF-BE-023 | Medio | CP-BE-ONB-034..037 | `GET /professionals`, `/nearby`, `/search/skills`, `/top-rated`, `/:id`, `/reference/:ref`, `/:id/stats` y `/:id/services` devolvían postulantes PENDING, rechazados y suspendidos a cualquier cliente. | Corregido (8420fa2): un cliente solo ve APPROVED y activos (404 en los lookups); admin, gestores y el propio profesional ven todo |
+| DEF-BE-024 | Crítico | CP-BE-UPL-001..005, 008, 009, 011..013 | cliente_b pide `GET /uploads/presigned-url?key=<fileKey de un documento de identidad ajeno>` y descarga los bytes reales del MinIO; `info/:filename` igual; el URL duraba 900 s. | Corregido (a4050d5): autorización por dueño resuelto desde la DB, 404 sin registro, TTL <= 300 s |
+| DEF-BE-025 | Alto | CP-BE-UPL-014, 015 | cliente_b `DELETE /uploads/:fileKey` borra el documento de otro usuario (200). | Corregido (59382c1): solo dueño o admin |
+
+Auditoría de IDOR en `/services/:id/progress` y `/budget-options` (lectura y escritura): **sin defectos**, casos de regresión CP-BE-UPL-017 y 018.
 
 ## 4. Desvíos y observaciones
 
-- **Estabilidad:** la suite completa corrió 3 veces seguidas con `pnpm test:e2e:real` (193/193 en las tres, ~70 s cada una) y una cuarta
-  desde cero con este `pnpm qa:e2e` (stack nuevo, 193/193). Las tres variantes de concurrencia (CP-BE-MKT-022..024) dieron 20/20 en todas las
+- **Estabilidad:** la suite completa corrió 3 veces seguidas con `pnpm test:e2e:real` (214/214 en las tres, ~75 s cada una) y una cuarta
+  desde cero con este `pnpm qa:e2e` (stack nuevo). Las tres variantes de concurrencia (CP-BE-MKT-022..024) dieron 20/20 en todas las
   corridas. Sin flakies, timeouts ni omitidos.
 - **Arnés:** el SDK de S3 falla dentro de Jest sin `--experimental-vm-modules` (500 al subir a MinIO); el CLI lo agrega solo (`scripts/e2e/cli.ts`).
 - **Job de expiración:** se invoca `ProfessionalDocumentsExpirationJob.run()` directo (CP-BE-ONB-020); el disparo por cron de las 3 AM queda como caso manual.
 - **WebSocket:** `subscribeToProfessional` no se prueba por socket (no hay `socket.io-client` en el repo); se probó la misma regla por REST
   (`GET /locations/professional/:id`, CP-BE-MKT-035..038) y la cubre `locations.gateway.spec.ts`. Caso manual documentado en CP-MKT.md.
-- **Observaciones fuera de alcance (no corregidas):** `GET /uploads/presigned-url?key=` firma cualquier clave para cualquier usuario autenticado
-  (revisar en M9); `GET /services/:id/progress` y `/requests/:requestId/budget-options` deben auditarse por IDOR en W3/W4; las respuestas de
-  profesional incluyen `checksum`, `changeSignature` y `createdBy` internos.
-- El campo "Commit" del encabezado dice "árbol con cambios sin commitear" solo porque este informe aún no estaba versionado al generarse.
+- **Observaciones no corregidas:** las respuestas de profesional incluyen `checksum`, `changeSignature` y `createdBy` internos; el admin no puede
+  leer las opciones de presupuesto (decisión de producto para M5); un profesional suspendido a mitad de servicio deja de ser visible para su
+  cliente (404) y las claves `merchant-docs` no se pueden pedir (flujo sin uso). Ver CP-UPL.md ("No cubierto").
+- El campo "Commit" del encabezado puede decir "árbol con cambios sin commitear" solo porque los informes aún no estaban versionados al generarse.
 
 ## 5. Evidencia
 
@@ -255,4 +280,4 @@ Detectados por los specs W2 (cada uno se escribió primero como `it.failing`, se
 
 ## 6. Veredicto
 
-**APROBADO CON OBSERVACIONES.** 193/193 casos pasan (72 son de W2: 34 de M3 y 38 de M4, 1 de ellos `it.failing` por DEF-BE-023 abierto), 4 corridas consecutivas sin fallos y concurrencia 20/20. Observación: DEF-BE-023 abierto (Medio) y los puntos de la sección 4.
+**APROBADO.** 214/214 casos pasan (93 son de W2: 37 de M3, 38 de M4 y 18 de archivos/auditoría), 4 corridas consecutivas sin fallos, concurrencia 20/20 y sin defectos abiertos. Las observaciones de la sección 4 no bloquean.

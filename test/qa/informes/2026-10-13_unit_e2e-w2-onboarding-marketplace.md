@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 07:26 |
+| Fecha y hora | 2026-10-13 07:59 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w2-onboarding-marketplace` |
-| Commit | `2261c02` |
+| Commit | `8420fa2` (árbol con cambios sin commitear) |
 | Entorno | local, Jest con mocks (sin infraestructura), Node v22.16.0 |
 | Comando | `pnpm qa:unit` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,16 +14,16 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 144 (0 con fallo) | 1625 | 1625 | 0 | 0 | 26.4 s |
+| 145 (0 con fallo) | 1642 | 1642 | 0 | 0 | 21.7 s |
 
 ### Cobertura
 
 | Métrica | Cobertura | Cubiertos/Total | Umbral (jest.config.ts) | Estado |
 |---|---|---|---|---|
-| statements | 82.28% | 5877/7142 | 80% | cumple |
-| branches | 67.29% | 3245/4822 | 70% | INCUMPLE |
-| functions | 76.32% | 1315/1723 | 80% | INCUMPLE |
-| lines | 82.19% | 5347/6505 | 80% | cumple |
+| statements | 82.11% | 5936/7229 | 80% | cumple |
+| branches | 67.17% | 3305/4920 | 70% | INCUMPLE |
+| functions | 76.38% | 1326/1736 | 80% | INCUMPLE |
+| lines | 82% | 5397/6581 | 80% | cumple |
 
 ## 2. Resultados por suite (agrupadas por dominio)
 
@@ -53,7 +53,7 @@
 | `src/api/professional-document-types` | 1 | 6 | 0 | 0 |
 | `src/api/professional-documents` | 3 | 29 | 0 | 0 |
 | `src/api/professional-portfolio` | 2 | 27 | 0 | 0 |
-| `src/api/professionals` | 3 | 53 | 0 | 0 |
+| `src/api/professionals` | 3 | 57 | 0 | 0 |
 | `src/api/promotions` | 2 | 26 | 0 | 0 |
 | `src/api/ratings` | 3 | 66 | 0 | 0 |
 | `src/api/roles-permission` | 3 | 34 | 0 | 0 |
@@ -62,7 +62,7 @@
 | `src/api/services` | 3 | 85 | 0 | 0 |
 | `src/api/tax` | 2 | 6 | 0 | 0 |
 | `src/api/tips` | 3 | 16 | 0 | 0 |
-| `src/api/uploads` | 2 | 33 | 0 | 0 |
+| `src/api/uploads` | 3 | 46 | 0 | 0 |
 | `src/api/users` | 2 | 23 | 0 | 0 |
 | `src/app.module.spec.ts` | 1 | 6 | 0 | 0 |
 | `src/common` | 4 | 31 | 0 | 0 |
@@ -276,7 +276,7 @@
 |---|---|---|---|---|---|
 | `src/api/professionals/controllers/admin-professionals-export.controller.spec.ts` | 2 | 2 | 0 | 0 | OK |
 | `src/api/professionals/controllers/professionals.controller.spec.ts` | 22 | 22 | 0 | 0 | OK |
-| `src/api/professionals/services/professionals.service.spec.ts` | 29 | 29 | 0 | 0 | OK |
+| `src/api/professionals/services/professionals.service.spec.ts` | 33 | 33 | 0 | 0 | OK |
 
 #### `src/api/promotions`
 
@@ -340,7 +340,8 @@
 
 | Suite (spec) | Casos | Pasaron | Fallaron | Omitidos | Estado |
 |---|---|---|---|---|---|
-| `src/api/uploads/controllers/uploads.controller.spec.ts` | 11 | 11 | 0 | 0 | OK |
+| `src/api/uploads/controllers/uploads.controller.spec.ts` | 14 | 14 | 0 | 0 | OK |
+| `src/api/uploads/services/uploads-access.service.spec.ts` | 10 | 10 | 0 | 0 | OK |
 | `src/api/uploads/services/uploads.service.spec.ts` | 22 | 22 | 0 | 0 | OK |
 
 #### `src/api/users`
@@ -639,13 +640,18 @@ se registran los tests unitarios agregados o ajustados al corregirlos:
 | DEF-BE-020 | `services.service.spec.ts`: responder una oferta ya ACCEPTED/REJECTED lanza `ConflictException` sin tocarla |
 | DEF-BE-021 | `services.service.spec.ts` y `services.controller.spec.ts`: autorización de lectura de detalle, ofertas y listados |
 | DEF-BE-022 | `services.service.spec.ts`: PENDING/REJECTED/SUSPENDED/inactivo no aceptan ni ofertan |
+| DEF-BE-023 | `professionals.service.spec.ts` y `professionals.controller.spec.ts`: visibilidad por estado y por rol (admin, gestor, el propio profesional) |
+| DEF-BE-024 | `uploads-access.service.spec.ts` (nuevo, 12 casos) y `uploads.controller.spec.ts`: la key se autoriza antes de firmar |
+| DEF-BE-025 | `uploads.controller.spec.ts`: no se borra si `assertCanDelete` rechaza |
 
 ## 4. Desvíos y observaciones
 
-- Sin flakies, timeouts ni omitidos: 144 suites, 1625 casos (1603 en la línea base de develop + 22 agregados por W2).
-- **Cobertura global bajo el umbral de `jest.config.ts` en branches (67,3 % vs 70 %) y functions (76,3 % vs 80 %):** es el mismo
-  incumplimiento que ya tenía la rama base (W1: 67,17 % / 76,32 %); W2 no lo empeora (branches sube 0,1 punto). Por eso
-  `pnpm qa:unit` sale con código 1 aunque todos los tests pasan. `pnpm test` (sin cobertura) sale con 0. No se tocó el umbral.
+- Sin flakies persistentes, timeouts ni omitidos: 145 suites, 1642 casos (1603 en la línea base de develop + 39 agregados por W2).
+- **Un flaky aislado:** en una corrida de `pnpm test` falló `src/common/i18n/i18n.helper.spec.ts` (4 casos, "Test suite failed to run");
+  no se reprodujo en 3 corridas posteriores ni aislado. No se tocó.
+- **Cobertura global bajo el umbral de `jest.config.ts` en branches (67,17 % vs 70 %) y functions (76,38 % vs 80 %):** es el mismo
+  incumplimiento que ya tenía la rama base (W1: 67,17 % / 76,32 %); W2 no lo empeora. Por eso `pnpm qa:unit` sale con código 1 aunque
+  todos los tests pasan. `pnpm test` (sin cobertura) sale con 0. No se tocó el umbral.
 
 ## 5. Evidencia
 
@@ -653,4 +659,4 @@ se registran los tests unitarios agregados o ajustados al corregirlos:
 
 ## 6. Veredicto
 
-**APROBADO CON OBSERVACIONES.** 1625/1625 casos pasan, 0 fallos y 0 omitidos; la observación es el umbral de cobertura heredado (ver sección 4).
+**APROBADO CON OBSERVACIONES.** 1642/1642 casos pasan, 0 fallos y 0 omitidos; las observaciones son el umbral de cobertura heredado y el flaky aislado de i18n (sección 4).

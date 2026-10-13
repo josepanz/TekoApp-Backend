@@ -7,7 +7,7 @@
  * Precondiciones: pnpm e2e:up + e2e:seed (versiones legales sembradas con countryId null); fixtures admin y
  *        cliente_a. Los usuarios/profesionales se crean por API en cada corrida (email único).
  * Trazabilidad: M3 del plan maestro (TEKOAPP-E2E-MASTER-PLAN.md §3); openspec/specs/e2e-test-plan.md Tier 3;
- *        DEF-BE-014..018 y DEF-BE-023 (abierto).
+ *        DEF-BE-014..018 y DEF-BE-023.
  */
 import { PrismaClient } from '@prisma/client';
 import { ProfessionalDocumentsExpirationJob } from '../../src/api/professional-documents/jobs/professional-documents-expiration.job';

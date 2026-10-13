@@ -1,6 +1,6 @@
 # CP-ONB — M3 Onboarding profesional (Backend)
 
-Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-001..034 de la ola W2 (Tier 3 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal; DEF-BE-023 sigue abierto y su test es `it.failing` (pasa mientras el defecto exista; hay que quitar `.failing` al corregirlo).
+Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-001..037 de la ola W2 (Tier 3 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal; DEF-BE-023 también quedó corregido.
 
 ## Decisiones y casos no automatizables
 
@@ -8,7 +8,8 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 - **Arnés Jest:** el SDK de S3 usa `import()` dinámico, que dentro de la VM de Jest falla con `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG` (500 al subir). `pnpm test:e2e:real` agrega `--experimental-vm-modules` (`scripts/e2e/cli.ts`). Es una limitación del arnés; la app corre en Node normal.
 - **Job de expiración:** `ProfessionalDocumentsExpirationJob.run()` es público y se invoca directo con `app.get(...)`; el test vence un documento en la DB y verifica EXPIRED y el recálculo (CP-BE-ONB-020). El disparo por cron (`EVERY_DAY_AT_3AM`) no se prueba: caso manual, ejecutar con `NODE_ENV` normal y comprobar el log "Venciendo N documento(s)".
 - **Consentimiento:** los consentimientos solo consideran versiones `countryId: null` (los usuarios no tienen país). Antes del fix de DEF-BE-014 el seed las creaba con país y nadie podía aceptarlas.
-- **Brecha conocida:** el listado público `GET /professionals` y los lookups por id/referenceId no filtran por estado ni distinguen admin (DEF-BE-023, abierto, requiere decisión de alcance con Web admin que reutiliza el endpoint). `GET /uploads/presigned-url?key=` firma cualquier `key` para cualquier usuario autenticado: observación pendiente para M9 (cumplimiento).
+- **Visibilidad (DEF-BE-023):** un cliente solo ve profesionales APPROVED y activos; admin y quien tenga `professionals.verification:manage` ven todos y el propio profesional se ve a sí mismo. El backoffice de Web (`features/professionals`) usa `GET /professionals`, `/professionals/reference/:ref`, `verify` y `suspend` con sesión admin y no cambia. Caso no cubierto: un profesional suspendido a mitad de un servicio deja de ser visible para su cliente (404).
+- **Archivos:** la autorización de `GET /uploads/presigned-url`, `info` y `DELETE` está en `CP-UPL.md`.
 - **Datos que cambian de forma observable pero no se prueban acá:** notificaciones de revisión/verify/suspend (M11).
 
 
@@ -507,20 +508,65 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 | Resultado esperado | 400 y el item sigue PENDING. |
 | Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-016: rechazar un item de portafolio con motivo vacío o solo espacios -> 400 y sigue PENDING` |
 
-### CP-BE-ONB-034 — Un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId) [DEF-BE-023: ABIERTO (it.failing)]
+### CP-BE-ONB-034 — Un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId) [DEF-BE-023: Corregido (8420fa2)]
 
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-ONB-034 |
-| Título | Un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId) [DEF-BE-023: ABIERTO (it.failing)] |
+| Título | Un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId) [DEF-BE-023: Corregido (8420fa2)] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P2 |
 | Trazabilidad | M3 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 3; DEF-BE-023 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
-| Pasos | cliente_a consulta `GET /professionals/:id` y `/professionals/reference/:ref` de un postulante PENDING. |
+| Pasos | cliente_a consulta `GET /professionals/:id` y `/professionals/reference/:ref` de un postulante PENDING; el admin hace lo mismo. |
 | Datos de prueba | — |
-| Resultado esperado | Esperado 404 para no-admin (admin 200). Hoy 200: DEF-BE-023 abierto. |
+| Resultado esperado | 404 para cliente y 200 para admin (antes: 200 para todos). |
 | Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-023: un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId)` |
+
+### CP-BE-ONB-035 — El listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente [DEF-BE-023: Corregido (8420fa2)]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-035 |
+| Título | El listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente [DEF-BE-023: Corregido (8420fa2)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 3; DEF-BE-023 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Un postulante PENDING (disponible, con posición y skill única) no debe aparecer para cliente_a en `GET /professionals?search=`, `/professionals/search/skills` ni `/professionals/nearby`. |
+| Datos de prueba | nombre y skill únicos |
+| Resultado esperado | Ausente en los tres listados. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-023: el listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente` |
+
+### CP-BE-ONB-036 — Admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo [DEF-BE-023: Corregido (8420fa2)]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-036 |
+| Título | Admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo [DEF-BE-023: Corregido (8420fa2)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 3; DEF-BE-023 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Admin y el propio postulante piden lista, id, referenceId, stats y services; cliente_a pide stats y services. |
+| Datos de prueba | — |
+| Resultado esperado | 200 para admin y para el dueño; 404 para el cliente en stats y services. |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-023: admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo` |
+
+### CP-BE-ONB-037 — Un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado) [DEF-BE-023: Corregido (8420fa2)]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-037 |
+| Título | Un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado) [DEF-BE-023: Corregido (8420fa2)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 3; DEF-BE-023 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Verificar uno, rechazar otro y suspender un tercero; cliente_a consulta id, referenceId y listado; admin consulta los ocultos. |
+| Datos de prueba | — |
+| Resultado esperado | APPROVED 200 y en el listado; REJECTED/SUSPENDED 404 y fuera del listado; el admin los sigue viendo (backoffice Web). |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-023: un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado)` |
 
 ## Estado de defectos (rama test/e2e-w2-onboarding-marketplace)
 
@@ -531,4 +577,4 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 | DEF-BE-016 | Medio | CP-BE-ONB-031, 033 | Corregido (21ba467): rechazo de documentos y portafolio exige motivo no vacío |
 | DEF-BE-017 | Bajo | CP-BE-ONB-032 | Corregido (0f5ceb6): suspensión exige motivo no vacío |
 | DEF-BE-018 | Alto | CP-BE-ONB-024 | Corregido (8aa44de): `/locations/nearby` daba 500 (HAVING sin GROUP BY) |
-| DEF-BE-023 | Medio | CP-BE-ONB-034 | ABIERTO: `GET /professionals/:id` y `/reference/:ref` exponen postulantes PENDING a cualquier cliente |
+| DEF-BE-023 | Medio | CP-BE-ONB-034..037 | Corregido (8420fa2): lista, cercanos, skills, top-rated, id, referenceId, stats y services ocultan no aprobados a clientes |
