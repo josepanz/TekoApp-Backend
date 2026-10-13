@@ -73,6 +73,7 @@ export class ProfessionalsDbService {
     const where: Prisma.ProfessionalsWhereInput = { isActive: true };
 
     if (filters.categoryId) where.categoryId = filters.categoryId;
+    if (filters.onlyApproved) where.status = ProfessionalStatus.APPROVED;
     if (filters.isAvailable !== undefined)
       where.isAvailable = filters.isAvailable;
     if (filters.minRating) where.averageRating = { gte: filters.minRating };
@@ -154,6 +155,7 @@ export class ProfessionalsDbService {
     longitude: number,
     radius = 10,
     categoryId?: number,
+    onlyApproved = false,
   ): Promise<ProfessionalWithRelations[]> {
     const latRange = radius / 111;
     const lngRange = radius / (111 * Math.cos((latitude * Math.PI) / 180));
@@ -161,6 +163,7 @@ export class ProfessionalsDbService {
     const where: Prisma.ProfessionalsWhereInput = {
       isAvailable: true,
       isActive: true,
+      ...(onlyApproved && { status: ProfessionalStatus.APPROVED }),
       currentLatitude: { gte: latitude - latRange, lte: latitude + latRange },
       currentLongitude: {
         gte: longitude - lngRange,
@@ -332,6 +335,7 @@ export class ProfessionalsDbService {
   async searchBySkills(
     skills: string[],
     query: PaginationQueryDTO & Record<string, unknown>,
+    onlyApproved = false,
   ): Promise<{
     data: ProfessionalWithRelations[];
     pagination: PaginationResponseDTO;
@@ -339,6 +343,7 @@ export class ProfessionalsDbService {
     const where: Prisma.ProfessionalsWhereInput = {
       isActive: true,
       skills: { hasSome: skills },
+      ...(onlyApproved && { status: ProfessionalStatus.APPROVED }),
     };
 
     return PrismaPaginationUtil.paginate<ProfessionalWithRelations>(
@@ -356,10 +361,12 @@ export class ProfessionalsDbService {
   async getTopRated(
     categoryId?: number,
     limit = 10,
+    onlyApproved = false,
   ): Promise<ProfessionalWithRelations[]> {
     const where: Prisma.ProfessionalsWhereInput = {
       isActive: true,
       averageRating: { gt: 0 },
+      ...(onlyApproved && { status: ProfessionalStatus.APPROVED }),
     };
     if (categoryId) where.categoryId = categoryId;
 

@@ -120,11 +120,11 @@ describe('ProfessionalsController', () => {
       mockGetProfessionals.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getProfessionals(query);
+      const result = await controller.getProfessionals(query, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetProfessionals).toHaveBeenCalledWith(query);
+      expect(mockGetProfessionals).toHaveBeenCalledWith(query, mockUser);
     });
   });
 
@@ -140,11 +140,11 @@ describe('ProfessionalsController', () => {
       mockGetNearbyProfessionals.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getNearbyProfessionals(query);
+      const result = await controller.getNearbyProfessionals(query, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetNearbyProfessionals).toHaveBeenCalledWith(query);
+      expect(mockGetNearbyProfessionals).toHaveBeenCalledWith(query, mockUser);
     });
   });
 
@@ -161,11 +161,11 @@ describe('ProfessionalsController', () => {
       mockSearchBySkills.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.searchBySkills(query);
+      const result = await controller.searchBySkills(query, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockSearchBySkills).toHaveBeenCalledWith(query);
+      expect(mockSearchBySkills).toHaveBeenCalledWith(query, mockUser);
     });
   });
 
@@ -177,11 +177,14 @@ describe('ProfessionalsController', () => {
       mockGetTopRatedProfessionals.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getTopRatedProfessionals(query);
+      const result = await controller.getTopRatedProfessionals(query, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetTopRatedProfessionals).toHaveBeenCalledWith(query);
+      expect(mockGetTopRatedProfessionals).toHaveBeenCalledWith(
+        query,
+        mockUser,
+      );
     });
   });
 
@@ -192,11 +195,11 @@ describe('ProfessionalsController', () => {
       mockGetProfessionalById.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getProfessionalById(mockParam);
+      const result = await controller.getProfessionalById(mockParam, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetProfessionalById).toHaveBeenCalledWith(10);
+      expect(mockGetProfessionalById).toHaveBeenCalledWith(10, mockUser);
     });
 
     it('debe propagar NotFoundException si el profesional no existe', async () => {
@@ -206,9 +209,9 @@ describe('ProfessionalsController', () => {
       );
 
       // Act & Assert
-      await expect(controller.getProfessionalById(mockParam)).rejects.toThrow(
-        'Profesional no encontrado',
-      );
+      await expect(
+        controller.getProfessionalById(mockParam, mockReq),
+      ).rejects.toThrow('Profesional no encontrado');
     });
   });
 
@@ -250,13 +253,16 @@ describe('ProfessionalsController', () => {
       mockGetProfessionalByReference.mockResolvedValue(expected);
 
       // Act
-      const result =
-        await controller.getProfessionalByReference(mockReferenceParam);
+      const result = await controller.getProfessionalByReference(
+        mockReferenceParam,
+        mockReq,
+      );
 
       // Assert
       expect(result).toEqual(expected);
       expect(mockGetProfessionalByReference).toHaveBeenCalledWith(
         'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        mockUser,
       );
     });
 
@@ -268,7 +274,7 @@ describe('ProfessionalsController', () => {
 
       // Act & Assert
       await expect(
-        controller.getProfessionalByReference(mockReferenceParam),
+        controller.getProfessionalByReference(mockReferenceParam, mockReq),
       ).rejects.toThrow('Profesional no encontrado');
     });
   });
@@ -372,11 +378,19 @@ describe('ProfessionalsController', () => {
       mockGetProfessionalServices.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getProfessionalServices(mockParam, query);
+      const result = await controller.getProfessionalServices(
+        mockParam,
+        query,
+        mockReq,
+      );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetProfessionalServices).toHaveBeenCalledWith(10, query);
+      expect(mockGetProfessionalServices).toHaveBeenCalledWith(
+        10,
+        query,
+        mockUser,
+      );
     });
   });
 
@@ -415,11 +429,11 @@ describe('ProfessionalsController', () => {
       mockGetProfessionalStats.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getProfessionalStats(mockParam);
+      const result = await controller.getProfessionalStats(mockParam, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetProfessionalStats).toHaveBeenCalledWith(10);
+      expect(mockGetProfessionalStats).toHaveBeenCalledWith(10, mockUser);
     });
   });
 

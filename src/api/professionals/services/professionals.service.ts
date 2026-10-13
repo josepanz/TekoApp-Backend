@@ -2,6 +2,7 @@ import {
   Injectable,
   ForbiddenException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Prisma, ProfessionalStatus, VerificationStatus } from '@prisma/client';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
@@ -47,6 +48,42 @@ export class ProfessionalsService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
+  /** Admin y quien gestiona profesionales (verify/suspend) ven profesionales en cualquier estado. */
+  private canSeeAllProfessionals(viewer: IUserDataOnJwt): boolean {
+    return (
+      viewer.permissions?.some(
+        (p) =>
+          p === PERMISSIONS.ADMIN.ALL || p === PERMISSIONS.PROFESSIONALS.VERIFY,
+      ) ?? false
+    );
+  }
+
+  /**
+   * Vista pública/cliente (DEF-BE-023): un profesional que no está APPROVED y activo solo lo ven un
+   * admin, un gestor de profesionales o él mismo; para el resto responde 404 como si no existiera.
+   */
+  private assertProfessionalVisible(
+    professional: {
+      userId: number;
+      status: ProfessionalStatus;
+      isActive: boolean;
+    },
+    viewer: IUserDataOnJwt,
+  ): void {
+    if (
+      this.canSeeAllProfessionals(viewer) ||
+      professional.userId === viewer.id
+    ) {
+      return;
+    }
+    if (
+      professional.status !== ProfessionalStatus.APPROVED ||
+      !professional.isActive
+    ) {
+      throw new NotFoundException(t('professionals.NOT_FOUND'));
+    }
+  }
+
   async registerProfessional(
     dto: CreateProfessionalRequestDTO,
     userId: number,
@@ -60,8 +97,10 @@ export class ProfessionalsService {
 
   async getProfessionals(
     query: GetProfessionalsListQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalsListResponseDTO> {
     const filters = {
+      onlyApproved: !this.canSeeAllProfessionals(viewer),
       categoryId: query.categoryId,
       latitude: query.latitude,
       longitude: query.longitude,
@@ -113,20 +152,24 @@ export class ProfessionalsService {
 
   async getNearbyProfessionals(
     query: GetNearbyProfessionalsQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO[]> {
     const result = await this.professionalsDb.findNearby(
       query.latitude,
       query.longitude,
       query.radius,
       query.categoryId,
+      !this.canSeeAllProfessionals(viewer),
     );
     return result as unknown as ProfessionalDetailResponseDTO[];
   }
 
   async getProfessionalById(
     id: number,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO> {
     const result = await this.professionalsDb.findById(id);
+    this.assertProfessionalVisible(result, viewer);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -139,9 +182,11 @@ export class ProfessionalsService {
 
   async getProfessionalByReference(
     referenceId: string,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO> {
     const result =
       await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    this.assertProfessionalVisible(result, viewer);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -205,7 +250,12 @@ export class ProfessionalsService {
   async getProfessionalServices(
     id: number,
     query: GetProfessionalServicesQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalServicesListResponseDTO> {
+    this.assertProfessionalVisible(
+      await this.professionalsDb.findById(id),
+      viewer,
+    );
     const result = await this.professionalsDb.findServices(
       id,
       query as unknown as PaginationQueryDTO & Record<string, unknown>,
@@ -231,6 +281,10 @@ export class ProfessionalsService {
     query: GetProfessionalReviewsQueryDTO,
     user: IUserDataOnJwt,
   ): Promise<ProfessionalReviewsListResponseDTO> {
+    this.assertProfessionalVisible(
+      await this.professionalsDb.findById(id),
+      user,
+    );
     const [result, viewer] = await Promise.all([
       this.professionalsDb.findReviews(
         id,
@@ -246,27 +300,36 @@ export class ProfessionalsService {
 
   async getProfessionalStats(
     id: number,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalStatsResponseDTO> {
+    this.assertProfessionalVisible(
+      await this.professionalsDb.findById(id),
+      viewer,
+    );
     return this.professionalsDb.getStats(id);
   }
 
   async searchBySkills(
     query: SearchBySkillsQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalsListResponseDTO> {
     const skills = query.skills.split(',').map((s) => s.trim());
     const result = await this.professionalsDb.searchBySkills(
       skills,
       query as unknown as PaginationQueryDTO & Record<string, unknown>,
+      !this.canSeeAllProfessionals(viewer),
     );
     return result as unknown as ProfessionalsListResponseDTO;
   }
 
   async getTopRatedProfessionals(
     query: GetTopRatedQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO[]> {
     const result = await this.professionalsDb.getTopRated(
       query.categoryId,
       query.limit,
+      !this.canSeeAllProfessionals(viewer),
     );
     return result as unknown as ProfessionalDetailResponseDTO[];
   }

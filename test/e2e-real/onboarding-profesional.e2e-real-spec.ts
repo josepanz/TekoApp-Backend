@@ -186,7 +186,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
 
   describe('Visibilidad pública de postulantes', () => {
     // CP-BE-ONB-034
-    it.failing('DEF-BE-023: un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId)', async () => {
+    it('DEF-BE-023: un cliente no puede ver el perfil de un postulante PENDING (por id ni por referenceId)', async () => {
       const { pro } = await newPro();
       const byId = await http
         .get(`${PREFIX}/professionals/${pro.id}`)
@@ -238,7 +238,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .set(bearer(token));
 
     // CP-BE-ONB-035
-    it.failing('DEF-BE-023: el listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente', async () => {
+    it('DEF-BE-023: el listado, la búsqueda por skills y los cercanos no devuelven postulantes PENDING a un cliente', async () => {
       const { name, skill, pro } = await setup();
       expect(ids(await listFor(clienteA, name), true)).not.toContain(
         pro.referenceId,
@@ -256,7 +256,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
     });
 
     // CP-BE-ONB-036
-    it.failing('DEF-BE-023: admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo', async () => {
+    it('DEF-BE-023: admin ve al postulante PENDING (lista, id, referenceId, services, stats) y el propio profesional se ve a sí mismo', async () => {
       const { name, user, pro } = await setup();
       expect(ids(await listFor(admin, name), true)).toContain(pro.referenceId);
       for (const token of [admin, user.token]) {
@@ -289,7 +289,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
     });
 
     // CP-BE-ONB-037
-    it.failing('DEF-BE-023: un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado)', async () => {
+    it('DEF-BE-023: un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado)', async () => {
       const approved = await setup();
       const rejected = await setup();
       const suspended = await setup();

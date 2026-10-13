@@ -67,8 +67,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: ProfessionalsListResponseDTO })
   async getProfessionals(
     @Query() query: GetProfessionalsListQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalsListResponseDTO> {
-    return this.professionalsService.getProfessionals(query);
+    return this.professionalsService.getProfessionals(query, req.user);
   }
 
   @Get('nearby')
@@ -76,8 +77,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: [ProfessionalDetailResponseDTO] })
   async getNearbyProfessionals(
     @Query() query: GetNearbyProfessionalsQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO[]> {
-    return this.professionalsService.getNearbyProfessionals(query);
+    return this.professionalsService.getNearbyProfessionals(query, req.user);
   }
 
   @Get('search/skills')
@@ -85,8 +87,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: ProfessionalsListResponseDTO })
   async searchBySkills(
     @Query() query: SearchBySkillsQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalsListResponseDTO> {
-    return this.professionalsService.searchBySkills(query);
+    return this.professionalsService.searchBySkills(query, req.user);
   }
 
   @Get('top-rated')
@@ -94,8 +97,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: [ProfessionalDetailResponseDTO] })
   async getTopRatedProfessionals(
     @Query() query: GetTopRatedQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO[]> {
-    return this.professionalsService.getTopRatedProfessionals(query);
+    return this.professionalsService.getTopRatedProfessionals(query, req.user);
   }
 
   @Get('me')
@@ -119,9 +123,11 @@ export class ProfessionalsController {
   @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
   async getProfessionalByReference(
     @Param() param: ProfessionalReferenceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.getProfessionalByReference(
       param.referenceId,
+      req.user,
     );
   }
 
@@ -146,8 +152,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
   async getProfessionalById(
     @Param() param: ProfessionalIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO> {
-    return this.professionalsService.getProfessionalById(param.id);
+    return this.professionalsService.getProfessionalById(param.id, req.user);
   }
 
   @Put(':id')
@@ -197,8 +204,13 @@ export class ProfessionalsController {
   async getProfessionalServices(
     @Param() param: ProfessionalIdParamDTO,
     @Query() query: GetProfessionalServicesQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalServicesListResponseDTO> {
-    return this.professionalsService.getProfessionalServices(param.id, query);
+    return this.professionalsService.getProfessionalServices(
+      param.id,
+      query,
+      req.user,
+    );
   }
 
   @Get(':id/reviews')
@@ -221,8 +233,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: ProfessionalStatsResponseDTO })
   async getProfessionalStats(
     @Param() param: ProfessionalIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalStatsResponseDTO> {
-    return this.professionalsService.getProfessionalStats(param.id);
+    return this.professionalsService.getProfessionalStats(param.id, req.user);
   }
 
   @Post(':id/verify')

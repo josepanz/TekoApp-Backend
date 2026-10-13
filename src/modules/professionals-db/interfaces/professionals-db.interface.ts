@@ -7,6 +7,8 @@ export interface ProfessionalFilters {
   maxPrice?: number;
   isAvailable?: boolean;
   search?: string;
+  /** Solo APPROVED: vista pública/cliente (admin y gestores ven todos los estados). */
+  onlyApproved?: boolean;
   page?: number;
   pageSize?: number;
 }

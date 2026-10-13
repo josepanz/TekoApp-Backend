@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
@@ -31,6 +35,7 @@ const mockProfessional = {
   categoryId: 2,
   isAvailable: true,
   status: 'APPROVED',
+  isActive: true,
   verificationStatus: 'VERIFIED',
 };
 
@@ -113,7 +118,7 @@ describe('ProfessionalsService', () => {
       mockFindMany.mockResolvedValue(mockResult);
 
       // Act
-      const result = await service.getProfessionals(query);
+      const result = await service.getProfessionals(query, fakeUser());
 
       // Assert
       expect(mockFindMany).toHaveBeenCalledWith(
@@ -134,7 +139,7 @@ describe('ProfessionalsService', () => {
       mockFindMany.mockResolvedValue(mockResult);
 
       // Act
-      await service.getProfessionals(query);
+      await service.getProfessionals(query, fakeUser());
 
       // Assert
       expect(mockFindMany).toHaveBeenCalledWith(
@@ -213,7 +218,7 @@ describe('ProfessionalsService', () => {
       mockFindNearby.mockResolvedValue([mockProfessional]);
 
       // Act
-      const result = await service.getNearbyProfessionals(query);
+      const result = await service.getNearbyProfessionals(query, fakeUser());
 
       // Assert
       expect(mockFindNearby).toHaveBeenCalledWith(
@@ -221,6 +226,7 @@ describe('ProfessionalsService', () => {
         query.longitude,
         query.radius,
         query.categoryId,
+        true,
       );
       expect(result).toEqual([mockProfessional]);
     });
@@ -232,7 +238,7 @@ describe('ProfessionalsService', () => {
       mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
-      const result = await service.getProfessionalById(1);
+      const result = await service.getProfessionalById(1, fakeUser());
 
       // Assert
       expect(mockFindById).toHaveBeenCalledWith(1);
@@ -248,6 +254,7 @@ describe('ProfessionalsService', () => {
       // Act
       const result = await service.getProfessionalByReference(
         'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        fakeUser(),
       );
 
       // Assert
@@ -402,15 +409,104 @@ describe('ProfessionalsService', () => {
     });
   });
 
+  describe('visibilidad de profesionales no aprobados (DEF-BE-023)', () => {
+    const pending = { ...mockProfessional, status: 'PENDING' };
+
+    it('debe responder NotFoundException a un cliente por id y por referenceId si el profesional no está APPROVED', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue(pending);
+      mockFindProfessionalByReferenceId.mockResolvedValue(pending);
+
+      // Act & Assert
+      await expect(
+        service.getProfessionalById(1, fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfessionalByReference('ref', fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfessionalStats(1, fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe tratar como no visible a un profesional APPROVED pero inactivo', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue({ ...mockProfessional, isActive: false });
+
+      // Act & Assert
+      await expect(
+        service.getProfessionalById(1, fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe permitirlo a admin, a un gestor de profesionales y al propio profesional', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue(pending);
+
+      // Act & Assert
+      for (const viewer of [
+        fakeUser({ id: 99, permissions: ['admin:all'] }),
+        fakeUser({
+          id: 99,
+          permissions: ['professionals.verification:manage'],
+        }),
+        fakeUser({ id: mockProfessional.userId }),
+      ]) {
+        await expect(
+          service.getProfessionalById(1, viewer),
+        ).resolves.toBeDefined();
+      }
+    });
+
+    it('debe pedir todos los estados (onlyApproved=false) a admin y solo APPROVED a un cliente', async () => {
+      // Arrange
+      mockFindMany.mockResolvedValue({ data: [], pagination: {} });
+      mockFindNearby.mockResolvedValue([]);
+      mockSearchBySkills.mockResolvedValue([]);
+      mockGetTopRated.mockResolvedValue([]);
+      const admin = fakeUser({ id: 1, permissions: ['admin:all'] });
+      const client = fakeUser({ id: 2 });
+
+      // Act
+      await service.getProfessionals({} as never, admin);
+      await service.getProfessionals({} as never, client);
+      await service.searchBySkills({ skills: 'a' } as never, admin);
+      await service.getTopRatedProfessionals({} as never, admin);
+
+      // Assert
+      expect(mockFindMany).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ onlyApproved: false }),
+        {},
+      );
+      expect(mockFindMany).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ onlyApproved: true }),
+        {},
+      );
+      expect(mockSearchBySkills).toHaveBeenCalledWith(
+        ['a'],
+        { skills: 'a' },
+        false,
+      );
+      expect(mockGetTopRated).toHaveBeenCalledWith(undefined, undefined, false);
+    });
+  });
+
   describe('getProfessionalServices', () => {
     it('debe retornar los servicios del profesional paginados', async () => {
       // Arrange
       const query = { page: 1, pageSize: 10, status: 'COMPLETED' };
       const mockResult = { data: [], pagination: { total: 0 } };
       mockFindServices.mockResolvedValue(mockResult);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
-      const result = await service.getProfessionalServices(1, query as never);
+      const result = await service.getProfessionalServices(
+        1,
+        query as never,
+        fakeUser(),
+      );
 
       // Assert
       expect(mockFindServices).toHaveBeenCalledWith(1, query, query.status);
@@ -448,6 +544,7 @@ describe('ProfessionalsService', () => {
         pagination,
       });
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
       const result = await service.getProfessionalReviews(
@@ -503,6 +600,7 @@ describe('ProfessionalsService', () => {
         pagination,
       });
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act — viewer id=99, sin permiso de auditoría, no es el autor (autor es userId=3)
       const result = await service.getProfessionalReviews(
@@ -540,6 +638,7 @@ describe('ProfessionalsService', () => {
         pagination,
       });
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
       const result = await service.getProfessionalReviews(
@@ -562,9 +661,10 @@ describe('ProfessionalsService', () => {
         averageRating: 4.8,
       };
       mockGetStats.mockResolvedValue(mockStats);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
-      const result = await service.getProfessionalStats(1);
+      const result = await service.getProfessionalStats(1, fakeUser());
 
       // Assert
       expect(mockGetStats).toHaveBeenCalledWith(1);
@@ -582,12 +682,13 @@ describe('ProfessionalsService', () => {
       mockSearchBySkills.mockResolvedValue([mockProfessional]);
 
       // Act
-      const result = await service.searchBySkills(query);
+      const result = await service.searchBySkills(query, fakeUser());
 
       // Assert
       expect(mockSearchBySkills).toHaveBeenCalledWith(
         ['plomería', 'electricidad', 'pintura'],
         query,
+        true,
       );
       expect(result).toEqual([mockProfessional]);
     });
@@ -598,10 +699,14 @@ describe('ProfessionalsService', () => {
       mockSearchBySkills.mockResolvedValue([]);
 
       // Act
-      await service.searchBySkills(query);
+      await service.searchBySkills(query, fakeUser());
 
       // Assert
-      expect(mockSearchBySkills).toHaveBeenCalledWith(['plomería'], query);
+      expect(mockSearchBySkills).toHaveBeenCalledWith(
+        ['plomería'],
+        query,
+        true,
+      );
     });
   });
 
@@ -612,12 +717,13 @@ describe('ProfessionalsService', () => {
       mockGetTopRated.mockResolvedValue([mockProfessional]);
 
       // Act
-      const result = await service.getTopRatedProfessionals(query);
+      const result = await service.getTopRatedProfessionals(query, fakeUser());
 
       // Assert
       expect(mockGetTopRated).toHaveBeenCalledWith(
         query.categoryId,
         query.limit,
+        true,
       );
       expect(result).toEqual([mockProfessional]);
     });
