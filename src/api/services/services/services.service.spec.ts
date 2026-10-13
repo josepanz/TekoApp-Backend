@@ -56,6 +56,11 @@ const mockService = {
   category: { requiresProgressLog: false },
 };
 
+// Quién consulta: el dueño del mockService (userId 1), un admin y un tercero sin perfil profesional.
+const OWNER = { id: 1, permissions: [] as string[] };
+const ADMIN = { id: 99, permissions: ['admin:all'] };
+const STRANGER = { id: 77, permissions: [] as string[] };
+
 const mockProfessional = {
   id: 5,
   userId: 10,
@@ -159,7 +164,7 @@ describe('ServicesService', () => {
       mockFindManyWithCount.mockResolvedValue([[mockService], 1]);
 
       // Act
-      const result = await service.getServices({} as never);
+      const result = await service.getServices({} as never, ADMIN);
 
       // Assert
       expect(result.data).toHaveLength(1);
@@ -181,7 +186,7 @@ describe('ServicesService', () => {
       mockFindManyWithCount.mockResolvedValue([[], 0]);
 
       // Act
-      await service.getServices(filters);
+      await service.getServices(filters, ADMIN);
 
       // Assert
       expect(mockFindManyWithCount).toHaveBeenCalledWith(
@@ -191,6 +196,38 @@ describe('ServicesService', () => {
         }),
         2,
         5,
+      );
+    });
+  });
+
+  describe('getServices (autorización, DEF-BE-021)', () => {
+    it('debe rechazar con ForbiddenException a un usuario sin perfil profesional', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.getServices({} as never, STRANGER)).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(mockFindManyWithCount).not.toHaveBeenCalled();
+    });
+
+    it('debe forzar status PENDING a un profesional aunque pida otro estado', async () => {
+      // Arrange
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+      mockFindManyWithCount.mockResolvedValue([[], 0]);
+
+      // Act
+      await service.getServices({ status: ServiceStatus.COMPLETED } as never, {
+        id: 10,
+        permissions: [],
+      });
+
+      // Assert
+      expect(mockFindManyWithCount).toHaveBeenCalledWith(
+        expect.objectContaining({ status: ServiceStatus.PENDING }),
+        1,
+        10,
       );
     });
   });
@@ -217,7 +254,7 @@ describe('ServicesService', () => {
       mockFindServiceByReferenceId.mockResolvedValue(mockService);
 
       // Act
-      const result = await service.getServiceById(SERVICE_REF);
+      const result = await service.getServiceById(SERVICE_REF, OWNER);
 
       // Assert
       expect(result.id).toBe(SERVICE_PK);
@@ -230,9 +267,73 @@ describe('ServicesService', () => {
       mockFindServiceByReferenceId.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getServiceById('no-existe')).rejects.toThrow(
+      await expect(service.getServiceById('no-existe', OWNER)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('getServiceById (autorización, DEF-BE-021)', () => {
+    it('debe rechazar con ForbiddenException a un tercero sin perfil profesional', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.getServiceById(SERVICE_REF, STRANGER),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('debe permitir a admin, a un profesional aprobado en PENDING y al profesional asignado', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+
+      // Act & Assert
+      await expect(
+        service.getServiceById(SERVICE_REF, ADMIN),
+      ).resolves.toBeDefined();
+      await expect(
+        service.getServiceById(SERVICE_REF, { id: 10, permissions: [] }),
+      ).resolves.toBeDefined();
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        status: ServiceStatus.ACCEPTED,
+        professionalId: mockProfessional.id,
+      });
+      await expect(
+        service.getServiceById(SERVICE_REF, { id: 10, permissions: [] }),
+      ).resolves.toBeDefined();
+    });
+
+    it('debe rechazar a un profesional ajeno cuando el servicio ya no está PENDING', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue({
+        ...mockService,
+        status: ServiceStatus.ACCEPTED,
+        professionalId: 999,
+      });
+      mockFindProfessionalByUserId.mockResolvedValue(mockProfessional);
+
+      // Act & Assert
+      await expect(
+        service.getServiceById(SERVICE_REF, { id: 10, permissions: [] }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('debe rechazar a un profesional PENDING aunque el servicio esté PENDING', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindProfessionalByUserId.mockResolvedValue({
+        ...mockProfessional,
+        status: ProfessionalStatus.PENDING,
+      });
+
+      // Act & Assert
+      await expect(
+        service.getServiceById(SERVICE_REF, { id: 10, permissions: [] }),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -866,7 +967,7 @@ describe('ServicesService', () => {
       mockFindServiceRequests.mockResolvedValue([mockRequest]);
 
       // Act
-      const result = await service.getServiceRequests(SERVICE_REF);
+      const result = await service.getServiceRequests(SERVICE_REF, OWNER);
 
       // Assert
       expect(result.data).toHaveLength(1);
@@ -874,6 +975,23 @@ describe('ServicesService', () => {
       expect(result.data[0].referenceId).toBe('req-001');
       expect(result.data[0].serviceId).toBe(SERVICE_REF);
       expect(mockFindServiceRequests).toHaveBeenCalledWith(SERVICE_PK);
+    });
+  });
+
+  describe('getServiceRequests (autorización, DEF-BE-021)', () => {
+    it('debe rechazar con ForbiddenException a quien no es el dueño ni admin, y permitir a admin', async () => {
+      // Arrange
+      mockFindServiceByReferenceId.mockResolvedValue(mockService);
+      mockFindServiceRequests.mockResolvedValue([]);
+
+      // Act & Assert
+      await expect(
+        service.getServiceRequests(SERVICE_REF, STRANGER),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockFindServiceRequests).not.toHaveBeenCalled();
+      await expect(
+        service.getServiceRequests(SERVICE_REF, ADMIN),
+      ).resolves.toEqual({ data: [] });
     });
   });
 

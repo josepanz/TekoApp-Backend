@@ -16,6 +16,7 @@ import { ServiceProgressDbService } from '@modules/service-progress-db/services/
 import { BudgetsDbService } from '@modules/budgets-db/services/budgets-db.service';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { CreateServiceRequestDTO } from '../dtos/request/create-service.request.dto';
 import { UpdateServiceRequestDTO } from '../dtos/request/update-service.request.dto';
 import { CreateServiceRequestRequestDTO } from '../dtos/request/create-service-request.request.dto';
@@ -44,6 +45,12 @@ const CANCELLABLE = new Set<ServiceStatus>([
 type ServiceEntity = NonNullable<
   Awaited<ReturnType<ServicesDbService['findServiceByReferenceId']>>
 >;
+
+/** Quién consulta: id de `Users` y permisos del JWT (admin:all ve todo). */
+export interface ServiceViewer {
+  id: number;
+  permissions?: string[];
+}
 
 @Injectable()
 export class ServicesService {
@@ -83,6 +90,51 @@ export class ServicesService {
     }
   }
 
+  private isAdmin(viewer: ServiceViewer): boolean {
+    return viewer.permissions?.includes(PERMISSIONS.ADMIN.ALL) ?? false;
+  }
+
+  /** Profesional APPROVED y activo (el único perfil que explora el marketplace), o null. */
+  private async findOperatingProfessional(viewer: ServiceViewer) {
+    const professional = await this.db.findProfessionalByUserId(viewer.id);
+    return professional &&
+      professional.status === ProfessionalStatus.APPROVED &&
+      professional.isActive
+      ? professional
+      : null;
+  }
+
+  /**
+   * Autorización de lectura (DEF-BE-021): un servicio lo ve su cliente, el profesional asignado, un
+   * admin, o cualquier profesional aprobado mientras esté PENDING (marketplace: necesita ver la
+   * solicitud para ofertar). Cualquier otro usuario autenticado recibe 403.
+   */
+  private async assertCanViewService(
+    service: ServiceEntity,
+    viewer: ServiceViewer,
+  ): Promise<void> {
+    if (this.isAdmin(viewer) || service.userId === viewer.id) return;
+    const professional = await this.findOperatingProfessional(viewer);
+    if (
+      professional &&
+      (service.professionalId === professional.id ||
+        service.status === ServiceStatus.PENDING)
+    ) {
+      return;
+    }
+    throw new ForbiddenException(t('services.UNAUTHORIZED_VIEW'));
+  }
+
+  /** Explorar el marketplace (listado/cercanos): admin o profesional aprobado. */
+  private async assertCanBrowseMarketplace(
+    viewer: ServiceViewer,
+  ): Promise<void> {
+    if (this.isAdmin(viewer)) return;
+    if (!(await this.findOperatingProfessional(viewer))) {
+      throw new ForbiddenException(t('services.UNAUTHORIZED_BROWSE'));
+    }
+  }
+
   async createService(
     dto: CreateServiceRequestDTO,
     userId: number,
@@ -114,9 +166,16 @@ export class ServicesService {
 
   async getServices(
     filters: GetServicesListQueryDTO,
+    viewer: ServiceViewer,
   ): Promise<ServicesListResponseDTO> {
+    await this.assertCanBrowseMarketplace(viewer);
     const where: Prisma.ServicesWhereInput = {};
-    if (filters.status) where.status = filters.status;
+    // Un no-admin solo explora solicitudes abiertas: nunca los servicios ya asignados de otros.
+    if (this.isAdmin(viewer)) {
+      if (filters.status) where.status = filters.status;
+    } else {
+      where.status = ServiceStatus.PENDING;
+    }
     if (filters.categoryId) where.categoryId = filters.categoryId;
 
     if (filters.latitude && filters.longitude && filters.radius) {
@@ -158,7 +217,9 @@ export class ServicesService {
     longitude: number,
     radius = 10,
     categoryId?: number,
+    viewer?: ServiceViewer,
   ): Promise<ServiceDetailResponseDTO[]> {
+    if (viewer) await this.assertCanBrowseMarketplace(viewer);
     const latRange = radius / 111;
     const lngRange = radius / (111 * Math.cos((latitude * Math.PI) / 180));
 
@@ -173,7 +234,20 @@ export class ServicesService {
     return mapServicesToResponse(services);
   }
 
-  async getServiceById(id: string): Promise<ServiceDetailResponseDTO> {
+  /** Lectura autorizada (endpoint GET /services/:id). */
+  async getServiceById(
+    id: string,
+    viewer: ServiceViewer,
+  ): Promise<ServiceDetailResponseDTO> {
+    const service = await this.getServiceEntityByRef(id);
+    await this.assertCanViewService(service, viewer);
+    return mapServiceToResponse(service);
+  }
+
+  /** Respuesta de un servicio ya autorizado por la operación que lo llama (sin chequeo de lectura). */
+  private async getServiceResponse(
+    id: string,
+  ): Promise<ServiceDetailResponseDTO> {
     const service = await this.getServiceEntityByRef(id);
     return mapServiceToResponse(service);
   }
@@ -209,7 +283,7 @@ export class ServicesService {
     if (updatedCount === 0) {
       throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_UPDATE'));
     }
-    return this.getServiceById(id);
+    return this.getServiceResponse(id);
   }
 
   async cancelService(
@@ -275,7 +349,7 @@ export class ServicesService {
       }
     }
 
-    return this.getServiceById(id);
+    return this.getServiceResponse(id);
   }
 
   async acceptService(
@@ -315,7 +389,7 @@ export class ServicesService {
       service.userId,
     );
 
-    return this.getServiceById(id);
+    return this.getServiceResponse(id);
   }
 
   async startService(
@@ -341,7 +415,7 @@ export class ServicesService {
     if (updatedCount === 0) {
       throw new ConflictException(t('services.STATUS_CHANGED_BEFORE_START'));
     }
-    return this.getServiceById(id);
+    return this.getServiceResponse(id);
   }
 
   async completeService(
@@ -414,7 +488,7 @@ export class ServicesService {
       service.userId,
     );
 
-    return this.getServiceById(id);
+    return this.getServiceResponse(id);
   }
 
   async createServiceRequest(
@@ -450,8 +524,13 @@ export class ServicesService {
 
   async getServiceRequests(
     serviceId: string,
+    viewer: ServiceViewer,
   ): Promise<ServiceRequestsListResponseDTO> {
     const service = await this.getServiceEntityByRef(serviceId);
+    // Las ofertas (precios, mensajes) son del cliente dueño del servicio y de admin.
+    if (!this.isAdmin(viewer) && service.userId !== viewer.id) {
+      throw new ForbiddenException(t('services.UNAUTHORIZED_VIEW_REQUESTS'));
+    }
     const data = await this.db.findServiceRequests(service.id);
     return { data: mapServiceRequestsToResponse(data) };
   }

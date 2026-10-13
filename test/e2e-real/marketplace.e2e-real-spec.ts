@@ -394,7 +394,7 @@ describe('M4 Marketplace (e2e real)', () => {
 
   describe('Autorización (IDOR y roles)', () => {
     // CP-BE-MKT-025
-    it.failing('DEF-BE-021: cliente_b no puede ver el detalle de un servicio de cliente_a (403/404)', async () => {
+    it('DEF-BE-021: cliente_b no puede ver el detalle de un servicio de cliente_a (403/404)', async () => {
       const svc = await newService(clienteA);
       const res = await getService(svc.referenceId, clienteB);
       expect([403, 404]).toContain(res.status);
@@ -404,7 +404,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-026
-    it.failing('DEF-BE-021: cliente_b no puede listar las ofertas de un servicio de cliente_a', async () => {
+    it('DEF-BE-021: cliente_b no puede listar las ofertas de un servicio de cliente_a', async () => {
       const svc = await newService(clienteA);
       await offer(svc.referenceId, proX.token).expect(201);
       const res = await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteB));
@@ -474,7 +474,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-032
-    it.failing('DEF-BE-021: GET /services (listado) no expone servicios ajenos a un cliente sin perfil profesional', async () => {
+    it('DEF-BE-021: GET /services (listado) no expone servicios ajenos a un cliente sin perfil profesional', async () => {
       const svc = await newService(clienteA);
       const res = await http.get(`${PREFIX}/services`).query({ status: 'PENDING', pageSize: 100 }).set(bearer(clienteB));
       if (res.status === 200) {

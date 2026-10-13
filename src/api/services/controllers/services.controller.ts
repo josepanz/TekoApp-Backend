@@ -70,20 +70,23 @@ export class ServicesController {
   @GetServicesDocs()
   async getServices(
     @Query() query: GetServicesListQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ServicesListResponseDTO> {
-    return this.servicesService.getServices(query);
+    return this.servicesService.getServices(query, req.user);
   }
 
   @Get('nearby')
   @GetNearbyServicesDocs()
   async getNearbyServices(
     @Query() query: GetNearbyServicesQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ServiceDetailResponseDTO[]> {
     return this.servicesService.getNearbyServices(
       query.latitude,
       query.longitude,
       query.radius,
       query.categoryId,
+      req.user,
     );
   }
 
@@ -112,8 +115,9 @@ export class ServicesController {
   @GetServiceByIdDocs()
   async getServiceById(
     @Param() param: ServiceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ServiceDetailResponseDTO> {
-    return this.servicesService.getServiceById(param.id);
+    return this.servicesService.getServiceById(param.id, req.user);
   }
 
   @Put(':id')
@@ -185,8 +189,9 @@ export class ServicesController {
   @GetServiceRequestsDocs()
   async getServiceRequests(
     @Param() param: ServiceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ServiceRequestsListResponseDTO> {
-    return this.servicesService.getServiceRequests(param.id);
+    return this.servicesService.getServiceRequests(param.id, req.user);
   }
 
   @Put(':id/requests/:requestId')

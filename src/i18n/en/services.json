@@ -34,5 +34,8 @@
   "UNAUTHORIZED_UPDATE": "You do not have permission to modify this service",
   "USER_NOT_FOUND": "User not found",
   "PROFESSIONAL_NOT_APPROVED": "Your professional profile is not approved yet or is suspended",
+  "UNAUTHORIZED_VIEW": "You do not have access to this service",
+  "UNAUTHORIZED_BROWSE": "You do not have access to the services list",
+  "UNAUTHORIZED_VIEW_REQUESTS": "You do not have access to the offers of this service",
   "USER_NOT_PROFESSIONAL": "The user is not a professional"
 }
