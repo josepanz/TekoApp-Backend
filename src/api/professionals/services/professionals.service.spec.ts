@@ -22,6 +22,7 @@ const mockFindProfessionalIdByUserId = jest.fn();
 const mockFindProfessionalByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
 const mockUpdateConditional = jest.fn();
+const mockFindStatusHistory = jest.fn();
 const mockFindServices = jest.fn();
 const mockFindReviews = jest.fn();
 const mockGetStats = jest.fn();
@@ -74,6 +75,7 @@ describe('ProfessionalsService', () => {
             findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             update: mockUpdate,
             updateConditional: mockUpdateConditional,
+            findStatusHistory: mockFindStatusHistory,
             findServices: mockFindServices,
             findReviews: mockFindReviews,
             getStats: mockGetStats,
@@ -1129,6 +1131,80 @@ describe('ProfessionalsService', () => {
       expect(store).toEqual(
         expect.objectContaining({ ip: 'unknown', userAgent: 'unknown' }),
       );
+    });
+  });
+
+  describe('getStatusHistory', () => {
+    it('debe devolver 404 (propaga NotFound) si el profesional no existe', async () => {
+      mockFindById.mockRejectedValue(new NotFoundException('nope'));
+
+      await expect(service.getStatusHistory(1, {} as never)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockFindStatusHistory).not.toHaveBeenCalled();
+    });
+
+    it('debe paginar con page=1/pageSize=10 por defecto y mapear las transiciones', async () => {
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindStatusHistory.mockResolvedValue({
+        rows: [
+          {
+            id: BigInt(5),
+            oldData: { status: 'SUSPENDED' },
+            newData: { status: 'APPROVED', changed_reason: 'Apelación' },
+            changedAt: new Date('2026-10-13T10:00:00.000Z'),
+            changedBy: 'ref-admin',
+            ipAddress: '1.2.3.4',
+            userAgent: 'ua',
+          },
+        ],
+        total: 11,
+        actors: [
+          {
+            id: 3,
+            referenceId: 'ref-admin',
+            email: 'a@b.c',
+            firstName: 'Ada',
+            lastName: 'Admin',
+          },
+        ],
+      });
+
+      const result = await service.getStatusHistory(1, {} as never);
+
+      expect(mockFindStatusHistory).toHaveBeenCalledWith(1, 1, 10);
+      expect(result.pagination).toEqual({
+        total: 11,
+        page: 1,
+        pageSize: 10,
+        totalPages: 2,
+      });
+      expect(result.data).toEqual([
+        expect.objectContaining({
+          action: 'REACTIVATE',
+          fromStatus: 'SUSPENDED',
+          toStatus: 'APPROVED',
+          reason: 'Apelación',
+          actor: {
+            referenceId: 'ref-admin',
+            name: 'Ada Admin',
+            email: 'a@b.c',
+          },
+        }),
+      ]);
+    });
+
+    it('debe respetar page y pageSize recibidos', async () => {
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindStatusHistory.mockResolvedValue({
+        rows: [],
+        total: 0,
+        actors: [],
+      });
+
+      await service.getStatusHistory(1, { page: 2, pageSize: 100 } as never);
+
+      expect(mockFindStatusHistory).toHaveBeenCalledWith(1, 2, 100);
     });
   });
 });

@@ -13,3 +13,4 @@ export * from './update-professional-location.request.dto';
 export * from './verify-professional.request.dto';
 export * from './suspend-professional.request.dto';
 export * from './reactivate-professional.request.dto';
+export * from './get-professional-status-history.query.dto';

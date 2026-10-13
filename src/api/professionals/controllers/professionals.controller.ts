@@ -41,6 +41,7 @@ import {
   VerifyProfessionalRequestDTO,
   SuspendProfessionalRequestDTO,
   ReactivateProfessionalRequestDTO,
+  GetProfessionalStatusHistoryQueryDTO,
 } from '../dtos/request';
 import {
   ProfessionalDetailResponseDTO,
@@ -48,6 +49,7 @@ import {
   ProfessionalServicesListResponseDTO,
   ProfessionalReviewsListResponseDTO,
   ProfessionalStatsResponseDTO,
+  ProfessionalStatusHistoryResponseDTO,
 } from '../dtos/response';
 
 type AuditedRequest = {
@@ -260,6 +262,22 @@ export class ProfessionalsController {
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalStatsResponseDTO> {
     return this.professionalsService.getProfessionalStats(param.id, req.user);
+  }
+
+  @Get(':id/status-history')
+  @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
+  @ApiOperation({
+    summary: 'Historial de cambios de estado del profesional (solo admin)',
+    description:
+      'Transiciones verify/reject/suspend/reactivate tomadas del audit-log, más recientes primero. page/pageSize (máx. 100).',
+  })
+  @ApiResponse({ status: 200, type: ProfessionalStatusHistoryResponseDTO })
+  @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
+  async getStatusHistory(
+    @Param() param: ProfessionalIdParamDTO,
+    @Query() query: GetProfessionalStatusHistoryQueryDTO,
+  ): Promise<ProfessionalStatusHistoryResponseDTO> {
+    return this.professionalsService.getStatusHistory(param.id, query);
   }
 
   @Post(':id/verify')

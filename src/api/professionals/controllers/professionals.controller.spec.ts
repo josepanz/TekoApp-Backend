@@ -39,6 +39,7 @@ const mockGetProfessionalStats = jest.fn();
 const mockVerifyProfessional = jest.fn();
 const mockSuspendProfessional = jest.fn();
 const mockReactivateProfessional = jest.fn();
+const mockGetStatusHistory = jest.fn();
 
 const mockUser = { id: 1 } as unknown as IUserDataOnJwt;
 const mockReq = { user: mockUser };
@@ -84,6 +85,7 @@ describe('ProfessionalsController', () => {
             verifyProfessional: mockVerifyProfessional,
             suspendProfessional: mockSuspendProfessional,
             reactivateProfessional: mockReactivateProfessional,
+            getStatusHistory: mockGetStatusHistory,
           },
         },
       ],
@@ -567,6 +569,32 @@ describe('ProfessionalsController', () => {
         'Apelación aceptada',
         ...AUDIT_ARGS,
       );
+    });
+  });
+
+  describe('getStatusHistory', () => {
+    it('debe requerir el permiso de gestión de profesionales o admin:all', () => {
+      const required = new Reflector().get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata
+        controller.getStatusHistory,
+      );
+
+      expect(required).toEqual([
+        PERMISSIONS.PROFESSIONALS.VERIFY,
+        PERMISSIONS.ADMIN.ALL,
+      ]);
+    });
+
+    it('debe delegar en el servicio con el id y la paginación', async () => {
+      const expected = { data: [], pagination: { total: 0 } };
+      mockGetStatusHistory.mockResolvedValue(expected);
+      const query = { page: 2, pageSize: 5 } as never;
+
+      const result = await controller.getStatusHistory(mockParam, query);
+
+      expect(result).toEqual(expected);
+      expect(mockGetStatusHistory).toHaveBeenCalledWith(10, query);
     });
   });
 });

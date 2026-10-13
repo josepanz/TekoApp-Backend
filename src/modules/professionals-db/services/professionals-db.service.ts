@@ -5,6 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import {
+  AuditLogs,
   Prisma,
   ProfessionalStatus,
   ServiceStatus,
@@ -30,6 +31,15 @@ import {
 } from '../types/professionals-db.type';
 
 import { t } from '@common/i18n/i18n.helper';
+
+export interface ProfessionalStatusActor {
+  id: number;
+  referenceId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
 @Injectable()
 export class ProfessionalsDbService {
   constructor(private readonly prisma: PrismaDatasource) {}
@@ -260,6 +270,69 @@ export class ProfessionalsDbService {
       data,
     });
     return result.count;
+  }
+
+  /**
+   * Transiciones de estado de un profesional, tomadas de `audit_logs` (las escribe el trigger de
+   * auditoría): solo UPDATE donde `old_data.status != new_data.status`, más recientes primero.
+   * El filtro se arma con los pares (from, to) del enum porque Prisma no compara dos paths JSON entre sí.
+   * `actors` resuelve `changed_by` (referenceId; filas viejas pueden traer el id numérico) a usuarios.
+   */
+  async findStatusHistory(
+    professionalId: number,
+    page: number,
+    pageSize: number,
+  ): Promise<{
+    rows: AuditLogs[];
+    total: number;
+    actors: ProfessionalStatusActor[];
+  }> {
+    const statuses = Object.values(ProfessionalStatus);
+    const where: Prisma.AuditLogsWhereInput = {
+      tableName: 'professionals',
+      recordId: String(professionalId),
+      operationType: 'UPDATE',
+      OR: statuses.flatMap((from) =>
+        statuses
+          .filter((to) => to !== from)
+          .map((to) => ({
+            AND: [
+              { oldData: { path: ['status'], equals: from } },
+              { newData: { path: ['status'], equals: to } },
+            ],
+          })),
+      ),
+    };
+    const [rows, total] = await Promise.all([
+      this.prisma.extended.auditLogs.findMany({
+        where,
+        orderBy: [{ changedAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.extended.auditLogs.count({ where }),
+    ]);
+
+    const changedBy = [...new Set(rows.map((r) => r.changedBy))];
+    const numericIds = changedBy.filter((c) => /^\d+$/.test(c)).map(Number);
+    const actors = changedBy.length
+      ? await this.prisma.extended.users.findMany({
+          where: {
+            OR: [
+              { referenceId: { in: changedBy } },
+              ...(numericIds.length ? [{ id: { in: numericIds } }] : []),
+            ],
+          },
+          select: {
+            id: true,
+            referenceId: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        })
+      : [];
+    return { rows, total, actors };
   }
 
   async findServices(

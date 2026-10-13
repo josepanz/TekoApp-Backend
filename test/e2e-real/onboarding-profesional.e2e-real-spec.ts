@@ -1122,6 +1122,102 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       expect((last.newData as any).changed_reason).toBeNull();
     });
 
+    const history = (
+      id: number,
+      token: string,
+      query: Record<string, unknown> = {},
+    ) =>
+      http
+        .get(`${PREFIX}/professionals/${id}/status-history`)
+        .query(query)
+        .set(bearer(token));
+
+    // CP-BE-ONB-046
+    it('status-history: lista paginada de transiciones (más reciente primero) con actor, de->a, motivo, fecha, IP y user-agent', async () => {
+      const { pro } = await newPro();
+      const UA = 'e2e-qa-history/1.0';
+      await verify(pro.id, admin, { isVerified: false, notes: 'Ilegible' })
+        .set('User-Agent', UA)
+        .expect(201);
+      await verify(pro.id, admin).set('User-Agent', UA).expect(201);
+      await suspend(pro.id, admin, { reason: 'Reportes' })
+        .set('User-Agent', UA)
+        .expect(201);
+      await reactivate(pro.id, admin, { reason: 'Apelación' })
+        .set('User-Agent', UA)
+        .expect(201);
+
+      const res = await history(pro.id, admin).expect(200);
+      const { data, pagination } = unwrap(res.body);
+      expect(pagination).toEqual({
+        total: 4,
+        page: 1,
+        pageSize: 10,
+        totalPages: 1,
+      });
+      expect(
+        data.map((d: any) => `${d.action}:${d.fromStatus}>${d.toStatus}`),
+      ).toEqual([
+        'REACTIVATE:SUSPENDED>APPROVED',
+        'SUSPEND:APPROVED>SUSPENDED',
+        'VERIFY:REJECTED>APPROVED',
+        'REJECT:PENDING>REJECTED',
+      ]);
+      expect(data.map((d: any) => d.reason)).toEqual([
+        'Apelación',
+        'Reportes',
+        null,
+        'Ilegible',
+      ]);
+      for (const d of data) {
+        expect(d.actor.email).toBe(FIXTURE.admin.email);
+        expect(typeof d.actor.name).toBe('string');
+        expect(d.actor.referenceId).toEqual(expect.any(String));
+        expect(d.userAgent).toBe(UA);
+        expect(d.ipAddress).toMatch(/127\.0\.0\.1|::1/);
+        expect(Number.isNaN(Date.parse(d.changedAt))).toBe(false);
+        expect(d.id).toEqual(expect.any(String));
+      }
+
+      const p1 = unwrap(
+        (await history(pro.id, admin, { pageSize: 3 }).expect(200)).body,
+      );
+      const p2 = unwrap(
+        (await history(pro.id, admin, { page: 2, pageSize: 3 }).expect(200))
+          .body,
+      );
+      expect(p1.data).toHaveLength(3);
+      expect(p1.pagination.totalPages).toBe(2);
+      expect(p2.data.map((d: any) => d.action)).toEqual(['REJECT']);
+    });
+
+    // CP-BE-ONB-047
+    it('status-history: pageSize > 100 -> 400, sin permiso 403, sin JWT 401, inexistente 404; una actualización sin cambio de estado no genera entrada', async () => {
+      const { user, pro } = await newPro();
+      expect((await history(pro.id, admin, { pageSize: 101 })).status).toBe(
+        400,
+      );
+      for (const token of [clienteA, user.token]) {
+        expect((await history(pro.id, token)).status).toBe(403);
+      }
+      await http
+        .get(`${PREFIX}/professionals/${pro.id}/status-history`)
+        .expect(401);
+      expect((await history(99999999, admin)).status).toBe(404);
+
+      const empty = unwrap((await history(pro.id, admin).expect(200)).body);
+      expect(empty.data).toEqual([]);
+      expect(empty.pagination.total).toBe(0);
+      // el propio profesional edita su perfil (UPDATE en audit_logs sin cambio de status)
+      await http
+        .put(`${PREFIX}/professionals/${pro.id}`)
+        .set(bearer(user.token))
+        .send({ description: 'Descripción actualizada para el historial' })
+        .expect(200);
+      const after = unwrap((await history(pro.id, admin).expect(200)).body);
+      expect(after.pagination.total).toBe(0);
+    });
+
     // CP-BE-ONB-043
     it('reactivate con la cuenta del usuario no ACTIVE (bloqueada) -> 409 y sigue SUSPENDED', async () => {
       const { user, pro } = await newPro();

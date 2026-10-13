@@ -21,6 +21,7 @@ import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interf
 import { RatingViewerContext } from '@api/ratings/helpers/ratings-response.helper';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { mapStatusHistory } from '../helpers/professional-status-history.helper';
 import { mapReviewsToSummaries } from '../helpers/professional-reviews-response.helper';
 import {
   PROFESSIONALS_EXPORT_COLUMNS,
@@ -37,6 +38,7 @@ import {
   UpdateProfessionalRequestDTO,
   UpdateProfessionalLocationRequestDTO,
   VerifyProfessionalRequestDTO,
+  GetProfessionalStatusHistoryQueryDTO,
 } from '../dtos/request';
 import {
   ProfessionalDetailResponseDTO,
@@ -44,6 +46,7 @@ import {
   ProfessionalServicesListResponseDTO,
   ProfessionalReviewsListResponseDTO,
   ProfessionalStatsResponseDTO,
+  ProfessionalStatusHistoryResponseDTO,
 } from '../dtos/response';
 
 import { t } from '@common/i18n/i18n.helper';
@@ -400,6 +403,27 @@ export class ProfessionalsService {
       },
       () => this.professionalsDb.updateConditional(id, expectedStatuses, data),
     );
+  }
+
+  /** Historial de transiciones de estado del profesional (verify, reject, suspend, reactivate), del audit-log. */
+  async getStatusHistory(
+    id: number,
+    query: GetProfessionalStatusHistoryQueryDTO,
+  ): Promise<ProfessionalStatusHistoryResponseDTO> {
+    await this.professionalsDb.findById(id); // 404 si no existe
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 10;
+    const { rows, total, actors } =
+      await this.professionalsDb.findStatusHistory(id, page, pageSize);
+    return {
+      data: mapStatusHistory(rows, actors),
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   }
 
   async verifyProfessional(

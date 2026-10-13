@@ -23,6 +23,9 @@ const mockPaginate = PrismaPaginationUtil.paginate as jest.MockedFunction<
 
 // ─── Mocks de users ───────────────────────────────────────────────────────────
 const mockUsersFindUnique = jest.fn();
+const mockUsersFindMany = jest.fn();
+const mockAuditFindMany = jest.fn();
+const mockAuditCount = jest.fn();
 
 // ─── Mocks de professionals ───────────────────────────────────────────────────
 const mockProfessionalsFindUnique = jest.fn();
@@ -45,7 +48,9 @@ const mockPrisma = {
   extended: {
     users: {
       findUnique: mockUsersFindUnique,
+      findMany: mockUsersFindMany,
     },
+    auditLogs: { findMany: mockAuditFindMany, count: mockAuditCount },
     professionals: {
       findUnique: mockProfessionalsFindUnique,
       findMany: mockProfessionalsFindMany,
@@ -579,6 +584,69 @@ describe('ProfessionalsDbService', () => {
 
       // Assert
       expect(result).toBe(0);
+    });
+  });
+
+  // ─── findStatusHistory ───────────────────────────────────────────────────
+  describe('findStatusHistory', () => {
+    it('debe filtrar solo UPDATE de professionals con cambio de status (12 pares from/to), paginar y resolver actores', async () => {
+      // Arrange
+      mockAuditFindMany.mockResolvedValue([
+        { id: BigInt(2), changedBy: 'ref-admin' },
+        { id: BigInt(1), changedBy: '7' },
+      ]);
+      mockAuditCount.mockResolvedValue(25);
+      mockUsersFindMany.mockResolvedValue([{ id: 7, referenceId: 'ref-x' }]);
+
+      // Act
+      const result = await service.findStatusHistory(5, 3, 10);
+
+      // Assert
+      const args = mockAuditFindMany.mock.calls[0][0] as {
+        where: { OR: unknown[]; tableName: string; recordId: string };
+        skip: number;
+        take: number;
+        orderBy: unknown;
+      };
+      expect(args.where).toEqual(
+        expect.objectContaining({
+          tableName: 'professionals',
+          recordId: '5',
+          operationType: 'UPDATE',
+        }),
+      );
+      expect(args.where.OR).toHaveLength(12);
+      expect(args.where.OR).toContainEqual({
+        AND: [
+          { oldData: { path: ['status'], equals: 'SUSPENDED' } },
+          { newData: { path: ['status'], equals: 'APPROVED' } },
+        ],
+      });
+      expect(args.skip).toBe(20);
+      expect(args.take).toBe(10);
+      expect(args.orderBy).toEqual([{ changedAt: 'desc' }, { id: 'desc' }]);
+      expect(mockUsersFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            OR: [
+              { referenceId: { in: ['ref-admin', '7'] } },
+              { id: { in: [7] } },
+            ],
+          },
+        }),
+      );
+      expect(result.total).toBe(25);
+      expect(result.actors).toEqual([{ id: 7, referenceId: 'ref-x' }]);
+    });
+
+    it('no consulta usuarios cuando no hay transiciones', async () => {
+      mockAuditFindMany.mockResolvedValue([]);
+      mockAuditCount.mockResolvedValue(0);
+
+      const result = await service.findStatusHistory(5, 1, 10);
+
+      expect(mockUsersFindMany).not.toHaveBeenCalled();
+      expect(result).toEqual({ rows: [], total: 0, actors: [] });
     });
   });
 
