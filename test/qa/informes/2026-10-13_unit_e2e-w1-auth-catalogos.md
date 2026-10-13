@@ -5,7 +5,7 @@
 | Fecha y hora | 2026-10-13 00:17 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w1-auth-catalogos` |
-| Commit | `0282b67` (árbol con cambios sin commitear) |
+| Commit | `88addb8` |
 | Entorno | local, Jest con mocks (sin infraestructura), Node v22.16.0 |
 | Comando | `pnpm qa:unit` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 142 (0 con fallo) | 1586 | 1586 | 0 | 0 | 25.4 s |
+| 142 (0 con fallo) | 1586 | 1586 | 0 | 0 | 18.4 s |
 
 ### Cobertura
 
