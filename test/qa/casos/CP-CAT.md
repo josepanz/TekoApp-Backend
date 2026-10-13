@@ -1,6 +1,6 @@
 # CP-CAT — M2 Catálogos (Backend)
 
-Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-001..033 de la ola W1. Los marcados `[DEF ...]` están automatizados como `it.failing` (pasan mientras el defecto exista; hay que quitar `.failing` al corregirlo).
+Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-001..035 de la ola W1. Los marcados `[DEF ...]` están automatizados como `it.failing` (pasan mientras el defecto exista; hay que quitar `.failing` al corregirlo).
 
 ## Decisiones y casos no automatizables
 
@@ -519,6 +519,36 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Resultado esperado | 400/422. Antes del fix: 500. |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Paginación: pageSize enorme › DEF-BE-001: pageSize inválido (-1 / abc)...` |
 
+### CP-BE-CAT-034 — GET /categories/all (admin) respeta page y pageSize
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-CAT-034 |
+| Título | GET /categories/all (admin) respeta page y pageSize [DEF-BE-012: Corregido (d80e84a); caso `it` normal] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | M2 del plan maestro (§3); DEF-BE-012 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`). Fixture admin. |
+| Pasos | 1. Login admin y crear 3 categorías.<br>2. `GET /categories/all?page=1&pageSize=2`.<br>3. Última página.<br>4. `?pageSize=101`. |
+| Datos de prueba | 3 categorías nuevas, page=1&pageSize=2; pageSize=101 |
+| Resultado esperado | 200 con `{data (2 ítems), pagination:{total,page,pageSize,totalPages}}`; última página con el resto; pageSize>100 -> 400. Antes del fix: devolvía todo. |
+| Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías: paginación admin y nombre vacío › DEF-BE-012...` |
+
+### CP-BE-CAT-035 — POST/PATCH /categories rechaza name vacío o solo espacios
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-CAT-035 |
+| Título | POST/PATCH /categories rechaza name vacío o solo espacios [DEF-BE-013: Corregido (cba23fa); caso `it` normal] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P3 |
+| Trazabilidad | M2 del plan maestro (§3); DEF-BE-013 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`). Fixture admin. |
+| Pasos | 1. Login admin.<br>2. `POST /categories` con `name` vacío y con espacios.<br>3. `PATCH /categories/:id` con `name: "  "`. |
+| Datos de prueba | name `""` y `"   "` |
+| Resultado esperado | 400 en los tres. Antes del fix: 201. |
+| Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías: paginación admin y nombre vacío › DEF-BE-013...` |
+
 ## Estado de defectos (rama e2e-w1-auth-catalogos)
 
 | DEF | Sev. | Estado |
@@ -528,3 +558,5 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | DEF-BE-008 | Medio | Corregido (dcf2657) |
 | DEF-BE-009 | Medio | Corregido (c0c7d8f): tope `pageSize` = 100 |
 | DEF-BE-010 | Medio | Corregido (9b11879) |
+| DEF-BE-012 | Medio | Corregido (d80e84a): `/categories/all` paginado, tope 100 |
+| DEF-BE-013 | Bajo | Corregido (cba23fa): `name` con trim + `@IsNotEmpty()` |
