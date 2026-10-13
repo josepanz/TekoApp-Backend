@@ -3,7 +3,7 @@
  * Suite: M4 Marketplace contra el stack real (ciclo de vida solicitud -> oferta -> ACCEPTED ->
  * IN_PROGRESS -> COMPLETED/CANCELLED, transiciones inválidas, concurrencia 20x, IDOR y alcance de
  * /locations según el estado del servicio).
- * Casos: CP-BE-MKT-001..040 (ver test/qa/casos/CP-MKT.md; ahí está la tabla serviceId vs serviceRequestId)
+ * Casos: CP-BE-MKT-001..038 (ver test/qa/casos/CP-MKT.md; ahí está la tabla serviceId vs serviceRequestId)
  * Tipo: e2e   Prioridad: P1
  * Precondiciones: pnpm e2e:up + e2e:seed; fixtures admin, cliente_a y cliente_b. Los profesionales y
  *        servicios se crean por API en cada corrida (datos únicos).

@@ -18,6 +18,8 @@ scripts/qa/report.ts     generador de informes (ts-node, sin dependencias nuevas
 | `casos/CP-ENV.md` | M0 Entorno E2E | CP-BE-ENV-001..003 |
 | `casos/CP-AUTH.md` | M1 Auth y sesión (smoke + W1) y contrato de error | CP-BE-AUTH-001..038, CP-BE-ERR-001..009 |
 | `casos/CP-CAT.md` | M2 Catálogos | CP-BE-CAT-001..033 |
+| `casos/CP-ONB.md` | M3 Onboarding profesional | CP-BE-ONB-001..034 |
+| `casos/CP-MKT.md` | M4 Marketplace (ciclo de vida, concurrencia, IDOR, tabla serviceId vs serviceRequestId) | CP-BE-MKT-001..038 |
 | `casos/CP-LOC.md` | Blindaje de `/locations` | CP-BE-LOC-001..007 |
 | `casos/CP-SEED.md` | Seed del rol COMPLIANCE | CP-BE-SEED-001..002 |
 
