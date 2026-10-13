@@ -338,7 +338,7 @@ describe('M4 Marketplace (e2e real)', () => {
     const ITERATIONS = 20;
 
     // CP-BE-MKT-022
-    it(`dos profesionales aceptan el mismo servicio en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409`, async () => {
+    it('dos profesionales aceptan el mismo servicio en paralelo: 20/20 con un solo 2xx y un 409', async () => {
       const outcomes: string[] = [];
       for (let i = 0; i < ITERATIONS; i++) {
         const svc = await newService();
@@ -358,7 +358,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-023
-    it(`el mismo profesional acepta dos veces en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409`, async () => {
+    it('el mismo profesional acepta dos veces en paralelo: 20/20 con un solo 2xx y un 409', async () => {
       const outcomes: string[] = [];
       for (let i = 0; i < ITERATIONS; i++) {
         const svc = await newService();
@@ -372,7 +372,7 @@ describe('M4 Marketplace (e2e real)', () => {
     });
 
     // CP-BE-MKT-024
-    it(`el cliente acepta dos ofertas distintas en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 200 y un 409, y una sola oferta ACCEPTED`, async () => {
+    it('el cliente acepta dos ofertas distintas en paralelo: 20/20 con un solo 200 y un 409, y una sola oferta ACCEPTED', async () => {
       const outcomes: string[] = [];
       for (let i = 0; i < ITERATIONS; i++) {
         const svc = await newService();

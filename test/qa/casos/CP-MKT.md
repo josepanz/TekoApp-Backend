@@ -344,12 +344,12 @@ Regla práctica: en `/services/**` el primer id siempre es el servicio; solo `:r
 | Resultado esperado | 400 con campos `title` y `latitude`; 400/404; 401. |
 | Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `crear una solicitud con datos inválidos (sin título, coordenadas fuera de rango, categoría inexistente) -> 400/404` |
 
-### CP-BE-MKT-022 — Dos profesionales aceptan el mismo servicio en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409
+### CP-BE-MKT-022 — Dos profesionales aceptan el mismo servicio en paralelo: 20/20 con un solo 2xx y un 409
 
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-MKT-022 |
-| Título | Dos profesionales aceptan el mismo servicio en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409 |
+| Título | Dos profesionales aceptan el mismo servicio en paralelo: 20/20 con un solo 2xx y un 409 |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M4 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 4 |
@@ -357,14 +357,14 @@ Regla práctica: en `/services/**` el primer id siempre es el servicio; solo `:r
 | Pasos | Crear servicio.<br>`Promise.all` de dos `accept` por proX y proY.<br>Repetir 20 veces. |
 | Datos de prueba | 20 iteraciones |
 | Resultado esperado | Cada iteración exactamente un 201 y un 409; el servicio queda ACCEPTED con el ganador. 20/20. |
-| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `dos profesionales aceptan el mismo servicio en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409` |
+| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `dos profesionales aceptan el mismo servicio en paralelo: 20/20 con un solo 2xx y un 409` |
 
-### CP-BE-MKT-023 — El mismo profesional acepta dos veces en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409
+### CP-BE-MKT-023 — El mismo profesional acepta dos veces en paralelo: 20/20 con un solo 2xx y un 409
 
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-MKT-023 |
-| Título | El mismo profesional acepta dos veces en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409 |
+| Título | El mismo profesional acepta dos veces en paralelo: 20/20 con un solo 2xx y un 409 |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M4 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 4 |
@@ -372,14 +372,14 @@ Regla práctica: en `/services/**` el primer id siempre es el servicio; solo `:r
 | Pasos | `Promise.all` de dos `accept` del mismo profesional; 20 iteraciones. |
 | Datos de prueba | 20 iteraciones |
 | Resultado esperado | Cada iteración 201 y 409. 20/20. |
-| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `el mismo profesional acepta dos veces en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 2xx y un 409` |
+| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `el mismo profesional acepta dos veces en paralelo: 20/20 con un solo 2xx y un 409` |
 
-### CP-BE-MKT-024 — El cliente acepta dos ofertas distintas en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 200 y un 409, y una sola oferta ACCEPTED
+### CP-BE-MKT-024 — El cliente acepta dos ofertas distintas en paralelo: 20/20 con un solo 200 y un 409, y una sola oferta ACCEPTED
 
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-MKT-024 |
-| Título | El cliente acepta dos ofertas distintas en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 200 y un 409, y una sola oferta ACCEPTED |
+| Título | El cliente acepta dos ofertas distintas en paralelo: 20/20 con un solo 200 y un 409, y una sola oferta ACCEPTED |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M4 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 4 |
@@ -387,7 +387,7 @@ Regla práctica: en `/services/**` el primer id siempre es el servicio; solo `:r
 | Pasos | Dos ofertas; `Promise.all` de dos respuestas ACCEPTED; 20 iteraciones. |
 | Datos de prueba | 20 iteraciones |
 | Resultado esperado | Cada iteración 200 y 409 y una sola oferta ACCEPTED. 20/20. |
-| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `el cliente acepta dos ofertas distintas en paralelo: ${ITERATIONS}/${ITERATIONS} con un solo 200 y un 409, y una sola oferta ACCEPTED` |
+| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `el cliente acepta dos ofertas distintas en paralelo: 20/20 con un solo 200 y un 409, y una sola oferta ACCEPTED` |
 
 ### CP-BE-MKT-025 — Cliente_b no puede ver el detalle de un servicio de cliente_a (403/404) [DEF-BE-021: Corregido (5a38afb)]
 
