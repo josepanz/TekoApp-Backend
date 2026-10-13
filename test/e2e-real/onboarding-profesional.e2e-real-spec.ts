@@ -131,7 +131,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
     });
 
     // CP-BE-ONB-002
-    it.failing('DEF-BE-015: la doble postulación (USER_ALREADY_PROFESSIONAL) debe responder 409', async () => {
+    it('DEF-BE-015: la doble postulación (USER_ALREADY_PROFESSIONAL) debe responder 409', async () => {
       const { user } = await newPro();
       const res = await applyAsProfessional(http, user.token, categoryId);
       expect(res.status).toBe(409);

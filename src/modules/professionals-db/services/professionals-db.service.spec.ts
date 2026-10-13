@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { ProfessionalStatus, ServiceStatus, RatingType } from '@prisma/client';
 import { PrismaDatasource } from '@core/database/services/prisma.service';
 import { PrismaPaginationUtil } from '@common/utils/prisma-pagination.util';
@@ -114,13 +118,13 @@ describe('ProfessionalsDbService', () => {
       await expect(service.create(dto, 999)).rejects.toThrow(NotFoundException);
     });
 
-    it('debe lanzar BadRequestException cuando el usuario ya tiene perfil profesional', async () => {
+    it('debe lanzar ConflictException cuando el usuario ya tiene perfil profesional', async () => {
       // Arrange
       mockUsersFindUnique.mockResolvedValue({ id: 5 });
       mockProfessionalsFindUnique.mockResolvedValue({ id: 1, userId: 5 });
 
       // Act & Assert
-      await expect(service.create(dto, 5)).rejects.toThrow(BadRequestException);
+      await expect(service.create(dto, 5)).rejects.toThrow(ConflictException);
     });
 
     it('debe lanzar BadRequestException cuando la categoría no existe', async () => {

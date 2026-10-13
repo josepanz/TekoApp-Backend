@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import {
   Prisma,
@@ -46,9 +47,7 @@ export class ProfessionalsDbService {
       where: { userId },
     });
     if (existing)
-      throw new BadRequestException(
-        t('professionals.USER_ALREADY_PROFESSIONAL'),
-      );
+      throw new ConflictException(t('professionals.USER_ALREADY_PROFESSIONAL'));
 
     const category = await this.prisma.extended.category.findUnique({
       where: { id: dto.categoryId },
