@@ -67,13 +67,10 @@ describe('M1 Auth - rate limit (multiplicador = 1)', () => {
   });
 
   // CP-BE-ERR-006
-  it.failing(
-    'DEF-BE-005: el 429 debe usar el envelope {success:false,error:{code,message}} (hoy {error,retryAfter})',
-    async () => {
-      const res = await basic(ctx.http.post(`${PREFIX}/auth/nonce`));
-      expect(res.status).toBe(429);
-      expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe(429);
-    },
-  );
+  it('DEF-BE-005: el 429 debe usar el envelope {success:false,error:{code,message}}', async () => {
+    const res = await basic(ctx.http.post(`${PREFIX}/auth/nonce`));
+    expect(res.status).toBe(429);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe(429);
+  });
 });

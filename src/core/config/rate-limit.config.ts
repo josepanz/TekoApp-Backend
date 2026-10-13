@@ -37,7 +37,33 @@ export class RateLimitConfig {
       this.logger.warn(
         `Rechazo por rate limit — limiter=${limiterName} method=${req.method} path=${req.originalUrl} ip=${req.ip}`,
       );
-      res.status(optionsUsed.statusCode).send(optionsUsed.message);
+      // DEF-BE-005: mismo envelope que el resto de errores de la API
+      // ({success:false, error:{code,message,error,timestamp,path}}). `retryAfter` (segundos) se
+      // conserva dentro de `error` y el header estándar `Retry-After` lo agrega la librería.
+      const raw = optionsUsed.message as unknown;
+      const detail =
+        typeof raw === 'object' && raw !== null
+          ? (raw as { error?: unknown; retryAfter?: unknown })
+          : undefined;
+      const message =
+        typeof raw === 'string'
+          ? raw
+          : typeof detail?.error === 'string'
+            ? detail.error
+            : 'Too Many Requests';
+      res.status(optionsUsed.statusCode).json({
+        success: false,
+        error: {
+          code: optionsUsed.statusCode,
+          message,
+          error: 'Too Many Requests',
+          ...(typeof detail?.retryAfter === 'number'
+            ? { retryAfter: detail.retryAfter }
+            : {}),
+          timestamp: new Date().toISOString(),
+          path: req.originalUrl,
+        },
+      });
     };
   }
 
