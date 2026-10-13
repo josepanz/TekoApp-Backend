@@ -158,6 +158,30 @@ describe('M4 Marketplace (e2e real)', () => {
       await offer(svc.referenceId, proY.token).expect(201);
     });
 
+    // CP-BE-MKT-040
+    it('DEF-BE-027 (descartado): el motivo al rechazar una oferta es opcional; sin motivo, motivo vacio o con motivo -> 200 REJECTED', async () => {
+      const svc = await newService();
+      const o1 = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
+      const o2 = unwrap((await offer(svc.referenceId, proY.token).expect(201)).body);
+      const noReason = await respond(svc.referenceId, o1.referenceId, clienteA, 'REJECTED').expect(200);
+      expect(unwrap(noReason.body).status).toBe('REJECTED');
+      const emptyReason = await http
+        .put(`${PREFIX}/services/${svc.referenceId}/requests/${o2.referenceId}`)
+        .set(bearer(clienteA))
+        .send({ status: 'REJECTED', reason: '' })
+        .expect(200);
+      expect(unwrap(emptyReason.body).status).toBe('REJECTED');
+      const proZ = await createApprovedPro(http, admin, categoryId);
+      const o3 = unwrap((await offer(svc.referenceId, proZ.token).expect(201)).body);
+      const withReason = await http
+        .put(`${PREFIX}/services/${svc.referenceId}/requests/${o3.referenceId}`)
+        .set(bearer(clienteA))
+        .send({ status: 'REJECTED', reason: 'Muy caro' })
+        .expect(200);
+      expect(unwrap(withReason.body).status).toBe('REJECTED');
+      expect(await status(svc.referenceId)).toBe('PENDING');
+    });
+
     // CP-BE-MKT-006
     it('al aceptar una oferta, las demás ofertas pendientes pasan a REJECTED', async () => {
       const svc = await newService();
