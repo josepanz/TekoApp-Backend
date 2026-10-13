@@ -2,7 +2,7 @@
 /**
  * Suite: M2 Catálogos contra el stack real (categorías CRUD + visibilidad pública, service-types,
  * countries/currencies/languages públicos, tipos de documento profesional, TaxConfig/TipConfig sin
- * fila, paginación). Defectos de producto con `it.failing` y su DEF-BE en el nombre.
+ * fila, paginación). Los DEF-BE detectados quedaron corregidos; sus tests llevan el DEF en el nombre.
  * Casos: CP-BE-CAT-001..035 (ver test/qa/casos/CP-CAT.md)
  * Tipo: e2e   Prioridad: P0/P1
  * Precondiciones: pnpm e2e:up + e2e:seed; fixtures admin y cliente_a. Los nombres/códigos creados

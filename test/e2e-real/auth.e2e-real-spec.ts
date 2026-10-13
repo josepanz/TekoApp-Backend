@@ -1,8 +1,8 @@
 /* eslint-disable */
 /**
  * Suite: M1 Auth y sesión contra el stack real (registro, login, scope, refresh, Basic Auth
- * pre-login, guards de permisos, rol COMPLIANCE). Defectos de producto marcados `it.failing`
- * con su DEF-BE en el nombre (no se corrige código de producto en esta rama).
+ * pre-login, guards de permisos, rol COMPLIANCE). Los DEF-BE detectados
+ * (001..011) quedaron corregidos en esta rama; sus tests llevan el DEF en el nombre.
  * Casos: CP-BE-AUTH-007..034 (ver test/qa/casos/CP-AUTH.md). El rate-limit vive en
  *        auth-rate-limit.e2e-real-spec.ts (CP-BE-AUTH-035) y la forma de error en
  *        error-contract.e2e-real-spec.ts (CP-BE-ERR-001..).

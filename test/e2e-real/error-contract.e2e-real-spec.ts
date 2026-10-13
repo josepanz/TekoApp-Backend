@@ -2,7 +2,7 @@
 /**
  * Suite: contrato de error uniforme de la API (400/401/403/404/409 comparten forma
  * {success:false, error:{code, message, error, timestamp, path}}). Las desviaciones son defectos
- * registrados (it.failing con DEF-BE), no se corrigen en esta rama.
+ * registrados como DEF-BE y corregidos en esta rama (el DEF va en el nombre del test).
  * Casos: CP-BE-ERR-001..005 (el 429 es CP-BE-ERR-006 en auth-rate-limit.e2e-real-spec.ts)
  *        (ver test/qa/casos/CP-AUTH.md)
  * Tipo: e2e   Prioridad: P1
