@@ -238,14 +238,41 @@ describe('M2 Catálogos (e2e real)', () => {
     });
 
     // CP-BE-CAT-016
-    it.failing(
-      'DEF-BE-008: GET /categories/:id de una categoría oculta debe dar 404 como slug/listados (hoy 200)',
-      async () => {
-        const cat = await createCategory({ isVisible: false });
-        const res = await http.get(`${PREFIX}/categories/${cat.id}`);
-        expect(res.status).toBe(404);
-      },
-    );
+    it('DEF-BE-008: GET /categories/:id de una categoría oculta debe dar 404 como slug/listados', async () => {
+      const cat = await createCategory({ isVisible: false });
+      const res = await http.get(`${PREFIX}/categories/${cat.id}`);
+      expect(res.status).toBe(404);
+      // un token de cliente no cambia nada; un token inválido tampoco rompe la ruta pública
+      await http
+        .get(`${PREFIX}/categories/${cat.id}`)
+        .set(bearer(cliente))
+        .expect(404);
+      await http
+        .get(`${PREFIX}/categories/${cat.id}`)
+        .set('Authorization', 'Bearer basura')
+        .expect(404);
+    });
+
+    // CP-BE-CAT-016b
+    it('DEF-BE-008: el admin sí ve la categoría oculta o inactiva por id; la visible la ve cualquiera', async () => {
+      const oculta = await createCategory({ isVisible: false });
+      const visible = await createCategory();
+      const res = await http
+        .get(`${PREFIX}/categories/${oculta.id}`)
+        .set(bearer(admin))
+        .expect(200);
+      expect(unwrap(res.body).id).toBe(oculta.id);
+      await http
+        .patch(`${PREFIX}/categories/${visible.id}/status`)
+        .query({ status: 'INACTIVE' })
+        .set(bearer(admin))
+        .expect(200);
+      await http.get(`${PREFIX}/categories/${visible.id}`).expect(404);
+      await http
+        .get(`${PREFIX}/categories/${visible.id}`)
+        .set(bearer(admin))
+        .expect(200);
+    });
   });
 
   describe('Service types', () => {

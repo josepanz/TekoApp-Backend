@@ -99,6 +99,50 @@ describe('CategoriesService', () => {
     });
   });
 
+  // ── findOneForViewer (DEF-BE-008) ───────────────────────────────────────
+  describe('findOneForViewer', () => {
+    it('devuelve una categoría activa y visible a cualquiera', async () => {
+      mockFindUnique.mockResolvedValue(categoriaBase);
+
+      await expect(service.findOneForViewer(1, false)).resolves.toEqual(
+        categoriaBase,
+      );
+    });
+
+    it.each([
+      ['oculta', { isVisible: false }],
+      ['inactiva', { status: CategoryStatus.INACTIVE }],
+    ])(
+      'lanza NotFoundException si está %s y no puede verla',
+      async (_n, patch) => {
+        mockFindUnique.mockResolvedValue({ ...categoriaBase, ...patch });
+
+        await expect(service.findOneForViewer(1, false)).rejects.toThrow(
+          NotFoundException,
+        );
+      },
+    );
+
+    it('un admin sí ve la categoría oculta o inactiva', async () => {
+      const oculta = {
+        ...categoriaBase,
+        isVisible: false,
+        status: CategoryStatus.INACTIVE,
+      };
+      mockFindUnique.mockResolvedValue(oculta);
+
+      await expect(service.findOneForViewer(1, true)).resolves.toEqual(oculta);
+    });
+
+    it('lanza NotFoundException si no existe, aun para un admin', async () => {
+      mockFindUnique.mockResolvedValue(null);
+
+      await expect(service.findOneForViewer(9, true)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
   // ── create ───────────────────────────────────────────────────────────────
   describe('create', () => {
     const dto: CreateCategoryDto = {

@@ -5,6 +5,7 @@ import { CategoriesController } from './categories.controller';
 import { CategoriesService } from '@api/categories/services/categories.service';
 import { CategoryStatus } from '@prisma/client';
 import { Reflector } from '@nestjs/core';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 
@@ -19,6 +20,7 @@ const mockFindMainCategories = jest.fn();
 const mockFindSubcategories = jest.fn();
 const mockSearchCategories = jest.fn();
 const mockFindOne = jest.fn();
+const mockFindOneForViewer = jest.fn();
 const mockFindBySlug = jest.fn();
 const mockGetCategoryStats = jest.fn();
 const mockUpdate = jest.fn();
@@ -43,6 +45,7 @@ describe('CategoriesController', () => {
             findSubcategories: mockFindSubcategories,
             searchCategories: mockSearchCategories,
             findOne: mockFindOne,
+            findOneForViewer: mockFindOneForViewer,
             findBySlug: mockFindBySlug,
             getCategoryStats: mockGetCategoryStats,
             update: mockUpdate,
@@ -232,29 +235,51 @@ describe('CategoriesController', () => {
 
   // ── findOne ───────────────────────────────────────────────────────────────
   describe('findOne', () => {
+    const param = { id: 1 } as never;
+    const userWith = (...permissions: string[]) =>
+      ({ permissions }) as unknown as IUserDataOnJwt;
+
     it('debe retornar la categoría correspondiente al id proporcionado', async () => {
       // Arrange
-      const param = { id: 1 } as never;
       const expected = { id: 1, name: 'Plomería' };
-      mockFindOne.mockResolvedValue(expected);
+      mockFindOneForViewer.mockResolvedValue(expected);
 
       // Act
       const result = await controller.findOne(param);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindOne).toHaveBeenCalledWith(1);
+      expect(mockFindOneForViewer).toHaveBeenCalledWith(1, false);
     });
+
+    it('anónimo o sin permiso de categorías no puede ver ocultas (canSeeHidden=false)', async () => {
+      mockFindOneForViewer.mockResolvedValue({ id: 1 });
+
+      await controller.findOne(param, userWith('dashboard:read'));
+      await controller.findOne(param, undefined);
+
+      expect(mockFindOneForViewer).toHaveBeenNthCalledWith(1, 1, false);
+      expect(mockFindOneForViewer).toHaveBeenNthCalledWith(2, 1, false);
+    });
+
+    it.each([PERMISSIONS.ADMIN.ALL, PERMISSIONS.CATEGORIES.MANAGE])(
+      'con el permiso %s puede ver ocultas (canSeeHidden=true)',
+      async (permission) => {
+        mockFindOneForViewer.mockResolvedValue({ id: 1 });
+
+        await controller.findOne(param, userWith(permission));
+
+        expect(mockFindOneForViewer).toHaveBeenCalledWith(1, true);
+      },
+    );
 
     it('debe propagar NotFoundException cuando la categoría no existe', async () => {
       // Arrange
-      const param = { id: 999 } as never;
-      mockFindOne.mockRejectedValue(new NotFoundException());
+      const p = { id: 999 } as never;
+      mockFindOneForViewer.mockRejectedValue(new NotFoundException());
 
       // Act & Assert
-      await expect(controller.findOne(param)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(controller.findOne(p)).rejects.toThrow(NotFoundException);
     });
   });
 

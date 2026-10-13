@@ -85,6 +85,22 @@ export class CategoriesService {
     return category;
   }
 
+  /**
+   * Detalle de una categoría para el endpoint público. Aplica la misma regla que los listados y
+   * `findBySlug` (solo ACTIVE y visible) salvo que quien llama pueda administrar categorías
+   * (DEF-BE-008). Los usos internos (update/changeStatus/remove) siguen usando `findOne`.
+   */
+  async findOneForViewer(id: number, canSeeHidden: boolean): Promise<Category> {
+    const category = await this.findOne(id);
+    if (
+      !canSeeHidden &&
+      (category.status !== CategoryStatus.ACTIVE || !category.isVisible)
+    ) {
+      throw new NotFoundException(t('categories.NOT_FOUND'));
+    }
+    return category;
+  }
+
   async findBySlug(slug: string): Promise<Category> {
     const category = await this.categoriesDb.findFirst({
       slug,

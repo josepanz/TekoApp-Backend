@@ -13,6 +13,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '@modules/auth/guards/optional-jwt-auth.guard';
+import { User } from '@common/decorators/user.decorator';
+import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
 import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
 import { Permissions } from '@common/decorators/permissions.decorator';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
@@ -109,12 +112,21 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiGetCategoryById()
   async findOne(
     @Param() param: CategoryIdParamDTO,
+    @User() user?: IUserDataOnJwt,
   ): Promise<CategoryDetailResponseDTO> {
-    return this.categoriesService.findOne(
+    // DEF-BE-008: las categorías ocultas/inactivas solo las ve quien puede administrarlas.
+    const canSeeHidden =
+      user?.permissions?.some(
+        (p) =>
+          p === PERMISSIONS.CATEGORIES.MANAGE || p === PERMISSIONS.ADMIN.ALL,
+      ) ?? false;
+    return this.categoriesService.findOneForViewer(
       param.id,
+      canSeeHidden,
     ) as unknown as Promise<CategoryDetailResponseDTO>;
   }
 
