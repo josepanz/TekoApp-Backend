@@ -10,6 +10,7 @@ import { UpdateCategoryDto } from '../dtos/request/update-category.dto';
 import { CategoryStatsResponseDTO } from '../dtos/response';
 import { Category, CategoryStatus, Prisma } from '@prisma/client';
 
+import { PaginatedResponse } from '@common/dtos/response-with-pagination.dto';
 import { t } from '@common/i18n/i18n.helper';
 @Injectable()
 export class CategoriesService {
@@ -71,10 +72,28 @@ export class CategoriesService {
     });
   }
 
-  async findAllWithRelations(): Promise<Category[]> {
-    return this.categoriesDb.findMany({
-      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-    });
+  /** Listado admin paginado (DEF-BE-012): todas las categorías, sin filtrar por estado/visibilidad. */
+  async findAllWithRelations(
+    page = 1,
+    pageSize = 10,
+  ): Promise<PaginatedResponse<Category>> {
+    const [data, total] = await Promise.all([
+      this.categoriesDb.findMany({
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.categoriesDb.count(),
+    ]);
+    return {
+      data,
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   }
 
   async findOne(id: number): Promise<Category> {

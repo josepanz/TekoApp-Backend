@@ -159,15 +159,21 @@ describe('CategoriesController', () => {
   describe('findAllWithRelations', () => {
     it('debe retornar todas las categorías con sus relaciones', async () => {
       // Arrange
-      const expected = [{ id: 1, name: 'Plomería', subcategories: [] }];
+      const expected = {
+        data: [{ id: 1, name: 'Plomería', subcategories: [] }],
+        pagination: { total: 1, page: 2, pageSize: 5, totalPages: 1 },
+      };
       mockFindAllWithRelations.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.findAllWithRelations();
+      const result = await controller.findAllWithRelations({
+        page: 2,
+        pageSize: 5,
+      });
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockFindAllWithRelations).toHaveBeenCalled();
+      expect(mockFindAllWithRelations).toHaveBeenCalledWith(2, 5);
     });
   });
 

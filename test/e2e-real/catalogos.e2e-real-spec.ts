@@ -85,7 +85,7 @@ describe('M2 Catálogos (e2e real)', () => {
       const all = unwrap(
         (
           await http
-            .get(`${PREFIX}/categories/all`)
+            .get(`${PREFIX}/categories/all?pageSize=100`)
             .set(bearer(admin))
             .expect(200)
         ).body,
@@ -531,6 +531,32 @@ describe('M2 Catálogos (e2e real)', () => {
   });
 
   describe('Categorías: paginación admin y nombre vacío', () => {
+    // CP-BE-CAT-034
+    it('DEF-BE-012: GET /categories/all respeta page/pageSize y devuelve {data, pagination}', async () => {
+      await createCategory();
+      await createCategory();
+      await createCategory();
+      const res = await http
+        .get(`${PREFIX}/categories/all?page=1&pageSize=2`)
+        .set(bearer(admin))
+        .expect(200);
+      expect(res.body.data).toHaveLength(2);
+      const { total, page, pageSize, totalPages } = res.body.pagination;
+      expect(total).toBeGreaterThanOrEqual(3);
+      expect(page).toBe(1);
+      expect(pageSize).toBe(2);
+      expect(totalPages).toBe(Math.ceil(total / 2));
+      const last = await http
+        .get(`${PREFIX}/categories/all?page=${totalPages}&pageSize=2`)
+        .set(bearer(admin))
+        .expect(200);
+      expect(last.body.data.length).toBe(total - (totalPages - 1) * 2);
+      // pageSize > 100 se rechaza
+      await http
+        .get(`${PREFIX}/categories/all?pageSize=101`)
+        .set(bearer(admin))
+        .expect(400);
+    });
     // CP-BE-CAT-035
     it('DEF-BE-013: POST /categories con name vacío o solo espacios -> 400', async () => {
       for (const name of ['', '   ']) {

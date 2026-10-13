@@ -19,6 +19,8 @@ import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interf
 import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
 import { Permissions } from '@common/decorators/permissions.decorator';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
+import { PaginationQueryDTO } from '@common/dtos/pagination.dto';
+import { PaginatedResponse } from '@common/dtos/response-with-pagination.dto';
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dtos/request/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/request/update-category.dto';
@@ -77,10 +79,13 @@ export class CategoriesController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiGetAllCategoriesWithRelations()
-  async findAllWithRelations(): Promise<CategoryDetailResponseDTO[]> {
-    return this.categoriesService.findAllWithRelations() as unknown as Promise<
-      CategoryDetailResponseDTO[]
-    >;
+  async findAllWithRelations(
+    @Query() query: PaginationQueryDTO,
+  ): Promise<PaginatedResponse<CategoryDetailResponseDTO>> {
+    return this.categoriesService.findAllWithRelations(
+      query.page,
+      query.pageSize,
+    ) as unknown as Promise<PaginatedResponse<CategoryDetailResponseDTO>>;
   }
 
   @Get('main')
