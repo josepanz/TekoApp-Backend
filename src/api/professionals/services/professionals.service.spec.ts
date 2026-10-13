@@ -41,9 +41,12 @@ const mockProfessional = {
   verificationStatus: 'VERIFIED',
 };
 
-function fakeUser(overrides: { id?: number; permissions?: string[] } = {}) {
+function fakeUser(
+  overrides: { id?: number; referenceId?: string; permissions?: string[] } = {},
+) {
   return {
     id: overrides.id ?? 1,
+    referenceId: overrides.referenceId ?? 'ref-viewer',
     permissions: overrides.permissions ?? [],
   } as never;
 }
@@ -447,11 +450,8 @@ describe('ProfessionalsService', () => {
       mockHasActiveServiceWith.mockImplementation((ref: string) =>
         Promise.resolve(ref === 'cliente-con-servicio'),
       );
-      const linked = {
-        ...fakeUser({ id: 99 }),
-        referenceId: 'cliente-con-servicio',
-      };
-      const other = { ...fakeUser({ id: 98 }), referenceId: 'otro' };
+      const linked = fakeUser({ id: 99, referenceId: 'cliente-con-servicio' });
+      const other = fakeUser({ id: 98, referenceId: 'otro' });
 
       // Act & Assert
       await expect(service.getProfessionalById(1, linked)).resolves.toBe(
