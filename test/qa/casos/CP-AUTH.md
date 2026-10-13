@@ -733,6 +733,6 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 | DEF-BE-003 | Medio | Corregido (1cdcbce) |
 | DEF-BE-004 | Bajo | Corregido (ad9f0d8) |
 | DEF-BE-005 | Medio | Corregido (bbfac18) |
-| DEF-BE-006 | Alto | Corregido (HASH006): refresh con `jti` + `POST /auth/logout` + denylist `revoked:jti:<jti>` en Redis con TTL. Refresh legacy sin `jti` se acepta hasta expirar; Redis caído: refresh sigue (warning), logout falla 500 |
+| DEF-BE-006 | Alto | Corregido (69f80ca): refresh con `jti` + `POST /auth/logout` + denylist `revoked:jti:<jti>` en Redis con TTL. Refresh legacy sin `jti` se acepta hasta expirar; Redis caído: refresh sigue (warning), logout falla 500 |
 | DEF-BE-007 | Bajo | Corregido (a24fea1) |
 | DEF-BE-011 | Bajo | Abierto (`it.failing` unitario, CP-BE-AUTH-039): `JwtRefreshStrategy` busca por `payload.email`, que el refresh token no lleva; no es explotable porque el service revalida por `sub`. Corregir cambiando la búsqueda a `sub` (fuera del alcance de DEF-BE-006) |

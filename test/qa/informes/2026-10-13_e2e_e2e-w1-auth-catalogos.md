@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 00:18 |
+| Fecha y hora | 2026-10-13 00:29 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w1-auth-catalogos` |
-| Commit | `88addb8` (árbol con cambios sin commitear) |
+| Commit | `69f80ca` (árbol con cambios sin commitear) |
 | Entorno | compose e2e (docker-compose.e2e.yml, .env.e2e), Node v22.16.0, Docker 29.6.2, build dfc4efb |
 | Comando | `pnpm qa:e2e` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 5 (0 con fallo) | 116 | 116 | 0 | 0 | 27.2 s |
+| 5 (0 con fallo) | 119 | 119 | 0 | 0 | 27.1 s |
 
 ## 2. Resultados por caso
 
@@ -42,7 +42,10 @@
 | CP-BE-AUTH-024 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) refresh expirado (firmado con la clave real) -> 401 | passed |
 | CP-BE-AUTH-025 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) refresh firmado con otra clave -> 401 | passed |
 | CP-BE-AUTH-026 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) DEF-BE-004: el 401 de refresh debe llamarse "Unauthorized" en error.error | passed |
-| CP-BE-AUTH-027 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) DEF-BE-006: existe logout que invalide la sesión (hoy POST /auth/logout -> 404) | passed |
+| CP-BE-AUTH-027 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) DEF-BE-006: logout revoca el refresh; refresh posterior -> 401 en envelope uniforme | passed |
+| CP-BE-AUTH-036 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) DEF-BE-006: un segundo logout con el mismo refresh es idempotente (204) | passed |
+| CP-BE-AUTH-037 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) DEF-BE-006: logout solo revoca ese refresh; otra sesión del mismo usuario sigue válida | passed |
+| CP-BE-AUTH-038 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Refresh token (cookie + Basic Auth) DEF-BE-006: logout sin cookie, con cookie basura o sin Basic Auth -> 401 | passed |
 | CP-BE-AUTH-028 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Basic Auth inválido o ausente en endpoints pre-login public-key sin Authorization -> 401 | passed |
 | CP-BE-AUTH-028 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Basic Auth inválido o ausente en endpoints pre-login nonce sin Authorization -> 401 | passed |
 | CP-BE-AUTH-028 | `test/e2e-real/auth.e2e-real-spec.ts` | M1 Auth y sesión (e2e real) Basic Auth inválido o ausente en endpoints pre-login login sin Authorization -> 401 | passed |
@@ -143,7 +146,7 @@ Ninguno.
 
 ## 3. Defectos encontrados
 
-Defectos heredados del informe `2026-10-12_e2e_e2e-w1-auth-catalogos.md`; en esta ejecución 9 de 10 están corregidos y sus casos son `it` normales. No se detectaron defectos nuevos (no hay DEF-BE-011+).
+Defectos heredados del informe `2026-10-12_e2e_e2e-w1-auth-catalogos.md`; en esta ejecución (segunda corrida de la rama, tras implementar DEF-BE-006; sobrescribe el informe de la primera corrida del mismo día) los 10 están corregidos y sus casos son `it` normales. Defecto nuevo: DEF-BE-011 (Bajo, abierto, `it.failing` unitario CP-BE-AUTH-039): `JwtRefreshStrategy` busca por `payload.email`, que el refresh no lleva; no explotable porque el service revalida por `sub`.
 
 | ID | Severidad | Casos | Estado |
 |---|---|---|---|
@@ -152,7 +155,7 @@ Defectos heredados del informe `2026-10-12_e2e_e2e-w1-auth-catalogos.md`; en est
 | DEF-BE-003 | Media | CP-BE-AUTH-013 | Corregido (1cdcbce): email inexistente -> 401 `INVALID_CREDENTIALS` |
 | DEF-BE-004 | Baja | CP-BE-AUTH-026 | Corregido (ad9f0d8): `error` sale del status si la excepción no lo trae |
 | DEF-BE-005 | Baja | CP-BE-ERR-006 | Corregido (bbfac18): el 429 usa el envelope uniforme |
-| DEF-BE-006 | Media | CP-BE-AUTH-027 | **Abierto** (`it.failing`): los refresh tokens son JWT RS256 stateless sin `jti` ni persistencia; propuesta: denylist de `jti` en Redis con TTL (pendiente de decisión del orquestador) |
+| DEF-BE-006 | Media | CP-BE-AUTH-027, 036..038 | Corregido (69f80ca): refresh con `jti`, `POST /auth/logout` y denylist `revoked:jti:<jti>` en Redis con TTL |
 | DEF-BE-007 | Baja | CP-BE-ERR-008 | Corregido (a24fea1): el 400 incluye `error.error:"Bad Request"` |
 | DEF-BE-008 | Baja | CP-BE-CAT-016, 016b | Corregido (dcf2657): detalle por id oculto para no-admin (`OptionalJwtAuthGuard`) |
 | DEF-BE-009 | Media | CP-BE-CAT-031, 032 | Corregido (c0c7d8f): `pageSize` máximo 100 (`PaginationQueryDTO` y `ListUsersRequestDTO`) |
@@ -160,11 +163,12 @@ Defectos heredados del informe `2026-10-12_e2e_e2e-w1-auth-catalogos.md`; en est
 
 ## 4. Desvíos y observaciones
 
-- **Sin fallos ni flakies:** la suite (5 suites, 116 casos) pasó 3 veces seguidas con `pnpm test:e2e:real` y una cuarta vía `pnpm qa:e2e`. El único `it.failing` restante es DEF-BE-006 (se muestra como `passed` porque el fallo es el esperado).
-- **Unitarias:** `pnpm test` (142 suites, 1586 tests), `pnpm lint` (0 errores) y `pnpm check:types` en verde. `pnpm qa:unit` sale con código 1 por umbrales de cobertura global (branches 67.17% < 70%, functions 76.21% < 80%): estado previo a esta rama, no causado por los fixes (cobertura previa 66.85% / 75.74%).
+- **Sin fallos ni flakies:** la suite (5 suites, 119 casos) pasó 3 veces seguidas con `pnpm test:e2e:real` y una cuarta vía `pnpm qa:e2e`. No queda ningún `it.failing` e2e.
+- **Unitarias:** `pnpm test` (144 suites, 1603 tests), `pnpm lint` (0 errores) y `pnpm check:types` en verde. `pnpm qa:unit` sale con código 1 por umbrales de cobertura global (branches 67,17% < 70%, functions 76,32% < 80%): ya incumplían antes de esta rama (66,85% / 75,74%).
+- **Diseño de DEF-BE-006:** un refresh legacy sin `jti` se acepta hasta expirar; si Redis cae, el refresh sigue (warning) y el logout falla con 500 (fail-closed).
 - **Observación, no corregida:** el login de un usuario existente sin credencial sigue devolviendo 200 `{login:false, requiredNewPassword:true}` (flujo de migración de usuarios legacy), lo que aún permite distinguir ese caso; además el login de email inexistente no ejecuta la verificación de hash (diferencia de tiempo). Fuera de alcance de DEF-BE-003.
 - `qa:e2e` levantó y bajó el stack (`pnpm e2e:down` incluido; sin contenedores `tekoapp-e2e-*` al terminar).
-- La marca "árbol con cambios sin commitear" del encabezado se debe a que este informe aún no estaba commiteado; el código ejecutado es el de `88addb8`.
+- La marca "árbol con cambios sin commitear" del encabezado se debe a que este informe aún no estaba commiteado; el código ejecutado es el de `69f80ca`.
 
 ## 5. Evidencia
 
@@ -173,4 +177,4 @@ Defectos heredados del informe `2026-10-12_e2e_e2e-w1-auth-catalogos.md`; en est
 
 ## 6. Veredicto
 
-APROBADO CON OBSERVACIONES: 116/116 casos pasan en 4 corridas y no hay defectos nuevos, pero DEF-BE-006 (logout/revocación) sigue abierto y requiere una decisión de diseño.
+APROBADO CON OBSERVACIONES: 119/119 casos pasan en 4 corridas y los 10 defectos DEF-BE-001..010 están corregidos; queda abierto DEF-BE-011 (bajo).

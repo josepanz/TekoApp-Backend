@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 00:17 |
+| Fecha y hora | 2026-10-13 00:28 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w1-auth-catalogos` |
-| Commit | `88addb8` |
+| Commit | `69f80ca` (árbol con cambios sin commitear) |
 | Entorno | local, Jest con mocks (sin infraestructura), Node v22.16.0 |
 | Comando | `pnpm qa:unit` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,16 +14,16 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 142 (0 con fallo) | 1586 | 1586 | 0 | 0 | 18.4 s |
+| 144 (0 con fallo) | 1603 | 1603 | 0 | 0 | 20.1 s |
 
 ### Cobertura
 
 | Métrica | Cobertura | Cubiertos/Total | Umbral (jest.config.ts) | Estado |
 |---|---|---|---|---|
-| statements | 82.11% | 5797/7060 | 80% | cumple |
-| branches | 67.17% | 3192/4752 | 70% | INCUMPLE |
-| functions | 76.21% | 1301/1707 | 80% | INCUMPLE |
-| lines | 81.98% | 5271/6429 | 80% | cumple |
+| statements | 82.25% | 5842/7102 | 80% | cumple |
+| branches | 67.17% | 3213/4783 | 70% | INCUMPLE |
+| functions | 76.32% | 1309/1715 | 80% | INCUMPLE |
+| lines | 82.15% | 5314/6468 | 80% | cumple |
 
 ## 2. Resultados por suite (agrupadas por dominio)
 
@@ -35,7 +35,7 @@
 | `src/api/ai-disclosures` | 1 | 11 | 0 | 0 |
 | `src/api/analytics` | 2 | 13 | 0 | 0 |
 | `src/api/audit-log` | 2 | 4 | 0 | 0 |
-| `src/api/auth` | 4 | 69 | 0 | 0 |
+| `src/api/auth` | 4 | 73 | 0 | 0 |
 | `src/api/budgets` | 1 | 14 | 0 | 0 |
 | `src/api/categories` | 2 | 57 | 0 | 0 |
 | `src/api/contracts` | 2 | 29 | 0 | 0 |
@@ -71,7 +71,7 @@
 | `src/modules/ai-disclosures-db` | 1 | 3 | 0 | 0 |
 | `src/modules/analytics-db` | 1 | 15 | 0 | 0 |
 | `src/modules/audit-log-db` | 1 | 4 | 0 | 0 |
-| `src/modules/auth` | 10 | 111 | 0 | 0 |
+| `src/modules/auth` | 12 | 124 | 0 | 0 |
 | `src/modules/budgets-db` | 1 | 7 | 0 | 0 |
 | `src/modules/categories-db` | 1 | 13 | 0 | 0 |
 | `src/modules/contracts-db` | 1 | 9 | 0 | 0 |
@@ -140,9 +140,9 @@
 
 | Suite (spec) | Casos | Pasaron | Fallaron | Omitidos | Estado |
 |---|---|---|---|---|---|
-| `src/api/auth/controllers/auth-api.controller.spec.ts` | 26 | 26 | 0 | 0 | OK |
+| `src/api/auth/controllers/auth-api.controller.spec.ts` | 29 | 29 | 0 | 0 | OK |
 | `src/api/auth/services/auth-api.service.spec.ts` | 29 | 29 | 0 | 0 | OK |
-| `src/api/auth/services/auth-cookie.service.spec.ts` | 6 | 6 | 0 | 0 | OK |
+| `src/api/auth/services/auth-cookie.service.spec.ts` | 7 | 7 | 0 | 0 | OK |
 | `src/api/auth/services/auth-migration.service.spec.ts` | 8 | 8 | 0 | 0 | OK |
 
 #### `src/api/budgets`
@@ -409,9 +409,11 @@
 | `src/modules/auth/helpers/password-policy.helper.spec.ts` | 6 | 6 | 0 | 0 | OK |
 | `src/modules/auth/repositories/credentials.repository.spec.ts` | 4 | 4 | 0 | 0 | OK |
 | `src/modules/auth/services/auth-password.service.spec.ts` | 27 | 27 | 0 | 0 | OK |
-| `src/modules/auth/services/auth-token.service.spec.ts` | 8 | 8 | 0 | 0 | OK |
+| `src/modules/auth/services/auth-token.service.spec.ts` | 16 | 16 | 0 | 0 | OK |
 | `src/modules/auth/services/auth.service.spec.ts` | 32 | 32 | 0 | 0 | OK |
 | `src/modules/auth/services/nonce.service.spec.ts` | 7 | 7 | 0 | 0 | OK |
+| `src/modules/auth/services/token-revocation.service.spec.ts` | 4 | 4 | 0 | 0 | OK |
+| `src/modules/auth/strategies/jwt-refresh.strategy.spec.ts` | 1 | 1 | 0 | 0 | OK |
 
 #### `src/modules/budgets-db`
 
