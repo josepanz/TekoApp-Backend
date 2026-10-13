@@ -115,13 +115,10 @@ describe('Contrato de error uniforme (e2e real)', () => {
   );
 
   // CP-BE-ERR-008
-  it.failing(
-    'DEF-BE-007: el 400 debe incluir error.error "Bad Request" como el resto (hoy lo omite y agrega errors[])',
-    async () => {
-      const res = await triggers[0][2]();
-      expect(res.body.error.error).toBe('Bad Request');
-    },
-  );
+  it('DEF-BE-007: el 400 debe incluir error.error "Bad Request" como el resto', async () => {
+    const res = await triggers[0][2]();
+    expect(res.body.error.error).toBe('Bad Request');
+  });
 
   // CP-BE-ERR-009
   it('DEF-BE-001: un body inválido debe usar el mismo envelope de error', async () => {
