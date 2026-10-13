@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
@@ -26,6 +27,7 @@ const mockGetStats = jest.fn();
 const mockSearchBySkills = jest.fn();
 const mockGetTopRated = jest.fn();
 const mockGenerate = jest.fn();
+const mockHasActiveServiceWith = jest.fn();
 const mockNotificationsCreate = jest.fn();
 
 const mockProfessional = {
@@ -72,6 +74,10 @@ describe('ProfessionalsService', () => {
             searchBySkills: mockSearchBySkills,
             getTopRated: mockGetTopRated,
           },
+        },
+        {
+          provide: ProfessionalPositionDbService,
+          useValue: { hasActiveServiceWith: mockHasActiveServiceWith },
         },
         {
           provide: ReportService,
@@ -427,6 +433,40 @@ describe('ProfessionalsService', () => {
       await expect(
         service.getProfessionalStats(1, fakeUser({ id: 99 })),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe seguir mostrando a un SUSPENDED al cliente con servicio activo con él (DEF-BE-030) y 404 a los demás', async () => {
+      // Arrange
+      const suspended = {
+        ...mockProfessional,
+        status: 'SUSPENDED',
+        isActive: false,
+      };
+      mockFindById.mockResolvedValue(suspended);
+      mockFindProfessionalByReferenceId.mockResolvedValue(suspended);
+      mockHasActiveServiceWith.mockImplementation((ref: string) =>
+        Promise.resolve(ref === 'cliente-con-servicio'),
+      );
+      const linked = {
+        ...fakeUser({ id: 99 }),
+        referenceId: 'cliente-con-servicio',
+      };
+      const other = { ...fakeUser({ id: 98 }), referenceId: 'otro' };
+
+      // Act & Assert
+      await expect(service.getProfessionalById(1, linked)).resolves.toBe(
+        suspended,
+      );
+      await expect(
+        service.getProfessionalByReference('ref', linked),
+      ).resolves.toBe(suspended);
+      await expect(service.getProfessionalById(1, other)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockHasActiveServiceWith).toHaveBeenCalledWith(
+        'cliente-con-servicio',
+        suspended.id,
+      );
     });
 
     it('debe tratar como no visible a un profesional APPROVED pero inactivo', async () => {

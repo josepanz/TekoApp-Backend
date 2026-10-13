@@ -567,5 +567,39 @@ describe('M4 Marketplace (e2e real)', () => {
     it('sin JWT /locations/professional/:id -> 401', async () => {
       await http.get(`${PREFIX}/locations/professional/${proL.proId}`).expect(401);
     });
+
+    // CP-BE-MKT-039
+    it('DEF-BE-030: un profesional suspendido a mitad de servicio sigue visible (id y referenceId) para su cliente con servicio ACCEPTED/IN_PROGRESS; terceros y quien perdio el vinculo reciben 404', async () => {
+      const proS = await createApprovedPro(http, admin, categoryId);
+      const clientAccepted = await freshClient();
+      const clientInProgress = await freshClient();
+      const accepted = await newService(clientAccepted);
+      const inProgress = await newService(clientInProgress);
+      for (const [svc, client] of [
+        [accepted, clientAccepted],
+        [inProgress, clientInProgress],
+      ] as const) {
+        const req = unwrap((await offer(svc.referenceId, proS.token).expect(201)).body);
+        await respond(svc.referenceId, req.referenceId, client, 'ACCEPTED').expect(200);
+      }
+      await start(inProgress.referenceId, proS.token).expect(201);
+      await http
+        .post(`${PREFIX}/professionals/${proS.proId}/suspend`)
+        .set(bearer(admin))
+        .send({ reason: 'e2e a mitad de servicio' })
+        .expect(201);
+      const view = async (token: string) => [
+        (await http.get(`${PREFIX}/professionals/${proS.proId}`).set(bearer(token))).status,
+        (await http.get(`${PREFIX}/professionals/reference/${proS.proReferenceId}`).set(bearer(token))).status,
+      ];
+      expect(await view(clientAccepted)).toEqual([200, 200]); // ACCEPTED
+      expect(await view(clientInProgress)).toEqual([200, 200]); // IN_PROGRESS
+      expect(await view(clienteB)).toEqual([404, 404]); // sin vinculo
+      expect(await view(admin)).toEqual([200, 200]);
+
+      await cancel(accepted.referenceId, clientAccepted).expect(200);
+      expect(await view(clientAccepted)).toEqual([404, 404]); // el vinculo se revoco
+      expect(await view(clientInProgress)).toEqual([200, 200]);
+    });
   });
 });

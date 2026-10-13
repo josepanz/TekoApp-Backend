@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, ProfessionalStatus, VerificationStatus } from '@prisma/client';
+import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
@@ -52,6 +53,7 @@ export class ProfessionalsService {
     private readonly professionalsDb: ProfessionalsDbService,
     private readonly reportService: ReportService,
     private readonly notificationsService: NotificationsService,
+    private readonly professionalPositionDb: ProfessionalPositionDbService,
   ) {}
 
   /** Admin y quien gestiona profesionales (verify/suspend) ven profesionales en cualquier estado. */
@@ -67,15 +69,18 @@ export class ProfessionalsService {
   /**
    * Vista pública/cliente (DEF-BE-023): un profesional que no está APPROVED y activo solo lo ven un
    * admin, un gestor de profesionales o él mismo; para el resto responde 404 como si no existiera.
+   * Excepción (DEF-BE-030): un cliente con un servicio ACCEPTED/IN_PROGRESS con ese profesional lo
+   * sigue viendo aunque lo hayan suspendido a mitad de servicio (mismo vínculo que usa `/locations`).
    */
-  private assertProfessionalVisible(
+  private async assertProfessionalVisible(
     professional: {
+      id: number;
       userId: number;
       status: ProfessionalStatus;
       isActive: boolean;
     },
     viewer: IUserDataOnJwt,
-  ): void {
+  ): Promise<void> {
     if (
       this.canSeeAllProfessionals(viewer) ||
       professional.userId === viewer.id
@@ -86,6 +91,14 @@ export class ProfessionalsService {
       professional.status !== ProfessionalStatus.APPROVED ||
       !professional.isActive
     ) {
+      if (
+        await this.professionalPositionDb.hasActiveServiceWith(
+          viewer.referenceId,
+          professional.id,
+        )
+      ) {
+        return;
+      }
       throw new NotFoundException(t('professionals.NOT_FOUND'));
     }
   }
@@ -175,7 +188,7 @@ export class ProfessionalsService {
     viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO> {
     const result = await this.professionalsDb.findById(id);
-    this.assertProfessionalVisible(result, viewer);
+    await this.assertProfessionalVisible(result, viewer);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -192,7 +205,7 @@ export class ProfessionalsService {
   ): Promise<ProfessionalDetailResponseDTO> {
     const result =
       await this.professionalsDb.findProfessionalByReferenceId(referenceId);
-    this.assertProfessionalVisible(result, viewer);
+    await this.assertProfessionalVisible(result, viewer);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -258,7 +271,7 @@ export class ProfessionalsService {
     query: GetProfessionalServicesQueryDTO,
     viewer: IUserDataOnJwt,
   ): Promise<ProfessionalServicesListResponseDTO> {
-    this.assertProfessionalVisible(
+    await this.assertProfessionalVisible(
       await this.professionalsDb.findById(id),
       viewer,
     );
@@ -287,7 +300,7 @@ export class ProfessionalsService {
     query: GetProfessionalReviewsQueryDTO,
     user: IUserDataOnJwt,
   ): Promise<ProfessionalReviewsListResponseDTO> {
-    this.assertProfessionalVisible(
+    await this.assertProfessionalVisible(
       await this.professionalsDb.findById(id),
       user,
     );
@@ -308,7 +321,7 @@ export class ProfessionalsService {
     id: number,
     viewer: IUserDataOnJwt,
   ): Promise<ProfessionalStatsResponseDTO> {
-    this.assertProfessionalVisible(
+    await this.assertProfessionalVisible(
       await this.professionalsDb.findById(id),
       viewer,
     );
