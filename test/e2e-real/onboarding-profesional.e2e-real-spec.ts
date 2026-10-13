@@ -648,7 +648,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
     });
 
     // CP-BE-ONB-032
-    it.failing('DEF-BE-017: suspender con motivo solo espacios debe dar 400 y no suspender', async () => {
+    it('DEF-BE-017: suspender con motivo solo espacios debe dar 400 y no suspender', async () => {
       const { user, pro } = await newPro();
       await verify(pro.id, admin).expect(201);
       const res = await suspend(pro.id, admin, { reason: '   ' });
