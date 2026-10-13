@@ -1,6 +1,6 @@
 # CP-MKT — M4 Marketplace: ciclo de vida de servicios (Backend)
 
-Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-MKT-001..038 de la ola W2 (Tier 4 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal.
+Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-MKT-001..040 de la ola W2 (Tier 4 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal.
 
 ## Naming `serviceId` vs `serviceRequestId` (TRAMPA histórica, verificada en `schema.prisma` y controllers)
 
@@ -600,6 +600,36 @@ Regla práctica: en `/services/**` el primer id siempre es el servicio; solo `:r
 | Resultado esperado | 401. |
 | Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `sin JWT /locations/professional/:id -> 401` |
 
+### CP-BE-MKT-039 — Un profesional suspendido a mitad de servicio sigue visible para su cliente con servicio ACCEPTED/IN_PROGRESS; terceros y quien perdió el vínculo reciben 404 [DEF-BE-030: Corregido (b76baa0)]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-MKT-039 |
+| Título | Un profesional suspendido a mitad de servicio sigue visible para su cliente con servicio ACCEPTED/IN_PROGRESS; terceros y quien perdió el vínculo reciben 404 [DEF-BE-030: Corregido (b76baa0)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M4 del plan maestro (§3); DEF-BE-030 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Admin suspende al profesional; `GET /professionals/:id` y `/professionals/reference/:ref` como cada cliente, como cliente_b y como admin; cancelar el servicio ACCEPTED y repetir. |
+| Datos de prueba | reason "e2e a mitad de servicio" |
+| Resultado esperado | Clientes con servicio ACCEPTED/IN_PROGRESS: 200 en ambas rutas; cliente_b: 404; admin: 200; tras cancelar, ese cliente pasa a 404. Reutiliza `hasActiveServiceWith` (mismo vínculo que `/locations`). |
+| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `DEF-BE-030: un profesional suspendido a mitad de servicio sigue visible (id y referenceId) para su cliente con servicio ACCEPTED/IN_PROGRESS; terceros y quien perdio el vinculo reciben 404` |
+
+### CP-BE-MKT-040 — El motivo al rechazar una oferta es opcional (Descartado: motivo opcional por decisión de UX) [DEF-BE-027: Descartado]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-MKT-040 |
+| Título | El motivo al rechazar una oferta es opcional (Descartado: motivo opcional por decisión de UX) [DEF-BE-027: Descartado] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | M4 del plan maestro (§3); DEF-BE-027 descartado por decisión del orquestador |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | `PUT /services/:id/requests/:rid` con `{status:"REJECTED"}` sin motivo, con `reason:""` y con `reason:"Muy caro"`. |
+| Datos de prueba | reason omitido / vacío / "Muy caro" |
+| Resultado esperado | Los tres casos: 200 REJECTED y el servicio sigue PENDING. Contrato fijado por el test; no es un defecto. |
+| Automatizado en | `test/e2e-real/marketplace.e2e-real-spec.ts` — `DEF-BE-027 (descartado): el motivo al rechazar una oferta es opcional; sin motivo, motivo vacio o con motivo -> 200 REJECTED` |
+
 ## Estado de defectos (rama test/e2e-w2-onboarding-marketplace)
 
 | DEF | Sev. | Casos | Estado |
@@ -608,3 +638,5 @@ Regla práctica: en `/services/**` el primer id siempre es el servicio; solo `:r
 | DEF-BE-020 | Medio | CP-BE-MKT-017 | Corregido (8742cb6): una oferta ya respondida no se vuelve a responder (409) |
 | DEF-BE-021 | Crítico | CP-BE-MKT-025, 026, 032 | Corregido (5a38afb): IDOR de lectura de servicios, ofertas y listados |
 | DEF-BE-022 | Alto | CP-BE-MKT-031 | Corregido (fce2887): solo profesionales APPROVED y activos aceptan u ofertan |
+| DEF-BE-027 | Bajo | CP-BE-MKT-040 | Descartado: motivo opcional por decisión de UX (test 1b1d4d9 fija el contrato) |
+| DEF-BE-030 | Medio | CP-BE-MKT-039 | Corregido (b76baa0): el cliente con servicio ACCEPTED/IN_PROGRESS sigue viendo al profesional suspendido |

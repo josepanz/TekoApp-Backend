@@ -1,6 +1,6 @@
 # CP-ONB — M3 Onboarding profesional (Backend)
 
-Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-001..037 de la ola W2 (Tier 3 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal; DEF-BE-023 también quedó corregido.
+Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-001..039 de la ola W2 (Tier 3 del plan e2e). Los marcados `[DEF ...]` quedaron corregidos y su test es un `it` normal; DEF-BE-023 también quedó corregido.
 
 ## Decisiones y casos no automatizables
 
@@ -8,7 +8,8 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 - **Arnés Jest:** el SDK de S3 usa `import()` dinámico, que dentro de la VM de Jest falla con `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG` (500 al subir). `pnpm test:e2e:real` agrega `--experimental-vm-modules` (`scripts/e2e/cli.ts`). Es una limitación del arnés; la app corre en Node normal.
 - **Job de expiración:** `ProfessionalDocumentsExpirationJob.run()` es público y se invoca directo con `app.get(...)`; el test vence un documento en la DB y verifica EXPIRED y el recálculo (CP-BE-ONB-020). El disparo por cron (`EVERY_DAY_AT_3AM`) no se prueba: caso manual, ejecutar con `NODE_ENV` normal y comprobar el log "Venciendo N documento(s)".
 - **Consentimiento:** los consentimientos solo consideran versiones `countryId: null` (los usuarios no tienen país). Antes del fix de DEF-BE-014 el seed las creaba con país y nadie podía aceptarlas.
-- **Visibilidad (DEF-BE-023):** un cliente solo ve profesionales APPROVED y activos; admin y quien tenga `professionals.verification:manage` ven todos y el propio profesional se ve a sí mismo. El backoffice de Web (`features/professionals`) usa `GET /professionals`, `/professionals/reference/:ref`, `verify` y `suspend` con sesión admin y no cambia. Caso no cubierto: un profesional suspendido a mitad de un servicio deja de ser visible para su cliente (404).
+- **Visibilidad (DEF-BE-023):** un cliente solo ve profesionales APPROVED y activos; admin y quien tenga `professionals.verification:manage` ven todos y el propio profesional se ve a sí mismo. El backoffice de Web (`features/professionals`) usa `GET /professionals`, `/professionals/reference/:ref`, `verify` y `suspend` con sesión admin y no cambia. Excepción (DEF-BE-030, CP-BE-MKT-039): un cliente con un servicio ACCEPTED o IN_PROGRESS con el profesional lo sigue viendo aunque lo suspendan.
+- **Máquina de estados verify/suspend (DEF-BE-028/029):** `POST /professionals/:id/verify` solo desde PENDING o REJECTED (APPROVED y SUSPENDED -> 409); `POST /professionals/:id/suspend` solo desde APPROVED (PENDING, REJECTED y SUSPENDED -> 409). No existe endpoint de reactivación (`reactivate`/`unsuspend`): un SUSPENDED no se puede volver a aprobar por API y queda como alcance de un cambio futuro; `verify` sobre SUSPENDED no es esa vía.
 - **Archivos:** la autorización de `GET /uploads/presigned-url`, `info` y `DELETE` está en `CP-UPL.md`.
 - **Datos que cambian de forma observable pero no se prueban acá:** notificaciones de revisión/verify/suspend (M11).
 
@@ -568,6 +569,36 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 | Resultado esperado | APPROVED 200 y en el listado; REJECTED/SUSPENDED 404 y fuera del listado; el admin los sigue viendo (backoffice Web). |
 | Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-023: un profesional APPROVED sí es visible para el cliente; REJECTED y SUSPENDED dejan de serlo (id, referenceId y listado)` |
 
+### CP-BE-ONB-038 — verify sobre un SUSPENDED o APPROVED responde 409 con envelope y no cambia el estado; sobre REJECTED sí (re-revision) [DEF-BE-028: Corregido (6ef4c40)]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-038 |
+| Título | verify sobre un SUSPENDED o APPROVED responde 409 con envelope y no cambia el estado; sobre REJECTED sí (re-revision) [DEF-BE-028: Corregido (6ef4c40)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P1 |
+| Trazabilidad | M3 del plan maestro (§3); DEF-BE-028 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Verificar (APPROVED); verificar de nuevo; suspender; verificar el SUSPENDED; en otro profesional, rechazar y luego verificar. |
+| Datos de prueba | `isVerified` true/false |
+| Resultado esperado | APPROVED -> verify: 409; SUSPENDED -> verify: 409 con envelope `{success:false, error.code:409}` y el profesional sigue SUSPENDED/isActive=false; REJECTED -> verify: 201 APPROVED (re-revisión). |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-028: verify sobre un SUSPENDED o APPROVED responde 409 con envelope y no cambia el estado; sobre REJECTED sí (re-revision)` |
+
+### CP-BE-ONB-039 — suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original [DEF-BE-029: Corregido (a7f3d3b)]
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-ONB-039 |
+| Título | suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original [DEF-BE-029: Corregido (a7f3d3b)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | M3 del plan maestro (§3); DEF-BE-029 |
+| Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. Los usuarios se crean por API con email único por corrida. |
+| Pasos | Suspender un PENDING; verificar y suspender con motivo "primero"; suspender de nuevo con motivo "segundo". |
+| Datos de prueba | reason "primero" / "segundo" |
+| Resultado esperado | PENDING -> suspend: 409; APPROVED -> 201; SUSPENDED -> suspend: 409 y `changedReason` sigue "primero". |
+| Automatizado en | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` — `DEF-BE-029: suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original` |
+
 ## Estado de defectos (rama test/e2e-w2-onboarding-marketplace)
 
 | DEF | Sev. | Caso | Estado |
@@ -578,3 +609,5 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-ONB-00
 | DEF-BE-017 | Bajo | CP-BE-ONB-032 | Corregido (0f5ceb6): suspensión exige motivo no vacío |
 | DEF-BE-018 | Alto | CP-BE-ONB-024 | Corregido (8aa44de): `/locations/nearby` daba 500 (HAVING sin GROUP BY) |
 | DEF-BE-023 | Medio | CP-BE-ONB-034..037 | Corregido (8420fa2): lista, cercanos, skills, top-rated, id, referenceId, stats y services ocultan no aprobados a clientes |
+| DEF-BE-028 | Medio | CP-BE-ONB-038 | Corregido (6ef4c40): verify solo desde PENDING/REJECTED; sobre SUSPENDED o APPROVED responde 409 (antes 201 y reactivaba) |
+| DEF-BE-029 | Bajo | CP-BE-ONB-039 | Corregido (a7f3d3b): suspend solo desde APPROVED; sobre SUSPENDED responde 409 (antes 201) |

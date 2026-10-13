@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 08:01 |
+| Fecha y hora | 2026-10-13 12:57 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w2-onboarding-marketplace` |
-| Commit | `8420fa2` (árbol con cambios sin commitear) |
+| Commit | `c20602c` (árbol con cambios sin commitear) |
 | Entorno | compose e2e (docker-compose.e2e.yml, .env.e2e), Node v22.16.0, Docker 29.6.2, build dfc4efb |
 | Comando | `pnpm qa:e2e` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 8 (0 con fallo) | 214 | 214 | 0 | 0 | 1 min 21 s |
+| 8 (0 con fallo) | 218 | 218 | 0 | 0 | 1 min 24 s |
 
 ## 2. Resultados por caso
 
@@ -140,6 +140,7 @@
 | CP-BE-MKT-003 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Ciclo de vida feliz start (IN_PROGRESS) y complete (COMPLETED) por el profesional asignado, con startedAt/completedAt y finalAmount | passed |
 | CP-BE-MKT-004 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Ciclo de vida feliz aceptación directa del profesional (POST /services/:id/accept) deja ACCEPTED con él asignado | passed |
 | CP-BE-MKT-005 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Ciclo de vida feliz rechazar una oferta la deja REJECTED y el servicio sigue PENDING y abierto a otras ofertas | passed |
+| CP-BE-MKT-040 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Ciclo de vida feliz DEF-BE-027 (descartado): el motivo al rechazar una oferta es opcional; sin motivo, motivo vacio o con motivo -> 200 REJECTED | passed |
 | CP-BE-MKT-006 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Ciclo de vida feliz al aceptar una oferta, las demás ofertas pendientes pasan a REJECTED | passed |
 | CP-BE-MKT-007 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Ciclo de vida feliz el profesional ve el servicio asignado en my-services?role=professional y el cliente en role=client | passed |
 | CP-BE-MKT-008 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Cancelación el cliente cancela un servicio PENDING: CANCELLED con motivo y cancelledAt | passed |
@@ -173,6 +174,7 @@
 | CP-BE-MKT-036 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Alcance de /locations según el estado del servicio ACCEPTED e IN_PROGRESS autorizan al cliente del servicio; COMPLETED revoca; un tercero nunca | passed |
 | CP-BE-MKT-037 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Alcance de /locations según el estado del servicio CANCELLED también revoca el acceso a la posición exacta | passed |
 | CP-BE-MKT-038 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Alcance de /locations según el estado del servicio sin JWT /locations/professional/:id -> 401 | passed |
+| CP-BE-MKT-039 | `test/e2e-real/marketplace.e2e-real-spec.ts` | M4 Marketplace (e2e real) Alcance de /locations según el estado del servicio DEF-BE-030: un profesional suspendido a mitad de servicio sigue visible (id y referenceId) para su cliente con servicio ACCEPTED/IN_PROGRESS; terceros y quien perdio el vinculo reciben 404 | passed |
 | CP-BE-ONB-001 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Postulación POST /professionals un usuario registrado se postula y queda PENDING, no disponible | passed |
 | CP-BE-ONB-002 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Postulación POST /professionals DEF-BE-015: la doble postulación (USER_ALREADY_PROFESSIONAL) debe responder 409 | passed |
 | CP-BE-ONB-003 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Postulación POST /professionals una categoría inexistente se rechaza con 400 y mensaje claro | passed |
@@ -201,6 +203,8 @@
 | CP-BE-ONB-021 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales sin permiso (cliente, el propio profesional postulado) verify y suspend -> 403 y el estado no cambia | passed |
 | CP-BE-ONB-022 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales admin verifica: APPROVED + VERIFIED; admin rechaza: REJECTED; id inexistente 404; sin JWT 401 | passed |
 | CP-BE-ONB-023 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales suspender exige motivo (400) y deja SUSPENDED/isActive=false | passed |
+| CP-BE-ONB-038 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-028: verify sobre un SUSPENDED o APPROVED responde 409 con envelope y no cambia el estado; sobre REJECTED sí (re-revision) | passed |
+| CP-BE-ONB-039 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-029: suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original | passed |
 | CP-BE-ONB-032 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-017: suspender con motivo solo espacios debe dar 400 y no suspender | passed |
 | CP-BE-ONB-024 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-018: GET /locations/nearby no debe dar 500 y un profesional suspendido desaparece de /locations/nearby y de la lista de disponibles | passed |
 | CP-BE-ONB-025 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Portafolio de trabajos subir al portafolio exige IMAGE_USAGE_CONSENT (403 CONSENT_REQUIRED) y con él queda PENDING y visible | passed |
@@ -241,7 +245,7 @@ Ninguno.
 
 ## 3. Defectos encontrados
 
-Detectados por los specs W2 (cada uno se escribió primero como `it.failing`, se documentó y se corrigió en un commit propio):
+Detectados por los specs W2 (cada uno se escribió primero como test que falla, se documentó y se corrigió en un commit propio):
 
 | ID | Sev. | Caso | Repro | Estado |
 |---|---|---|---|---|
@@ -258,20 +262,22 @@ Detectados por los specs W2 (cada uno se escribió primero como `it.failing`, se
 | DEF-BE-024 | Crítico | CP-BE-UPL-001..005, 008, 009, 011..013 | cliente_b pide `GET /uploads/presigned-url?key=<fileKey de un documento de identidad ajeno>` y descarga los bytes reales del MinIO; `info/:filename` igual; el URL duraba 900 s. | Corregido (a4050d5): autorización por dueño resuelto desde la DB, 404 sin registro, TTL <= 300 s |
 | DEF-BE-025 | Alto | CP-BE-UPL-014, 015 | cliente_b `DELETE /uploads/:fileKey` borra el documento de otro usuario (200). | Corregido (59382c1): solo dueño o admin |
 
+| DEF-BE-027 | Bajo | CP-BE-MKT-040 | Rechazar una oferta sin motivo -> 200. | Descartado por decisión de UX: el motivo es opcional; el test 1b1d4d9 fija el contrato |
+| DEF-BE-028 | Medio | CP-BE-ONB-038 | `POST /professionals/:id/verify` sobre un SUSPENDED -> 201 y lo dejaba APPROVED (también re-verificaba un APPROVED). | Corregido (6ef4c40): verify solo desde PENDING/REJECTED, resto 409 |
+| DEF-BE-029 | Bajo | CP-BE-ONB-039 | `suspend` sobre un SUSPENDED -> 201, pisaba el motivo y reenviaba la notificación. | Corregido (a7f3d3b): suspend solo desde APPROVED, resto 409 |
+| DEF-BE-030 | Medio | CP-BE-MKT-039 | Profesional suspendido a mitad de servicio -> 404 para su cliente en `/professionals/:id` y `/reference/:ref`. | Corregido (b76baa0): un cliente con servicio ACCEPTED/IN_PROGRESS lo sigue viendo; terceros 404 |
+
 Auditoría de IDOR en `/services/:id/progress` y `/budget-options` (lectura y escritura): **sin defectos**, casos de regresión CP-BE-UPL-017 y 018.
 
 ## 4. Desvíos y observaciones
 
-- **Estabilidad:** la suite completa corrió 3 veces seguidas con `pnpm test:e2e:real` (214/214 en las tres, ~75 s cada una) y una cuarta
-  desde cero con este `pnpm qa:e2e` (stack nuevo). Las tres variantes de concurrencia (CP-BE-MKT-022..024) dieron 20/20 en todas las
-  corridas. Sin flakies, timeouts ni omitidos.
+- **Estabilidad:** la suite completa corrió 3 veces seguidas (`pnpm qa:e2e` sobre un stack nuevo y dos `pnpm test:e2e:real`): 218/218 en las tres, ~85 s cada una. Las tres variantes de concurrencia (CP-BE-MKT-022..024) dieron 20/20 en todas las corridas. Sin flakies, timeouts ni omitidos.
 - **Arnés:** el SDK de S3 falla dentro de Jest sin `--experimental-vm-modules` (500 al subir a MinIO); el CLI lo agrega solo (`scripts/e2e/cli.ts`).
 - **Job de expiración:** se invoca `ProfessionalDocumentsExpirationJob.run()` directo (CP-BE-ONB-020); el disparo por cron de las 3 AM queda como caso manual.
 - **WebSocket:** `subscribeToProfessional` no se prueba por socket (no hay `socket.io-client` en el repo); se probó la misma regla por REST
   (`GET /locations/professional/:id`, CP-BE-MKT-035..038) y la cubre `locations.gateway.spec.ts`. Caso manual documentado en CP-MKT.md.
 - **Observaciones no corregidas:** las respuestas de profesional incluyen `checksum`, `changeSignature` y `createdBy` internos; el admin no puede
-  leer las opciones de presupuesto (decisión de producto para M5); un profesional suspendido a mitad de servicio deja de ser visible para su
-  cliente (404) y las claves `merchant-docs` no se pueden pedir (flujo sin uso). Ver CP-UPL.md ("No cubierto").
+  leer las opciones de presupuesto (decisión de producto para M5); las claves `merchant-docs` no se pueden pedir (flujo sin uso). Ver CP-UPL.md ("No cubierto").
 - El campo "Commit" del encabezado puede decir "árbol con cambios sin commitear" solo porque los informes aún no estaban versionados al generarse.
 
 ## 5. Evidencia
@@ -280,4 +286,5 @@ Auditoría de IDOR en `/services/:id/progress` y `/budget-options` (lectura y es
 
 ## 6. Veredicto
 
-**APROBADO.** 214/214 casos pasan (93 son de W2: 37 de M3, 38 de M4 y 18 de archivos/auditoría), 4 corridas consecutivas sin fallos, concurrencia 20/20 y sin defectos abiertos. Las observaciones de la sección 4 no bloquean.
+**APROBADO.** 218/218 casos pasan (97 son de W2: 39 de M3, 40 de M4 y 18 de archivos/auditoría), 3 corridas completas consecutivas sin fallos, concurrencia 20/20 y sin defectos abiertos (DEF-BE-027 descartado por decisión de UX). Las observaciones de la sección 4 no bloquean.
+

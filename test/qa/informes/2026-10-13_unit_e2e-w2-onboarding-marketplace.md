@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 07:59 |
+| Fecha y hora | 2026-10-13 13:01 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w2-onboarding-marketplace` |
-| Commit | `8420fa2` (árbol con cambios sin commitear) |
+| Commit | `c20602c` (árbol con cambios sin commitear) |
 | Entorno | local, Jest con mocks (sin infraestructura), Node v22.16.0 |
 | Comando | `pnpm qa:unit` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,16 +14,16 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 145 (0 con fallo) | 1642 | 1642 | 0 | 0 | 21.7 s |
+| 145 (0 con fallo) | 1649 | 1649 | 0 | 0 | 21.4 s |
 
 ### Cobertura
 
 | Métrica | Cobertura | Cubiertos/Total | Umbral (jest.config.ts) | Estado |
 |---|---|---|---|---|
-| statements | 82.11% | 5936/7229 | 80% | cumple |
-| branches | 67.17% | 3305/4920 | 70% | INCUMPLE |
+| statements | 82.13% | 5945/7238 | 80% | cumple |
+| branches | 67.2% | 3311/4927 | 70% | INCUMPLE |
 | functions | 76.38% | 1326/1736 | 80% | INCUMPLE |
-| lines | 82% | 5397/6581 | 80% | cumple |
+| lines | 82.03% | 5406/6590 | 80% | cumple |
 
 ## 2. Resultados por suite (agrupadas por dominio)
 
@@ -53,7 +53,7 @@
 | `src/api/professional-document-types` | 1 | 6 | 0 | 0 |
 | `src/api/professional-documents` | 3 | 29 | 0 | 0 |
 | `src/api/professional-portfolio` | 2 | 27 | 0 | 0 |
-| `src/api/professionals` | 3 | 57 | 0 | 0 |
+| `src/api/professionals` | 3 | 64 | 0 | 0 |
 | `src/api/promotions` | 2 | 26 | 0 | 0 |
 | `src/api/ratings` | 3 | 66 | 0 | 0 |
 | `src/api/roles-permission` | 3 | 34 | 0 | 0 |
@@ -276,7 +276,7 @@
 |---|---|---|---|---|---|
 | `src/api/professionals/controllers/admin-professionals-export.controller.spec.ts` | 2 | 2 | 0 | 0 | OK |
 | `src/api/professionals/controllers/professionals.controller.spec.ts` | 22 | 22 | 0 | 0 | OK |
-| `src/api/professionals/services/professionals.service.spec.ts` | 33 | 33 | 0 | 0 | OK |
+| `src/api/professionals/services/professionals.service.spec.ts` | 40 | 40 | 0 | 0 | OK |
 
 #### `src/api/promotions`
 
@@ -630,7 +630,7 @@ Ninguno.
 ## 3. Defectos encontrados
 
 Los defectos de la ola W2 los detectó el e2e real (ver el informe `2026-10-13_e2e_e2e-w2-onboarding-marketplace.md`); acá solo
-se registran los tests unitarios agregados o ajustados al corregirlos:
+se registran los tests unitarios agregados o ajustados al corregirlos (DEF-BE-028..030: casos nuevos en `professionals.service.spec.ts`):
 
 | DEF | Tests unitarios |
 |---|---|
@@ -646,7 +646,7 @@ se registran los tests unitarios agregados o ajustados al corregirlos:
 
 ## 4. Desvíos y observaciones
 
-- Sin flakies persistentes, timeouts ni omitidos: 145 suites, 1642 casos (1603 en la línea base de develop + 39 agregados por W2).
+- Sin flakies persistentes, timeouts ni omitidos: 145 suites, 1649 casos (1603 en la línea base de develop + 46 agregados por W2).
 - **Un flaky aislado:** en una corrida de `pnpm test` falló `src/common/i18n/i18n.helper.spec.ts` (4 casos, "Test suite failed to run");
   no se reprodujo en 3 corridas posteriores ni aislado. No se tocó.
 - **Cobertura global bajo el umbral de `jest.config.ts` en branches (67,17 % vs 70 %) y functions (76,38 % vs 80 %):** es el mismo
@@ -659,4 +659,4 @@ se registran los tests unitarios agregados o ajustados al corregirlos:
 
 ## 6. Veredicto
 
-**APROBADO CON OBSERVACIONES.** 1642/1642 casos pasan, 0 fallos y 0 omitidos; las observaciones son el umbral de cobertura heredado y el flaky aislado de i18n (sección 4).
+**APROBADO CON OBSERVACIONES.** 1649/1649 casos pasan, 0 fallos y 0 omitidos; las observaciones son el umbral de cobertura heredado y el flaky aislado de i18n (sección 4).
