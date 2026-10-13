@@ -299,15 +299,12 @@ describe('M1 Auth y sesión (e2e real)', () => {
     });
 
     // CP-BE-AUTH-026
-    it.failing(
-      'DEF-BE-004: el 401 de refresh debe llamarse "Unauthorized" en error.error (hoy "Internal Server Error")',
-      async () => {
-        const res = await basic(
-          http.post(`${PREFIX}/auth/refresh-token`),
-        ).expect(401);
-        expect(res.body.error.error).toBe('Unauthorized');
-      },
-    );
+    it('DEF-BE-004: el 401 de refresh debe llamarse "Unauthorized" en error.error', async () => {
+      const res = await basic(http.post(`${PREFIX}/auth/refresh-token`)).expect(
+        401,
+      );
+      expect(res.body.error.error).toBe('Unauthorized');
+    });
 
     // CP-BE-AUTH-027
     it.failing(
