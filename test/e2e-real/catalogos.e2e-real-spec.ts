@@ -183,8 +183,9 @@ describe('M2 Catálogos (e2e real)', () => {
         .expect(404);
     });
 
-    // CP-BE-CAT-010..014 (DEF-BE-002): hoy cualquier usuario autenticado muta categorías.
+    // DEF-BE-002: hoy cualquier usuario autenticado muta categorías (casos CP-BE-CAT-010..014).
     describe('cliente sin permiso admin (403 esperado)', () => {
+      // CP-BE-CAT-010
       it.failing(
         'DEF-BE-002: cliente_a NO debe poder crear una categoría (hoy 201)',
         async () => {
@@ -197,6 +198,7 @@ describe('M2 Catálogos (e2e real)', () => {
           expect(res.status).toBe(403);
         },
       );
+      // CP-BE-CAT-011
       it.failing(
         'DEF-BE-002: cliente_a NO debe poder editar una categoría (hoy 200)',
         async () => {
@@ -208,6 +210,7 @@ describe('M2 Catálogos (e2e real)', () => {
           expect(res.status).toBe(403);
         },
       );
+      // CP-BE-CAT-012
       it.failing(
         'DEF-BE-002: cliente_a NO debe poder ocultar una categoría (hoy 200)',
         async () => {
@@ -218,6 +221,7 @@ describe('M2 Catálogos (e2e real)', () => {
           expect(res.status).toBe(403);
         },
       );
+      // CP-BE-CAT-013
       it.failing(
         'DEF-BE-002: cliente_a NO debe poder cambiar el estado de una categoría (hoy 200)',
         async () => {
@@ -229,6 +233,7 @@ describe('M2 Catálogos (e2e real)', () => {
           expect(res.status).toBe(403);
         },
       );
+      // CP-BE-CAT-014
       it.failing(
         'DEF-BE-002: cliente_a NO debe poder borrar una categoría (hoy 204)',
         async () => {
