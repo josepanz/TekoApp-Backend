@@ -100,6 +100,14 @@ function down(): void {
 }
 
 function test(): void {
+  // El SDK de AWS S3 (checksums) usa import() dinámico: dentro de la VM de Jest falla con
+  // ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG (500 al subir archivos a MinIO) salvo con este flag.
+  // Es una limitación del arnés (Jest), no de la app (main.ts corre en Node normal).
+  const nodeOptions = process.env.NODE_OPTIONS ?? '';
+  if (!nodeOptions.includes('--experimental-vm-modules')) {
+    process.env.NODE_OPTIONS =
+      `${nodeOptions} --experimental-vm-modules`.trim();
+  }
   run('npx', [
     'jest',
     '--config',
