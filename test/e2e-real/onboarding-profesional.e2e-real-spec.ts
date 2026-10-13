@@ -658,7 +658,7 @@ describe('M3 Onboarding profesional (e2e real)', () => {
     });
 
     // CP-BE-ONB-024
-    it.failing('DEF-BE-018: GET /locations/nearby no debe dar 500 y un profesional suspendido desaparece de /locations/nearby y de la lista de disponibles', async () => {
+    it('DEF-BE-018: GET /locations/nearby no debe dar 500 y un profesional suspendido desaparece de /locations/nearby y de la lista de disponibles', async () => {
       const { user, pro } = await newPro();
       await verify(pro.id, admin).expect(201);
       const lat = -25.3 + Math.random() * 0.001;
