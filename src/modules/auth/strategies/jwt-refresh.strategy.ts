@@ -33,7 +33,13 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(payload: IJwtPayload): Promise<UserWithSecurities> {
-    const user = await this.usersService.findActiveUserByEmail(payload.email);
+    if (!payload.sub) {
+      throw new UnauthorizedException(t('auth.USER_NOT_FOUND_OR_INACTIVE'));
+    }
+
+    const user = await this.usersService.findActiveUserByReferenceId(
+      payload.sub,
+    );
 
     if (!user) {
       throw new UnauthorizedException(t('auth.USER_NOT_FOUND_OR_INACTIVE'));
