@@ -40,6 +40,12 @@ import {
 } from '../dtos/response';
 
 import { t } from '@common/i18n/i18n.helper';
+/** Estados desde los que `verify` es una transición válida (DEF-BE-028). */
+const VERIFIABLE_STATUSES: ProfessionalStatus[] = [
+  ProfessionalStatus.PENDING,
+  ProfessionalStatus.REJECTED,
+];
+
 @Injectable()
 export class ProfessionalsService {
   constructor(
@@ -340,6 +346,12 @@ export class ProfessionalsService {
     adminId: number,
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
+    // Máquina de estados (DEF-BE-028): solo se resuelve una verificación PENDING o se revisa una
+    // REJECTED. APPROVED (ya resuelto) y SUSPENDED (no hay endpoint de reactivación: verify no
+    // es la vía) son transiciones inválidas.
+    if (!VERIFIABLE_STATUSES.includes(professional.status)) {
+      throw new ConflictException(t('professionals.INVALID_STATE_FOR_VERIFY'));
+    }
     // updateMany + count en vez de update() incondicional: evita que dos escrituras
     // administrativas concurrentes sobre el mismo profesional (ej. dos admins resolviendo la
     // misma verificación) se pisen sin detectar el conflicto — mismo patrón que

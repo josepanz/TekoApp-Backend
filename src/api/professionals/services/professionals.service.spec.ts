@@ -730,13 +730,47 @@ describe('ProfessionalsService', () => {
   });
 
   describe('verifyProfessional', () => {
+    const pendingProfessional = {
+      ...mockProfessional,
+      status: 'PENDING',
+      verificationStatus: 'UNVERIFIED',
+    };
+
+    it.each(['APPROVED', 'SUSPENDED'])(
+      'debe lanzar ConflictException (DEF-BE-028) y no escribir si el profesional está %s',
+      async (status) => {
+        mockFindById.mockResolvedValue({ ...mockProfessional, status });
+
+        await expect(
+          service.verifyProfessional(1, { isVerified: true }, 99),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+        expect(mockNotificationsCreate).not.toHaveBeenCalled();
+      },
+    );
+
+    it('debe permitir revisar de nuevo un profesional REJECTED', async () => {
+      mockFindById
+        .mockResolvedValueOnce({ ...mockProfessional, status: 'REJECTED' })
+        .mockResolvedValueOnce(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(1);
+
+      await service.verifyProfessional(1, { isVerified: true }, 99);
+
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        ['REJECTED'],
+        expect.objectContaining({ status: 'APPROVED' }),
+      );
+    });
+
     it('debe marcar el profesional como verificado cuando isVerified=true', async () => {
       // Arrange
       const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
       mockFindById
-        .mockResolvedValueOnce(mockProfessional)
+        .mockResolvedValueOnce(pendingProfessional)
         .mockResolvedValueOnce({
-          ...mockProfessional,
+          ...pendingProfessional,
           verificationStatus: 'VERIFIED',
           status: 'APPROVED',
         });
@@ -748,7 +782,7 @@ describe('ProfessionalsService', () => {
       // Assert
       expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
-        [mockProfessional.status],
+        [pendingProfessional.status],
         expect.objectContaining({
           verificationStatus: 'VERIFIED',
           status: 'APPROVED',
@@ -766,14 +800,14 @@ describe('ProfessionalsService', () => {
         expect.objectContaining({
           type: NotificationType.PROFESSIONAL_VERIFIED,
         }),
-        mockProfessional.userId,
+        pendingProfessional.userId,
       );
     });
 
     it('debe marcar el profesional como rechazado cuando isVerified=false', async () => {
       // Arrange
       const dto = { isVerified: false, notes: 'Documentos inválidos' } as never;
-      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindById.mockResolvedValue(pendingProfessional);
       mockUpdateConditional.mockResolvedValue(1);
 
       // Act
@@ -782,7 +816,7 @@ describe('ProfessionalsService', () => {
       // Assert
       expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
-        [mockProfessional.status],
+        [pendingProfessional.status],
         expect.objectContaining({
           verificationStatus: 'REJECTED',
           status: 'REJECTED',
@@ -792,7 +826,7 @@ describe('ProfessionalsService', () => {
         expect.objectContaining({
           type: NotificationType.PROFESSIONAL_VERIFICATION_REJECTED,
         }),
-        mockProfessional.userId,
+        pendingProfessional.userId,
       );
     });
 
@@ -800,7 +834,7 @@ describe('ProfessionalsService', () => {
       // Arrange — dos admins resolviendo la misma verificación al mismo tiempo: el segundo
       // `updateMany` no encuentra ninguna fila con el estado leído, count() vuelve 0.
       const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
-      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindById.mockResolvedValue(pendingProfessional);
       mockUpdateConditional.mockResolvedValue(0);
 
       // Act & Assert
@@ -809,7 +843,7 @@ describe('ProfessionalsService', () => {
       );
       expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
-        [mockProfessional.status],
+        [pendingProfessional.status],
         expect.objectContaining({ status: 'APPROVED' }),
       );
     });

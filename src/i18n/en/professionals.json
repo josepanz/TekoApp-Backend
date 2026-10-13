@@ -1,5 +1,6 @@
 {
   "CATEGORY_DOES_NOT_EXIST": "The category does not exist",
+  "INVALID_STATE_FOR_VERIFY": "Only a PENDING or REJECTED professional can be verified",
   "NOT_FOUND": "Professional not found",
   "NOTIFICATION_VERIFIED_TITLE": "Your account was verified",
   "NOTIFICATION_VERIFIED_MESSAGE": "We approved your professional verification. You can now operate on the platform.",

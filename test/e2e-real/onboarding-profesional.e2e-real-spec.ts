@@ -800,6 +800,29 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       expect((await myProfile(user.token)).status).toBe('SUSPENDED');
     });
 
+    // CP-BE-ONB-038
+    it('DEF-BE-028: verify sobre un SUSPENDED o APPROVED responde 409 con envelope y no cambia el estado; sobre REJECTED sí (re-revision)', async () => {
+      const { user, pro } = await newPro();
+      await verify(pro.id, admin).expect(201);
+      // APPROVED -> verify de nuevo: transicion invalida
+      const again = await verify(pro.id, admin).expect(409);
+      expect(again.body.success).toBe(false);
+      expect(again.body.error.code).toBe(409);
+      await suspend(pro.id, admin).expect(201);
+      const res = await verify(pro.id, admin);
+      expect(res.status).toBe(409);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe(409);
+      const me = await myProfile(user.token);
+      expect(me.status).toBe('SUSPENDED');
+      expect(me.isActive).toBe(false);
+
+      const other = await newPro();
+      await verify(other.pro.id, admin, { isVerified: false }).expect(201);
+      const re = await verify(other.pro.id, admin, { isVerified: true }).expect(201);
+      expect(unwrap(re.body).status).toBe('APPROVED');
+    });
+
     // CP-BE-ONB-032
     it('DEF-BE-017: suspender con motivo solo espacios debe dar 400 y no suspender', async () => {
       const { user, pro } = await newPro();
