@@ -183,11 +183,11 @@ describe('M2 Catálogos (e2e real)', () => {
         .expect(404);
     });
 
-    // DEF-BE-002: hoy cualquier usuario autenticado muta categorías (casos CP-BE-CAT-010..014).
+    // DEF-BE-002 (corregido): mutar categorías exige categories.catalog:manage o admin:all (CP-BE-CAT-010..014).
     describe('cliente sin permiso admin (403 esperado)', () => {
       // CP-BE-CAT-010
-      it.failing(
-        'DEF-BE-002: cliente_a NO debe poder crear una categoría (hoy 201)',
+      it(
+        'DEF-BE-002: cliente_a NO debe poder crear una categoría',
         async () => {
           const name = `E2E Cat cliente ${uniqueSuffix()}`;
           const res = await http
@@ -199,8 +199,8 @@ describe('M2 Catálogos (e2e real)', () => {
         },
       );
       // CP-BE-CAT-011
-      it.failing(
-        'DEF-BE-002: cliente_a NO debe poder editar una categoría (hoy 200)',
+      it(
+        'DEF-BE-002: cliente_a NO debe poder editar una categoría',
         async () => {
           const cat = await createCategory();
           const res = await http
@@ -211,8 +211,8 @@ describe('M2 Catálogos (e2e real)', () => {
         },
       );
       // CP-BE-CAT-012
-      it.failing(
-        'DEF-BE-002: cliente_a NO debe poder ocultar una categoría (hoy 200)',
+      it(
+        'DEF-BE-002: cliente_a NO debe poder ocultar una categoría',
         async () => {
           const cat = await createCategory();
           const res = await http
@@ -222,8 +222,8 @@ describe('M2 Catálogos (e2e real)', () => {
         },
       );
       // CP-BE-CAT-013
-      it.failing(
-        'DEF-BE-002: cliente_a NO debe poder cambiar el estado de una categoría (hoy 200)',
+      it(
+        'DEF-BE-002: cliente_a NO debe poder cambiar el estado de una categoría',
         async () => {
           const cat = await createCategory();
           const res = await http
@@ -234,8 +234,8 @@ describe('M2 Catálogos (e2e real)', () => {
         },
       );
       // CP-BE-CAT-014
-      it.failing(
-        'DEF-BE-002: cliente_a NO debe poder borrar una categoría (hoy 204)',
+      it(
+        'DEF-BE-002: cliente_a NO debe poder borrar una categoría',
         async () => {
           const cat = await createCategory();
           const res = await http

@@ -13,6 +13,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
+import { Permissions } from '@common/decorators/permissions.decorator';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dtos/request/create-category.dto';
 import { UpdateCategoryDto } from '../dtos/request/update-category.dto';
@@ -48,7 +51,8 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiCreateCategory()
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
@@ -67,7 +71,8 @@ export class CategoriesController {
   }
 
   @Get('all')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiGetAllCategoriesWithRelations()
   async findAllWithRelations(): Promise<CategoryDetailResponseDTO[]> {
     return this.categoriesService.findAllWithRelations() as unknown as Promise<
@@ -132,7 +137,8 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiUpdateCategory()
   async update(
     @Param() param: CategoryIdParamDTO,
@@ -145,7 +151,8 @@ export class CategoriesController {
   }
 
   @Patch(':id/status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiChangeCategoryStatus()
   async changeStatus(
     @Param() param: CategoryIdParamDTO,
@@ -158,7 +165,8 @@ export class CategoriesController {
   }
 
   @Patch(':id/toggle-visibility')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @ApiToggleCategoryVisibility()
   async toggleVisibility(
     @Param() param: CategoryIdParamDTO,
@@ -169,7 +177,8 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions(PERMISSIONS.CATEGORIES.MANAGE, PERMISSIONS.ADMIN.ALL)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiDeleteCategory()
   async remove(@Param() param: CategoryIdParamDTO): Promise<void> {

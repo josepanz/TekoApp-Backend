@@ -4,6 +4,12 @@ import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 import { CategoriesController } from './categories.controller';
 import { CategoriesService } from '@api/categories/services/categories.service';
 import { CategoryStatus } from '@prisma/client';
+import { Reflector } from '@nestjs/core';
+import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
+import { PERMISSIONS } from '@common/enum/permissions.enum';
+
+const PERMISSIONS_KEY = 'permissions';
+const GUARDS_KEY = '__guards__';
 
 // ── mocks de nivel de módulo ─────────────────────────────────────────────────
 const mockCreate = jest.fn();
@@ -47,6 +53,8 @@ describe('CategoriesController', () => {
         },
       ],
     })
+      .overrideGuard(PermissionsGuard)
+      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: jest.fn().mockReturnValue(true) })
       .compile();
@@ -55,6 +63,50 @@ describe('CategoriesController', () => {
   });
 
   afterEach(() => jest.clearAllMocks());
+
+  // ── DEF-BE-002: las rutas de escritura y `all` exigen permiso de categorías o admin:all ──
+  describe('permisos (DEF-BE-002)', () => {
+    const protectedHandlers = [
+      'create',
+      'findAllWithRelations',
+      'update',
+      'changeStatus',
+      'toggleVisibility',
+      'remove',
+    ] as const;
+
+    it.each(protectedHandlers)(
+      '%s requiere categories.catalog:manage o admin:all y usa PermissionsGuard',
+      (name) => {
+        const handler = CategoriesController.prototype[name];
+        const required = new Reflector().get<string[]>(
+          PERMISSIONS_KEY,
+          handler,
+        );
+        const guards = Reflect.getMetadata(GUARDS_KEY, handler) as unknown[];
+        expect(required).toEqual([
+          PERMISSIONS.CATEGORIES.MANAGE,
+          PERMISSIONS.ADMIN.ALL,
+        ]);
+        expect(guards).toEqual(expect.arrayContaining([PermissionsGuard]));
+      },
+    );
+
+    it('las lecturas públicas no exigen permisos', () => {
+      for (const name of [
+        'findAll',
+        'findMainCategories',
+        'findOne',
+      ] as const) {
+        expect(
+          new Reflector().get(
+            PERMISSIONS_KEY,
+            CategoriesController.prototype[name],
+          ),
+        ).toBeUndefined();
+      }
+    });
+  });
 
   // ── create ────────────────────────────────────────────────────────────────
   describe('create', () => {
