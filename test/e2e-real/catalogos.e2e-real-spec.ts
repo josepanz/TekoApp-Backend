@@ -506,31 +506,21 @@ describe('M2 Catálogos (e2e real)', () => {
 
   describe('Paginación: pageSize enorme', () => {
     // CP-BE-CAT-031
-    it.failing(
-      'DEF-BE-009: GET /countries?pageSize=100000 debe acotarse (<=100) o dar 400/422 (hoy se acepta tal cual)',
-      async () => {
-        const res = await http.get(`${PREFIX}/countries?pageSize=100000`);
-        if (res.status === 200) {
-          expect(unwrap(res.body).pagination.pageSize).toBeLessThanOrEqual(100);
-        } else {
-          expect([400, 422]).toContain(res.status);
-        }
-      },
-    );
+    it('DEF-BE-009: GET /countries?pageSize=100000 debe dar 400 (tope 100)', async () => {
+      const res = await http.get(`${PREFIX}/countries?pageSize=100000`);
+      expect(res.status).toBe(400);
+      // el límite exacto sigue permitido
+      await http.get(`${PREFIX}/countries?pageSize=100`).expect(200);
+    });
     // CP-BE-CAT-032
-    it.failing(
-      'DEF-BE-009: GET /users?pageSize=100000 (admin) debe acotarse (<=100) o dar 400/422 (hoy se acepta tal cual)',
-      async () => {
-        const res = await http
-          .get(`${PREFIX}/users?pageSize=100000`)
-          .set(bearer(admin));
-        if (res.status === 200) {
-          expect(unwrap(res.body).pagination.pageSize).toBeLessThanOrEqual(100);
-        } else {
-          expect([400, 422]).toContain(res.status);
-        }
-      },
-    );
+    it('DEF-BE-009: GET /users?pageSize=100000 (admin) debe dar 400 (tope 100)', async () => {
+      const res = await http
+        .get(`${PREFIX}/users?pageSize=100000`)
+        .set(bearer(admin));
+      expect(res.status).toBe(400);
+      // el límite exacto sigue permitido
+      await http.get(`${PREFIX}/countries?pageSize=100`).expect(200);
+    });
     // CP-BE-CAT-033
     it('DEF-BE-001: pageSize inválido (-1 / abc) debe dar 400/422', async () => {
       for (const v of ['-1', 'abc']) {

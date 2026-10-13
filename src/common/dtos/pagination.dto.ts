@@ -10,6 +10,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   Min,
   Validate,
 } from 'class-validator';
@@ -52,6 +53,9 @@ function parseDateFilterValue(
   return new Date(trimmedValue);
 }
 
+/** Tope de `pageSize` (DEF-BE-009). El máximo que piden hoy los clientes es 100 (Mobile, catálogo de materiales). */
+export const MAX_PAGE_SIZE = 100;
+
 export class PaginationQueryDTO {
   @ApiPropertyOptional({
     description:
@@ -65,14 +69,17 @@ export class PaginationQueryDTO {
   page?: number;
 
   @ApiPropertyOptional({
-    description:
-      'Pagina para paginación de resultados (opcional, por defecto 10)',
+    description: 'Tamaño de página (opcional, por defecto 10, máximo 100)',
     example: 10,
+    maximum: 100,
   })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1, { message: i18nValidationMessage('validation.PAGE_SIZE_MIN') })
+  @Max(MAX_PAGE_SIZE, {
+    message: i18nValidationMessage('validation.PAGE_SIZE_MAX'),
+  })
   pageSize?: number;
 
   @ApiPropertyOptional({
