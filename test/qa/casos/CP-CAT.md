@@ -149,14 +149,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-010 |
-| Título | Un cliente no puede crear una categoría (403) [DEF DEF-BE-002: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un cliente no puede crear una categoría (403) [DEF-BE-002: Corregido (f92e95a); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-002 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Login cliente_a.<br>2. `POST /categories` con su Bearer. |
 | Datos de prueba | cliente_a |
-| Resultado esperado | 403 (mutación reservada a admin). Hoy: 201 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
+| Resultado esperado | 403 (mutación reservada a admin). Antes del fix: 201 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › cliente sin permiso admin (403 esperado) › DEF-BE-002: cliente_a NO debe poder ...` |
 
 ### CP-BE-CAT-011 — Un cliente no puede editar una categoría (403)
@@ -164,14 +164,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-011 |
-| Título | Un cliente no puede editar una categoría (403) [DEF DEF-BE-002: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un cliente no puede editar una categoría (403) [DEF-BE-002: Corregido (f92e95a); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-002 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Login cliente_a.<br>2. `PATCH /categories/:id` con su Bearer. |
 | Datos de prueba | cliente_a |
-| Resultado esperado | 403 (mutación reservada a admin). Hoy: 200 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
+| Resultado esperado | 403 (mutación reservada a admin). Antes del fix: 200 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › cliente sin permiso admin (403 esperado) › DEF-BE-002: cliente_a NO debe poder ...` |
 
 ### CP-BE-CAT-012 — Un cliente no puede ocultar una categoría (403)
@@ -179,14 +179,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-012 |
-| Título | Un cliente no puede ocultar una categoría (403) [DEF DEF-BE-002: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un cliente no puede ocultar una categoría (403) [DEF-BE-002: Corregido (f92e95a); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-002 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Login cliente_a.<br>2. `PATCH /categories/:id/toggle-visibility` con su Bearer. |
 | Datos de prueba | cliente_a |
-| Resultado esperado | 403 (mutación reservada a admin). Hoy: 200 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
+| Resultado esperado | 403 (mutación reservada a admin). Antes del fix: 200 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › cliente sin permiso admin (403 esperado) › DEF-BE-002: cliente_a NO debe poder ...` |
 
 ### CP-BE-CAT-013 — Un cliente no puede cambiar el estado de una categoría (403)
@@ -194,14 +194,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-013 |
-| Título | Un cliente no puede cambiar el estado de una categoría (403) [DEF DEF-BE-002: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un cliente no puede cambiar el estado de una categoría (403) [DEF-BE-002: Corregido (f92e95a); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-002 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Login cliente_a.<br>2. `PATCH /categories/:id/status?status=INACTIVE` con su Bearer. |
 | Datos de prueba | cliente_a |
-| Resultado esperado | 403 (mutación reservada a admin). Hoy: 200 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
+| Resultado esperado | 403 (mutación reservada a admin). Antes del fix: 200 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › cliente sin permiso admin (403 esperado) › DEF-BE-002: cliente_a NO debe poder ...` |
 
 ### CP-BE-CAT-014 — Un cliente no puede borrar una categoría (403)
@@ -209,14 +209,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-014 |
-| Título | Un cliente no puede borrar una categoría (403) [DEF DEF-BE-002: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un cliente no puede borrar una categoría (403) [DEF-BE-002: Corregido (f92e95a); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P0 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-002 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Login cliente_a.<br>2. `DELETE /categories/:id` con su Bearer. |
 | Datos de prueba | cliente_a |
-| Resultado esperado | 403 (mutación reservada a admin). Hoy: 204 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
+| Resultado esperado | 403 (mutación reservada a admin). Antes del fix: 204 (los endpoints solo usan `JwtAuthGuard`, sin `PermissionsGuard`). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › cliente sin permiso admin (403 esperado) › DEF-BE-002: cliente_a NO debe poder ...` |
 
 ### CP-BE-CAT-015 — Un id de categoría no numérico da 400/422
@@ -224,14 +224,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-015 |
-| Título | Un id de categoría no numérico da 400/422 [DEF DEF-BE-001: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un id de categoría no numérico da 400/422 [DEF-BE-001: Corregido (2dd5228); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-001 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. `GET /categories/abc`. |
 | Datos de prueba | abc |
-| Resultado esperado | 400/422. Hoy: 500 `{statusCode,message}`. |
+| Resultado esperado | 400/422. Antes del fix: 500 `{statusCode,message}`. |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › DEF-BE-001: GET /categories/abc debe dar 400/422...` |
 
 ### CP-BE-CAT-016 — GET /categories/:id de una categoría oculta da 404 como el resto de lecturas públicas
@@ -239,15 +239,30 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-016 |
-| Título | GET /categories/:id de una categoría oculta da 404 como el resto de lecturas públicas [DEF DEF-BE-008: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | GET /categories/:id de una categoría oculta da 404 como el resto de lecturas públicas [DEF-BE-008: Corregido (dcf2657); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P3 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-008 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Crear categoría oculta.<br>2. `GET /categories/:id` sin token. |
 | Datos de prueba | isVisible=false |
-| Resultado esperado | 404 (listados y slug ya la ocultan). Hoy: 200 con el detalle. |
+| Resultado esperado | 404 (listados y slug ya la ocultan). Antes del fix: 200 con el detalle. |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › DEF-BE-008: GET /categories/:id de una categoría oculta...` |
+
+### CP-BE-CAT-016b — El admin sí ve por id la categoría oculta o inactiva
+
+| Campo | Contenido |
+|---|---|
+| ID | CP-BE-CAT-016b |
+| Título | El detalle por id de una categoría oculta/inactiva es visible solo con permiso de categorías (admin) [DEF-BE-008: Corregido (dcf2657)] |
+| Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
+| Prioridad | P2 |
+| Trazabilidad | DEF-BE-008 (regla de visibilidad del listado público aplicada al detalle) |
+| Precondiciones | Stack e2e arriba y sembrado; fixture admin. |
+| Pasos | 1. Crear categoría oculta y otra visible.<br>2. `GET /categories/:id` de la oculta con token admin.<br>3. Poner la visible en INACTIVE y pedirla sin token y con token admin. |
+| Datos de prueba | isVisible=false; status=INACTIVE |
+| Resultado esperado | Admin: 200 en ambos. Anónimo/cliente/token inválido: 404 en ambos. |
+| Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Categorías › DEF-BE-008: el admin sí ve la categoría oculta o inactiva por id...` |
 
 ### CP-BE-CAT-017 — service-types es público y lista solo tipos activos
 
@@ -374,14 +389,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-025 |
-| Título | Rechaza código de tipo de documento duplicado con 409 [DEF DEF-BE-010: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Rechaza código de tipo de documento duplicado con 409 [DEF-BE-010: Corregido (9b11879); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-010 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Crear un tipo.<br>2. Crear otro con el mismo `code`. |
 | Datos de prueba | — |
-| Resultado esperado | 409. Hoy: 500 (violación de unicidad de Prisma P2002 sin mapear). |
+| Resultado esperado | 409. Antes del fix: 500 (violación de unicidad de Prisma P2002 sin mapear). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `ProfessionalDocumentTypes › DEF-BE-010: código ... duplicado debe dar 409` |
 
 ### CP-BE-CAT-026 — Body inválido en alta de tipo de documento da 400/422
@@ -389,14 +404,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-026 |
-| Título | Body inválido en alta de tipo de documento da 400/422 [DEF DEF-BE-001: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Body inválido en alta de tipo de documento da 400/422 [DEF-BE-001: Corregido (2dd5228); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-001 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. `POST /admin/professional-document-types` con `{}` como admin. |
 | Datos de prueba | {} |
-| Resultado esperado | 400/422. Hoy: 500. |
+| Resultado esperado | 400/422. Antes del fix: 500. |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `ProfessionalDocumentTypes › DEF-BE-001: body inválido ... debe dar 400/422` |
 
 ### CP-BE-CAT-027 — TaxConfig sin fila devuelve el fallback seguro
@@ -464,14 +479,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-031 |
-| Título | Un pageSize enorme en /countries se acota o se rechaza [DEF DEF-BE-009: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un pageSize enorme en /countries se acota o se rechaza [DEF-BE-009: Corregido (c0c7d8f); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-009 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. `GET /countries?pageSize=100000`. |
 | Datos de prueba | pageSize=100000 |
-| Resultado esperado | pageSize efectivo <= 100 o 400/422. Hoy: se acepta tal cual (`pagination.pageSize`=100000). |
+| Resultado esperado | pageSize efectivo <= 100 o 400/422. Antes del fix: se acepta tal cual (`pagination.pageSize`=100000). |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Paginación: pageSize enorme › DEF-BE-009: GET /countries?pageSize=100000 ...` |
 
 ### CP-BE-CAT-032 — Un pageSize enorme en /users se acota o se rechaza
@@ -479,14 +494,14 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-032 |
-| Título | Un pageSize enorme en /users se acota o se rechaza [DEF DEF-BE-009: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un pageSize enorme en /users se acota o se rechaza [DEF-BE-009: Corregido (c0c7d8f); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-009 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. Login admin.<br>2. `GET /users?pageSize=100000`. |
 | Datos de prueba | pageSize=100000 |
-| Resultado esperado | pageSize efectivo <= 100 o 400/422. Hoy: se acepta tal cual. |
+| Resultado esperado | pageSize efectivo <= 100 o 400/422. Antes del fix: se acepta tal cual. |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Paginación: pageSize enorme › DEF-BE-009: GET /users?pageSize=100000 (admin) ...` |
 
 ### CP-BE-CAT-033 — Un pageSize inválido (-1 / abc) da 400/422
@@ -494,13 +509,22 @@ Especificación según `C:\workspace\QA-DOC-STANDARD.md` §2. Casos CP-BE-CAT-00
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-CAT-033 |
-| Título | Un pageSize inválido (-1 / abc) da 400/422 [DEF DEF-BE-001: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un pageSize inválido (-1 / abc) da 400/422 [DEF-BE-001: Corregido (2dd5228); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P2 |
 | Trazabilidad | M2 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 2; DEF-BE-001 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. Fixtures admin y cliente_a. |
 | Pasos | 1. `GET /countries?pageSize=-1` y `?pageSize=abc`. |
 | Datos de prueba | -1, abc |
-| Resultado esperado | 400/422. Hoy: 500. |
+| Resultado esperado | 400/422. Antes del fix: 500. |
 | Automatizado en | `test/e2e-real/catalogos.e2e-real-spec.ts` — `Paginación: pageSize enorme › DEF-BE-001: pageSize inválido (-1 / abc)...` |
 
+## Estado de defectos (rama e2e-w1-auth-catalogos)
+
+| DEF | Sev. | Estado |
+|---|---|---|
+| DEF-BE-001 | Alto | Corregido (2dd5228) |
+| DEF-BE-002 | Crítico | Corregido (f92e95a): permiso `categories.catalog:manage` o `admin:all` |
+| DEF-BE-008 | Medio | Corregido (dcf2657) |
+| DEF-BE-009 | Medio | Corregido (c0c7d8f): tope `pageSize` = 100 |
+| DEF-BE-010 | Medio | Corregido (9b11879) |

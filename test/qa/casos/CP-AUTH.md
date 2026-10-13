@@ -95,7 +95,7 @@ CP-BE-AUTH-001..006: smoke real. CP-BE-AUTH-007..038 y CP-BE-ERR-001..009: ola W
 
 ## Ola W1 — registro, login, scope, refresh, Basic Auth, guards y COMPLIANCE
 
-Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-BE-006); la invalidación posterior al logout queda como caso `it.failing`.
+Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-BE-006, Abierto); la invalidación posterior al logout queda como caso `it.failing`.
 
 ### CP-BE-AUTH-007 — Registra un usuario nuevo por POST /onboarding
 
@@ -147,15 +147,15 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-010 |
-| Título | Rechaza body de registro inválido con 400/422 [DEF DEF-BE-001: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Rechaza body de registro inválido con 400/422 [DEF-BE-001: Corregido (2dd5228); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M1 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 1; DEF-BE-001 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
 | Pasos | 1. `POST /onboarding` con body `{ "email": "nope" }`. |
 | Datos de prueba | body incompleto |
-| Resultado esperado | 400 o 422 con el envelope de error estándar. Hoy: 500 `{statusCode,message}` (el `exceptionFactory` del ValidationPipe devuelve un objeto plano, no una HttpException). |
-| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Registro POST /onboarding › DEF-BE-001: body inválido debe responder 400/422 (hoy 500)` |
+| Resultado esperado | 400 o 422 con el envelope de error estándar. Antes del fix: 500 `{statusCode,message}` (el `exceptionFactory` del ValidationPipe devuelve un objeto plano, no una HttpException). |
+| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Registro POST /onboarding › DEF-BE-001: body inválido debe responder 400/422` |
 
 ### CP-BE-AUTH-011 — Un usuario recién registrado inicia sesión en estado PENDING_VERIFICATION sin acceso admin
 
@@ -192,14 +192,14 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-013 |
-| Título | Rechaza login con email inexistente con 401 (igual que password incorrecta) [DEF DEF-BE-003: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Rechaza login con email inexistente con 401 (igual que password incorrecta) [DEF-BE-003: Corregido (1cdcbce); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M1 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 1; DEF-BE-003 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
 | Pasos | 1. Login RSA+nonce con un email que no existe. |
 | Datos de prueba | email aleatorio |
-| Resultado esperado | 401, igual que la password incorrecta (sin enumeración de usuarios). Hoy: 200 `{login:false}`. |
+| Resultado esperado | 401, igual que la password incorrecta (sin enumeración de usuarios). Antes del fix: 200 `{login:false}`. |
 | Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Login › DEF-BE-003: email inexistente debe dar 401...` |
 
 ### CP-BE-AUTH-014 — Rechaza login con body vacío con 400/422
@@ -207,15 +207,15 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-014 |
-| Título | Rechaza login con body vacío con 400/422 [DEF DEF-BE-001: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Rechaza login con body vacío con 400/422 [DEF-BE-001: Corregido (2dd5228); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M1 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 1; DEF-BE-001 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
 | Pasos | 1. `POST /auth/login` con Basic válido y `{}`. |
 | Datos de prueba | {} |
-| Resultado esperado | 400/422. Hoy: 500 `{statusCode,message}`. |
-| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Login › DEF-BE-001: login con body vacío debe dar 400/422 (hoy 500)` |
+| Resultado esperado | 400/422. Antes del fix: 500 `{statusCode,message}`. |
+| Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Login › DEF-BE-001: login con body vacío debe dar 400/422` |
 
 ### CP-BE-AUTH-015 — Un nonce reutilizado no permite un segundo login
 
@@ -387,14 +387,14 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-026 |
-| Título | El 401 de refresh nombra el error como Unauthorized [DEF DEF-BE-004: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | El 401 de refresh nombra el error como Unauthorized [DEF-BE-004: Corregido (ad9f0d8); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P2 |
 | Trazabilidad | M1 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 1; DEF-BE-004 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
 | Pasos | 1. `POST /auth/refresh-token` sin cookie.<br>2. Leer `error.error`. |
 | Datos de prueba | — |
-| Resultado esperado | `error.error` = "Unauthorized". Hoy: "Internal Server Error" con `message` "Unauthorized" (sin localizar). |
+| Resultado esperado | `error.error` = "Unauthorized". Antes del fix: "Internal Server Error" con `message` "Unauthorized" (sin localizar). |
 | Automatizado en | `test/e2e-real/auth.e2e-real-spec.ts` — `Refresh token › DEF-BE-004: el 401 de refresh debe llamarse "Unauthorized"...` |
 
 ### CP-BE-AUTH-027 — Existe logout que invalida la sesión
@@ -402,7 +402,7 @@ Matriz de cobertura de la ola (extracto del plan): sin endpoint de logout (DEF-B
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-AUTH-027 |
-| Título | Existe logout que invalida la sesión [DEF DEF-BE-006: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Existe logout que invalida la sesión [DEF-BE-006: Abierto, caso `it.failing` (ver tabla de defectos al final)] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | M1 del plan maestro (§3); openspec/specs/e2e-test-plan.md Tier 1; DEF-BE-006 |
@@ -602,14 +602,14 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-ERR-006 |
-| Título | El 429 usa el envelope de error estándar [DEF DEF-BE-005: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | El 429 usa el envelope de error estándar [DEF-BE-005: Corregido (bbfac18); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P2 |
 | Trazabilidad | Contrato de error transversal; M1/M2 del plan maestro; DEF-BE-005 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
 | Pasos | 1. Con el limiter `auth` saturado, `POST /auth/nonce`. |
 | Datos de prueba | ver CP-BE-AUTH-035 |
-| Resultado esperado | `{success:false, error:{code:429,...}}`. Hoy: `{error, retryAfter}` sin envelope. |
+| Resultado esperado | `{success:false, error:{code:429,...}}`. Antes del fix: `{error, retryAfter}` sin envelope. |
 | Automatizado en | `test/e2e-real/auth-rate-limit.e2e-real-spec.ts` — `M1 Auth - rate limit (multiplicador = 1) › DEF-BE-005: el 429 debe usar el envelope...` |
 
 ### CP-BE-ERR-007 — 401/403/404/409 incluyen el nombre HTTP en error.error
@@ -632,7 +632,7 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-ERR-008 |
-| Título | El 400 incluye error.error "Bad Request" [DEF DEF-BE-007: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | El 400 incluye error.error "Bad Request" [DEF-BE-007: Corregido (a24fea1); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P3 |
 | Trazabilidad | Contrato de error transversal; M1/M2 del plan maestro; DEF-BE-007 |
@@ -647,14 +647,14 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 | Campo | Contenido |
 |---|---|
 | ID | CP-BE-ERR-009 |
-| Título | Un body inválido usa el mismo envelope de error [DEF DEF-BE-001: caso `it.failing`, hoy el sistema NO cumple el esperado] |
+| Título | Un body inválido usa el mismo envelope de error [DEF-BE-001: Corregido (2dd5228); caso `it` normal] |
 | Tipo / Nivel | e2e real (stack docker-compose.e2e.yml) |
 | Prioridad | P1 |
 | Trazabilidad | Contrato de error transversal; M1/M2 del plan maestro; DEF-BE-001 |
 | Precondiciones | Stack e2e arriba y sembrado (`pnpm e2e:up` + `pnpm e2e:seed`, o `pnpm qa:e2e`); Basic Auth web `tekoapp-web`. |
 | Pasos | 1. `POST /onboarding` con `{email:"nope"}`. |
 | Datos de prueba | — |
-| Resultado esperado | `success:false` y `error.code` = status. Hoy: 500 con `{statusCode,message}` (sin envelope). |
+| Resultado esperado | `success:false` y `error.code` = status. Antes del fix: 500 con `{statusCode,message}` (sin envelope). |
 | Automatizado en | `test/e2e-real/error-contract.e2e-real-spec.ts` — `Contrato de error uniforme › DEF-BE-001: un body inválido debe usar el mismo envelope de error` |
 
 
@@ -664,3 +664,14 @@ Forma esperada: `{success:false, error:{code, message, error, timestamp, path}}`
 |---|---|
 | Expiración real del access token (15 min) en una sesión viva | Requiere esperar o alterar `ACCESS_TOKEN_EXPIRES`; cubierto en refresh con un JWT firmado ya vencido (CP-BE-AUTH-024). |
 | Entrega real del email de verificación / recuperación en MailHog | Fuera del alcance de W1 (M11 Notificaciones). |
+
+## Estado de defectos (rama e2e-w1-auth-catalogos)
+
+| DEF | Sev. | Estado |
+|---|---|---|
+| DEF-BE-001 | Alto | Corregido (2dd5228) |
+| DEF-BE-003 | Medio | Corregido (1cdcbce) |
+| DEF-BE-004 | Bajo | Corregido (ad9f0d8) |
+| DEF-BE-005 | Medio | Corregido (bbfac18) |
+| DEF-BE-006 | Alto | Abierto: los refresh tokens son JWT RS256 stateless sin `jti` ni persistencia; revocar exige una denylist de `jti` en Redis con TTL (decisión de diseño pendiente del orquestador) |
+| DEF-BE-007 | Bajo | Corregido (a24fea1) |

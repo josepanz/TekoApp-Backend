@@ -191,7 +191,7 @@ describe('RateLimitConfig', () => {
           message: 'Demasiados intentos',
           error: 'Too Many Requests',
           retryAfter: 900,
-          timestamp: expect.any(String),
+          timestamp: expect.any(String) as string,
           path: '/tekoapp-backend/api/v1/auth/nonce',
         },
       });
