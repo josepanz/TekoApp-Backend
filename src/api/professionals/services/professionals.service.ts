@@ -4,7 +4,12 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, ProfessionalStatus, VerificationStatus } from '@prisma/client';
+import {
+  Prisma,
+  ProfessionalStatus,
+  UserStatus,
+  VerificationStatus,
+} from '@prisma/client';
 import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
@@ -45,6 +50,13 @@ import { t } from '@common/i18n/i18n.helper';
 const VERIFIABLE_STATUSES: ProfessionalStatus[] = [
   ProfessionalStatus.PENDING,
   ProfessionalStatus.REJECTED,
+];
+
+/** Estados de cuenta desde los que NO se reactiva a un profesional (DELETED/PENDING_DELETION lo suspenden a propósito). */
+const REACTIVATION_BLOCKING_USER_STATUSES: UserStatus[] = [
+  UserStatus.DELETED,
+  UserStatus.PENDING_DELETION,
+  UserStatus.BLOCKED,
 ];
 
 @Injectable()
@@ -360,7 +372,7 @@ export class ProfessionalsService {
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
     // Máquina de estados (DEF-BE-028): solo se resuelve una verificación PENDING o se revisa una
-    // REJECTED. APPROVED (ya resuelto) y SUSPENDED (no hay endpoint de reactivación: verify no
+    // REJECTED. APPROVED (ya resuelto) y SUSPENDED (la reactivación es POST :id/reactivate: verify no
     // es la vía) son transiciones inválidas.
     if (!VERIFIABLE_STATUSES.includes(professional.status)) {
       throw new ConflictException(t('professionals.INVALID_STATE_FOR_VERIFY'));
@@ -450,6 +462,65 @@ export class ProfessionalsService {
         title: t('professionals.NOTIFICATION_SUSPENDED_TITLE'),
         message: t('professionals.NOTIFICATION_SUSPENDED_MESSAGE', { reason }),
         type: NotificationType.PROFESSIONAL_SUSPENDED,
+        channels: ['in_app', 'push'],
+      },
+      professional.userId,
+    );
+
+    const result = await this.professionalsDb.findById(id);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  /**
+   * Reactiva un profesional SUSPENDED y lo deja como un APPROVED normal: `isActive=true` y
+   * `isAvailable/isOnline=false` (igual que tras `verify`; tiene que volver a marcarse disponible).
+   * `verify` no exige `requiredDocumentsVerified`, así que acá tampoco; sí se revalida que la cuenta
+   * del usuario no esté eliminada, en borrado o bloqueada (el borrado de cuenta también deja al
+   * profesional SUSPENDED).
+   */
+  async reactivateProfessional(
+    id: number,
+    reason: string,
+    adminId: number,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const professional = await this.professionalsDb.findById(id);
+    if (professional.status !== ProfessionalStatus.SUSPENDED) {
+      throw new ConflictException(
+        t('professionals.INVALID_STATE_FOR_REACTIVATE'),
+      );
+    }
+    if (
+      REACTIVATION_BLOCKING_USER_STATUSES.includes(professional.user.status)
+    ) {
+      throw new ConflictException(
+        t('professionals.USER_NOT_ACTIVE_FOR_REACTIVATE'),
+      );
+    }
+    const updatedCount = await this.professionalsDb.updateConditional(
+      id,
+      [ProfessionalStatus.SUSPENDED],
+      {
+        status: ProfessionalStatus.APPROVED,
+        isActive: true,
+        isAvailable: false,
+        isOnline: false,
+        lastChangedBy: String(adminId),
+        changedReason: reason,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        t('professionals.STATUS_CHANGED_BEFORE_REACTIVATE'),
+      );
+    }
+
+    await this.notificationsService.create(
+      {
+        title: t('professionals.NOTIFICATION_REACTIVATED_TITLE'),
+        message: t('professionals.NOTIFICATION_REACTIVATED_MESSAGE', {
+          reason,
+        }),
+        type: NotificationType.PROFESSIONAL_VERIFIED,
         channels: ['in_app', 'push'],
       },
       professional.userId,

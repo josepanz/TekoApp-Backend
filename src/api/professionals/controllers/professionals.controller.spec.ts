@@ -38,6 +38,7 @@ const mockGetProfessionalReviews = jest.fn();
 const mockGetProfessionalStats = jest.fn();
 const mockVerifyProfessional = jest.fn();
 const mockSuspendProfessional = jest.fn();
+const mockReactivateProfessional = jest.fn();
 
 const mockUser = { id: 1 } as unknown as IUserDataOnJwt;
 const mockReq = { user: mockUser };
@@ -73,6 +74,7 @@ describe('ProfessionalsController', () => {
             getProfessionalStats: mockGetProfessionalStats,
             verifyProfessional: mockVerifyProfessional,
             suspendProfessional: mockSuspendProfessional,
+            reactivateProfessional: mockReactivateProfessional,
           },
         },
       ],
@@ -510,6 +512,46 @@ describe('ProfessionalsController', () => {
       expect(mockSuspendProfessional).toHaveBeenCalledWith(
         10,
         'Comportamiento inapropiado',
+        1,
+      );
+    });
+  });
+
+  describe('reactivateProfessional', () => {
+    it('debe requerir los mismos permisos que suspend', () => {
+      const reflector = new Reflector();
+      const reactivate = reflector.get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata
+        controller.reactivateProfessional,
+      );
+      const suspend = reflector.get<string[]>(
+        PERMISSIONS_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- solo se lee su metadata
+        controller.suspendProfessional,
+      );
+
+      expect(reactivate).toEqual(suspend);
+      expect(reactivate).toEqual([
+        PERMISSIONS.PROFESSIONALS.VERIFY,
+        PERMISSIONS.ADMIN.ALL,
+      ]);
+    });
+
+    it('debe reactivar el profesional extrayendo la razón del DTO', async () => {
+      const expected = { id: 10, status: 'APPROVED' };
+      mockReactivateProfessional.mockResolvedValue(expected);
+
+      const result = await controller.reactivateProfessional(
+        mockParam,
+        { reason: 'Apelación aceptada' },
+        mockReq,
+      );
+
+      expect(result).toEqual(expected);
+      expect(mockReactivateProfessional).toHaveBeenCalledWith(
+        10,
+        'Apelación aceptada',
         1,
       );
     });

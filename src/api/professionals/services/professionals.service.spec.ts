@@ -957,4 +957,79 @@ describe('ProfessionalsService', () => {
       ).rejects.toThrow(ConflictException);
     });
   });
+  describe('reactivateProfessional', () => {
+    const suspended = {
+      ...mockProfessional,
+      status: 'SUSPENDED',
+      isActive: false,
+      user: { status: 'ACTIVE' },
+    };
+
+    it.each(['APPROVED', 'PENDING', 'REJECTED'])(
+      'debe lanzar ConflictException y no escribir si el profesional está %s',
+      async (status) => {
+        mockFindById.mockResolvedValue({ ...suspended, status });
+
+        await expect(
+          service.reactivateProfessional(1, 'motivo', 99),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+        expect(mockNotificationsCreate).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['DELETED', 'BLOCKED', 'PENDING_DELETION'])(
+      'debe lanzar ConflictException si la cuenta del usuario está %s (no reactiva)',
+      async (userStatus) => {
+        mockFindById.mockResolvedValue({
+          ...suspended,
+          user: { status: userStatus },
+        });
+
+        await expect(
+          service.reactivateProfessional(1, 'motivo', 99),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+      },
+    );
+
+    it('debe pasar a APPROVED dejando al profesional como un APPROVED normal y notificarlo', async () => {
+      mockFindById
+        .mockResolvedValueOnce(suspended)
+        .mockResolvedValueOnce({ ...suspended, status: 'APPROVED' });
+      mockUpdateConditional.mockResolvedValue(1);
+
+      const result = await service.reactivateProfessional(1, 'Apelación', 99);
+
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        ['SUSPENDED'],
+        expect.objectContaining({
+          status: 'APPROVED',
+          isActive: true,
+          isAvailable: false,
+          isOnline: false,
+          changedReason: 'Apelación',
+          lastChangedBy: '99',
+        }),
+      );
+      expect(result).toEqual(expect.objectContaining({ status: 'APPROVED' }));
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_VERIFIED,
+        }),
+        mockProfessional.userId,
+      );
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la lectura y la escritura (carrera)', async () => {
+      mockFindById.mockResolvedValue(suspended);
+      mockUpdateConditional.mockResolvedValue(0);
+
+      await expect(
+        service.reactivateProfessional(1, 'Apelación', 99),
+      ).rejects.toThrow(ConflictException);
+      expect(mockNotificationsCreate).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -313,9 +313,9 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .get(`${PREFIX}/professionals/${approved.pro.id}`)
         .set(bearer(clienteA))
         .expect(200);
-      expect(
-        ids(await listFor(clienteA, approved.name), true),
-      ).toContain(approved.pro.referenceId);
+      expect(ids(await listFor(clienteA, approved.name), true)).toContain(
+        approved.pro.referenceId,
+      );
       for (const x of [rejected, suspended]) {
         await http
           .get(`${PREFIX}/professionals/${x.pro.id}`)
@@ -528,9 +528,9 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       );
       const noReason = await review(up.referenceId, { status: 'REJECTED' });
       expect(noReason.status).toBe(400);
-      expect((noReason.body.error.errors as any[]).map((e) => e.field)).toContain(
-        'rejectionReason',
-      );
+      expect(
+        (noReason.body.error.errors as any[]).map((e) => e.field),
+      ).toContain('rejectionReason');
       const rows = unwrap(
         (
           await http
@@ -635,9 +635,8 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       const uploaded: string[] = [];
       for (const t of required) {
         uploaded.push(
-          unwrap(
-            (await uploadDoc(user.token, t.referenceId).expect(201)).body,
-          ).referenceId,
+          unwrap((await uploadDoc(user.token, t.referenceId).expect(201)).body)
+            .referenceId,
         );
       }
       expect((await myProfile(user.token)).requiredDocumentsVerified).toBe(
@@ -748,6 +747,16 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         .set(bearer(token))
         .send(body);
 
+    const reactivate = (
+      id: number,
+      token: string,
+      body: Record<string, unknown> = { reason: 'Apelación aceptada' },
+    ) =>
+      http
+        .post(`${PREFIX}/professionals/${id}/reactivate`)
+        .set(bearer(token))
+        .send(body);
+
     // CP-BE-ONB-021
     it('sin permiso (cliente, el propio profesional postulado) verify y suspend -> 403 y el estado no cambia', async () => {
       const { user, pro } = await newPro();
@@ -819,7 +828,9 @@ describe('M3 Onboarding profesional (e2e real)', () => {
 
       const other = await newPro();
       await verify(other.pro.id, admin, { isVerified: false }).expect(201);
-      const re = await verify(other.pro.id, admin, { isVerified: true }).expect(201);
+      const re = await verify(other.pro.id, admin, { isVerified: true }).expect(
+        201,
+      );
       expect(unwrap(re.body).status).toBe('APPROVED');
     });
 
@@ -901,6 +912,155 @@ describe('M3 Onboarding profesional (e2e real)', () => {
       await suspend(pro.id, admin).expect(201);
       expect(await nearbyIds()).not.toContain(pro.referenceId);
       expect(await availableIds()).not.toContain(pro.referenceId);
+    });
+
+    // CP-BE-ONB-040
+    it('reactivate: SUSPENDED -> APPROVED con motivo; vuelve a ser visible y queda como un APPROVED normal (isActive, no disponible hasta re-marcarse)', async () => {
+      const { user, pro } = await newPro();
+      await verify(pro.id, admin).expect(201);
+      const lat = -25.31 + Math.random() * 0.001;
+      const lng = -57.61 + Math.random() * 0.001;
+      await http
+        .post(`${PREFIX}/professionals/${pro.id}/availability`)
+        .set(bearer(user.token))
+        .send({ isAvailable: true })
+        .expect(201);
+      await http
+        .post(`${PREFIX}/locations/update`)
+        .set(bearer(user.token))
+        .send({ latitude: lat, longitude: lng })
+        .expect(200);
+      await http
+        .patch(`${PREFIX}/locations/online`)
+        .set(bearer(user.token))
+        .send({ isOnline: true })
+        .expect(200);
+      const nearbyIds = async () =>
+        (
+          unwrap(
+            (
+              await http
+                .get(`${PREFIX}/locations/nearby`)
+                .query({ latitude: lat, longitude: lng, radius: 5 })
+                .set(bearer(clienteA))
+                .expect(200)
+            ).body,
+          ) as any[]
+        ).map((p) => p.referenceId);
+      const clientSees = (expected: number) =>
+        http
+          .get(`${PREFIX}/professionals/${pro.id}`)
+          .set(bearer(clienteA))
+          .expect(expected);
+
+      await suspend(pro.id, admin, { reason: 'Reportes' }).expect(201);
+      await clientSees(404);
+      expect(await nearbyIds()).not.toContain(pro.referenceId);
+
+      const res = await reactivate(pro.id, admin, {
+        reason: '  Apelación aceptada  ',
+      }).expect(201);
+      const body = unwrap(res.body);
+      expect(body.status).toBe('APPROVED');
+      expect(body.isActive).toBe(true);
+      expect(body.isAvailable).toBe(false);
+      expect(body.isOnline).toBe(false);
+      expect(body.verificationStatus).toBe('VERIFIED');
+      expect(body.changedReason).toBe('Apelación aceptada');
+      await clientSees(200);
+      const me = await myProfile(user.token);
+      expect(me.status).toBe('APPROVED');
+      // igual que un APPROVED normal: tiene que volver a marcarse disponible/en línea para aparecer cerca
+      expect(await nearbyIds()).not.toContain(pro.referenceId);
+      await http
+        .post(`${PREFIX}/professionals/${pro.id}/availability`)
+        .set(bearer(user.token))
+        .send({ isAvailable: true })
+        .expect(201);
+      await http
+        .patch(`${PREFIX}/locations/online`)
+        .set(bearer(user.token))
+        .send({ isOnline: true })
+        .expect(200);
+      expect(await nearbyIds()).toContain(pro.referenceId);
+    });
+
+    // CP-BE-ONB-041
+    it('reactivate sobre PENDING, REJECTED, APPROVED o ya reactivado -> 409 con envelope y no cambia el estado ni el motivo', async () => {
+      const pending = await newPro();
+      const rejected = await newPro();
+      await verify(rejected.pro.id, admin, {
+        isVerified: false,
+        notes: 'Documentación ilegible',
+      }).expect(201);
+      const approved = await newPro();
+      await verify(approved.pro.id, admin).expect(201);
+
+      for (const [x, status] of [
+        [pending, 'PENDING'],
+        [rejected, 'REJECTED'],
+        [approved, 'APPROVED'],
+      ] as const) {
+        const res = await reactivate(x.pro.id, admin);
+        expect(res.status).toBe(409);
+        expect(res.body.success).toBe(false);
+        expect(res.body.error.code).toBe(409);
+        expect((await myProfile(x.user.token)).status).toBe(status);
+      }
+
+      await suspend(approved.pro.id, admin, { reason: 'Reportes' }).expect(201);
+      await reactivate(approved.pro.id, admin, { reason: 'primera' }).expect(
+        201,
+      );
+      const again = await reactivate(approved.pro.id, admin, {
+        reason: 'segunda',
+      });
+      expect(again.status).toBe(409);
+      expect((await myProfile(approved.user.token)).changedReason).toBe(
+        'primera',
+      );
+    });
+
+    // CP-BE-ONB-042
+    it('reactivate exige motivo (400 si falta, vacío o solo espacios), permiso (403), JWT (401) y existencia (404)', async () => {
+      const { user, pro } = await newPro();
+      await verify(pro.id, admin).expect(201);
+      await suspend(pro.id, admin).expect(201);
+      for (const body of [{}, { reason: '' }, { reason: '   ' }]) {
+        expect((await reactivate(pro.id, admin, body)).status).toBe(400);
+      }
+      expect((await myProfile(user.token)).status).toBe('SUSPENDED');
+      for (const token of [clienteA, user.token]) {
+        expect((await reactivate(pro.id, token)).status).toBe(403);
+      }
+      await http
+        .post(`${PREFIX}/professionals/${pro.id}/reactivate`)
+        .send({ reason: 'x' })
+        .expect(401);
+      expect((await reactivate(99999999, admin)).status).toBe(404);
+      expect((await myProfile(user.token)).status).toBe('SUSPENDED');
+    });
+
+    // CP-BE-ONB-043
+    it('reactivate con la cuenta del usuario no ACTIVE (bloqueada) -> 409 y sigue SUSPENDED', async () => {
+      const { user, pro } = await newPro();
+      await verify(pro.id, admin).expect(201);
+      await suspend(pro.id, admin).expect(201);
+      const dbPro = await prisma.professionals.findUniqueOrThrow({
+        where: { id: pro.id },
+      });
+      await prisma.users.update({
+        where: { id: dbPro.userId },
+        data: { status: 'BLOCKED' },
+      });
+      const res = await reactivate(pro.id, admin);
+      await prisma.users.update({
+        where: { id: dbPro.userId },
+        data: { status: 'ACTIVE' },
+      });
+      expect(res.status).toBe(409);
+      expect((await myProfile(user.token)).status).toBe('SUSPENDED');
+      await reactivate(pro.id, admin).expect(201);
     });
   });
 
@@ -987,9 +1147,9 @@ describe('M3 Onboarding profesional (e2e real)', () => {
         isVisible: false,
       }).expect(200);
       expect(await pub(owner.pro.referenceId)).not.toContain(item.referenceId);
-      expect((await mine(owner.user.token)).map((i) => i.referenceId)).toContain(
-        item.referenceId,
-      );
+      expect(
+        (await mine(owner.user.token)).map((i) => i.referenceId),
+      ).toContain(item.referenceId);
 
       await patch(owner.user.token, item.referenceId, {
         isVisible: true,

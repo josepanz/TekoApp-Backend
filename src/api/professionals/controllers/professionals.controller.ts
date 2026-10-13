@@ -36,6 +36,7 @@ import {
   UpdateProfessionalLocationRequestDTO,
   VerifyProfessionalRequestDTO,
   SuspendProfessionalRequestDTO,
+  ReactivateProfessionalRequestDTO,
 } from '../dtos/request';
 import {
   ProfessionalDetailResponseDTO,
@@ -264,6 +265,27 @@ export class ProfessionalsController {
     @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.suspendProfessional(
+      param.id,
+      dto.reason,
+      req.user.id,
+    );
+  }
+
+  @Post(':id/reactivate')
+  @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
+  @ApiOperation({
+    summary: 'Reactivar un profesional suspendido (solo admin)',
+    description:
+      'SUSPENDED -> APPROVED; cualquier otro estado responde 409. El motivo es obligatorio.',
+  })
+  @ApiResponse({ status: 201, type: ProfessionalDetailResponseDTO })
+  @ApiResponse({ status: 409, description: 'El profesional no está SUSPENDED' })
+  async reactivateProfessional(
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: ReactivateProfessionalRequestDTO,
+    @Request() req: { user: IUserDataOnJwt },
+  ): Promise<ProfessionalDetailResponseDTO> {
+    return this.professionalsService.reactivateProfessional(
       param.id,
       dto.reason,
       req.user.id,
