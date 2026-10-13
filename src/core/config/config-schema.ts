@@ -24,6 +24,8 @@ export const configSchema = Joi.object({
   // Cantidad de contraseñas históricas contra las que se valida el reuso al rotar. Default 5.
   PASSWORD_HISTORY_LIMIT: Joi.number().integer().min(1).default(5),
 
+  // Solo E2E local; se ignora en NODE_ENV=production (ver RateLimitConfig.resolveMultiplier).
+  RATE_LIMIT_MULTIPLIER: Joi.number().min(1).optional(),
   SEQ_ENABLED: Joi.boolean().default(false),
   SEQ_URL: Joi.string().uri().required(),
 

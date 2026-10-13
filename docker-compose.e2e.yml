@@ -1,0 +1,74 @@
+# Entorno E2E AISLADO (solo local, sin CI). Puertos NO estándar a propósito: en la máquina de
+# desarrollo hay un Postgres nativo de Windows en 5432 que NO es Docker y no debe tocarse.
+# Volúmenes descartables: `pnpm e2e:down` los borra (`down -v`).
+name: tekoapp-e2e
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: tekoapp-e2e-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tekoapp_e2e
+    ports:
+      - '55432:5432'
+    volumes:
+      - e2e_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d tekoapp_e2e']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  mongo:
+    image: mongo:7
+    container_name: tekoapp-e2e-mongo
+    ports:
+      - '57017:27017'
+    volumes:
+      - e2e_mongo:/data/db
+    healthcheck:
+      test: ['CMD-SHELL', "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7
+    container_name: tekoapp-e2e-redis
+    ports:
+      - '56379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # `minio/minio` ya no se publica en Docker Hub ni en quay.io accesible: se usa la imagen legacy de
+  # Bitnami (mismo servidor MinIO), que crea el bucket al arrancar via MINIO_DEFAULT_BUCKETS.
+  minio:
+    image: bitnamilegacy/minio:2024.10.13
+    container_name: tekoapp-e2e-minio
+    restart: on-failure:3 # el setup de Bitnami a veces deja el puerto ocupado en el primer arranque
+    environment:
+      MINIO_ROOT_USER: e2e-minio-user
+      MINIO_ROOT_PASSWORD: e2e-minio-password
+      MINIO_DEFAULT_BUCKETS: tekoapp-e2e-uploads
+    ports:
+      - '59000:9000'
+      - '59001:9001'
+    volumes:
+      - e2e_minio:/bitnami/minio/data
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: tekoapp-e2e-mailhog
+    ports:
+      - '51025:1025' # SMTP
+      - '58025:8025' # UI / API HTTP
+
+volumes:
+  e2e_pg:
+  e2e_mongo:
+  e2e_minio:

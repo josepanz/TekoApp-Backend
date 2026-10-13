@@ -1,4 +1,13 @@
+/**
+ * Suite: controller de /locations: delegación al servicio, 403 propagado en ubicación exacta y JwtAuthGuard a nivel de clase
+ * Casos: CP-BE-LOC-001, CP-BE-LOC-005 (ver test/qa/casos/CP-LOC.md)
+ * Tipo: unitaria   Prioridad: P1
+ * Precondiciones: servicio y guards mockeados (sin infraestructura)
+ * Trazabilidad: blindaje de /locations (commit f9b53da)
+ */
 import { Test, TestingModule } from '@nestjs/testing';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { ForbiddenException } from '@nestjs/common';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import { LocationsController } from './locations.controller';
 import { LocationsService } from '../services/locations.service';
@@ -17,6 +26,7 @@ const mockGetProfessionalLocation = jest.fn();
 const mockGetOnlineProfessionalsCount = jest.fn();
 const mockGetProfessionalsByArea = jest.fn();
 const mockCalculateDistance = jest.fn();
+const mockAssertCanViewExactLocation = jest.fn();
 
 const mockReq = {
   user: { id: 1, referenceId: 'user-ref-1' } as unknown as IUserDataOnJwt,
@@ -40,6 +50,7 @@ describe('LocationsController', () => {
             getOnlineProfessionalsCount: mockGetOnlineProfessionalsCount,
             getProfessionalsByArea: mockGetProfessionalsByArea,
             calculateDistance: mockCalculateDistance,
+            assertCanViewExactLocation: mockAssertCanViewExactLocation,
           },
         },
       ],
@@ -121,11 +132,30 @@ describe('LocationsController', () => {
       mockGetProfessionalLocation.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getProfessionalLocation(param);
+      const result = await controller.getProfessionalLocation(mockReq, param);
 
       // Assert
       expect(result).toEqual(expected);
+      expect(mockAssertCanViewExactLocation).toHaveBeenCalledWith(
+        'user-ref-1',
+        5,
+        undefined,
+      );
       expect(mockGetProfessionalLocation).toHaveBeenCalledWith(5);
+    });
+
+    it('debe propagar el 403 y no leer la coordenada si el requester no esta autorizado', async () => {
+      // Arrange
+      const param = { id: 5 } as unknown as GetProfessionalLocationParamDTO;
+      mockAssertCanViewExactLocation.mockRejectedValue(
+        new ForbiddenException('x'),
+      );
+
+      // Act + Assert
+      await expect(
+        controller.getProfessionalLocation(mockReq, param),
+      ).rejects.toThrow(ForbiddenException);
+      expect(mockGetProfessionalLocation).not.toHaveBeenCalled();
     });
   });
 
@@ -190,6 +220,16 @@ describe('LocationsController', () => {
       // Assert
       expect(result.distance).toBe(3.14);
       expect(result.unit).toBe('km');
+    });
+  });
+
+  describe('seguridad', () => {
+    it('JwtAuthGuard esta aplicado a nivel de clase (todos los endpoints exigen JWT)', () => {
+      const guards = Reflect.getMetadata(
+        GUARDS_METADATA,
+        LocationsController,
+      ) as unknown[];
+      expect(guards).toContain(JwtAuthGuard);
     });
   });
 });

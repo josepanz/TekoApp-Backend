@@ -138,6 +138,44 @@ async function main() {
     });
   }
 
+  // ─── Rol COMPLIANCE (auditoría legal) ───────────────────────────────────────
+  // Pedido en TekoApp-Frontend-Web/PENDING.md: versiones legales + políticas de retención
+  // (`legal.config:manage`) y auditoría de consentimientos (`legal.consent-audit:read`).
+  // Upsert idempotente de rol y asignaciones.
+  const complianceRole = await prisma.roles.upsert({
+    where: { name: 'COMPLIANCE' },
+    update: {},
+    create: {
+      name: 'COMPLIANCE',
+      displayName: 'Compliance',
+      description:
+        'Auditoría legal: versiones de documentos, retención y consentimientos',
+      createdBy: 'seed',
+    },
+  });
+  for (const code of [
+    PERMISSIONS.LEGAL.CONFIG_MANAGE,
+    PERMISSIONS.LEGAL.CONSENT_AUDIT_VIEW,
+  ]) {
+    const permission = await prisma.permissions.findUniqueOrThrow({
+      where: { name: code },
+    });
+    await prisma.rolePermissions.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: complianceRole.id,
+          permissionId: permission.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: complianceRole.id,
+        permissionId: permission.id,
+        createdBy: 'seed',
+      },
+    });
+  }
+
   // ─── Categoría y tipo de servicio (catálogo mínimo para /solicitar) ────────
   const category = await prisma.category.upsert({
     where: { slug: 'plomeria' },

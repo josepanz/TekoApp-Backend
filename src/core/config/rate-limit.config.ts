@@ -69,8 +69,25 @@ export class RateLimitConfig {
     }
   }
 
+  /**
+   * Multiplicador de los `max` de TODOS los limitadores, pensado solo para el entorno E2E local
+   * (`RATE_LIMIT_MULTIPLIER` en `.env.e2e`): una suite de smoke hace más de 100 requests o 5
+   * logins en 15 min y se bloquearía a sí misma. Se IGNORA por completo si `NODE_ENV=production`
+   * (nunca puede aflojar los límites en prod, ni por error de configuración), y también si el
+   * valor no es un número finito >= 1 (nunca endurece ni rompe el límite base).
+   */
+  static resolveMultiplier(configService: ConfigService): number {
+    if (configService.get<string>('NODE_ENV') === 'production') return 1;
+    const raw = configService.get<string | number>('RATE_LIMIT_MULTIPLIER');
+    if (raw === undefined || raw === null || raw === '') return 1;
+    const value = Number(raw);
+    return Number.isFinite(value) && value >= 1 ? value : 1;
+  }
+
   static createLimiter(configService: ConfigService): RateLimitConfigReturn {
     const redis = this.getRedisClient(configService);
+    const multiplier = this.resolveMultiplier(configService);
+    const scaled = (base: number): number => Math.ceil(base * multiplier);
 
     // `prefix` es OBLIGATORIO y distinto por limitador: `rate-limit-redis` usa `rl:` por defecto,
     // así que sin esto los 5 limitadores comparten el MISMO contador por IP en Redis. Con un solo
@@ -92,7 +109,7 @@ export class RateLimitConfig {
     const generalLimiter = rateLimit({
       store: createStore('rl:general:'),
       windowMs: 15 * 60 * 1000, // 15 minutos
-      max: 100,
+      max: scaled(100),
       message: {
         error:
           'Demasiadas solicitudes desde esta IP, inténtalo de nuevo en 15 minutos.',
@@ -112,7 +129,7 @@ export class RateLimitConfig {
     const authLimiter = rateLimit({
       store: createStore('rl:auth:'),
       windowMs: 15 * 60 * 1000, // 15 minutos
-      max: 5,
+      max: scaled(5),
       message: {
         error:
           'Demasiados intentos de autenticación, inténtalo de nuevo en 15 minutos.',
@@ -129,7 +146,7 @@ export class RateLimitConfig {
     const uploadLimiter = rateLimit({
       store: createStore('rl:upload:'),
       windowMs: 60 * 60 * 1000, // 1 hora
-      max: 10,
+      max: scaled(10),
       message: {
         error: 'Demasiadas subidas de archivos, inténtalo de nuevo en 1 hora.',
         retryAfter: 60 * 60,
@@ -147,7 +164,7 @@ export class RateLimitConfig {
     const paymentLimiter = rateLimit({
       store: createStore('rl:payment:'),
       windowMs: 60 * 60 * 1000, // 1 hora
-      max: 20,
+      max: scaled(20),
       message: {
         error: 'Demasiadas transacciones, inténtalo de nuevo en 1 hora.',
         retryAfter: 60 * 60,
@@ -165,7 +182,7 @@ export class RateLimitConfig {
     const searchLimiter = rateLimit({
       store: createStore('rl:search:'),
       windowMs: 1 * 60 * 1000, // 1 minuto
-      max: 30,
+      max: scaled(30),
       message: {
         error: 'Demasiadas búsquedas, inténtalo de nuevo en 1 minuto.',
         retryAfter: 60,

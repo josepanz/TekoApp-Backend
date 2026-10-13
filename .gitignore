@@ -145,3 +145,7 @@ dist
 
 # Claude Code MCP local state (engram memory server)
 .engram/
+
+# E2E local
+.env.e2e
+!.env.e2e.example

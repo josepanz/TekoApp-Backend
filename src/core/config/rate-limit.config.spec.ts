@@ -1,3 +1,10 @@
+/**
+ * Suite: RateLimitConfig: prefijos Redis por limitador y RATE_LIMIT_MULTIPLIER (ignorado con NODE_ENV=production)
+ * Casos: CP-BE-ENV-003 (ver test/qa/casos/CP-ENV.md)
+ * Tipo: unitaria   Prioridad: P0
+ * Precondiciones: Redis y express-rate-limit mockeados
+ * Trazabilidad: M0 del plan maestro: rate-limit relajado solo en e2e
+ */
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
@@ -76,6 +83,53 @@ describe('RateLimitConfig', () => {
         .map(([options]: [{ prefix?: string }]) => options);
 
       expect(generalOptions.prefix).not.toBe(authOptions.prefix);
+    });
+  });
+
+  describe('RATE_LIMIT_MULTIPLIER', () => {
+    const cfg = (env: Record<string, unknown>) =>
+      ({
+        get: jest.fn((key: string, fallback?: unknown) => env[key] ?? fallback),
+      }) as unknown as ConfigService;
+    const maxes = () =>
+      mockRateLimit.mock.calls.map(([o]: [{ max: number }]) => o.max);
+
+    it('sin la variable, los max quedan en los valores base', () => {
+      RateLimitConfig.createLimiter(cfg({}));
+      expect(maxes()).toEqual([100, 5, 10, 20, 30]);
+    });
+
+    it('escala todos los max cuando NODE_ENV no es production', () => {
+      RateLimitConfig.createLimiter(
+        cfg({ NODE_ENV: 'develop', RATE_LIMIT_MULTIPLIER: '10' }),
+      );
+      expect(maxes()).toEqual([1000, 50, 100, 200, 300]);
+    });
+
+    it('IGNORA el multiplicador si NODE_ENV=production', () => {
+      RateLimitConfig.createLimiter(
+        cfg({ NODE_ENV: 'production', RATE_LIMIT_MULTIPLIER: '1000' }),
+      );
+      expect(maxes()).toEqual([100, 5, 10, 20, 30]);
+    });
+
+    it.each(['abc', '0', '-3', '0.5', 'Infinity', ''])(
+      'ignora el valor inválido %p y usa 1',
+      (raw) => {
+        expect(
+          RateLimitConfig.resolveMultiplier(
+            cfg({
+              RATE_LIMIT_MULTIPLIER: raw,
+            }),
+          ),
+        ).toBe(1);
+      },
+    );
+
+    it('acepta el multiplicador numérico', () => {
+      expect(
+        RateLimitConfig.resolveMultiplier(cfg({ RATE_LIMIT_MULTIPLIER: 3 })),
+      ).toBe(3);
     });
   });
 

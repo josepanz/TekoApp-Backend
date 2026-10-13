@@ -1,7 +1,15 @@
+/**
+ * Suite: servicio de locations: posición aproximada en nearby y las 3 reglas de coordenada exacta (propio, admin, servicio activo) con 403
+ * Casos: CP-BE-LOC-003, CP-BE-LOC-004, CP-BE-LOC-005 (ver test/qa/casos/CP-LOC.md)
+ * Tipo: unitaria   Prioridad: P1
+ * Precondiciones: repositorios de posición y servicios mockeados
+ * Trazabilidad: blindaje de /locations (commit f9b53da)
+ */
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LocationsService } from './locations.service';
+import { haversineKm } from '../helpers/location-obfuscation.helper';
 import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
 
 const mockFindById = jest.fn();
@@ -12,6 +20,8 @@ const mockFindMany = jest.fn();
 const mockFindByUserReferenceId = jest.fn();
 const mockSetOnlineStatus = jest.fn();
 const mockConfigGet = jest.fn();
+const mockHasActiveServiceWith = jest.fn();
+const mockUserHasPermission = jest.fn();
 
 const mockProfessional = {
   id: 1,
@@ -40,6 +50,8 @@ describe('LocationsService', () => {
             findMany: mockFindMany,
             findByUserReferenceId: mockFindByUserReferenceId,
             setOnlineStatus: mockSetOnlineStatus,
+            hasActiveServiceWith: mockHasActiveServiceWith,
+            userHasPermission: mockUserHasPermission,
           },
         },
         {
@@ -110,37 +122,66 @@ describe('LocationsService', () => {
   };
 
   describe('findNearbyProfessionals', () => {
-    it('debe mapear la fila cruda de Postgres a camelCase con números normalizados', async () => {
+    it('debe devolver posición aproximada (nunca la exacta) y distancia recalculada', async () => {
       // Arrange
       const dto = { latitude: -25.2867, longitude: -57.647, radius: 5 };
-      mockConfigGet.mockReturnValue(50);
+      mockConfigGet.mockImplementation((k: string) =>
+        k === 'MAX_RADIUS_KM' ? 50 : 'test-secret',
+      );
       mockFindNearby.mockResolvedValue([rawNearbyRow]);
 
       // Act
       const result = await service.findNearbyProfessionals(dto as never);
 
       // Assert
-      expect(result).toEqual([
-        {
-          id: 1,
-          referenceId: 'prof-ref-1',
-          categoryId: 3,
-          description: 'Plomero',
-          hourlyRate: 50000,
-          latitude: -25.2867,
-          longitude: -57.647,
-          distanceKm: 1.23,
-          isAvailable: true,
-          isOnline: true,
-          averageRating: 4.5,
-        },
-      ]);
+      expect(result).toHaveLength(1);
+      const [item] = result;
+      expect(item.id).toBe(1);
+      expect(item.referenceId).toBe('prof-ref-1');
+      expect(item.hourlyRate).toBe(50000);
+      expect(item.latitude).not.toBe(Number(rawNearbyRow.current_latitude));
+      expect(item.longitude).not.toBe(Number(rawNearbyRow.current_longitude));
+      expect(Object.keys(item)).not.toContain('distance');
+      const expected =
+        Math.round(
+          haversineKm(
+            dto.latitude,
+            dto.longitude,
+            item.latitude,
+            item.longitude,
+          ) * 100,
+        ) / 100;
+      expect(item.distanceKm).toBe(expected);
+    });
+
+    it('debe forzar onlineOnly=true aunque el cliente mande false', async () => {
+      // Arrange
+      const dto = {
+        latitude: -25.2867,
+        longitude: -57.647,
+        radius: 5,
+        onlineOnly: false,
+      };
+      mockConfigGet.mockImplementation((k: string) =>
+        k === 'MAX_RADIUS_KM' ? 50 : 'test-secret',
+      );
+      mockFindNearby.mockResolvedValue([]);
+
+      // Act
+      await service.findNearbyProfessionals(dto as never);
+
+      // Assert
+      expect(mockFindNearby).toHaveBeenCalledWith(
+        expect.objectContaining({ onlineOnly: true }),
+      );
     });
 
     it('debe usar el radio solicitado cuando es menor al máximo configurado', async () => {
       // Arrange
       const dto = { latitude: -25.2867, longitude: -57.647, radius: 5 };
-      mockConfigGet.mockReturnValue(50);
+      mockConfigGet.mockImplementation((k: string) =>
+        k === 'MAX_RADIUS_KM' ? 50 : 'test-secret',
+      );
       mockFindNearby.mockResolvedValue([rawNearbyRow]);
 
       // Act
@@ -156,7 +197,9 @@ describe('LocationsService', () => {
     it('debe limitar el radio al máximo configurado cuando el radio solicitado es mayor', async () => {
       // Arrange
       const dto = { latitude: -25.2867, longitude: -57.647, radius: 200 };
-      mockConfigGet.mockReturnValue(50);
+      mockConfigGet.mockImplementation((k: string) =>
+        k === 'MAX_RADIUS_KM' ? 50 : 'test-secret',
+      );
       mockFindNearby.mockResolvedValue([]);
 
       // Act
@@ -176,7 +219,9 @@ describe('LocationsService', () => {
         radius: 10,
         categoryId: 3,
       };
-      mockConfigGet.mockReturnValue(50);
+      mockConfigGet.mockImplementation((k: string) =>
+        k === 'MAX_RADIUS_KM' ? 50 : 'test-secret',
+      );
       mockFindNearby.mockResolvedValue([]);
 
       // Act
@@ -260,13 +305,41 @@ describe('LocationsService', () => {
         minLng: -57.7,
         maxLng: -57.6,
       };
-      mockFindMany.mockResolvedValue([mockProfessional]);
+      mockConfigGet.mockReturnValue('test-secret');
+      mockFindMany.mockResolvedValue([
+        {
+          ...mockProfessional,
+          referenceId: 'prof-ref-1',
+          categoryId: 3,
+          description: 'Plomero',
+          hourlyRate: '50000',
+          averageRating: '4.5',
+          skills: ['x'],
+        },
+      ]);
 
       // Act
       const result = await service.getProfessionalsByArea(dto);
 
       // Assert
       expect(result).toHaveLength(1);
+      expect(result[0].latitude).not.toBe(mockProfessional.currentLatitude);
+      expect(result[0].longitude).not.toBe(mockProfessional.currentLongitude);
+      // allowlist: nada de la entidad completa (userId, skills, currentLatitude...)
+      expect(Object.keys(result[0]).sort()).toEqual(
+        [
+          'averageRating',
+          'categoryId',
+          'description',
+          'hourlyRate',
+          'id',
+          'isAvailable',
+          'isOnline',
+          'latitude',
+          'longitude',
+          'referenceId',
+        ].sort(),
+      );
       expect(mockFindMany).toHaveBeenCalledWith({
         where: expect.objectContaining({
           currentLatitude: { gte: dto.minLat, lte: dto.maxLat },
@@ -367,6 +440,54 @@ describe('LocationsService', () => {
       await expect(
         service.resolveProfessionalIdByUserRef('user-ref-1'),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('canViewExactLocation / assertCanViewExactLocation', () => {
+    beforeEach(() => {
+      mockUserHasPermission.mockResolvedValue(false);
+      mockFindByUserReferenceId.mockResolvedValue(null);
+      mockHasActiveServiceWith.mockResolvedValue(false);
+    });
+
+    it('(i) permite al propio profesional', async () => {
+      mockFindByUserReferenceId.mockResolvedValue({ id: 7 });
+      await expect(service.canViewExactLocation('u1', 7, [])).resolves.toBe(
+        true,
+      );
+    });
+
+    it('(ii) permite a un admin con permisos ya conocidos (HTTP)', async () => {
+      await expect(
+        service.canViewExactLocation('u1', 7, ['admin:all']),
+      ).resolves.toBe(true);
+      expect(mockUserHasPermission).not.toHaveBeenCalled();
+    });
+
+    it('(ii) consulta la DB por admin cuando no hay permisos conocidos (WS)', async () => {
+      mockUserHasPermission.mockResolvedValue(true);
+      await expect(service.canViewExactLocation('u1', 7)).resolves.toBe(true);
+    });
+
+    it('(iii) permite a un cliente con servicio activo con ese profesional', async () => {
+      mockHasActiveServiceWith.mockResolvedValue(true);
+      await expect(service.canViewExactLocation('u1', 7, [])).resolves.toBe(
+        true,
+      );
+      expect(mockHasActiveServiceWith).toHaveBeenCalledWith('u1', 7);
+    });
+
+    it('deniega a otro profesional o cliente sin vinculo', async () => {
+      mockFindByUserReferenceId.mockResolvedValue({ id: 99 });
+      await expect(service.canViewExactLocation('u1', 7, [])).resolves.toBe(
+        false,
+      );
+    });
+
+    it('assert lanza ForbiddenException (403) si no cumple ninguna rama', async () => {
+      await expect(
+        service.assertCanViewExactLocation('u1', 7, []),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 });

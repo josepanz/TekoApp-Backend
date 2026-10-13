@@ -825,53 +825,6 @@ async function main() {
   }
   console.log(`Notificaciones creadas en Mongo: ${notifCount}`);
 
-  const geoSchema = new mongoose.Schema(
-    {
-      professionalId: { type: Number, required: true },
-      serviceId: { type: String, required: true },
-      location: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
-        coordinates: { type: [Number], required: true },
-      },
-      heading: Number,
-      speed: Number,
-    },
-    { timestamps: true, collection: 'geo_tracking_logs', versionKey: false },
-  );
-  const GeoModel =
-    mongoose.models.GeoTrackingLog ??
-    mongoose.model('GeoTrackingLog', geoSchema);
-
-  const onlineProfessionals = await prisma.professionals.findMany({
-    where: { isOnline: true },
-    take: 5,
-  });
-  let geoCount = 0;
-  for (const professional of onlineProfessionals) {
-    const activeService = await prisma.services.findFirst({
-      where: {
-        professionalId: professional.id,
-        status: { in: [ServiceStatus.IN_PROGRESS, ServiceStatus.ACCEPTED] },
-      },
-    });
-    if (!activeService) continue;
-
-    for (let step = 0; step < 5; step++) {
-      await new GeoModel({
-        professionalId: professional.id,
-        serviceId: activeService.referenceId,
-        location: {
-          type: 'Point',
-          coordinates: [jitter(ASUNCION_LNG, 0.02), jitter(ASUNCION_LAT, 0.02)],
-        },
-        heading: randInt(0, 359),
-        speed: randInt(0, 60),
-      }).save();
-      geoCount += 1;
-    }
-  }
-  console.log(`Puntos de geolocalización creados en Mongo: ${geoCount}`);
-
   await mongoose.disconnect();
 
   console.log('\nSeed dummy completo.');

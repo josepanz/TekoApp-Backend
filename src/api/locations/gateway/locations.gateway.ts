@@ -100,14 +100,33 @@ export class LocationsGateway
         location,
       );
 
-      this.server.emit('locationUpdated', {
-        professionalId,
-        location: {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          timestamp: new Date(),
-        },
-      });
+      const timestamp = new Date();
+      // Canal global: SOLO posición aproximada y solo si el profesional está en línea. La
+      // coordenada exacta nunca se difunde a todos los sockets conectados.
+      if (updatedProfessional.isOnline) {
+        this.server.emit('locationUpdated', {
+          professionalId,
+          location: {
+            ...this.locationsService.approximate(
+              professionalId,
+              location.latitude,
+              location.longitude,
+            ),
+            timestamp,
+          },
+        });
+      }
+      // Canal exacto: solo la sala del profesional (él mismo + suscriptores autorizados).
+      this.server
+        .to(`professional:${professionalId}`)
+        .emit('exactLocationUpdated', {
+          professionalId,
+          location: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            timestamp,
+          },
+        });
 
       client.emit('locationUpdateConfirmed', {
         success: true,
@@ -127,11 +146,35 @@ export class LocationsGateway
   }
 
   @SubscribeMessage('subscribeToProfessional')
+  @UseGuards(WsJwtGuard)
   async handleSubscribeToProfessional(
     @MessageBody() data: { professionalId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    await client.join(`professional:${data.professionalId}`);
+    // Misma regla que GET /locations/professional/:id (propio, admin o servicio activo).
+    const professionalId = Number(data?.professionalId);
+    const user = (client.data as Record<string, unknown>).user as
+      | { sub?: string }
+      | undefined;
+    if (!Number.isInteger(professionalId) || !user?.sub) {
+      client.emit('subscriptionError', {
+        professionalId: data?.professionalId,
+        error: t('locations.INVALID_PROFESSIONAL_ID'),
+      });
+      return;
+    }
+    const allowed = await this.locationsService.canViewExactLocation(
+      user.sub,
+      professionalId,
+    );
+    if (!allowed) {
+      client.emit('subscriptionError', {
+        professionalId: data.professionalId,
+        error: t('locations.EXACT_LOCATION_FORBIDDEN'),
+      });
+      return;
+    }
+    await client.join(`professional:${professionalId}`);
     client.emit('subscriptionConfirmed', {
       professionalId: data.professionalId,
       message: t('locations.SUBSCRIBED'),
@@ -139,6 +182,7 @@ export class LocationsGateway
   }
 
   @SubscribeMessage('unsubscribeFromProfessional')
+  @UseGuards(WsJwtGuard)
   async handleUnsubscribeFromProfessional(
     @MessageBody() data: { professionalId: string },
     @ConnectedSocket() client: Socket,

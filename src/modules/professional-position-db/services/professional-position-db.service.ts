@@ -4,6 +4,7 @@ import {
   Prisma,
   Professionals,
   ProfessionalStatus,
+  ServiceStatus,
   VerificationStatus,
 } from '@prisma/client';
 import { FindNearbyQueryDTO } from '@/api/locations/dtos/request/find-nearby-query.dto';
@@ -31,6 +32,48 @@ export class ProfessionalPositionDbService {
       where: { user: { referenceId: userReferenceId } },
       select: { id: true },
     });
+  }
+
+  /** Servicio ACCEPTED/IN_PROGRESS entre el cliente (por referenceId del User) y el profesional. */
+  async hasActiveServiceWith(
+    clientUserReferenceId: string,
+    professionalId: number,
+  ): Promise<boolean> {
+    const count = await this.prisma.extended.services.count({
+      where: {
+        professionalId,
+        status: { in: [ServiceStatus.ACCEPTED, ServiceStatus.IN_PROGRESS] },
+        users: { referenceId: clientUserReferenceId },
+      },
+    });
+    return count > 0;
+  }
+
+  /** Permiso directo o vía rol (mismo criterio que JwtStrategy.validate) para un User. */
+  async userHasPermission(
+    userReferenceId: string,
+    permissionName: string,
+  ): Promise<boolean> {
+    const count = await this.prisma.extended.users.count({
+      where: {
+        referenceId: userReferenceId,
+        OR: [
+          { permissions: { some: { permission: { name: permissionName } } } },
+          {
+            roles: {
+              some: {
+                role: {
+                  rolePermissions: {
+                    some: { permission: { name: permissionName } },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+    return count > 0;
   }
 
   async countOnline(
