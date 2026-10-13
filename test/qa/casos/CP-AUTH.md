@@ -14,7 +14,7 @@ CP-BE-AUTH-001..006: smoke real. CP-BE-AUTH-007..038 y CP-BE-ERR-001..009: ola W
 | Precondiciones | Docker corriendo; `pnpm e2e:up` y `pnpm e2e:seed` ejecutados (o `pnpm qa:e2e`). |
 | Pasos | 1. `GET /tekoapp-backend/api/healthcheck` (versión neutra, sin auth).<br>2. Leer `details`. |
 | Datos de prueba | — |
-| Resultado esperado | Status 200, o 503 si falla SOLO `storage_disk` (umbral de disco del host); `postgres_database`, `mongodb_database` y `redis` con `status: up`. |
+| Resultado esperado | Status 200, o 503 si fallan SOLO `storage_disk` (umbral de disco del host) y/o `memory_heap` (umbral de heap del proceso jest in-process que corre la app); `postgres_database`, `mongodb_database` y `redis` con `status: up`. |
 | Automatizado en | `test/e2e-real/smoke.e2e-real-spec.ts` — `healthcheck (version-neutral): Postgres, Mongo y Redis reales en up` |
 
 ### CP-BE-AUTH-002 — Entrega el PEM público RSA generado para el E2E

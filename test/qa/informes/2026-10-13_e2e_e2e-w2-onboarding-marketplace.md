@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 2026-10-13 12:57 |
+| Fecha y hora | 2026-10-13 15:14 |
 | Repo | TekoApp-Backend |
 | Rama | `test/e2e-w2-onboarding-marketplace` |
-| Commit | `c20602c` (árbol con cambios sin commitear) |
+| Commit | `ec4724c` |
 | Entorno | compose e2e (docker-compose.e2e.yml, .env.e2e), Node v22.16.0, Docker 29.6.2, build dfc4efb |
 | Comando | `pnpm qa:e2e` |
 | Ejecutor | agente Claude Code (modelo claude-sonnet-5-5) |
@@ -14,7 +14,7 @@
 
 | Suites | Casos | Pasaron | Fallaron | Omitidos | Duración |
 |---|---|---|---|---|---|
-| 8 (0 con fallo) | 218 | 218 | 0 | 0 | 1 min 24 s |
+| 8 (0 con fallo) | 226 | 226 | 0 | 0 | 1 min 52 s |
 
 ## 2. Resultados por caso
 
@@ -207,6 +207,14 @@
 | CP-BE-ONB-039 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-029: suspend sobre un SUSPENDED (o PENDING/REJECTED) responde 409 y conserva el motivo original | passed |
 | CP-BE-ONB-032 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-017: suspender con motivo solo espacios debe dar 400 y no suspender | passed |
 | CP-BE-ONB-024 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales DEF-BE-018: GET /locations/nearby no debe dar 500 y un profesional suspendido desaparece de /locations/nearby y de la lista de disponibles | passed |
+| CP-BE-ONB-040 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales reactivate: SUSPENDED -> APPROVED con motivo; vuelve a ser visible y queda como un APPROVED normal (isActive, no disponible hasta re-marcarse) | passed |
+| CP-BE-ONB-041 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales reactivate sobre PENDING, REJECTED, APPROVED o ya reactivado -> 409 con envelope y no cambia el estado ni el motivo | passed |
+| CP-BE-ONB-042 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales reactivate exige motivo (400 si falta, vacío o solo espacios), permiso (403), JWT (401) y existencia (404) | passed |
+| CP-BE-ONB-044 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales auditoría: verify, suspend y reactivate registran actor (referenceId), estado anterior/nuevo, motivo, IP y user-agent en audit_logs | passed |
+| CP-BE-ONB-045 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales rechazar exige motivo (400 si falta o está en blanco); verify sin nota no arrastra el motivo previo | passed |
+| CP-BE-ONB-046 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales status-history: lista paginada de transiciones (más reciente primero) con actor, de->a, motivo, fecha, IP y user-agent | passed |
+| CP-BE-ONB-047 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales status-history: pageSize > 100 -> 400, sin permiso 403, sin JWT 401, inexistente 404; una actualización sin cambio de estado no genera entrada | passed |
+| CP-BE-ONB-043 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) verify / suspend de profesionales reactivate con la cuenta del usuario no ACTIVE (bloqueada) -> 409 y sigue SUSPENDED | passed |
 | CP-BE-ONB-025 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Portafolio de trabajos subir al portafolio exige IMAGE_USAGE_CONSENT (403 CONSENT_REQUIRED) y con él queda PENDING y visible | passed |
 | CP-BE-ONB-026 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Portafolio de trabajos rechaza archivos que no son imagen (PDF) con 400 | passed |
 | CP-BE-ONB-027 | `test/e2e-real/onboarding-profesional.e2e-real-spec.ts` | M3 Onboarding profesional (e2e real) Portafolio de trabajos PENDING no aparece en el endpoint público; aprobado sí; ocultar (isVisible:false) lo saca; mostrar lo devuelve | passed |
@@ -245,7 +253,7 @@ Ninguno.
 
 ## 3. Defectos encontrados
 
-Detectados por los specs W2 (cada uno se escribió primero como test que falla, se documentó y se corrigió en un commit propio):
+Detectados por los specs W2 y por la revisión de logs (cada uno se escribió primero como test que falla, se documentó y se corrigió en un commit propio):
 
 | ID | Sev. | Caso | Repro | Estado |
 |---|---|---|---|---|
@@ -261,30 +269,94 @@ Detectados por los specs W2 (cada uno se escribió primero como test que falla, 
 | DEF-BE-023 | Medio | CP-BE-ONB-034..037 | `GET /professionals`, `/nearby`, `/search/skills`, `/top-rated`, `/:id`, `/reference/:ref`, `/:id/stats` y `/:id/services` devolvían postulantes PENDING, rechazados y suspendidos a cualquier cliente. | Corregido (8420fa2): un cliente solo ve APPROVED y activos (404 en los lookups); admin, gestores y el propio profesional ven todo |
 | DEF-BE-024 | Crítico | CP-BE-UPL-001..005, 008, 009, 011..013 | cliente_b pide `GET /uploads/presigned-url?key=<fileKey de un documento de identidad ajeno>` y descarga los bytes reales del MinIO; `info/:filename` igual; el URL duraba 900 s. | Corregido (a4050d5): autorización por dueño resuelto desde la DB, 404 sin registro, TTL <= 300 s |
 | DEF-BE-025 | Alto | CP-BE-UPL-014, 015 | cliente_b `DELETE /uploads/:fileKey` borra el documento de otro usuario (200). | Corregido (59382c1): solo dueño o admin |
-
 | DEF-BE-027 | Bajo | CP-BE-MKT-040 | Rechazar una oferta sin motivo -> 200. | Descartado por decisión de UX: el motivo es opcional; el test 1b1d4d9 fija el contrato |
 | DEF-BE-028 | Medio | CP-BE-ONB-038 | `POST /professionals/:id/verify` sobre un SUSPENDED -> 201 y lo dejaba APPROVED (también re-verificaba un APPROVED). | Corregido (6ef4c40): verify solo desde PENDING/REJECTED, resto 409 |
 | DEF-BE-029 | Bajo | CP-BE-ONB-039 | `suspend` sobre un SUSPENDED -> 201, pisaba el motivo y reenviaba la notificación. | Corregido (a7f3d3b): suspend solo desde APPROVED, resto 409 |
 | DEF-BE-030 | Medio | CP-BE-MKT-039 | Profesional suspendido a mitad de servicio -> 404 para su cliente en `/professionals/:id` y `/reference/:ref`. | Corregido (b76baa0): un cliente con servicio ACCEPTED/IN_PROGRESS lo sigue viendo; terceros 404 |
+| DEF-BE-031 | Bajo | CP-BE-ENV-004 | Detectado en los logs: el log de un 4xx manejado salía como `ERROR` y con el status del handler ("201 - CREATED" en un 409). | Corregido (367a5c2): status real de la excepción, `WARN` para 4xx y `ERROR` solo para 5xx |
 
 Auditoría de IDOR en `/services/:id/progress` y `/budget-options` (lectura y escritura): **sin defectos**, casos de regresión CP-BE-UPL-017 y 018.
 
 ## 4. Desvíos y observaciones
 
-- **Estabilidad:** la suite completa corrió 3 veces seguidas (`pnpm qa:e2e` sobre un stack nuevo y dos `pnpm test:e2e:real`): 218/218 en las tres, ~85 s cada una. Las tres variantes de concurrencia (CP-BE-MKT-022..024) dieron 20/20 en todas las corridas. Sin flakies, timeouts ni omitidos.
+- **Estabilidad:** la suite completa corrió 3 veces seguidas sobre el stack e2e (`pnpm test:e2e:real` x3 más la corrida de `pnpm qa:e2e` sobre un stack nuevo): 226/226 en las cuatro. Las tres variantes de concurrencia (CP-BE-MKT-022..024) dieron 20/20 en todas. Sin flakies, timeouts ni omitidos. En una corrida previa de `qa:e2e`, `prisma migrate deploy` falló una vez con `P1001` (el puerto 55432 todavía no aceptaba conexiones recién levantado el contenedor); se repitió y pasó, es una carrera del CLI `e2e up`, ajena a la app.
 - **Arnés:** el SDK de S3 falla dentro de Jest sin `--experimental-vm-modules` (500 al subir a MinIO); el CLI lo agrega solo (`scripts/e2e/cli.ts`).
 - **Job de expiración:** se invoca `ProfessionalDocumentsExpirationJob.run()` directo (CP-BE-ONB-020); el disparo por cron de las 3 AM queda como caso manual.
 - **WebSocket:** `subscribeToProfessional` no se prueba por socket (no hay `socket.io-client` en el repo); se probó la misma regla por REST
   (`GET /locations/professional/:id`, CP-BE-MKT-035..038) y la cubre `locations.gateway.spec.ts`. Caso manual documentado en CP-MKT.md.
 - **Observaciones no corregidas:** las respuestas de profesional incluyen `checksum`, `changeSignature` y `createdBy` internos; el admin no puede
   leer las opciones de presupuesto (decisión de producto para M5); las claves `merchant-docs` no se pueden pedir (flujo sin uso). Ver CP-UPL.md ("No cubierto").
-- El campo "Commit" del encabezado puede decir "árbol con cambios sin commitear" solo porque los informes aún no estaban versionados al generarse.
+- **Reactivación, auditoría e historial (W2, 2026-10-13):** CP-BE-ONB-040..047. Sin migración: el modelo `AuditLogs` y el trigger `fn_audit_generic_trigger` ya guardan estado anterior/nuevo (`old_data`/`new_data`), motivo, actor, IP y user-agent; el `AuditInterceptor` global no está registrado, por eso las transiciones corren dentro de `auditStorage` para que el trigger registre IP y user-agent. Limitación conocida: la columna `audit_logs.reason` hereda el motivo anterior cuando una transición no trae nota (el trigger usa `COALESCE(NEW.changed_reason, OLD.changed_reason)`); el historial lee el motivo de `new_data.changed_reason`.
+- **Healthcheck 503 en el smoke:** CP-BE-AUTH-001 acepta 200 o 503; con la app in-process de jest el healthcheck responde 503 porque `memory_heap` (heap del proceso jest) y `storage_disk` (disco del host) superan sus umbrales, con Postgres, Mongo y Redis en `up`. Ver sección 7.
 
 ## 5. Evidencia
 
 - Salida JSON de jest en `coverage/jest-e2e.json` (ignorado por git).
+- Logs de la corrida en `test/qa/informes/artefactos/2026-10-13_e2e_e2e-w2-onboarding-marketplace/logs/` (ignorado por git; ver sección 7).
 
 ## 6. Veredicto
 
-**APROBADO.** 218/218 casos pasan (97 son de W2: 39 de M3, 40 de M4 y 18 de archivos/auditoría), 3 corridas completas consecutivas sin fallos, concurrencia 20/20 y sin defectos abiertos (DEF-BE-027 descartado por decisión de UX). Las observaciones de la sección 4 no bloquean.
+**APROBADO.** 226/226 casos pasan (105 son de W2: 47 de M3, 40 de M4 y 18 de archivos/auditoría), 4 corridas completas consecutivas sin fallos, concurrencia 20/20 y sin defectos abiertos (DEF-BE-027 descartado por decisión de UX; DEF-BE-031 corregido). El único 5xx de los logs está explicado (sección 7) y no hay errores no manejados. Las observaciones de la sección 4 no bloquean.
 
+## 7. Logs de servicios
+
+Carpeta de artefactos (gitignoreada): `test/qa/informes/artefactos/2026-10-13_e2e_e2e-w2-onboarding-marketplace/logs/`. `app` es el stdout de la app in-process de jest (pino) y `app-stderr` su stderr; el resto es `docker compose -f docker-compose.e2e.yml logs` por contenedor.
+
+| Servicio | Archivo | Líneas | ERROR/FATAL | 5xx | No manejados | WARN |
+|---|---|---|---|---|---|---|
+| app | `app.log` | 157023 | 1 (0 fatal) | 1 | 0 | 241 |
+| app-stderr | `app-stderr.log` | 7910 | 1 (0 fatal) | 0 | 0 | 0 |
+| mailhog | `mailhog.log` | 44634 | 0 (0 fatal) | 0 | 0 | 0 |
+| minio | `minio.log` | 24 | 0 (0 fatal) | 0 | 0 | 0 |
+| mongo | `mongo.log` | 1077 | 0 (0 fatal) | 0 | 0 | 3 |
+| postgres | `postgres.log` | 68 | 4 (0 fatal) | 0 | 0 | 0 |
+| redis | `redis.log` | 7 | 0 (0 fatal) | 0 | 0 | 1 |
+
+**Atención: 1 respuesta(s) 5xx y 0 error(es) no manejado(s) en los logs. Con tests en verde igual impiden el veredicto APROBADO hasta explicarlos (caso negativo esperado, con su CP) o registrarlos como DEF.**
+
+### Primeras 10 líneas de error por servicio
+
+#### app
+
+```text
+ERROR: Error | GET /tekoapp-backend/api/healthcheck - (503 - SERVICE_UNAVAILABLE) | Trace ID: 469b9401-85db-41fd-ad6d-ee783df728a7
+```
+
+#### app-stderr
+
+```text
+ERROR: [Nest] 37000  - 13/10/2026, 3:13:56 p. m.   ERROR [Testing] Health Check has failed! {"postgres_database":{"status":"up"},"mongodb_database":{"status":"up"},"redis":{"status":"up"},"memory_heap":{"message":"Used heap exceeded the set threshold","status":"down"},"storage_disk":{"message":"Used...
+```
+
+#### mailhog
+
+Ninguna.
+
+#### minio
+
+Ninguna.
+
+#### mongo
+
+Ninguna.
+
+#### postgres
+
+```text
+ERROR: 2026-10-13 18:13:18.503 UTC [298] ERROR:  duplicate key value violates unique constraint "users_email_key"
+ERROR: 2026-10-13 18:13:51.148 UTC [384] ERROR:  duplicate key value violates unique constraint "professional_document_types_code_key"
+ERROR: 2026-10-13 18:14:02.134 UTC [422] ERROR:  duplicate key value violates unique constraint "users_email_key"
+ERROR: 2026-10-13 18:14:02.356 UTC [422] ERROR:  duplicate key value violates unique constraint "users_email_key"
+```
+
+#### redis
+
+Ninguna.
+
+### Revisión
+
+- **5xx (1):** `GET /tekoapp-backend/api/healthcheck` -> 503, esperado: lo provoca el caso CP-BE-AUTH-001 (smoke), que acepta 200 o 503 porque en la app in-process de jest `memory_heap` y `storage_disk` superan sus umbrales (`app-stderr` lo muestra: Postgres, Mongo y Redis en `up`). No es un defecto de la app. El mismo 503 aparece como `ERROR` en `app` y como `ERROR [Testing] Health Check has failed!` en `app-stderr` (una sola respuesta, contada una vez).
+- **Errores no manejados:** ninguno (0 `UnhandledPromiseRejection` / excepciones no capturadas).
+- **`app` WARN (241):** son los 4xx manejados de los casos negativos (409 de máquinas de estado y carreras, 400/403/404 de validación y autorización). Tras DEF-BE-031 salen como `WARN` con su status real y solo el 503 del healthcheck es `ERROR`.
+- **Postgres ERROR (4, `duplicate key value violates unique constraint`):** violaciones de unicidad esperadas que la app convierte en 409: `users_email_key` x3 (registro con email duplicado: CP-BE-AUTH-008 y el caso "onboarding con email duplicado" del contrato de error, CP-BE-ERR-001/007) y `professional_document_types_code_key` x1 (CP-BE-CAT-025, código de tipo de documento duplicado). Ninguno llegó al cliente como 5xx.
+- **Mongo (3 WARN) y Redis (1 WARN):** avisos de arranque de los contenedores de desarrollo (Mongo: límite de conexiones y "access control is not enabled"; Redis: "no config file specified"), sin impacto. MinIO y MailHog sin errores.
