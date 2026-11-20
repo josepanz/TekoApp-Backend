@@ -66,8 +66,15 @@ describe('M4 Marketplace (e2e real)', () => {
   // ---- helpers ----
   const newService = async (token = clienteA, extra = {}) =>
     unwrap(
-      (await createService(http, token, categoryId, serviceTypeId, extra).expect(201))
-        .body,
+      (
+        await createService(
+          http,
+          token,
+          categoryId,
+          serviceTypeId,
+          extra,
+        ).expect(201)
+      ).body,
     );
   const getService = (id: string, token = clienteA) =>
     http.get(`${PREFIX}/services/${id}`).set(bearer(token));
@@ -77,16 +84,35 @@ describe('M4 Marketplace (e2e real)', () => {
     http.post(`${PREFIX}/services/${id}/start`).set(bearer(token));
   const complete = (id: string, token: string) =>
     http.post(`${PREFIX}/services/${id}/complete`).set(bearer(token));
-  const cancel = (id: string, token: string, body: Record<string, unknown> = { reason: 'Ya no lo necesito' }) =>
-    http.delete(`${PREFIX}/services/${id}`).set(bearer(token)).send(body);
-  const offer = (id: string, token: string, body: Record<string, unknown> = { proposedPrice: 80000, message: 'Puedo hoy' }) =>
-    http.post(`${PREFIX}/services/${id}/requests`).set(bearer(token)).send(body);
-  const respond = (id: string, requestId: string, token: string, status: string) =>
+  const cancel = (
+    id: string,
+    token: string,
+    body: Record<string, unknown> = { reason: 'Ya no lo necesito' },
+  ) => http.delete(`${PREFIX}/services/${id}`).set(bearer(token)).send(body);
+  const offer = (
+    id: string,
+    token: string,
+    body: Record<string, unknown> = {
+      proposedPrice: 80000,
+      message: 'Puedo hoy',
+    },
+  ) =>
+    http
+      .post(`${PREFIX}/services/${id}/requests`)
+      .set(bearer(token))
+      .send(body);
+  const respond = (
+    id: string,
+    requestId: string,
+    token: string,
+    status: string,
+  ) =>
     http
       .put(`${PREFIX}/services/${id}/requests/${requestId}`)
       .set(bearer(token))
       .send({ status });
-  const status = async (id: string) => unwrap((await getService(id).expect(200)).body).status;
+  const status = async (id: string) =>
+    unwrap((await getService(id).expect(200)).body).status;
   const assertEnvelope = (res: { body: any }) => {
     expect(res.body.success).toBe(false);
     expect(typeof res.body.error.message).toBe('string');
@@ -96,8 +122,12 @@ describe('M4 Marketplace (e2e real)', () => {
   /** servicio -> oferta -> el cliente acepta la oferta de `pro` => ACCEPTED */
   const acceptedVia = async (pro: ApprovedPro, token = clienteA) => {
     const svc = await newService(token);
-    const req = unwrap((await offer(svc.referenceId, pro.token).expect(201)).body);
-    await respond(svc.referenceId, req.referenceId, token, 'ACCEPTED').expect(200);
+    const req = unwrap(
+      (await offer(svc.referenceId, pro.token).expect(201)).body,
+    );
+    await respond(svc.referenceId, req.referenceId, token, 'ACCEPTED').expect(
+      200,
+    );
     return { svc, req };
   };
 
@@ -109,7 +139,13 @@ describe('M4 Marketplace (e2e real)', () => {
       expect(svc.professionalId).toBeNull();
       expect(svc.referenceId).toMatch(/^[0-9a-f-]{36}$/);
       const mine = unwrap(
-        (await http.get(`${PREFIX}/services/my-services`).query({ role: 'client' }).set(bearer(clienteA)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/my-services`)
+            .query({ role: 'client' })
+            .set(bearer(clienteA))
+            .expect(200)
+        ).body,
       ) as any[];
       expect(mine.map((s) => s.referenceId)).toContain(svc.referenceId);
     });
@@ -118,22 +154,35 @@ describe('M4 Marketplace (e2e real)', () => {
     it('oferta del profesional -> el cliente la acepta -> ACCEPTED con el profesional asignado y la oferta ACCEPTED', async () => {
       const { svc, req } = await acceptedVia(proX);
       expect(req.status).toBe('PENDING');
-      const after = unwrap((await getService(svc.referenceId).expect(200)).body);
+      const after = unwrap(
+        (await getService(svc.referenceId).expect(200)).body,
+      );
       expect(after.status).toBe('ACCEPTED');
       expect(after.professionalId).toBe(proX.proId);
       const reqs = unwrap(
-        (await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteA)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/${svc.referenceId}/requests`)
+            .set(bearer(clienteA))
+            .expect(200)
+        ).body,
       ).data as any[];
-      expect(reqs.find((r) => r.referenceId === req.referenceId).status).toBe('ACCEPTED');
+      expect(reqs.find((r) => r.referenceId === req.referenceId).status).toBe(
+        'ACCEPTED',
+      );
     });
 
     // CP-BE-MKT-003
     it('start (IN_PROGRESS) y complete (COMPLETED) por el profesional asignado, con startedAt/completedAt y finalAmount', async () => {
       const { svc } = await acceptedVia(proX);
-      const started = unwrap((await start(svc.referenceId, proX.token).expect(201)).body);
+      const started = unwrap(
+        (await start(svc.referenceId, proX.token).expect(201)).body,
+      );
       expect(started.status).toBe('IN_PROGRESS');
       expect(started.startedAt).toBeTruthy();
-      const done = unwrap((await complete(svc.referenceId, proX.token).expect(201)).body);
+      const done = unwrap(
+        (await complete(svc.referenceId, proX.token).expect(201)).body,
+      );
       expect(done.status).toBe('COMPLETED');
       expect(done.completedAt).toBeTruthy();
       expect(Number(done.finalAmount)).toBeGreaterThanOrEqual(0);
@@ -151,8 +200,15 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-005
     it('rechazar una oferta la deja REJECTED y el servicio sigue PENDING y abierto a otras ofertas', async () => {
       const svc = await newService();
-      const o1 = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-      const rej = await respond(svc.referenceId, o1.referenceId, clienteA, 'REJECTED').expect(200);
+      const o1 = unwrap(
+        (await offer(svc.referenceId, proX.token).expect(201)).body,
+      );
+      const rej = await respond(
+        svc.referenceId,
+        o1.referenceId,
+        clienteA,
+        'REJECTED',
+      ).expect(200);
       expect(unwrap(rej.body).status).toBe('REJECTED');
       expect(await status(svc.referenceId)).toBe('PENDING');
       await offer(svc.referenceId, proY.token).expect(201);
@@ -161,9 +217,18 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-040
     it('DEF-BE-027 (descartado): el motivo al rechazar una oferta es opcional; sin motivo, motivo vacio o con motivo -> 200 REJECTED', async () => {
       const svc = await newService();
-      const o1 = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-      const o2 = unwrap((await offer(svc.referenceId, proY.token).expect(201)).body);
-      const noReason = await respond(svc.referenceId, o1.referenceId, clienteA, 'REJECTED').expect(200);
+      const o1 = unwrap(
+        (await offer(svc.referenceId, proX.token).expect(201)).body,
+      );
+      const o2 = unwrap(
+        (await offer(svc.referenceId, proY.token).expect(201)).body,
+      );
+      const noReason = await respond(
+        svc.referenceId,
+        o1.referenceId,
+        clienteA,
+        'REJECTED',
+      ).expect(200);
       expect(unwrap(noReason.body).status).toBe('REJECTED');
       const emptyReason = await http
         .put(`${PREFIX}/services/${svc.referenceId}/requests/${o2.referenceId}`)
@@ -172,7 +237,9 @@ describe('M4 Marketplace (e2e real)', () => {
         .expect(200);
       expect(unwrap(emptyReason.body).status).toBe('REJECTED');
       const proZ = await createApprovedPro(http, admin, categoryId);
-      const o3 = unwrap((await offer(svc.referenceId, proZ.token).expect(201)).body);
+      const o3 = unwrap(
+        (await offer(svc.referenceId, proZ.token).expect(201)).body,
+      );
       const withReason = await http
         .put(`${PREFIX}/services/${svc.referenceId}/requests/${o3.referenceId}`)
         .set(bearer(clienteA))
@@ -185,25 +252,55 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-006
     it('al aceptar una oferta, las demás ofertas pendientes pasan a REJECTED', async () => {
       const svc = await newService();
-      const ox = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-      const oy = unwrap((await offer(svc.referenceId, proY.token).expect(201)).body);
-      await respond(svc.referenceId, ox.referenceId, clienteA, 'ACCEPTED').expect(200);
+      const ox = unwrap(
+        (await offer(svc.referenceId, proX.token).expect(201)).body,
+      );
+      const oy = unwrap(
+        (await offer(svc.referenceId, proY.token).expect(201)).body,
+      );
+      await respond(
+        svc.referenceId,
+        ox.referenceId,
+        clienteA,
+        'ACCEPTED',
+      ).expect(200);
       const reqs = unwrap(
-        (await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteA)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/${svc.referenceId}/requests`)
+            .set(bearer(clienteA))
+            .expect(200)
+        ).body,
       ).data as any[];
-      expect(reqs.find((r) => r.referenceId === ox.referenceId).status).toBe('ACCEPTED');
-      expect(reqs.find((r) => r.referenceId === oy.referenceId).status).toBe('REJECTED');
+      expect(reqs.find((r) => r.referenceId === ox.referenceId).status).toBe(
+        'ACCEPTED',
+      );
+      expect(reqs.find((r) => r.referenceId === oy.referenceId).status).toBe(
+        'REJECTED',
+      );
     });
 
     // CP-BE-MKT-007
     it('el profesional ve el servicio asignado en my-services?role=professional y el cliente en role=client', async () => {
       const { svc } = await acceptedVia(proX);
       const asPro = unwrap(
-        (await http.get(`${PREFIX}/services/my-services`).query({ role: 'professional', status: 'ACCEPTED' }).set(bearer(proX.token)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/my-services`)
+            .query({ role: 'professional', status: 'ACCEPTED' })
+            .set(bearer(proX.token))
+            .expect(200)
+        ).body,
       ) as any[];
       expect(asPro.map((s) => s.referenceId)).toContain(svc.referenceId);
       const asClient = unwrap(
-        (await http.get(`${PREFIX}/services/my-services`).query({ role: 'client' }).set(bearer(clienteA)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/my-services`)
+            .query({ role: 'client' })
+            .set(bearer(clienteA))
+            .expect(200)
+        ).body,
       ) as any[];
       expect(asClient.map((s) => s.referenceId)).toContain(svc.referenceId);
     });
@@ -213,7 +310,9 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-008
     it('el cliente cancela un servicio PENDING: CANCELLED con motivo y cancelledAt', async () => {
       const svc = await newService();
-      const res = await cancel(svc.referenceId, clienteA, { reason: 'Cambié de idea' }).expect(200);
+      const res = await cancel(svc.referenceId, clienteA, {
+        reason: 'Cambié de idea',
+      }).expect(200);
       expect(unwrap(res.body).status).toBe('CANCELLED');
       expect(unwrap(res.body).cancellationReason).toBe('Cambié de idea');
       expect(unwrap(res.body).cancelledAt).toBeTruthy();
@@ -222,9 +321,20 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-009
     it('el cliente y el profesional asignado pueden cancelar un servicio ACCEPTED', async () => {
       const a = await acceptedVia(proX);
-      expect(unwrap((await cancel(a.svc.referenceId, clienteA).expect(200)).body).status).toBe('CANCELLED');
+      expect(
+        unwrap((await cancel(a.svc.referenceId, clienteA).expect(200)).body)
+          .status,
+      ).toBe('CANCELLED');
       const b = await acceptedVia(proX);
-      expect(unwrap((await cancel(b.svc.referenceId, proX.token, { reason: 'Imprevisto' }).expect(200)).body).status).toBe('CANCELLED');
+      expect(
+        unwrap(
+          (
+            await cancel(b.svc.referenceId, proX.token, {
+              reason: 'Imprevisto',
+            }).expect(200)
+          ).body,
+        ).status,
+      ).toBe('CANCELLED');
     });
 
     // CP-BE-MKT-010
@@ -304,34 +414,67 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-017
     it('DEF-BE-020: una oferta ya aceptada no se puede rechazar después (la oferta y el servicio no quedan incoherentes)', async () => {
       const { svc, req } = await acceptedVia(proX);
-      const res = await respond(svc.referenceId, req.referenceId, clienteA, 'REJECTED');
+      const res = await respond(
+        svc.referenceId,
+        req.referenceId,
+        clienteA,
+        'REJECTED',
+      );
       expect(res.status).toBe(409);
       const reqs = unwrap(
-        (await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteA)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/${svc.referenceId}/requests`)
+            .set(bearer(clienteA))
+            .expect(200)
+        ).body,
       ).data as any[];
-      expect(reqs.find((r) => r.referenceId === req.referenceId).status).toBe('ACCEPTED');
+      expect(reqs.find((r) => r.referenceId === req.referenceId).status).toBe(
+        'ACCEPTED',
+      );
     });
 
     // CP-BE-MKT-018
     it('responder una oferta con un estado distinto de ACCEPTED/REJECTED -> 400 y no la modifica', async () => {
       const svc = await newService();
-      const o = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-      const res = await respond(svc.referenceId, o.referenceId, clienteA, 'CANCELLED');
+      const o = unwrap(
+        (await offer(svc.referenceId, proX.token).expect(201)).body,
+      );
+      const res = await respond(
+        svc.referenceId,
+        o.referenceId,
+        clienteA,
+        'CANCELLED',
+      );
       expect(res.status).toBe(400);
       const reqs = unwrap(
-        (await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteA)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/${svc.referenceId}/requests`)
+            .set(bearer(clienteA))
+            .expect(200)
+        ).body,
       ).data as any[];
-      expect(reqs.find((r) => r.referenceId === o.referenceId).status).toBe('PENDING');
+      expect(reqs.find((r) => r.referenceId === o.referenceId).status).toBe(
+        'PENDING',
+      );
     });
 
     // CP-BE-MKT-019
     it('DEF-BE-019: PUT /services/:id: el dueño edita en PENDING; fuera de PENDING/ACCEPTED -> 409', async () => {
       const svc = await newService();
-      const ok = await http.put(`${PREFIX}/services/${svc.referenceId}`).set(bearer(clienteA)).send({ title: 'Nuevo título' }).expect(200);
+      const ok = await http
+        .put(`${PREFIX}/services/${svc.referenceId}`)
+        .set(bearer(clienteA))
+        .send({ title: 'Nuevo título' })
+        .expect(200);
       expect(unwrap(ok.body).title).toBe('Nuevo título');
       await accept(svc.referenceId, proX.token).expect(201);
       await start(svc.referenceId, proX.token).expect(201);
-      const res = await http.put(`${PREFIX}/services/${svc.referenceId}`).set(bearer(clienteA)).send({ title: 'Tarde' });
+      const res = await http
+        .put(`${PREFIX}/services/${svc.referenceId}`)
+        .set(bearer(clienteA))
+        .send({ title: 'Tarde' });
       expect(res.status).toBe(409);
     });
 
@@ -348,7 +491,17 @@ describe('M4 Marketplace (e2e real)', () => {
 
     // CP-BE-MKT-021
     it('crear una solicitud con datos inválidos (sin título, coordenadas fuera de rango, categoría inexistente) -> 400/404', async () => {
-      const bad = await http.post(`${PREFIX}/services`).set(bearer(clienteA)).send({ description: 'x', categoryId, serviceTypeId, latitude: 200, longitude: 0, address: 'a' });
+      const bad = await http
+        .post(`${PREFIX}/services`)
+        .set(bearer(clienteA))
+        .send({
+          description: 'x',
+          categoryId,
+          serviceTypeId,
+          latitude: 200,
+          longitude: 0,
+          address: 'a',
+        });
       expect(bad.status).toBe(400);
       const fields = (bad.body.error.errors as any[]).map((e) => e.field);
       expect(fields).toEqual(expect.arrayContaining(['title', 'latitude']));
@@ -372,8 +525,11 @@ describe('M4 Marketplace (e2e real)', () => {
         ]);
         const codes = [rx.status, ry.status].sort();
         outcomes.push(codes.join('/'));
-        const winner = rx.status === 201 ? proX : ry.status === 201 ? proY : null;
-        const final = unwrap((await getService(svc.referenceId).expect(200)).body);
+        const winner =
+          rx.status === 201 ? proX : ry.status === 201 ? proY : null;
+        const final = unwrap(
+          (await getService(svc.referenceId).expect(200)).body,
+        );
         expect(final.status).toBe('ACCEPTED');
         expect(winner).not.toBeNull();
         expect(final.professionalId).toBe(winner!.proId);
@@ -400,15 +556,24 @@ describe('M4 Marketplace (e2e real)', () => {
       const outcomes: string[] = [];
       for (let i = 0; i < ITERATIONS; i++) {
         const svc = await newService();
-        const ox = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-        const oy = unwrap((await offer(svc.referenceId, proY.token).expect(201)).body);
+        const ox = unwrap(
+          (await offer(svc.referenceId, proX.token).expect(201)).body,
+        );
+        const oy = unwrap(
+          (await offer(svc.referenceId, proY.token).expect(201)).body,
+        );
         const [a, b] = await Promise.all([
           respond(svc.referenceId, ox.referenceId, clienteA, 'ACCEPTED'),
           respond(svc.referenceId, oy.referenceId, clienteA, 'ACCEPTED'),
         ]);
         outcomes.push([a.status, b.status].sort().join('/'));
         const reqs = unwrap(
-          (await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteA)).expect(200)).body,
+          (
+            await http
+              .get(`${PREFIX}/services/${svc.referenceId}/requests`)
+              .set(bearer(clienteA))
+              .expect(200)
+          ).body,
         ).data as any[];
         expect(reqs.filter((r) => r.status === 'ACCEPTED')).toHaveLength(1);
       }
@@ -424,27 +589,45 @@ describe('M4 Marketplace (e2e real)', () => {
       expect([403, 404]).toContain(res.status);
       // en cualquier estado
       const { svc: accepted } = await acceptedVia(proX);
-      expect([403, 404]).toContain((await getService(accepted.referenceId, clienteB)).status);
+      expect([403, 404]).toContain(
+        (await getService(accepted.referenceId, clienteB)).status,
+      );
     });
 
     // CP-BE-MKT-026
     it('DEF-BE-021: cliente_b no puede listar las ofertas de un servicio de cliente_a', async () => {
       const svc = await newService(clienteA);
       await offer(svc.referenceId, proX.token).expect(201);
-      const res = await http.get(`${PREFIX}/services/${svc.referenceId}/requests`).set(bearer(clienteB));
+      const res = await http
+        .get(`${PREFIX}/services/${svc.referenceId}/requests`)
+        .set(bearer(clienteB));
       expect([403, 404]).toContain(res.status);
     });
 
     // CP-BE-MKT-027
     it('cliente_b no puede editar, cancelar ni responder ofertas de un servicio de cliente_a; el servicio no cambia', async () => {
       const svc = await newService(clienteA);
-      const o = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-      const put = await http.put(`${PREFIX}/services/${svc.referenceId}`).set(bearer(clienteB)).send({ title: 'hack' });
+      const o = unwrap(
+        (await offer(svc.referenceId, proX.token).expect(201)).body,
+      );
+      const put = await http
+        .put(`${PREFIX}/services/${svc.referenceId}`)
+        .set(bearer(clienteB))
+        .send({ title: 'hack' });
       expect([403, 404]).toContain(put.status);
-      expect([403, 404]).toContain((await cancel(svc.referenceId, clienteB)).status);
-      const resp = await respond(svc.referenceId, o.referenceId, clienteB, 'ACCEPTED');
+      expect([403, 404]).toContain(
+        (await cancel(svc.referenceId, clienteB)).status,
+      );
+      const resp = await respond(
+        svc.referenceId,
+        o.referenceId,
+        clienteB,
+        'ACCEPTED',
+      );
       expect([403, 404]).toContain(resp.status);
-      const after = unwrap((await getService(svc.referenceId, clienteA).expect(200)).body);
+      const after = unwrap(
+        (await getService(svc.referenceId, clienteA).expect(200)).body,
+      );
       expect(after.status).toBe('PENDING');
       expect(after.title).not.toBe('hack');
     });
@@ -453,7 +636,12 @@ describe('M4 Marketplace (e2e real)', () => {
     it('my-services de cliente_b no incluye servicios de cliente_a', async () => {
       const svc = await newService(clienteA);
       const mine = unwrap(
-        (await http.get(`${PREFIX}/services/my-services`).set(bearer(clienteB)).expect(200)).body,
+        (
+          await http
+            .get(`${PREFIX}/services/my-services`)
+            .set(bearer(clienteB))
+            .expect(200)
+        ).body,
       ) as any[];
       expect(mine.map((s) => s.referenceId)).not.toContain(svc.referenceId);
     });
@@ -488,7 +676,11 @@ describe('M4 Marketplace (e2e real)', () => {
       const pending = await registerUser(http, 'pend');
       await applyAsProfessional(http, pending.token, categoryId).expect(201);
       const suspended = await createApprovedPro(http, admin, categoryId);
-      await http.post(`${PREFIX}/professionals/${suspended.proId}/suspend`).set(bearer(admin)).send({ reason: 'e2e' }).expect(201);
+      await http
+        .post(`${PREFIX}/professionals/${suspended.proId}/suspend`)
+        .set(bearer(admin))
+        .send({ reason: 'e2e' })
+        .expect(201);
       const svc = await newService();
       for (const pro of [pending, suspended]) {
         expect((await accept(svc.referenceId, pro.token)).status).toBe(403);
@@ -500,7 +692,10 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-032
     it('DEF-BE-021: GET /services (listado) no expone servicios ajenos a un cliente sin perfil profesional', async () => {
       const svc = await newService(clienteA);
-      const res = await http.get(`${PREFIX}/services`).query({ status: 'PENDING', pageSize: 100 }).set(bearer(clienteB));
+      const res = await http
+        .get(`${PREFIX}/services`)
+        .query({ status: 'PENDING', pageSize: 100 })
+        .set(bearer(clienteB));
       if (res.status === 200) {
         const ids = (unwrap(res.body).data as any[]).map((s) => s.referenceId);
         expect(ids).not.toContain(svc.referenceId);
@@ -512,8 +707,14 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-033
     it('un profesional ve los servicios PENDING del marketplace (listado) y admin ve todo', async () => {
       const svc = await newService(clienteA);
-      const asPro = await http.get(`${PREFIX}/services`).query({ status: 'PENDING', categoryId, pageSize: 100 }).set(bearer(proX.token)).expect(200);
-      expect((unwrap(asPro.body).data as any[]).map((s) => s.referenceId)).toContain(svc.referenceId);
+      const asPro = await http
+        .get(`${PREFIX}/services`)
+        .query({ status: 'PENDING', categoryId, pageSize: 100 })
+        .set(bearer(proX.token))
+        .expect(200);
+      expect(
+        (unwrap(asPro.body).data as any[]).map((s) => s.referenceId),
+      ).toContain(svc.referenceId);
       expect((await getService(svc.referenceId, proX.token)).status).toBe(200);
       expect((await getService(svc.referenceId, admin)).status).toBe(200);
     });
@@ -521,8 +722,13 @@ describe('M4 Marketplace (e2e real)', () => {
     // CP-BE-MKT-034
     it('el profesional que ofertó no puede responder su propia oferta (solo el cliente dueño)', async () => {
       const svc = await newService();
-      const o = unwrap((await offer(svc.referenceId, proX.token).expect(201)).body);
-      expect((await respond(svc.referenceId, o.referenceId, proX.token, 'ACCEPTED')).status).toBe(403);
+      const o = unwrap(
+        (await offer(svc.referenceId, proX.token).expect(201)).body,
+      );
+      expect(
+        (await respond(svc.referenceId, o.referenceId, proX.token, 'ACCEPTED'))
+          .status,
+      ).toBe(403);
       expect(await status(svc.referenceId)).toBe('PENDING');
     });
   });
@@ -538,7 +744,9 @@ describe('M4 Marketplace (e2e real)', () => {
     const freshClient = async () => (await registerUser(http, 'cli')).token;
     const flow = async (clientToken: string) => {
       const svc = await newService(clientToken);
-      const req = unwrap((await offer(svc.referenceId, proL.token).expect(201)).body);
+      const req = unwrap(
+        (await offer(svc.referenceId, proL.token).expect(201)).body,
+      );
       return { svc, req };
     };
 
@@ -564,7 +772,12 @@ describe('M4 Marketplace (e2e real)', () => {
     it('ACCEPTED e IN_PROGRESS autorizan al cliente del servicio; COMPLETED revoca; un tercero nunca', async () => {
       const client = await freshClient();
       const { svc, req } = await flow(client);
-      await respond(svc.referenceId, req.referenceId, client, 'ACCEPTED').expect(200);
+      await respond(
+        svc.referenceId,
+        req.referenceId,
+        client,
+        'ACCEPTED',
+      ).expect(200);
       const ok = await locationOf(proL.proId, client);
       expect(ok.status).toBe(200);
       expect(unwrap(ok.body).latitude).toBeCloseTo(lat, 4);
@@ -581,7 +794,12 @@ describe('M4 Marketplace (e2e real)', () => {
     it('CANCELLED también revoca el acceso a la posición exacta', async () => {
       const client = await freshClient();
       const { svc, req } = await flow(client);
-      await respond(svc.referenceId, req.referenceId, client, 'ACCEPTED').expect(200);
+      await respond(
+        svc.referenceId,
+        req.referenceId,
+        client,
+        'ACCEPTED',
+      ).expect(200);
       expect((await locationOf(proL.proId, client)).status).toBe(200);
       await cancel(svc.referenceId, client).expect(200);
       expect((await locationOf(proL.proId, client)).status).toBe(403);
@@ -589,7 +807,9 @@ describe('M4 Marketplace (e2e real)', () => {
 
     // CP-BE-MKT-038
     it('sin JWT /locations/professional/:id -> 401', async () => {
-      await http.get(`${PREFIX}/locations/professional/${proL.proId}`).expect(401);
+      await http
+        .get(`${PREFIX}/locations/professional/${proL.proId}`)
+        .expect(401);
     });
 
     // CP-BE-MKT-039
@@ -603,8 +823,15 @@ describe('M4 Marketplace (e2e real)', () => {
         [accepted, clientAccepted],
         [inProgress, clientInProgress],
       ] as const) {
-        const req = unwrap((await offer(svc.referenceId, proS.token).expect(201)).body);
-        await respond(svc.referenceId, req.referenceId, client, 'ACCEPTED').expect(200);
+        const req = unwrap(
+          (await offer(svc.referenceId, proS.token).expect(201)).body,
+        );
+        await respond(
+          svc.referenceId,
+          req.referenceId,
+          client,
+          'ACCEPTED',
+        ).expect(200);
       }
       await start(inProgress.referenceId, proS.token).expect(201);
       await http
@@ -613,8 +840,16 @@ describe('M4 Marketplace (e2e real)', () => {
         .send({ reason: 'e2e a mitad de servicio' })
         .expect(201);
       const view = async (token: string) => [
-        (await http.get(`${PREFIX}/professionals/${proS.proId}`).set(bearer(token))).status,
-        (await http.get(`${PREFIX}/professionals/reference/${proS.proReferenceId}`).set(bearer(token))).status,
+        (
+          await http
+            .get(`${PREFIX}/professionals/${proS.proId}`)
+            .set(bearer(token))
+        ).status,
+        (
+          await http
+            .get(`${PREFIX}/professionals/reference/${proS.proReferenceId}`)
+            .set(bearer(token))
+        ).status,
       ];
       expect(await view(clientAccepted)).toEqual([200, 200]); // ACCEPTED
       expect(await view(clientInProgress)).toEqual([200, 200]); // IN_PROGRESS

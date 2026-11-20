@@ -67,16 +67,27 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     const res = await fetch(url);
     return { status: res.status, bytes: Buffer.from(await res.arrayBuffer()) };
   };
-  const uploadDocument = async (token: string, code: string, file = tinyPdf()) => {
+  const uploadDocument = async (
+    token: string,
+    code: string,
+    file = tinyPdf(),
+  ) => {
     const types = unwrap(
-      (await http.get(`${PREFIX}/professional-document-types`).set(bearer(token))).body,
+      (
+        await http
+          .get(`${PREFIX}/professional-document-types`)
+          .set(bearer(token))
+      ).body,
     ).data as any[];
     const type = types.find((t) => t.code === code);
     const res = await http
       .post(`${PREFIX}/professionals/me/documents`)
       .set(bearer(token))
       .field('professionalDocumentTypeReferenceId', type.referenceId)
-      .attach('file', file, { filename: 'd.pdf', contentType: 'application/pdf' })
+      .attach('file', file, {
+        filename: 'd.pdf',
+        contentType: 'application/pdf',
+      })
       .expect(201);
     return { ...unwrap(res.body), bytes: file } as any;
   };
@@ -92,7 +103,10 @@ describe('Autorización de archivos S3 (e2e real)', () => {
         await http
           .post(`${PREFIX}/professionals/me/portfolio`)
           .set(bearer(token))
-          .attach('file', tinyPng(), { filename: `p-${uniqueSuffix()}.png`, contentType: 'image/png' })
+          .attach('file', tinyPng(), {
+            filename: `p-${uniqueSuffix()}.png`,
+            contentType: 'image/png',
+          })
           .expect(201)
       ).body,
     );
@@ -109,7 +123,10 @@ describe('Autorización de archivos S3 (e2e real)', () => {
         await http
           .post(`${PREFIX}/uploads/image`)
           .set(bearer(token))
-          .attach('file', tinyPng(), { filename: `i-${uniqueSuffix()}.png`, contentType: 'image/png' })
+          .attach('file', tinyPng(), {
+            filename: `i-${uniqueSuffix()}.png`,
+            contentType: 'image/png',
+          })
           .expect(201)
       ).body,
     ).key as string;
@@ -117,9 +134,14 @@ describe('Autorización de archivos S3 (e2e real)', () => {
   beforeAll(async () => {
     ctx = await bootApp();
     http = ctx.http;
-    admin = (await login(http, FIXTURE.admin.email, FIXTURE.admin.password)).accessToken;
-    clienteA = (await login(http, FIXTURE.clienteA.email, FIXTURE.clienteA.password)).accessToken;
-    clienteB = (await login(http, FIXTURE.clienteB.email, FIXTURE.clienteB.password)).accessToken;
+    admin = (await login(http, FIXTURE.admin.email, FIXTURE.admin.password))
+      .accessToken;
+    clienteA = (
+      await login(http, FIXTURE.clienteA.email, FIXTURE.clienteA.password)
+    ).accessToken;
+    clienteB = (
+      await login(http, FIXTURE.clienteB.email, FIXTURE.clienteB.password)
+    ).accessToken;
     categoryId = await plomeriaCategoryId(http);
     serviceTypeId = await firstServiceTypeId(http);
     pro = await createApprovedPro(http, admin, categoryId);
@@ -185,7 +207,9 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     // CP-BE-UPL-003
     it('DEF-BE-024: un documento aprobado y visible al cliente lo ve cualquier autenticado; uno aprobado no visible, no', async () => {
       expect((await presigned(clienteB, publicDocKey)).status).toBe(200);
-      expect((await presigned(clienteB, privateApprovedDocKey)).status).toBe(403);
+      expect((await presigned(clienteB, privateApprovedDocKey)).status).toBe(
+        403,
+      );
     });
 
     // CP-BE-UPL-004
@@ -220,7 +244,10 @@ describe('Autorización de archivos S3 (e2e real)', () => {
       const up = await http
         .post(`${PREFIX}/uploads/avatar`)
         .set(bearer(user.token))
-        .attach('file', tinyPng(), { filename: 'a.png', contentType: 'image/png' })
+        .attach('file', tinyPng(), {
+          filename: 'a.png',
+          contentType: 'image/png',
+        })
         .expect(201);
       const key = unwrap(up.body).key as string;
       await http
@@ -233,7 +260,10 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
     // CP-BE-UPL-008
     it('DEF-BE-024: una key que ninguna fila referencia (inventada o recién subida sin guardar) -> 404', async () => {
-      expect((await presigned(clienteB, `${uniqueSuffix()}${uniqueSuffix()}.pdf`)).status).toBe(404);
+      expect(
+        (await presigned(clienteB, `${uniqueSuffix()}${uniqueSuffix()}.pdf`))
+          .status,
+      ).toBe(404);
       const loose = await uploadImage(clienteB);
       expect((await presigned(clienteB, loose)).status).toBe(404);
       expect((await presigned(admin, loose)).status).toBe(404);
@@ -241,7 +271,8 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
     // CP-BE-UPL-009
     it('DEF-BE-024: el URL presignado expira en 5 minutos como máximo', async () => {
-      const url = unwrap((await presigned(pro.token, docKey)).body).url as string;
+      const url = unwrap((await presigned(pro.token, docKey)).body)
+        .url as string;
       const expires = Number(new URL(url).searchParams.get('X-Amz-Expires'));
       expect(expires).toBeGreaterThan(0);
       expect(expires).toBeLessThanOrEqual(300);
@@ -249,10 +280,19 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
     // CP-BE-UPL-010
     it('sin JWT o sin key -> 401 / 400', async () => {
-      await http.get(`${PREFIX}/uploads/presigned-url`).query({ key: docKey }).expect(401);
+      await http
+        .get(`${PREFIX}/uploads/presigned-url`)
+        .query({ key: docKey })
+        .expect(401);
       await http.get(`${PREFIX}/uploads/info/${docKey}`).expect(401);
       await http.delete(`${PREFIX}/uploads/${docKey}`).expect(401);
-      expect((await http.get(`${PREFIX}/uploads/presigned-url`).set(bearer(clienteB))).status).toBe(400);
+      expect(
+        (
+          await http
+            .get(`${PREFIX}/uploads/presigned-url`)
+            .set(bearer(clienteB))
+        ).status,
+      ).toBe(400);
     });
   });
 
@@ -269,7 +309,11 @@ describe('Autorización de archivos S3 (e2e real)', () => {
       await acceptConsent(http, assigned.token, 'IMAGE_USAGE_CONSENT');
       serviceImage = await uploadImage(client);
       const svc = unwrap(
-        (await createService(http, client, categoryId, serviceTypeId, { images: [serviceImage] }).expect(201)).body,
+        (
+          await createService(http, client, categoryId, serviceTypeId, {
+            images: [serviceImage],
+          }).expect(201)
+        ).body,
       );
       serviceRef = svc.referenceId;
     });
@@ -284,8 +328,14 @@ describe('Autorización de archivos S3 (e2e real)', () => {
 
     // CP-BE-UPL-012
     it('DEF-BE-024: tras asignarse, la foto del servicio y las de la bitácora solo las ven el cliente, el profesional asignado y el admin', async () => {
-      await http.post(`${PREFIX}/services/${serviceRef}/accept`).set(bearer(assigned.token)).expect(201);
-      await http.post(`${PREFIX}/services/${serviceRef}/start`).set(bearer(assigned.token)).expect(201);
+      await http
+        .post(`${PREFIX}/services/${serviceRef}/accept`)
+        .set(bearer(assigned.token))
+        .expect(201);
+      await http
+        .post(`${PREFIX}/services/${serviceRef}/start`)
+        .set(bearer(assigned.token))
+        .expect(201);
       progressImage = await uploadImage(assigned.token);
       await http
         .post(`${PREFIX}/services/${serviceRef}/progress`)
@@ -304,10 +354,20 @@ describe('Autorización de archivos S3 (e2e real)', () => {
     // CP-BE-UPL-013
     it('DEF-BE-024: adjuntar la key de un documento ajeno a una entrada de bitácora no da acceso a ese documento', async () => {
       const svc = unwrap(
-        (await createService(http, clienteA, categoryId, serviceTypeId).expect(201)).body,
+        (
+          await createService(http, clienteA, categoryId, serviceTypeId).expect(
+            201,
+          )
+        ).body,
       );
-      await http.post(`${PREFIX}/services/${svc.referenceId}/accept`).set(bearer(assigned.token)).expect(201);
-      await http.post(`${PREFIX}/services/${svc.referenceId}/start`).set(bearer(assigned.token)).expect(201);
+      await http
+        .post(`${PREFIX}/services/${svc.referenceId}/accept`)
+        .set(bearer(assigned.token))
+        .expect(201);
+      await http
+        .post(`${PREFIX}/services/${svc.referenceId}/start`)
+        .set(bearer(assigned.token))
+        .expect(201);
       await http
         .post(`${PREFIX}/services/${svc.referenceId}/progress`)
         .set(bearer(assigned.token))
@@ -324,13 +384,18 @@ describe('Autorización de archivos S3 (e2e real)', () => {
       const res = await remove(clienteB, d.fileKey);
       expect(res.status).toBe(403);
       expect((await presigned(pro.token, d.fileKey)).status).toBe(200);
-      const got = await download(unwrap((await presigned(pro.token, d.fileKey)).body).url);
+      const got = await download(
+        unwrap((await presigned(pro.token, d.fileKey)).body).url,
+      );
       expect(got.status).toBe(200);
     });
 
     // CP-BE-UPL-015
     it('DEF-BE-025: borrar una key no referenciada -> 404', async () => {
-      expect((await remove(clienteB, `${uniqueSuffix()}${uniqueSuffix()}.pdf`)).status).toBe(404);
+      expect(
+        (await remove(clienteB, `${uniqueSuffix()}${uniqueSuffix()}.pdf`))
+          .status,
+      ).toBe(404);
     });
 
     // CP-BE-UPL-016
@@ -353,7 +418,13 @@ describe('Autorización de archivos S3 (e2e real)', () => {
       owner = (await registerUser(http, 'own')).token;
       assigned = await createApprovedPro(http, admin, categoryId);
       offerPro = await createApprovedPro(http, admin, categoryId);
-      const svc = unwrap((await createService(http, owner, categoryId, serviceTypeId).expect(201)).body);
+      const svc = unwrap(
+        (
+          await createService(http, owner, categoryId, serviceTypeId).expect(
+            201,
+          )
+        ).body,
+      );
       svcRef = svc.referenceId;
       const req = unwrap(
         (
@@ -370,7 +441,10 @@ describe('Autorización de archivos S3 (e2e real)', () => {
         .set(bearer(owner))
         .send({ status: 'ACCEPTED' })
         .expect(200);
-      await http.post(`${PREFIX}/services/${svcRef}/start`).set(bearer(assigned.token)).expect(201);
+      await http
+        .post(`${PREFIX}/services/${svcRef}/start`)
+        .set(bearer(assigned.token))
+        .expect(201);
       await http
         .post(`${PREFIX}/services/${svcRef}/progress`)
         .set(bearer(assigned.token))
@@ -383,24 +457,49 @@ describe('Autorización de archivos S3 (e2e real)', () => {
       const progress = `${PREFIX}/services/${svcRef}/progress`;
       for (const token of [clienteB, offerPro.token]) {
         expect((await http.get(progress).set(bearer(token))).status).toBe(403);
-        expect((await http.post(progress).set(bearer(token)).send({ note: 'x' })).status).toBe(403);
+        expect(
+          (await http.post(progress).set(bearer(token)).send({ note: 'x' }))
+            .status,
+        ).toBe(403);
       }
       // el cliente dueño lee pero no escribe
       expect((await http.get(progress).set(bearer(owner))).status).toBe(200);
-      expect((await http.post(progress).set(bearer(owner)).send({ note: 'x' })).status).toBe(403);
+      expect(
+        (await http.post(progress).set(bearer(owner)).send({ note: 'x' }))
+          .status,
+      ).toBe(403);
       for (const token of [assigned.token, admin]) {
         expect((await http.get(progress).set(bearer(token))).status).toBe(200);
       }
       // borrar la entrada de otro: 403
-      const entry = unwrap((await http.get(progress).set(bearer(owner))).body).data[0];
-      expect((await http.delete(`${progress}/${entry.referenceId}`).set(bearer(clienteB))).status).toBe(403);
-      expect((await http.delete(`${progress}/${entry.referenceId}`).set(bearer(offerPro.token))).status).toBe(403);
+      const entry = unwrap((await http.get(progress).set(bearer(owner))).body)
+        .data[0];
+      expect(
+        (
+          await http
+            .delete(`${progress}/${entry.referenceId}`)
+            .set(bearer(clienteB))
+        ).status,
+      ).toBe(403);
+      expect(
+        (
+          await http
+            .delete(`${progress}/${entry.referenceId}`)
+            .set(bearer(offerPro.token))
+        ).status,
+      ).toBe(403);
     });
 
     // CP-BE-UPL-018
     it('presupuestos: un tercero no puede leer, reemplazar ni elegir opciones; solo el autor edita y solo el cliente dueño elige', async () => {
       // el servicio ya está asignado: usar una oferta PENDING de otro servicio
-      const svc2 = unwrap((await createService(http, owner, categoryId, serviceTypeId).expect(201)).body);
+      const svc2 = unwrap(
+        (
+          await createService(http, owner, categoryId, serviceTypeId).expect(
+            201,
+          )
+        ).body,
+      );
       const req2 = unwrap(
         (
           await http
@@ -411,21 +510,51 @@ describe('Autorización de archivos S3 (e2e real)', () => {
         ).body,
       );
       const base = `${PREFIX}/services/${svc2.referenceId}/requests/${req2.referenceId}/budget-options`;
-      const body = { options: [{ label: 'A', lineItems: [{ itemType: 'LABOR', description: 'mano de obra', quantity: 1, unitPrice: 100 }] }] };
+      const body = {
+        options: [
+          {
+            label: 'A',
+            lineItems: [
+              {
+                itemType: 'LABOR',
+                description: 'mano de obra',
+                quantity: 1,
+                unitPrice: 100,
+              },
+            ],
+          },
+        ],
+      };
       for (const token of [clienteB, offerPro.token]) {
         expect((await http.get(base).set(bearer(token))).status).toBe(403);
-        expect((await http.put(base).set(bearer(token)).send(body)).status).toBe(403);
-        expect((await http.patch(`${base}/${req2.referenceId}/select`).set(bearer(token))).status).toBe(403);
+        expect(
+          (await http.put(base).set(bearer(token)).send(body)).status,
+        ).toBe(403);
+        expect(
+          (
+            await http
+              .patch(`${base}/${req2.referenceId}/select`)
+              .set(bearer(token))
+          ).status,
+        ).toBe(403);
       }
       // el cliente dueño no puede escribir las opciones del profesional
-      expect((await http.put(base).set(bearer(owner)).send(body)).status).toBe(403);
+      expect((await http.put(base).set(bearer(owner)).send(body)).status).toBe(
+        403,
+      );
       // autor: reemplaza; luego lee el dueño
       const put = await http.put(base).set(bearer(assigned.token)).send(body);
       expect(put.status).toBe(200);
       expect((await http.get(base).set(bearer(owner))).status).toBe(200);
       const optRef = unwrap(put.body).data[0].referenceId;
       // el autor no puede elegir su propia opción
-      expect((await http.patch(`${base}/${optRef}/select`).set(bearer(assigned.token))).status).toBe(403);
+      expect(
+        (
+          await http
+            .patch(`${base}/${optRef}/select`)
+            .set(bearer(assigned.token))
+        ).status,
+      ).toBe(403);
     });
   });
 });

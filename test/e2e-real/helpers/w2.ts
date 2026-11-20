@@ -25,7 +25,11 @@ export interface NewUser {
 }
 
 /** Registra un usuario por POST /onboarding y devuelve su sesión. */
-export async function registerUser(http: Http, prefix = 'w2', firstName = 'W2'): Promise<NewUser> {
+export async function registerUser(
+  http: Http,
+  prefix = 'w2',
+  firstName = 'W2',
+): Promise<NewUser> {
   const pem = await getPublicKey(http);
   const email = `${prefix}_${uniqueSuffix()}@e2e.tekoapp.local`;
   const res = await basic(http.post(`${PREFIX}/onboarding`))
@@ -74,7 +78,12 @@ export async function acceptConsent(
   documentType: string,
 ): Promise<void> {
   const pending = unwrap(
-    (await http.get(`${PREFIX}/legal/consents/pending`).set(bearer(token)).expect(200)).body,
+    (
+      await http
+        .get(`${PREFIX}/legal/consents/pending`)
+        .set(bearer(token))
+        .expect(200)
+    ).body,
   ) as any[];
   const version = pending.find((v) => v.documentType === documentType);
   if (!version) throw new Error(`sin versión pendiente para ${documentType}`);
