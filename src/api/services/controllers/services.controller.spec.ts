@@ -114,11 +114,11 @@ describe('ServicesController', () => {
       mockGetServices.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getServices(query);
+      const result = await controller.getServices(query, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetServices).toHaveBeenCalledWith(query);
+      expect(mockGetServices).toHaveBeenCalledWith(query, mockUser);
     });
   });
 
@@ -135,11 +135,17 @@ describe('ServicesController', () => {
       mockGetNearbyServices.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getNearbyServices(query);
+      const result = await controller.getNearbyServices(query, mockReq);
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetNearbyServices).toHaveBeenCalledWith(-25.3, -57.6, 5, 2);
+      expect(mockGetNearbyServices).toHaveBeenCalledWith(
+        -25.3,
+        -57.6,
+        5,
+        2,
+        mockUser,
+      );
     });
   });
 
@@ -194,11 +200,17 @@ describe('ServicesController', () => {
       mockGetServiceById.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getServiceById(mockServiceIdParam);
+      const result = await controller.getServiceById(
+        mockServiceIdParam,
+        mockReq,
+      );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetServiceById).toHaveBeenCalledWith('service-uuid-001');
+      expect(mockGetServiceById).toHaveBeenCalledWith(
+        'service-uuid-001',
+        mockUser,
+      );
     });
 
     it('debe propagar NotFoundException si el servicio no existe', async () => {
@@ -209,7 +221,7 @@ describe('ServicesController', () => {
 
       // Act & Assert
       await expect(
-        controller.getServiceById(mockServiceIdParam),
+        controller.getServiceById(mockServiceIdParam, mockReq),
       ).rejects.toThrow('Servicio no encontrado');
     });
   });
@@ -387,11 +399,17 @@ describe('ServicesController', () => {
       mockGetServiceRequests.mockResolvedValue(expected);
 
       // Act
-      const result = await controller.getServiceRequests(mockServiceIdParam);
+      const result = await controller.getServiceRequests(
+        mockServiceIdParam,
+        mockReq,
+      );
 
       // Assert
       expect(result).toEqual(expected);
-      expect(mockGetServiceRequests).toHaveBeenCalledWith('service-uuid-001');
+      expect(mockGetServiceRequests).toHaveBeenCalledWith(
+        'service-uuid-001',
+        mockUser,
+      );
     });
   });
 

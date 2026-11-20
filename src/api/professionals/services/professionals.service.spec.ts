@@ -1,7 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException, ConflictException } from '@nestjs/common';
+import { auditStorage } from '@core/database/services/prisma.service';
+import {
+  ForbiddenException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProfessionalsService } from './professionals.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
+import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
@@ -16,12 +22,14 @@ const mockFindProfessionalIdByUserId = jest.fn();
 const mockFindProfessionalByReferenceId = jest.fn();
 const mockUpdate = jest.fn();
 const mockUpdateConditional = jest.fn();
+const mockFindStatusHistory = jest.fn();
 const mockFindServices = jest.fn();
 const mockFindReviews = jest.fn();
 const mockGetStats = jest.fn();
 const mockSearchBySkills = jest.fn();
 const mockGetTopRated = jest.fn();
 const mockGenerate = jest.fn();
+const mockHasActiveServiceWith = jest.fn();
 const mockNotificationsCreate = jest.fn();
 
 const mockProfessional = {
@@ -31,15 +39,21 @@ const mockProfessional = {
   categoryId: 2,
   isAvailable: true,
   status: 'APPROVED',
+  isActive: true,
   verificationStatus: 'VERIFIED',
 };
 
-function fakeUser(overrides: { id?: number; permissions?: string[] } = {}) {
+function fakeUser(
+  overrides: { id?: number; referenceId?: string; permissions?: string[] } = {},
+) {
   return {
     id: overrides.id ?? 1,
+    referenceId: overrides.referenceId ?? 'ref-viewer',
     permissions: overrides.permissions ?? [],
   } as never;
 }
+
+const ADMIN = { id: 99, referenceId: 'admin-ref-99' };
 
 describe('ProfessionalsService', () => {
   let service: ProfessionalsService;
@@ -61,12 +75,17 @@ describe('ProfessionalsService', () => {
             findProfessionalByReferenceId: mockFindProfessionalByReferenceId,
             update: mockUpdate,
             updateConditional: mockUpdateConditional,
+            findStatusHistory: mockFindStatusHistory,
             findServices: mockFindServices,
             findReviews: mockFindReviews,
             getStats: mockGetStats,
             searchBySkills: mockSearchBySkills,
             getTopRated: mockGetTopRated,
           },
+        },
+        {
+          provide: ProfessionalPositionDbService,
+          useValue: { hasActiveServiceWith: mockHasActiveServiceWith },
         },
         {
           provide: ReportService,
@@ -113,7 +132,7 @@ describe('ProfessionalsService', () => {
       mockFindMany.mockResolvedValue(mockResult);
 
       // Act
-      const result = await service.getProfessionals(query);
+      const result = await service.getProfessionals(query, fakeUser());
 
       // Assert
       expect(mockFindMany).toHaveBeenCalledWith(
@@ -134,7 +153,7 @@ describe('ProfessionalsService', () => {
       mockFindMany.mockResolvedValue(mockResult);
 
       // Act
-      await service.getProfessionals(query);
+      await service.getProfessionals(query, fakeUser());
 
       // Assert
       expect(mockFindMany).toHaveBeenCalledWith(
@@ -213,7 +232,7 @@ describe('ProfessionalsService', () => {
       mockFindNearby.mockResolvedValue([mockProfessional]);
 
       // Act
-      const result = await service.getNearbyProfessionals(query);
+      const result = await service.getNearbyProfessionals(query, fakeUser());
 
       // Assert
       expect(mockFindNearby).toHaveBeenCalledWith(
@@ -221,6 +240,7 @@ describe('ProfessionalsService', () => {
         query.longitude,
         query.radius,
         query.categoryId,
+        true,
       );
       expect(result).toEqual([mockProfessional]);
     });
@@ -232,7 +252,7 @@ describe('ProfessionalsService', () => {
       mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
-      const result = await service.getProfessionalById(1);
+      const result = await service.getProfessionalById(1, fakeUser());
 
       // Assert
       expect(mockFindById).toHaveBeenCalledWith(1);
@@ -248,6 +268,7 @@ describe('ProfessionalsService', () => {
       // Act
       const result = await service.getProfessionalByReference(
         'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        fakeUser(),
       );
 
       // Assert
@@ -402,15 +423,135 @@ describe('ProfessionalsService', () => {
     });
   });
 
+  describe('visibilidad de profesionales no aprobados (DEF-BE-023)', () => {
+    const pending = { ...mockProfessional, status: 'PENDING' };
+
+    it('debe responder NotFoundException a un cliente por id y por referenceId si el profesional no está APPROVED', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue(pending);
+      mockFindProfessionalByReferenceId.mockResolvedValue(pending);
+
+      // Act & Assert
+      await expect(
+        service.getProfessionalById(1, fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfessionalByReference('ref', fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfessionalStats(1, fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe seguir mostrando a un SUSPENDED al cliente con servicio activo con él (DEF-BE-030) y 404 a los demás', async () => {
+      // Arrange
+      const suspended = {
+        ...mockProfessional,
+        status: 'SUSPENDED',
+        isActive: false,
+      };
+      mockFindById.mockResolvedValue(suspended);
+      mockFindProfessionalByReferenceId.mockResolvedValue(suspended);
+      mockHasActiveServiceWith.mockImplementation((ref: string) =>
+        Promise.resolve(ref === 'cliente-con-servicio'),
+      );
+      const linked = fakeUser({ id: 99, referenceId: 'cliente-con-servicio' });
+      const other = fakeUser({ id: 98, referenceId: 'otro' });
+
+      // Act & Assert
+      await expect(service.getProfessionalById(1, linked)).resolves.toBe(
+        suspended,
+      );
+      await expect(
+        service.getProfessionalByReference('ref', linked),
+      ).resolves.toBe(suspended);
+      await expect(service.getProfessionalById(1, other)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockHasActiveServiceWith).toHaveBeenCalledWith(
+        'cliente-con-servicio',
+        suspended.id,
+      );
+    });
+
+    it('debe tratar como no visible a un profesional APPROVED pero inactivo', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue({ ...mockProfessional, isActive: false });
+
+      // Act & Assert
+      await expect(
+        service.getProfessionalById(1, fakeUser({ id: 99 })),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('debe permitirlo a admin, a un gestor de profesionales y al propio profesional', async () => {
+      // Arrange
+      mockFindById.mockResolvedValue(pending);
+
+      // Act & Assert
+      for (const viewer of [
+        fakeUser({ id: 99, permissions: ['admin:all'] }),
+        fakeUser({
+          id: 99,
+          permissions: ['professionals.verification:manage'],
+        }),
+        fakeUser({ id: mockProfessional.userId }),
+      ]) {
+        await expect(
+          service.getProfessionalById(1, viewer),
+        ).resolves.toBeDefined();
+      }
+    });
+
+    it('debe pedir todos los estados (onlyApproved=false) a admin y solo APPROVED a un cliente', async () => {
+      // Arrange
+      mockFindMany.mockResolvedValue({ data: [], pagination: {} });
+      mockFindNearby.mockResolvedValue([]);
+      mockSearchBySkills.mockResolvedValue([]);
+      mockGetTopRated.mockResolvedValue([]);
+      const admin = fakeUser({ id: 1, permissions: ['admin:all'] });
+      const client = fakeUser({ id: 2 });
+
+      // Act
+      await service.getProfessionals({} as never, admin);
+      await service.getProfessionals({} as never, client);
+      await service.searchBySkills({ skills: 'a' } as never, admin);
+      await service.getTopRatedProfessionals({} as never, admin);
+
+      // Assert
+      expect(mockFindMany).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ onlyApproved: false }),
+        {},
+      );
+      expect(mockFindMany).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ onlyApproved: true }),
+        {},
+      );
+      expect(mockSearchBySkills).toHaveBeenCalledWith(
+        ['a'],
+        { skills: 'a' },
+        false,
+      );
+      expect(mockGetTopRated).toHaveBeenCalledWith(undefined, undefined, false);
+    });
+  });
+
   describe('getProfessionalServices', () => {
     it('debe retornar los servicios del profesional paginados', async () => {
       // Arrange
       const query = { page: 1, pageSize: 10, status: 'COMPLETED' };
       const mockResult = { data: [], pagination: { total: 0 } };
       mockFindServices.mockResolvedValue(mockResult);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
-      const result = await service.getProfessionalServices(1, query as never);
+      const result = await service.getProfessionalServices(
+        1,
+        query as never,
+        fakeUser(),
+      );
 
       // Assert
       expect(mockFindServices).toHaveBeenCalledWith(1, query, query.status);
@@ -448,6 +589,7 @@ describe('ProfessionalsService', () => {
         pagination,
       });
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
       const result = await service.getProfessionalReviews(
@@ -503,6 +645,7 @@ describe('ProfessionalsService', () => {
         pagination,
       });
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act — viewer id=99, sin permiso de auditoría, no es el autor (autor es userId=3)
       const result = await service.getProfessionalReviews(
@@ -540,6 +683,7 @@ describe('ProfessionalsService', () => {
         pagination,
       });
       mockFindProfessionalIdByUserId.mockResolvedValue(null);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
       const result = await service.getProfessionalReviews(
@@ -562,9 +706,10 @@ describe('ProfessionalsService', () => {
         averageRating: 4.8,
       };
       mockGetStats.mockResolvedValue(mockStats);
+      mockFindById.mockResolvedValue(mockProfessional);
 
       // Act
-      const result = await service.getProfessionalStats(1);
+      const result = await service.getProfessionalStats(1, fakeUser());
 
       // Assert
       expect(mockGetStats).toHaveBeenCalledWith(1);
@@ -582,12 +727,13 @@ describe('ProfessionalsService', () => {
       mockSearchBySkills.mockResolvedValue([mockProfessional]);
 
       // Act
-      const result = await service.searchBySkills(query);
+      const result = await service.searchBySkills(query, fakeUser());
 
       // Assert
       expect(mockSearchBySkills).toHaveBeenCalledWith(
         ['plomería', 'electricidad', 'pintura'],
         query,
+        true,
       );
       expect(result).toEqual([mockProfessional]);
     });
@@ -598,10 +744,14 @@ describe('ProfessionalsService', () => {
       mockSearchBySkills.mockResolvedValue([]);
 
       // Act
-      await service.searchBySkills(query);
+      await service.searchBySkills(query, fakeUser());
 
       // Assert
-      expect(mockSearchBySkills).toHaveBeenCalledWith(['plomería'], query);
+      expect(mockSearchBySkills).toHaveBeenCalledWith(
+        ['plomería'],
+        query,
+        true,
+      );
     });
   });
 
@@ -612,37 +762,72 @@ describe('ProfessionalsService', () => {
       mockGetTopRated.mockResolvedValue([mockProfessional]);
 
       // Act
-      const result = await service.getTopRatedProfessionals(query);
+      const result = await service.getTopRatedProfessionals(query, fakeUser());
 
       // Assert
       expect(mockGetTopRated).toHaveBeenCalledWith(
         query.categoryId,
         query.limit,
+        true,
       );
       expect(result).toEqual([mockProfessional]);
     });
   });
 
   describe('verifyProfessional', () => {
+    const pendingProfessional = {
+      ...mockProfessional,
+      status: 'PENDING',
+      verificationStatus: 'UNVERIFIED',
+    };
+
+    it.each(['APPROVED', 'SUSPENDED'])(
+      'debe lanzar ConflictException (DEF-BE-028) y no escribir si el profesional está %s',
+      async (status) => {
+        mockFindById.mockResolvedValue({ ...mockProfessional, status });
+
+        await expect(
+          service.verifyProfessional(1, { isVerified: true }, ADMIN),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+        expect(mockNotificationsCreate).not.toHaveBeenCalled();
+      },
+    );
+
+    it('debe permitir revisar de nuevo un profesional REJECTED', async () => {
+      mockFindById
+        .mockResolvedValueOnce({ ...mockProfessional, status: 'REJECTED' })
+        .mockResolvedValueOnce(mockProfessional);
+      mockUpdateConditional.mockResolvedValue(1);
+
+      await service.verifyProfessional(1, { isVerified: true }, ADMIN);
+
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        ['REJECTED'],
+        expect.objectContaining({ status: 'APPROVED' }),
+      );
+    });
+
     it('debe marcar el profesional como verificado cuando isVerified=true', async () => {
       // Arrange
       const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
       mockFindById
-        .mockResolvedValueOnce(mockProfessional)
+        .mockResolvedValueOnce(pendingProfessional)
         .mockResolvedValueOnce({
-          ...mockProfessional,
+          ...pendingProfessional,
           verificationStatus: 'VERIFIED',
           status: 'APPROVED',
         });
       mockUpdateConditional.mockResolvedValue(1);
 
       // Act
-      const result = await service.verifyProfessional(1, dto, 99);
+      const result = await service.verifyProfessional(1, dto, ADMIN);
 
       // Assert
       expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
-        [mockProfessional.status],
+        [pendingProfessional.status],
         expect.objectContaining({
           verificationStatus: 'VERIFIED',
           status: 'APPROVED',
@@ -660,23 +845,23 @@ describe('ProfessionalsService', () => {
         expect.objectContaining({
           type: NotificationType.PROFESSIONAL_VERIFIED,
         }),
-        mockProfessional.userId,
+        pendingProfessional.userId,
       );
     });
 
     it('debe marcar el profesional como rechazado cuando isVerified=false', async () => {
       // Arrange
       const dto = { isVerified: false, notes: 'Documentos inválidos' } as never;
-      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindById.mockResolvedValue(pendingProfessional);
       mockUpdateConditional.mockResolvedValue(1);
 
       // Act
-      await service.verifyProfessional(1, dto, 99);
+      await service.verifyProfessional(1, dto, ADMIN);
 
       // Assert
       expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
-        [mockProfessional.status],
+        [pendingProfessional.status],
         expect.objectContaining({
           verificationStatus: 'REJECTED',
           status: 'REJECTED',
@@ -686,7 +871,7 @@ describe('ProfessionalsService', () => {
         expect.objectContaining({
           type: NotificationType.PROFESSIONAL_VERIFICATION_REJECTED,
         }),
-        mockProfessional.userId,
+        pendingProfessional.userId,
       );
     });
 
@@ -694,22 +879,35 @@ describe('ProfessionalsService', () => {
       // Arrange — dos admins resolviendo la misma verificación al mismo tiempo: el segundo
       // `updateMany` no encuentra ninguna fila con el estado leído, count() vuelve 0.
       const dto = { isVerified: true, notes: 'Documentos válidos' } as never;
-      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindById.mockResolvedValue(pendingProfessional);
       mockUpdateConditional.mockResolvedValue(0);
 
       // Act & Assert
-      await expect(service.verifyProfessional(1, dto, 99)).rejects.toThrow(
+      await expect(service.verifyProfessional(1, dto, ADMIN)).rejects.toThrow(
         ConflictException,
       );
       expect(mockUpdateConditional).toHaveBeenCalledWith(
         1,
-        [mockProfessional.status],
+        [pendingProfessional.status],
         expect.objectContaining({ status: 'APPROVED' }),
       );
     });
   });
 
   describe('suspendProfessional', () => {
+    it.each(['SUSPENDED', 'PENDING', 'REJECTED'])(
+      'debe lanzar ConflictException (DEF-BE-029) y no escribir si el profesional está %s',
+      async (status) => {
+        mockFindById.mockResolvedValue({ ...mockProfessional, status });
+
+        await expect(
+          service.suspendProfessional(1, 'motivo', ADMIN),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+        expect(mockNotificationsCreate).not.toHaveBeenCalled();
+      },
+    );
+
     it('debe suspender el profesional con la razón indicada', async () => {
       // Arrange
       mockFindById
@@ -725,7 +923,7 @@ describe('ProfessionalsService', () => {
       const result = await service.suspendProfessional(
         1,
         'Comportamiento inadecuado',
-        99,
+        ADMIN,
       );
 
       // Assert
@@ -737,7 +935,7 @@ describe('ProfessionalsService', () => {
           status: 'SUSPENDED',
           isActive: false,
           changedReason: 'Comportamiento inadecuado',
-          lastChangedBy: '99',
+          lastChangedBy: 'admin-ref-99',
         }),
       );
       expect(result).toEqual(
@@ -760,8 +958,253 @@ describe('ProfessionalsService', () => {
 
       // Act & Assert
       await expect(
-        service.suspendProfessional(1, 'Comportamiento inadecuado', 99),
+        service.suspendProfessional(1, 'Comportamiento inadecuado', ADMIN),
       ).rejects.toThrow(ConflictException);
+    });
+  });
+  describe('reactivateProfessional', () => {
+    const suspended = {
+      ...mockProfessional,
+      status: 'SUSPENDED',
+      isActive: false,
+      user: { status: 'ACTIVE' },
+    };
+
+    it.each(['APPROVED', 'PENDING', 'REJECTED'])(
+      'debe lanzar ConflictException y no escribir si el profesional está %s',
+      async (status) => {
+        mockFindById.mockResolvedValue({ ...suspended, status });
+
+        await expect(
+          service.reactivateProfessional(1, 'motivo', ADMIN),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+        expect(mockNotificationsCreate).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['DELETED', 'BLOCKED', 'PENDING_DELETION'])(
+      'debe lanzar ConflictException si la cuenta del usuario está %s (no reactiva)',
+      async (userStatus) => {
+        mockFindById.mockResolvedValue({
+          ...suspended,
+          user: { status: userStatus },
+        });
+
+        await expect(
+          service.reactivateProfessional(1, 'motivo', ADMIN),
+        ).rejects.toThrow(ConflictException);
+        expect(mockUpdateConditional).not.toHaveBeenCalled();
+      },
+    );
+
+    it('debe pasar a APPROVED dejando al profesional como un APPROVED normal y notificarlo', async () => {
+      mockFindById
+        .mockResolvedValueOnce(suspended)
+        .mockResolvedValueOnce({ ...suspended, status: 'APPROVED' });
+      mockUpdateConditional.mockResolvedValue(1);
+
+      const result = await service.reactivateProfessional(
+        1,
+        'Apelación',
+        ADMIN,
+      );
+
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        ['SUSPENDED'],
+        expect.objectContaining({
+          status: 'APPROVED',
+          isActive: true,
+          isAvailable: false,
+          isOnline: false,
+          changedReason: 'Apelación',
+          lastChangedBy: 'admin-ref-99',
+        }),
+      );
+      expect(result).toEqual(expect.objectContaining({ status: 'APPROVED' }));
+      expect(mockNotificationsCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NotificationType.PROFESSIONAL_VERIFIED,
+        }),
+        mockProfessional.userId,
+      );
+    });
+
+    it('debe lanzar ConflictException si el estado cambió entre la lectura y la escritura (carrera)', async () => {
+      mockFindById.mockResolvedValue(suspended);
+      mockUpdateConditional.mockResolvedValue(0);
+
+      await expect(
+        service.reactivateProfessional(1, 'Apelación', ADMIN),
+      ).rejects.toThrow(ConflictException);
+      expect(mockNotificationsCreate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auditoría uniforme de transiciones de estado', () => {
+    const META = { ip: '203.0.113.9', userAgent: 'jest-agent/1.0' };
+
+    it.each([
+      [
+        'verify',
+        () => service.verifyProfessional(1, { isVerified: true }, ADMIN, META),
+        { ...mockProfessional, status: 'PENDING' },
+      ],
+      [
+        'reject',
+        () =>
+          service.verifyProfessional(
+            1,
+            { isVerified: false, notes: 'Ilegible' },
+            ADMIN,
+            META,
+          ),
+        { ...mockProfessional, status: 'PENDING' },
+      ],
+      [
+        'suspend',
+        () => service.suspendProfessional(1, 'Reportes', ADMIN, META),
+        mockProfessional,
+      ],
+      [
+        'reactivate',
+        () => service.reactivateProfessional(1, 'Apelación', ADMIN, META),
+        {
+          ...mockProfessional,
+          status: 'SUSPENDED',
+          user: { status: 'ACTIVE' },
+        },
+      ],
+    ])(
+      '%s: escribe con actor (referenceId), IP y user-agent en el contexto de auditoría',
+      async (_name, call, current) => {
+        mockFindById.mockResolvedValue(current);
+        let store: unknown;
+        mockUpdateConditional.mockImplementation(() => {
+          store = auditStorage.getStore();
+          return Promise.resolve(1);
+        });
+
+        await call();
+
+        expect(store).toEqual({
+          userId: 'admin-ref-99',
+          ip: META.ip,
+          userAgent: META.userAgent,
+          applicationName: 'tekoapp-backend',
+        });
+        expect(mockUpdateConditional).toHaveBeenCalledWith(
+          1,
+          expect.any(Array),
+          expect.objectContaining({ lastChangedBy: 'admin-ref-99' }),
+        );
+      },
+    );
+
+    it('verify sin nota escribe changedReason=null (no arrastra el motivo de una transición previa)', async () => {
+      mockFindById.mockResolvedValue({
+        ...mockProfessional,
+        status: 'PENDING',
+      });
+      mockUpdateConditional.mockResolvedValue(1);
+
+      await service.verifyProfessional(1, { isVerified: true }, ADMIN);
+
+      expect(mockUpdateConditional).toHaveBeenCalledWith(
+        1,
+        ['PENDING'],
+        expect.objectContaining({ changedReason: null }),
+      );
+    });
+
+    it('sin metadata de request usa "unknown" para IP y user-agent', async () => {
+      mockFindById.mockResolvedValue(mockProfessional);
+      let store: { ip?: string; userAgent?: string } | undefined;
+      mockUpdateConditional.mockImplementation(() => {
+        store = auditStorage.getStore();
+        return Promise.resolve(1);
+      });
+
+      await service.suspendProfessional(1, 'Reportes', ADMIN);
+
+      expect(store).toEqual(
+        expect.objectContaining({ ip: 'unknown', userAgent: 'unknown' }),
+      );
+    });
+  });
+
+  describe('getStatusHistory', () => {
+    it('debe devolver 404 (propaga NotFound) si el profesional no existe', async () => {
+      mockFindById.mockRejectedValue(new NotFoundException('nope'));
+
+      await expect(service.getStatusHistory(1, {} as never)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockFindStatusHistory).not.toHaveBeenCalled();
+    });
+
+    it('debe paginar con page=1/pageSize=10 por defecto y mapear las transiciones', async () => {
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindStatusHistory.mockResolvedValue({
+        rows: [
+          {
+            id: BigInt(5),
+            oldData: { status: 'SUSPENDED' },
+            newData: { status: 'APPROVED', changed_reason: 'Apelación' },
+            changedAt: new Date('2026-10-13T10:00:00.000Z'),
+            changedBy: 'ref-admin',
+            ipAddress: '1.2.3.4',
+            userAgent: 'ua',
+          },
+        ],
+        total: 11,
+        actors: [
+          {
+            id: 3,
+            referenceId: 'ref-admin',
+            email: 'a@b.c',
+            firstName: 'Ada',
+            lastName: 'Admin',
+          },
+        ],
+      });
+
+      const result = await service.getStatusHistory(1, {} as never);
+
+      expect(mockFindStatusHistory).toHaveBeenCalledWith(1, 1, 10);
+      expect(result.pagination).toEqual({
+        total: 11,
+        page: 1,
+        pageSize: 10,
+        totalPages: 2,
+      });
+      expect(result.data).toEqual([
+        expect.objectContaining({
+          action: 'REACTIVATE',
+          fromStatus: 'SUSPENDED',
+          toStatus: 'APPROVED',
+          reason: 'Apelación',
+          actor: {
+            referenceId: 'ref-admin',
+            name: 'Ada Admin',
+            email: 'a@b.c',
+          },
+        }),
+      ]);
+    });
+
+    it('debe respetar page y pageSize recibidos', async () => {
+      mockFindById.mockResolvedValue(mockProfessional);
+      mockFindStatusHistory.mockResolvedValue({
+        rows: [],
+        total: 0,
+        actors: [],
+      });
+
+      await service.getStatusHistory(1, { page: 2, pageSize: 100 } as never);
+
+      expect(mockFindStatusHistory).toHaveBeenCalledWith(1, 2, 100);
     });
   });
 });

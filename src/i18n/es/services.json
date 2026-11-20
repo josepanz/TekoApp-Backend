@@ -16,6 +16,7 @@
   "NOTIFICATION_CANCELLED_BY_CLIENT_MESSAGE": "El cliente canceló el servicio en el que estabas asignado.",
   "NOTIFICATION_CANCELLED_BY_PROFESSIONAL_TITLE": "El profesional canceló el servicio",
   "NOTIFICATION_CANCELLED_BY_PROFESSIONAL_MESSAGE": "El profesional canceló el servicio que tenías en curso.",
+  "REQUEST_ALREADY_ANSWERED": "La oferta ya fue respondida",
   "NO_LONGER_ACCEPTING_REQUESTS": "El servicio ya no está disponible para aceptar solicitudes",
   "NO_LONGER_PENDING": "El servicio ya no está pendiente — alguien más lo aceptó primero",
   "ONLY_ASSIGNED_PROFESSIONAL_CAN_COMPLETE": "Solo el profesional asignado puede completar el servicio",
@@ -32,5 +33,9 @@
   "UNAUTHORIZED_CANCEL": "No tienes permisos para cancelar este servicio",
   "UNAUTHORIZED_UPDATE": "No tienes permisos para modificar este servicio",
   "USER_NOT_FOUND": "Usuario no encontrado",
+  "PROFESSIONAL_NOT_APPROVED": "Tu perfil profesional todavía no está aprobado o está suspendido",
+  "UNAUTHORIZED_VIEW": "No tenés acceso a este servicio",
+  "UNAUTHORIZED_BROWSE": "No tenés acceso al listado de servicios",
+  "UNAUTHORIZED_VIEW_REQUESTS": "No tenés acceso a las ofertas de este servicio",
   "USER_NOT_PROFESSIONAL": "Usuario no es un profesional"
 }

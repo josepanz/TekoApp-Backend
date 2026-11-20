@@ -149,3 +149,6 @@ dist
 # E2E local
 .env.e2e
 !.env.e2e.example
+
+# Artefactos de las corridas QA (logs de servicios, §3.7 del estándar): se regeneran con pnpm qa:e2e
+test/qa/informes/artefactos/

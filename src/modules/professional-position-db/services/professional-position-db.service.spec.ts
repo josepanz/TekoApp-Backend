@@ -346,6 +346,27 @@ describe('ProfessionalPositionDbService', () => {
       expect((stringsArray as string[]).join('')).not.toContain('GROUP BY');
     });
 
+    it('DEF-BE-018: filtra el radio fuera de la subconsulta (nunca un HAVING sin GROUP BY, 500 en Postgres real)', async () => {
+      // Arrange
+      mockQueryRaw.mockResolvedValue([]);
+
+      // Act
+      await service.findNearby({
+        latitude: -25.2867,
+        longitude: -57.647,
+        radius: 5,
+        limit: 10,
+        availableOnly: false,
+        onlineOnly: false,
+      });
+
+      // Assert
+      const [stringsArray]: unknown[] = mockQueryRaw.mock.calls[0] as unknown[];
+      const sql = (stringsArray as string[]).join('');
+      expect(sql).not.toContain('HAVING');
+      expect(sql).toContain('WHERE distance <=');
+    });
+
     it('debe retornar lista vacía cuando no hay profesionales en el radio', async () => {
       // Arrange
       mockQueryRaw.mockResolvedValue([]);

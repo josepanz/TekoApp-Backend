@@ -309,6 +309,9 @@ async function main() {
   // `professional-portfolio`. No sembrar el enum completo — el resto no bloquea ningún flujo.
   // Contenido: placeholder honesto marcado como tal, no texto legal real (lo redacta José con
   // asesoría legal).
+  // `countryId: null`: `LegalConsentsDbService` (pendientes, `hasActiveConsent`, versión vigente) solo
+  // considera versiones sin país mientras `Users` no tenga país (DEF-BE-014: sembradas con
+  // `paraguay.id` quedaban invisibles y ningún usuario podía aceptar el consentimiento).
   const legalDocumentTypesRequiredByGuards = [
     LegalDocumentType.DATA_PROCESSING_CONSENT,
     LegalDocumentType.IMAGE_USAGE_CONSENT,
@@ -316,13 +319,13 @@ async function main() {
 
   for (const documentType of legalDocumentTypesRequiredByGuards) {
     const existingActiveVersion = await prisma.legalDocumentVersions.findFirst({
-      where: { documentType, countryId: paraguay.id, isActive: true },
+      where: { documentType, countryId: null, isActive: true },
     });
     if (!existingActiveVersion) {
       await prisma.legalDocumentVersions.create({
         data: {
           documentType,
-          countryId: paraguay.id,
+          countryId: null,
           version: 'v1-dev-placeholder',
           contentUrl: `https://dev.tekoapp.local/legal-placeholder/${documentType.toLowerCase()}`,
           publishedAt: new Date(),

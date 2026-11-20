@@ -66,3 +66,11 @@ permisos `legal.config:manage` y `legal.consent-audit:read`). Ambos son upserts.
 
 `/healthcheck` puede dar 503 solo por `storage_disk` (umbral de disco del host). El smoke exige que
 Postgres, Mongo y Redis estén `up`, no el 200 global.
+
+## Subida de archivos a MinIO desde Jest
+
+`pnpm test:e2e:real` agrega `--experimental-vm-modules` a `NODE_OPTIONS`: el SDK de S3 usa `import()` dinámico y dentro de la VM de Jest
+falla con `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING_FLAG` (500 al subir documentos o fotos). Si corrés `jest` a mano, exportá la variable.
+
+Los specs de la ola W2 (`onboarding-profesional`, `marketplace`) crean sus propios usuarios y profesionales por API
+(`helpers/w2.ts`); no dependen de fixtures salvo admin, cliente_a y cliente_b.

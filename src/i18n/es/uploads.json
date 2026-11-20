@@ -3,6 +3,8 @@
   "FILE_DELETED": "Archivo eliminado exitosamente",
   "FILE_TOO_LARGE": "El archivo excede el tamaño máximo de {maxSizeMb}MB",
   "FILE_TYPE_NOT_ALLOWED": "Tipo de archivo no permitido",
+  "FILE_FORBIDDEN": "No tenés acceso a este archivo",
+  "FILE_NOT_FOUND": "Archivo no encontrado",
   "KEY_PARAM_REQUIRED": "El parámetro key es requerido",
   "MERCHANT_DOCUMENTS_UPLOAD_ERROR": "Error al subir documentos de merchant",
   "NO_FILE_UPLOADED": "No se ha subido ningún archivo",

@@ -20,7 +20,11 @@ import { PermissionsGuard } from '@modules/auth/guards/permissions.guard';
 import { Permissions } from '@common/decorators/permissions.decorator';
 import { PERMISSIONS } from '@common/enum/permissions.enum';
 import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interface';
-import { ProfessionalsService } from '../services/professionals.service';
+import {
+  ProfessionalsService,
+  RequestMeta,
+  StatusChangeActor,
+} from '../services/professionals.service';
 import {
   ProfessionalIdParamDTO,
   ProfessionalReferenceIdParamDTO,
@@ -36,6 +40,8 @@ import {
   UpdateProfessionalLocationRequestDTO,
   VerifyProfessionalRequestDTO,
   SuspendProfessionalRequestDTO,
+  ReactivateProfessionalRequestDTO,
+  GetProfessionalStatusHistoryQueryDTO,
 } from '../dtos/request';
 import {
   ProfessionalDetailResponseDTO,
@@ -43,7 +49,27 @@ import {
   ProfessionalServicesListResponseDTO,
   ProfessionalReviewsListResponseDTO,
   ProfessionalStatsResponseDTO,
+  ProfessionalStatusHistoryResponseDTO,
 } from '../dtos/response';
+
+type AuditedRequest = {
+  user: IUserDataOnJwt;
+  ip?: string;
+  headers?: Record<string, string | string[] | undefined>;
+};
+
+const auditActor = (req: AuditedRequest): StatusChangeActor => ({
+  id: req.user.id,
+  referenceId: req.user.referenceId,
+});
+
+const requestMeta = (req: AuditedRequest): RequestMeta => {
+  const userAgent = req.headers?.['user-agent'];
+  return {
+    ip: req.ip,
+    userAgent: Array.isArray(userAgent) ? userAgent[0] : userAgent,
+  };
+};
 
 @ApiTags('Professionals')
 @Controller('professionals')
@@ -67,8 +93,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: ProfessionalsListResponseDTO })
   async getProfessionals(
     @Query() query: GetProfessionalsListQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalsListResponseDTO> {
-    return this.professionalsService.getProfessionals(query);
+    return this.professionalsService.getProfessionals(query, req.user);
   }
 
   @Get('nearby')
@@ -76,8 +103,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: [ProfessionalDetailResponseDTO] })
   async getNearbyProfessionals(
     @Query() query: GetNearbyProfessionalsQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO[]> {
-    return this.professionalsService.getNearbyProfessionals(query);
+    return this.professionalsService.getNearbyProfessionals(query, req.user);
   }
 
   @Get('search/skills')
@@ -85,8 +113,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: ProfessionalsListResponseDTO })
   async searchBySkills(
     @Query() query: SearchBySkillsQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalsListResponseDTO> {
-    return this.professionalsService.searchBySkills(query);
+    return this.professionalsService.searchBySkills(query, req.user);
   }
 
   @Get('top-rated')
@@ -94,8 +123,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: [ProfessionalDetailResponseDTO] })
   async getTopRatedProfessionals(
     @Query() query: GetTopRatedQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO[]> {
-    return this.professionalsService.getTopRatedProfessionals(query);
+    return this.professionalsService.getTopRatedProfessionals(query, req.user);
   }
 
   @Get('me')
@@ -119,9 +149,11 @@ export class ProfessionalsController {
   @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
   async getProfessionalByReference(
     @Param() param: ProfessionalReferenceIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.getProfessionalByReference(
       param.referenceId,
+      req.user,
     );
   }
 
@@ -146,8 +178,9 @@ export class ProfessionalsController {
   @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
   async getProfessionalById(
     @Param() param: ProfessionalIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalDetailResponseDTO> {
-    return this.professionalsService.getProfessionalById(param.id);
+    return this.professionalsService.getProfessionalById(param.id, req.user);
   }
 
   @Put(':id')
@@ -197,8 +230,13 @@ export class ProfessionalsController {
   async getProfessionalServices(
     @Param() param: ProfessionalIdParamDTO,
     @Query() query: GetProfessionalServicesQueryDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalServicesListResponseDTO> {
-    return this.professionalsService.getProfessionalServices(param.id, query);
+    return this.professionalsService.getProfessionalServices(
+      param.id,
+      query,
+      req.user,
+    );
   }
 
   @Get(':id/reviews')
@@ -221,23 +259,45 @@ export class ProfessionalsController {
   @ApiResponse({ status: 200, type: ProfessionalStatsResponseDTO })
   async getProfessionalStats(
     @Param() param: ProfessionalIdParamDTO,
+    @Request() req: { user: IUserDataOnJwt },
   ): Promise<ProfessionalStatsResponseDTO> {
-    return this.professionalsService.getProfessionalStats(param.id);
+    return this.professionalsService.getProfessionalStats(param.id, req.user);
+  }
+
+  @Get(':id/status-history')
+  @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
+  @ApiOperation({
+    summary: 'Historial de cambios de estado del profesional (solo admin)',
+    description:
+      'Transiciones verify/reject/suspend/reactivate tomadas del audit-log, más recientes primero. page/pageSize (máx. 100).',
+  })
+  @ApiResponse({ status: 200, type: ProfessionalStatusHistoryResponseDTO })
+  @ApiResponse({ status: 404, description: 'Profesional no encontrado' })
+  async getStatusHistory(
+    @Param() param: ProfessionalIdParamDTO,
+    @Query() query: GetProfessionalStatusHistoryQueryDTO,
+  ): Promise<ProfessionalStatusHistoryResponseDTO> {
+    return this.professionalsService.getStatusHistory(param.id, query);
   }
 
   @Post(':id/verify')
   @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
-  @ApiOperation({ summary: 'Verificar identidad del profesional (solo admin)' })
+  @ApiOperation({
+    summary: 'Verificar o rechazar al profesional (solo admin)',
+    description:
+      'PENDING/REJECTED -> APPROVED (isVerified=true, nota opcional) o REJECTED (isVerified=false, nota obligatoria).',
+  })
   @ApiResponse({ status: 200, type: ProfessionalDetailResponseDTO })
   async verifyProfessional(
     @Param() param: ProfessionalIdParamDTO,
     @Body() dto: VerifyProfessionalRequestDTO,
-    @Request() req: { user: IUserDataOnJwt },
+    @Request() req: AuditedRequest,
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.verifyProfessional(
       param.id,
       dto,
-      req.user.id,
+      auditActor(req),
+      requestMeta(req),
     );
   }
 
@@ -248,12 +308,35 @@ export class ProfessionalsController {
   async suspendProfessional(
     @Param() param: ProfessionalIdParamDTO,
     @Body() dto: SuspendProfessionalRequestDTO,
-    @Request() req: { user: IUserDataOnJwt },
+    @Request() req: AuditedRequest,
   ): Promise<ProfessionalDetailResponseDTO> {
     return this.professionalsService.suspendProfessional(
       param.id,
       dto.reason,
-      req.user.id,
+      auditActor(req),
+      requestMeta(req),
+    );
+  }
+
+  @Post(':id/reactivate')
+  @Permissions(PERMISSIONS.PROFESSIONALS.VERIFY, PERMISSIONS.ADMIN.ALL)
+  @ApiOperation({
+    summary: 'Reactivar un profesional suspendido (solo admin)',
+    description:
+      'SUSPENDED -> APPROVED; cualquier otro estado responde 409. El motivo es obligatorio.',
+  })
+  @ApiResponse({ status: 201, type: ProfessionalDetailResponseDTO })
+  @ApiResponse({ status: 409, description: 'El profesional no está SUSPENDED' })
+  async reactivateProfessional(
+    @Param() param: ProfessionalIdParamDTO,
+    @Body() dto: ReactivateProfessionalRequestDTO,
+    @Request() req: AuditedRequest,
+  ): Promise<ProfessionalDetailResponseDTO> {
+    return this.professionalsService.reactivateProfessional(
+      param.id,
+      dto.reason,
+      auditActor(req),
+      requestMeta(req),
     );
   }
 }

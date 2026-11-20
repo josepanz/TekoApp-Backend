@@ -21,6 +21,7 @@ import {
   UploadedFilesValidated,
 } from '@common/decorators/file-uploader.decorator';
 import { UploadsService } from '../services/uploads.service';
+import { UploadsAccessService } from '../services/uploads-access.service';
 import { FileInfoResponseDTO } from '../dtos/response';
 import {
   UploadFileParamDTO,
@@ -45,7 +46,10 @@ import { t } from '@common/i18n/i18n.helper';
 @Controller('uploads')
 @UseGuards(JwtAuthGuard)
 export class UploadsController {
-  constructor(private readonly uploadsService: UploadsService) {}
+  constructor(
+    private readonly uploadsService: UploadsService,
+    private readonly uploadsAccessService: UploadsAccessService,
+  ) {}
 
   @Post('image')
   @UseInterceptors(FileInterceptor('file'))
@@ -104,8 +108,12 @@ export class UploadsController {
     required: true,
     description: 'Clave S3 del archivo',
   })
-  async getPresignedUrl(@Query('key') key: string): Promise<{ url: string }> {
+  async getPresignedUrl(
+    @Query('key') key: string,
+    @User() user: IUserDataOnJwt,
+  ): Promise<{ url: string }> {
     if (!key) throw new BadRequestException(t('uploads.KEY_PARAM_REQUIRED'));
+    await this.uploadsAccessService.assertCanRead(key, user);
     const url = await this.uploadsService.getPresignedUrl(key);
     return { url };
   }
@@ -113,7 +121,9 @@ export class UploadsController {
   @Get('info/:filename')
   async getFileInfo(
     @Param() param: UploadFileParamDTO,
+    @User() user: IUserDataOnJwt,
   ): Promise<{ url: string; key: string }> {
+    await this.uploadsAccessService.assertCanRead(param.filename, user);
     const url = await this.uploadsService.getPresignedUrl(param.filename);
     return { key: param.filename, url };
   }
@@ -122,7 +132,9 @@ export class UploadsController {
   @DeleteFileDocs()
   async deleteFile(
     @Param() param: UploadFileParamDTO,
+    @User() user: IUserDataOnJwt,
   ): Promise<{ message: string }> {
+    await this.uploadsAccessService.assertCanDelete(param.filename, user);
     await this.uploadsService.deleteFile(param.filename);
     return { message: t('uploads.FILE_DELETED') };
   }

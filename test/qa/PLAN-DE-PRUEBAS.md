@@ -7,7 +7,10 @@ Referencias: `C:\workspace\QA-DOC-STANDARD.md`, `C:\workspace\TEKOAPP-E2E-MASTER
 Backend NestJS (API REST versionada `/tekoapp-backend/api/v1`, WebSocket de ubicación, jobs y seeds). Cubierto por esta
 rama (`feat/e2e-entorno-y-blindaje-locations`): entorno E2E aislado (M0), smoke de autenticación (M1) y blindaje de
 `/locations` (JWT, ofuscación, coordenada exacta restringida, WS). Fuera de alcance por ahora: M2-M11 en e2e real
-(oleadas W1-W5 del plan maestro), carga/performance (k6) y accesibilidad (aplican a Web/Mobile).
+(oleadas W3-W5 del plan maestro), carga/performance (k6) y accesibilidad (aplican a Web/Mobile).
+
+Oleadas posteriores sobre la misma base: W1 (M1 auth y M2 catálogos, rama `test/e2e-w1-auth-catalogos`) y W2 (M3 onboarding
+profesional y M4 marketplace, rama `test/e2e-w2-onboarding-marketplace`; casos `CP-ONB` y `CP-MKT`).
 
 ## 2. Niveles de prueba
 

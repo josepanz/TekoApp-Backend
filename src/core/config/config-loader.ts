@@ -90,9 +90,13 @@ export const APP_CONFIG = registerAs('config', () => {
       retryDelayMs: process.env.S3_RETRY_DELAY_MS
         ? parseInt(process.env.S3_RETRY_DELAY_MS)
         : 250,
-      presignedUrlExpiresInSeconds: process.env.S3_PRESIGNED_URL_EXPIRES_IN
-        ? parseInt(process.env.S3_PRESIGNED_URL_EXPIRES_IN)
-        : 900,
+      // Tope de 5 minutos aunque el entorno pida más: la URL es un bearer del archivo (DEF-BE-024).
+      presignedUrlExpiresInSeconds: Math.min(
+        process.env.S3_PRESIGNED_URL_EXPIRES_IN
+          ? parseInt(process.env.S3_PRESIGNED_URL_EXPIRES_IN)
+          : 300,
+        300,
+      ),
     },
     geolocation: {
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,

@@ -142,28 +142,29 @@ export class ProfessionalPositionDbService {
     // enum nativo de Postgres — mismo motivo que `approvedStatus` arriba, mismo patrón.
     const verifiedStatus = Prisma.raw(`'${VerificationStatus.VERIFIED}'`);
 
-    // SQL parametrizado (tagged template) usando Haversine Fórmula
+    // SQL parametrizado (tagged template) usando Haversine Fórmula. La distancia se calcula en una
+    // subconsulta y el radio se filtra afuera: un `HAVING` sin `GROUP BY` sobre columnas de la fila
+    // falla en Postgres real (42803, DEF-BE-018 -> 500). El argumento de `acos` se acota a [-1, 1]
+    // porque el error de punto flotante en puntos coincidentes lo deja en 1.0000000000000002 y
+    // `acos` revienta con "input is out of range".
     return this.prisma.extended.$queryRaw<NearbyProfessionalRow[]>`
-      SELECT *, (
-        6371 * acos(
-          cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
-          sin(radians(${latitude})) * sin(radians(current_latitude))
-        )
-      ) AS distance
-      FROM professionals
-      WHERE current_latitude IS NOT NULL
-        AND current_longitude IS NOT NULL
-        AND status = ${approvedStatus}
-        AND verification_status = ${verifiedStatus}
-        ${categoryFilter}
-        ${availableFilter}
-        ${onlineFilter}
-      HAVING (
-        6371 * acos(
-          cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
-          sin(radians(${latitude})) * sin(radians(current_latitude))
-        )
-      ) <= ${radius}
+      SELECT * FROM (
+        SELECT *, (
+          6371 * acos(LEAST(1, GREATEST(-1,
+            cos(radians(${latitude})) * cos(radians(current_latitude)) * cos(radians(current_longitude) - radians(${longitude})) +
+            sin(radians(${latitude})) * sin(radians(current_latitude))
+          )))
+        ) AS distance
+        FROM professionals
+        WHERE current_latitude IS NOT NULL
+          AND current_longitude IS NOT NULL
+          AND status = ${approvedStatus}
+          AND verification_status = ${verifiedStatus}
+          ${categoryFilter}
+          ${availableFilter}
+          ${onlineFilter}
+      ) AS candidates
+      WHERE distance <= ${radius}
       ORDER BY distance ASC, average_rating DESC
       LIMIT ${limit}
     `;

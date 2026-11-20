@@ -2,8 +2,16 @@ import {
   Injectable,
   ForbiddenException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
-import { Prisma, ProfessionalStatus, VerificationStatus } from '@prisma/client';
+import {
+  Prisma,
+  ProfessionalStatus,
+  UserStatus,
+  VerificationStatus,
+} from '@prisma/client';
+import { ProfessionalPositionDbService } from '@modules/professional-position-db/services/professional-position-db.service';
+import { auditStorage } from '@core/database/services/prisma.service';
 import { ProfessionalsDbService } from '@modules/professionals-db/services/professionals-db.service';
 import { ReportService } from '@modules/report/services/report.service';
 import { IDownloadResponse } from '@core/interceptors/file-download.interceptor';
@@ -13,6 +21,7 @@ import { IUserDataOnJwt } from '@modules/auth/interfaces/user-data-on-jwt.interf
 import { RatingViewerContext } from '@api/ratings/helpers/ratings-response.helper';
 import { NotificationsService } from '@api/notifications/services/notifications.service';
 import { NotificationType } from '@modules/notifications-db/enums/notification-type.enum';
+import { mapStatusHistory } from '../helpers/professional-status-history.helper';
 import { mapReviewsToSummaries } from '../helpers/professional-reviews-response.helper';
 import {
   PROFESSIONALS_EXPORT_COLUMNS,
@@ -29,6 +38,7 @@ import {
   UpdateProfessionalRequestDTO,
   UpdateProfessionalLocationRequestDTO,
   VerifyProfessionalRequestDTO,
+  GetProfessionalStatusHistoryQueryDTO,
 } from '../dtos/request';
 import {
   ProfessionalDetailResponseDTO,
@@ -36,16 +46,90 @@ import {
   ProfessionalServicesListResponseDTO,
   ProfessionalReviewsListResponseDTO,
   ProfessionalStatsResponseDTO,
+  ProfessionalStatusHistoryResponseDTO,
 } from '../dtos/response';
 
 import { t } from '@common/i18n/i18n.helper';
+/** Estados desde los que `verify` es una transición válida (DEF-BE-028). */
+const VERIFIABLE_STATUSES: ProfessionalStatus[] = [
+  ProfessionalStatus.PENDING,
+  ProfessionalStatus.REJECTED,
+];
+
+/** Estados de cuenta desde los que NO se reactiva a un profesional (DELETED/PENDING_DELETION lo suspenden a propósito). */
+const REACTIVATION_BLOCKING_USER_STATUSES: UserStatus[] = [
+  UserStatus.DELETED,
+  UserStatus.PENDING_DELETION,
+  UserStatus.BLOCKED,
+];
+
+/** Quien ejecuta una transición de estado: su `referenceId` queda en `changed_by` del audit-log. */
+export interface StatusChangeActor {
+  id: number;
+  referenceId: string;
+}
+
+/** IP y user-agent de la request, para que el trigger de auditoría los registre. */
+export interface RequestMeta {
+  ip?: string;
+  userAgent?: string;
+}
+
 @Injectable()
 export class ProfessionalsService {
   constructor(
     private readonly professionalsDb: ProfessionalsDbService,
     private readonly reportService: ReportService,
     private readonly notificationsService: NotificationsService,
+    private readonly professionalPositionDb: ProfessionalPositionDbService,
   ) {}
+
+  /** Admin y quien gestiona profesionales (verify/suspend) ven profesionales en cualquier estado. */
+  private canSeeAllProfessionals(viewer: IUserDataOnJwt): boolean {
+    return (
+      viewer.permissions?.some(
+        (p) =>
+          p === PERMISSIONS.ADMIN.ALL || p === PERMISSIONS.PROFESSIONALS.VERIFY,
+      ) ?? false
+    );
+  }
+
+  /**
+   * Vista pública/cliente (DEF-BE-023): un profesional que no está APPROVED y activo solo lo ven un
+   * admin, un gestor de profesionales o él mismo; para el resto responde 404 como si no existiera.
+   * Excepción (DEF-BE-030): un cliente con un servicio ACCEPTED/IN_PROGRESS con ese profesional lo
+   * sigue viendo aunque lo hayan suspendido a mitad de servicio (mismo vínculo que usa `/locations`).
+   */
+  private async assertProfessionalVisible(
+    professional: {
+      id: number;
+      userId: number;
+      status: ProfessionalStatus;
+      isActive: boolean;
+    },
+    viewer: IUserDataOnJwt,
+  ): Promise<void> {
+    if (
+      this.canSeeAllProfessionals(viewer) ||
+      professional.userId === viewer.id
+    ) {
+      return;
+    }
+    if (
+      professional.status !== ProfessionalStatus.APPROVED ||
+      !professional.isActive
+    ) {
+      if (
+        await this.professionalPositionDb.hasActiveServiceWith(
+          viewer.referenceId,
+          professional.id,
+        )
+      ) {
+        return;
+      }
+      throw new NotFoundException(t('professionals.NOT_FOUND'));
+    }
+  }
 
   async registerProfessional(
     dto: CreateProfessionalRequestDTO,
@@ -60,8 +144,10 @@ export class ProfessionalsService {
 
   async getProfessionals(
     query: GetProfessionalsListQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalsListResponseDTO> {
     const filters = {
+      onlyApproved: !this.canSeeAllProfessionals(viewer),
       categoryId: query.categoryId,
       latitude: query.latitude,
       longitude: query.longitude,
@@ -113,20 +199,24 @@ export class ProfessionalsService {
 
   async getNearbyProfessionals(
     query: GetNearbyProfessionalsQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO[]> {
     const result = await this.professionalsDb.findNearby(
       query.latitude,
       query.longitude,
       query.radius,
       query.categoryId,
+      !this.canSeeAllProfessionals(viewer),
     );
     return result as unknown as ProfessionalDetailResponseDTO[];
   }
 
   async getProfessionalById(
     id: number,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO> {
     const result = await this.professionalsDb.findById(id);
+    await this.assertProfessionalVisible(result, viewer);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -139,9 +229,11 @@ export class ProfessionalsService {
 
   async getProfessionalByReference(
     referenceId: string,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO> {
     const result =
       await this.professionalsDb.findProfessionalByReferenceId(referenceId);
+    await this.assertProfessionalVisible(result, viewer);
     return result as unknown as ProfessionalDetailResponseDTO;
   }
 
@@ -205,7 +297,12 @@ export class ProfessionalsService {
   async getProfessionalServices(
     id: number,
     query: GetProfessionalServicesQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalServicesListResponseDTO> {
+    await this.assertProfessionalVisible(
+      await this.professionalsDb.findById(id),
+      viewer,
+    );
     const result = await this.professionalsDb.findServices(
       id,
       query as unknown as PaginationQueryDTO & Record<string, unknown>,
@@ -231,6 +328,10 @@ export class ProfessionalsService {
     query: GetProfessionalReviewsQueryDTO,
     user: IUserDataOnJwt,
   ): Promise<ProfessionalReviewsListResponseDTO> {
+    await this.assertProfessionalVisible(
+      await this.professionalsDb.findById(id),
+      user,
+    );
     const [result, viewer] = await Promise.all([
       this.professionalsDb.findReviews(
         id,
@@ -246,44 +347,107 @@ export class ProfessionalsService {
 
   async getProfessionalStats(
     id: number,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalStatsResponseDTO> {
+    await this.assertProfessionalVisible(
+      await this.professionalsDb.findById(id),
+      viewer,
+    );
     return this.professionalsDb.getStats(id);
   }
 
   async searchBySkills(
     query: SearchBySkillsQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalsListResponseDTO> {
     const skills = query.skills.split(',').map((s) => s.trim());
     const result = await this.professionalsDb.searchBySkills(
       skills,
       query as unknown as PaginationQueryDTO & Record<string, unknown>,
+      !this.canSeeAllProfessionals(viewer),
     );
     return result as unknown as ProfessionalsListResponseDTO;
   }
 
   async getTopRatedProfessionals(
     query: GetTopRatedQueryDTO,
+    viewer: IUserDataOnJwt,
   ): Promise<ProfessionalDetailResponseDTO[]> {
     const result = await this.professionalsDb.getTopRated(
       query.categoryId,
       query.limit,
+      !this.canSeeAllProfessionals(viewer),
     );
     return result as unknown as ProfessionalDetailResponseDTO[];
+  }
+
+  /**
+   * UPDATE condicional del estado dentro del contexto de auditoría (`auditStorage`): la extensión de
+   * Prisma lo envuelve en una transacción que fija `app.client_ip`/`app.user_agent`, y el trigger
+   * `fn_audit_generic_trigger` registra en `audit_logs` el estado anterior/nuevo (`old_data`/`new_data`),
+   * el motivo (`changed_reason`), el actor (`last_changed_by` = referenceId), IP y user-agent.
+   */
+  private applyTransition(
+    id: number,
+    expectedStatuses: ProfessionalStatus[],
+    actor: StatusChangeActor,
+    meta: RequestMeta,
+    data: Prisma.ProfessionalsUpdateInput,
+  ): Promise<number> {
+    return auditStorage.run(
+      {
+        userId: actor.referenceId,
+        ip: meta.ip ?? 'unknown',
+        userAgent: meta.userAgent ?? 'unknown',
+        applicationName: 'tekoapp-backend',
+      },
+      () => this.professionalsDb.updateConditional(id, expectedStatuses, data),
+    );
+  }
+
+  /** Historial de transiciones de estado del profesional (verify, reject, suspend, reactivate), del audit-log. */
+  async getStatusHistory(
+    id: number,
+    query: GetProfessionalStatusHistoryQueryDTO,
+  ): Promise<ProfessionalStatusHistoryResponseDTO> {
+    await this.professionalsDb.findById(id); // 404 si no existe
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 10;
+    const { rows, total, actors } =
+      await this.professionalsDb.findStatusHistory(id, page, pageSize);
+    return {
+      data: mapStatusHistory(rows, actors),
+      pagination: {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   }
 
   async verifyProfessional(
     id: number,
     dto: VerifyProfessionalRequestDTO,
-    adminId: number,
+    actor: StatusChangeActor,
+    meta: RequestMeta = {},
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
+    // Máquina de estados (DEF-BE-028): solo se resuelve una verificación PENDING o se revisa una
+    // REJECTED. APPROVED (ya resuelto) y SUSPENDED (la reactivación es POST :id/reactivate: verify no
+    // es la vía) son transiciones inválidas.
+    if (!VERIFIABLE_STATUSES.includes(professional.status)) {
+      throw new ConflictException(t('professionals.INVALID_STATE_FOR_VERIFY'));
+    }
     // updateMany + count en vez de update() incondicional: evita que dos escrituras
     // administrativas concurrentes sobre el mismo profesional (ej. dos admins resolviendo la
     // misma verificación) se pisen sin detectar el conflicto — mismo patrón que
     // services/payments/professional-documents — ver .claude/rules/typescript.md.
-    const updatedCount = await this.professionalsDb.updateConditional(
+    const updatedCount = await this.applyTransition(
       id,
       [professional.status],
+      actor,
+      meta,
       {
         verificationStatus: dto.isVerified
           ? VerificationStatus.VERIFIED
@@ -291,8 +455,8 @@ export class ProfessionalsService {
         status: dto.isVerified
           ? ProfessionalStatus.APPROVED
           : ProfessionalStatus.REJECTED,
-        lastChangedBy: String(adminId),
-        changedReason: dto.notes,
+        lastChangedBy: actor.referenceId,
+        changedReason: dto.notes ?? null,
       },
     );
     if (updatedCount === 0) {
@@ -331,16 +495,24 @@ export class ProfessionalsService {
   async suspendProfessional(
     id: number,
     reason: string,
-    adminId: number,
+    actor: StatusChangeActor,
+    meta: RequestMeta = {},
   ): Promise<ProfessionalDetailResponseDTO> {
     const professional = await this.professionalsDb.findById(id);
-    const updatedCount = await this.professionalsDb.updateConditional(
+    // Máquina de estados (DEF-BE-029): solo se suspende un APPROVED. Re-suspender pisaría el
+    // motivo y reenviaría la notificación; PENDING/REJECTED se resuelven con verify.
+    if (professional.status !== ProfessionalStatus.APPROVED) {
+      throw new ConflictException(t('professionals.INVALID_STATE_FOR_SUSPEND'));
+    }
+    const updatedCount = await this.applyTransition(
       id,
       [professional.status],
+      actor,
+      meta,
       {
         status: ProfessionalStatus.SUSPENDED,
         isActive: false,
-        lastChangedBy: String(adminId),
+        lastChangedBy: actor.referenceId,
         changedReason: reason,
       },
     );
@@ -357,6 +529,68 @@ export class ProfessionalsService {
         title: t('professionals.NOTIFICATION_SUSPENDED_TITLE'),
         message: t('professionals.NOTIFICATION_SUSPENDED_MESSAGE', { reason }),
         type: NotificationType.PROFESSIONAL_SUSPENDED,
+        channels: ['in_app', 'push'],
+      },
+      professional.userId,
+    );
+
+    const result = await this.professionalsDb.findById(id);
+    return result as unknown as ProfessionalDetailResponseDTO;
+  }
+
+  /**
+   * Reactiva un profesional SUSPENDED y lo deja como un APPROVED normal: `isActive=true` y
+   * `isAvailable/isOnline=false` (igual que tras `verify`; tiene que volver a marcarse disponible).
+   * `verify` no exige `requiredDocumentsVerified`, así que acá tampoco; sí se revalida que la cuenta
+   * del usuario no esté eliminada, en borrado o bloqueada (el borrado de cuenta también deja al
+   * profesional SUSPENDED).
+   */
+  async reactivateProfessional(
+    id: number,
+    reason: string,
+    actor: StatusChangeActor,
+    meta: RequestMeta = {},
+  ): Promise<ProfessionalDetailResponseDTO> {
+    const professional = await this.professionalsDb.findById(id);
+    if (professional.status !== ProfessionalStatus.SUSPENDED) {
+      throw new ConflictException(
+        t('professionals.INVALID_STATE_FOR_REACTIVATE'),
+      );
+    }
+    if (
+      REACTIVATION_BLOCKING_USER_STATUSES.includes(professional.user.status)
+    ) {
+      throw new ConflictException(
+        t('professionals.USER_NOT_ACTIVE_FOR_REACTIVATE'),
+      );
+    }
+    const updatedCount = await this.applyTransition(
+      id,
+      [ProfessionalStatus.SUSPENDED],
+      actor,
+      meta,
+      {
+        status: ProfessionalStatus.APPROVED,
+        isActive: true,
+        isAvailable: false,
+        isOnline: false,
+        lastChangedBy: actor.referenceId,
+        changedReason: reason,
+      },
+    );
+    if (updatedCount === 0) {
+      throw new ConflictException(
+        t('professionals.STATUS_CHANGED_BEFORE_REACTIVATE'),
+      );
+    }
+
+    await this.notificationsService.create(
+      {
+        title: t('professionals.NOTIFICATION_REACTIVATED_TITLE'),
+        message: t('professionals.NOTIFICATION_REACTIVATED_MESSAGE', {
+          reason,
+        }),
+        type: NotificationType.PROFESSIONAL_VERIFIED,
         channels: ['in_app', 'push'],
       },
       professional.userId,

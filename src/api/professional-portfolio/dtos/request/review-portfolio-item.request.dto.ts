@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PortfolioReviewStatus } from '@prisma/client';
-import { IsEnum, IsIn, IsString, MaxLength, ValidateIf } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
+import { Transform, TransformFnParams } from 'class-transformer';
 
 export class ReviewPortfolioItemRequestDTO {
   @ApiProperty({
@@ -15,7 +23,11 @@ export class ReviewPortfolioItemRequestDTO {
     (dto: ReviewPortfolioItemRequestDTO) =>
       dto.status === PortfolioReviewStatus.REJECTED,
   )
+  @Transform(({ value }: TransformFnParams): unknown =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString()
+  @IsNotEmpty()
   @MaxLength(1000)
   rejectionReason?: string;
 }

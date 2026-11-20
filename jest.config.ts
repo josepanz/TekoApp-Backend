@@ -3,6 +3,8 @@ import type { Config } from 'jest';
 const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
+  // scripts/qa tiene tests del generador de informes (parser de logs, §3.7); no entran en la cobertura
+  roots: ['<rootDir>', '<rootDir>/../scripts/qa'],
   testRegex: '.*\\.spec\\.ts$',
   testPathIgnorePatterns: ['\\.e2e-spec\\.ts$'],
   transform: {
