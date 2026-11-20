@@ -1,3 +1,7 @@
+## 1.0.0-develop.20 (2026-11-20)
+
+* feat: W2 onboarding y marketplace contra backend real, reactivación auditada y corrección de 17 defe ([de38f2b](https://github.com/josepanz/TekoApp-Backend/commit/de38f2b)), closes [#54](https://github.com/josepanz/TekoApp-Backend/issues/54)
+
 ## 1.0.0-develop.19 (2026-10-13)
 
 * feat: W1 auth y catálogos contra backend real, logout con revocación y corrección de 13 defectos (#5 ([1f989d8](https://github.com/josepanz/TekoApp-Backend/commit/1f989d8)), closes [#53](https://github.com/josepanz/TekoApp-Backend/issues/53)
